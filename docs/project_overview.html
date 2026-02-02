@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-02-02" />
+
+<title>Project overview and pipeline</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Project overview and pipeline</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-02-02</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-02-02
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 1
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeae38c124365df70a5a130854540823709e470a0dtargetblankae38c12a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/ae38c124365df70a5a130854540823709e470a0d" target="_blank">ae38c12</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeae38c124365df70a5a130854540823709e470a0dtargetblankae38c12a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/ae38c124365df70a5a130854540823709e470a0d" target="_blank">ae38c12</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Untracked files:
+    Untracked:  analysis/project_overview.Rmd
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<div id="what-is-pseudouridine" class="section level1">
+<h1>What is pseudouridine?</h1>
+<p>Pseudouridine (Ψ, also referred to as pU) is the most abundant RNA
+modification in cellular RNA. It is an isomer of uridine in which the
+glycosidic bond is rearranged from an N–C bond (N1–C1′ in uridine) to a
+C–C bond (C5–C1′).</p>
+<p>This structural change: - increases base-stacking interactions, -
+enhances RNA backbone rigidity, - and can stabilize RNA secondary and
+tertiary structure.</p>
+<p>Pseudouridine is found in many RNA classes, including: - rRNA (highly
+abundant, structural roles), - tRNA (decoding accuracy and stability), -
+sn/snoRNA, - and mRNA (regulatory roles affecting translation and RNA
+stability).</p>
+</div>
+<div id="aim-of-pum-seq-project" class="section level1">
+<h1>Aim of PUM-seq project</h1>
+<p>PUM-seq project aims to systematically map pseudouridine (Ψ, pU)
+modifications on mRNA and, in the longer term, identify genetic variants
+that regulate pseudouridylation levels (pU-QTLs).</p>
+</div>
+<div id="principle-of-pum-seqbased-pu-detection" class="section level1">
+<h1>Principle of PUM-seq–based pU Detection</h1>
+<p>PUM-seq relies on chemical treatment that selectively modifies
+pseudouridine residues. After treatment:</p>
+<ul>
+<li>Unmodified uridine (U) behaves normally during reverse
+transcription. It is read as T.</li>
+<li>Pseudouridine (Ψ) undergoes chemical derivatization that increases
+the probability of reverse-transcription misincorporation. It is read as
+C.</li>
+</ul>
+<p>In the pipeline, pseudouridine is detected through <strong>T→C
+mismatches</strong> in sequencing data (<code>base_change: T,C</code>),
+where:</p>
+<p><span class="math display">\[
+\text{conversion ratio} = \frac{C}{T + C}
+\]</span></p>
+<p>A high T→C conversion fraction indicates the presence of
+pseudouridine at that position.</p>
+</div>
+<div id="pipeline" class="section level1">
+<h1>Pipeline</h1>
+<p>From Yanming</p>
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p>The workflow is modular and proceeds through:</p>
+<ol style="list-style-type: decimal">
+<li>Hierarchical read mapping (rRNA → tRNA → snoRNA → genome)</li>
+<li>Per-site base conversion quantification (T→C)</li>
+<li>Treated vs input background filtering</li>
+<li>Optional replicate merging, annotation, differential testing, and
+summary plotting</li>
+</ol>
+<p>All metadata, paths, and thresholds are defined in a single
+configuration file: <code>data.yaml</code>.</p>
+</div>
+<div id="inputs" class="section level2">
+<h2>Inputs</h2>
+<div id="sequencing-data" class="section level3">
+<h3>Sequencing Data</h3>
+<ul>
+<li>Paired-end FASTQ files (<code>R1</code>, <code>R2</code>) for each
+sample</li>
+</ul>
+</div>
+<div id="sample-metadata-from-data.yaml" class="section level3">
+<h3>Sample Metadata (from <code>data.yaml</code>)</h3>
+<p>Each sample is annotated with: -
+<code>treated: true / false</code><br />
+(chemical treatment vs input/background) - <code>gene</code> (experiment
+label) - <code>gType</code> (cell line) - <code>repG</code> (replicate
+group)</p>
+<p>These fields determine <strong>treated–input pairing</strong> and
+downstream comparisons.</p>
+</div>
+<div id="references-and-annotations" class="section level3">
+<h3>References and Annotations</h3>
+<ul>
+<li>Bowtie2 indices:
+<ul>
+<li>rRNA</li>
+<li>tRNA</li>
+<li>snoRNA</li>
+</ul></li>
+<li>STAR genome index</li>
+<li>FASTA reference files</li>
+<li>BED / transcript annotation files</li>
+</ul>
+</div>
+</div>
+<div id="pipeline-summary" class="section level2">
+<h2>Pipeline Summary</h2>
+<div id="step-1-preprocessing-and-rrna-filtering-rrna.smk"
+class="section level3">
+<h3>Step 1: Preprocessing and rRNA Filtering
+(<code>rRNA.smk</code>)</h3>
+<p><strong>Goal:</strong></p>
+<p>Remove adapters and UMIs, map reads to rRNA, generate QC, and output
+rRNA-unmapped reads for downstream analysis.</p>
+<p><strong>Per sample operations</strong></p>
+<ul>
+<li>Adapter trimming (<code>cutadapt</code>)</li>
+<li>UMI trimming (<code>cutadapt</code>)</li>
+<li>rRNA alignment (<code>bowtie2</code>)</li>
+<li>Alignment filtering (<code>samtools</code>)</li>
+<li>Deduplication (<code>UMICollapse</code>)</li>
+<li>Pileup and base-count summarization</li>
+</ul>
+<p><strong>Key outputs</strong></p>
+<ul>
+<li>rRNA QC report:
+<ul>
+<li><code>qc/qc.pUFraction.rRNA.pdf</code></li>
+</ul></li>
+<li>rRNA-unmapped FASTQs:
+<ul>
+<li><code>fastq/bowtie2.{sample}.rRNA.unalign.R1.fq.gz</code></li>
+<li><code>fastq/bowtie2.{sample}.rRNA.unalign.R2.fq.gz</code></li>
+</ul></li>
+<li>rRNA site tables:
+<ul>
+<li><code>mpile/mpileup.{sample}.rRNA.pseusite.txt.gz</code></li>
+</ul></li>
+</ul>
+<p><strong>Cutoffs used</strong></p>
+<ul>
+<li><code>cutoff.mindep</code><br />
+(used only for rRNA QC visualization)</li>
+</ul>
+</div>
+<div
+id="step-2-genome-cascade-mapping-and-site-quantification-genome.smk"
+class="section level3">
+<h3>Step 2: Genome Cascade Mapping and Site Quantification
+(<code>genome.smk</code>)</h3>
+<p><strong>Goal:</strong></p>
+<p>Map rRNA-unmapped reads to tRNA, snoRNA, and genome, and compute
+per-position base conversion statistics.</p>
+<p><strong>Per sample operations</strong></p>
+<ol style="list-style-type: decimal">
+<li>Align to tRNA → deduplicate → pileup</li>
+<li>Align remaining reads to snoRNA → deduplicate → pileup</li>
+<li>Align remaining reads to genome (STAR)</li>
+<li>Deduplicate genome alignments</li>
+<li>Split genome BAM by chromosome and strand</li>
+<li>Generate per-chromosome, per-strand pileups</li>
+<li>Summarize base counts into pseusite tables</li>
+</ol>
+<p><strong>Key outputs</strong></p>
+<ul>
+<li>tRNA pseusite tables:
+<ul>
+<li><code>mpile/mpileup.{sample}.tRNA.pseusite.txt.gz</code></li>
+</ul></li>
+<li>snoRNA pseusite tables:
+<ul>
+<li><code>mpile/mpileup.{sample}.snoRNA.pseusite.txt.gz</code></li>
+</ul></li>
+<li>Genome pseusite tables:
+<ul>
+<li><code>mpile/mpileup.{sample}.{chr}.{strand}.pseusite.txt.gz</code></li>
+</ul></li>
+</ul>
+</div>
+<div
+id="step-3-treated-vs-input-site-filtering-sites.smk-p0_filterinput.py"
+class="section level3">
+<h3>Step 3: Treated vs Input Site Filtering (<code>sites.smk</code> +
+<code>p0_FilterInput.py</code>)</h3>
+<p><strong>Goal:</strong></p>
+<p>Identify candidate pU sites enriched in treated samples relative to
+matched input controls.</p>
+<div id="pairing-logic" class="section level4">
+<h4>Pairing logic</h4>
+<p>Samples are paired by:</p>
+<p>group = gene - gType - repG</p>
+<p>Within each group:</p>
+<ul>
+<li><code>treated: true</code> → treated sample</li>
+<li><code>treated: false</code> → input sample</li>
+</ul>
+<p>Each replicate group is processed independently.</p>
+</div>
+<div id="filtering-logic" class="section level4">
+<h4>Filtering logic</h4>
+<p>For each genomic site:</p>
+<ul>
+<li>Compute:
+<ul>
+<li><code>depth = T + C</code></li>
+<li><code>ratio = C / (T + C)</code></li>
+</ul></li>
+<li>Remove sites with high input background
+(<code>input ratio ≥ cutoff.ratio</code>)</li>
+<li>Final BED sites must satisfy:
+<ul>
+<li>Treated depth ≥ upper filter depth</li>
+<li>Treated ratio ≥ cutoff.ratio</li>
+<li>Input has coverage and low ratio</li>
+</ul></li>
+</ul>
+<p><strong>Key outputs</strong></p>
+<ul>
+<li>Per-group genome-wide site tables:
+<ul>
+<li><code>out/filter.{group}.genome.pseusite.txt.gz</code></li>
+</ul></li>
+<li><strong>Final deliverables (current milestone):</strong>
+<ul>
+<li><code>out/filter.{group}.genome.pseusite.bed</code></li>
+</ul></li>
+</ul>
+<p><strong>Cutoffs used</strong></p>
+<ul>
+<li><code>cutoff.filterdep</code> (e.g. <code>5,20</code>)</li>
+<li><code>cutoff.ratio</code></li>
+</ul>
+</div>
+</div>
+<div id="step-4-replicate-merging-annotation-and-differential-analysis"
+class="section level3">
+<h3>Step 4: Replicate Merging, Annotation, and Differential
+Analysis</h3>
+<div id="replicate-group-merging-p1_mergesite.py"
+class="section level4">
+<h4>Replicate / group merging (<code>p1_MergeSite.py</code>)</h4>
+<ul>
+<li>Requires sites to pass depth + ratio thresholds in ≥2
+replicates</li>
+<li>Uses:
+<ul>
+<li><code>cutoff.filterdep</code> (upper value)</li>
+<li><code>cutoff.ratio</code></li>
+</ul></li>
+</ul>
+</div>
+<div id="genome-annotation" class="section level4">
+<h4>Genome annotation</h4>
+<ul>
+<li>Annotate sites to rRNA, gene body, intron, transcript
+coordinates</li>
+</ul>
+</div>
+<div id="differential-testing" class="section level4">
+<h4>Differential testing</h4>
+<ul>
+<li>MethylKit-based testing</li>
+<li>Produces:
+<ul>
+<li><code>plot/DMA.{group}.genome.pseusite.txt</code></li>
+<li>clustering and PCA plots</li>
+</ul></li>
+</ul>
+</div>
+<div id="summary-plots-r3_plotsummary.r" class="section level4">
+<h4>Summary plots (<code>R3_PlotSummary.R</code>)</h4>
+<ul>
+<li><strong>Genome-only</strong>
+<ul>
+<li>Applies:</li>
+<li><code>cutoff.alpha</code> (FDR / q-value)</li>
+<li><code>cutoff.diff</code> (effect size threshold)</li>
+</ul></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="cutoff-usage-summary" class="section level2">
+<h2>Cutoff Usage Summary</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Cutoff</th>
+<th>Used in</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>mindep</code></td>
+<td>rRNA QC</td>
+<td>QC visualization</td>
+</tr>
+<tr class="even">
+<td><code>filterdep</code></td>
+<td>p0 / p1 scripts</td>
+<td>Site depth filtering</td>
+</tr>
+<tr class="odd">
+<td><code>ratio</code></td>
+<td>p0 / p1 scripts</td>
+<td>Treated enrichment</td>
+</tr>
+<tr class="even">
+<td><code>alpha</code></td>
+<td>R3 plots</td>
+<td>Statistical significance</td>
+</tr>
+<tr class="odd">
+<td><code>diff</code></td>
+<td>R3 plots</td>
+<td>Effect size filtering</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

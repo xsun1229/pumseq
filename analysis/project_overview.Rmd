@@ -1,0 +1,238 @@
+---
+title: "Project overview and pipeline"
+author: "XSun"
+date: "2026-02-02"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+
+# What is pseudouridine?
+
+Pseudouridine (Ψ, also referred to as pU) is the most abundant RNA modification in cellular RNA. It is an isomer of uridine in which the glycosidic bond is rearranged from an N–C bond
+(N1–C1′ in uridine) to a C–C bond (C5–C1′).
+
+This structural change:
+  - increases base-stacking interactions,
+  - enhances RNA backbone rigidity,
+  - and can stabilize RNA secondary and tertiary structure.
+
+Pseudouridine is found in many RNA classes, including:
+- rRNA (highly abundant, structural roles),
+- tRNA (decoding accuracy and stability),
+- sn/snoRNA,
+- and mRNA (regulatory roles affecting translation and RNA stability).
+
+# Aim of PUM-seq project
+
+PUM-seq project aims to systematically map pseudouridine (Ψ, pU) modifications on mRNA and, in the longer term, identify genetic variants that regulate pseudouridylation levels (pU-QTLs).
+
+# Principle of PUM-seq–based pU Detection
+
+PUM-seq relies on chemical treatment that selectively modifies pseudouridine residues. After treatment:
+
+- Unmodified uridine (U) behaves normally during reverse transcription. It is read as T. 
+- Pseudouridine (Ψ) undergoes chemical derivatization that increases the probability of
+  reverse-transcription misincorporation. It is read as C. 
+
+In the pipeline, pseudouridine is detected through **T→C mismatches** in sequencing data (`base_change: T,C`), where:
+
+\[
+\text{conversion ratio} = \frac{C}{T + C}
+\]
+
+A high T→C conversion fraction indicates the presence of pseudouridine at that position.
+
+
+# Pipeline 
+
+From Yanming
+
+## Overview 
+
+The workflow is modular and proceeds through:
+
+1. Hierarchical read mapping (rRNA → tRNA → snoRNA → genome)
+2. Per-site base conversion quantification (T→C)
+3. Treated vs input background filtering
+4. Optional replicate merging, annotation, differential testing, and summary plotting
+
+All metadata, paths, and thresholds are defined in a single configuration file: `data.yaml`.
+
+## Inputs
+
+### Sequencing Data
+
+  - Paired-end FASTQ files (`R1`, `R2`) for each sample
+
+### Sample Metadata (from `data.yaml`)
+
+Each sample is annotated with:
+  - `treated: true / false`  
+  (chemical treatment vs input/background)
+  - `gene` (experiment label)
+  - `gType` (cell line)
+  - `repG` (replicate group)
+
+These fields determine **treated–input pairing** and downstream comparisons.
+
+### References and Annotations
+
+  - Bowtie2 indices:
+    - rRNA
+    - tRNA
+    - snoRNA
+  - STAR genome index
+  - FASTA reference files
+  - BED / transcript annotation files
+
+
+## Pipeline Summary
+
+### Step 1: Preprocessing and rRNA Filtering (`rRNA.smk`)
+
+**Goal:**  
+
+Remove adapters and UMIs, map reads to rRNA, generate QC, and output rRNA-unmapped reads for downstream analysis.
+
+**Per sample operations**
+  
+  - Adapter trimming (`cutadapt`)
+  - UMI trimming (`cutadapt`)
+  - rRNA alignment (`bowtie2`)
+  - Alignment filtering (`samtools`)
+  - Deduplication (`UMICollapse`)
+  - Pileup and base-count summarization
+
+**Key outputs**
+
+  - rRNA QC report:
+    - `qc/qc.pUFraction.rRNA.pdf`
+  - rRNA-unmapped FASTQs:
+    - `fastq/bowtie2.{sample}.rRNA.unalign.R1.fq.gz`
+    - `fastq/bowtie2.{sample}.rRNA.unalign.R2.fq.gz`
+  - rRNA site tables:
+    - `mpile/mpileup.{sample}.rRNA.pseusite.txt.gz`
+
+**Cutoffs used**
+
+  - `cutoff.mindep`  
+    (used only for rRNA QC visualization)
+
+
+### Step 2: Genome Cascade Mapping and Site Quantification (`genome.smk`)
+
+**Goal:**  
+
+Map rRNA-unmapped reads to tRNA, snoRNA, and genome, and compute per-position base conversion statistics.
+
+**Per sample operations**
+
+1. Align to tRNA → deduplicate → pileup
+2. Align remaining reads to snoRNA → deduplicate → pileup
+3. Align remaining reads to genome (STAR)
+4. Deduplicate genome alignments
+5. Split genome BAM by chromosome and strand
+6. Generate per-chromosome, per-strand pileups
+7. Summarize base counts into pseusite tables
+
+**Key outputs**
+
+  - tRNA pseusite tables:
+    - `mpile/mpileup.{sample}.tRNA.pseusite.txt.gz`
+  - snoRNA pseusite tables:
+    - `mpile/mpileup.{sample}.snoRNA.pseusite.txt.gz`
+  - Genome pseusite tables:
+    - `mpile/mpileup.{sample}.{chr}.{strand}.pseusite.txt.gz`
+
+
+### Step 3: Treated vs Input Site Filtering (`sites.smk` + `p0_FilterInput.py`)
+
+**Goal:**  
+
+Identify candidate pU sites enriched in treated samples relative to matched input controls.
+
+#### Pairing logic
+
+Samples are paired by:
+
+group = gene - gType - repG
+
+Within each group:
+
+- `treated: true` → treated sample
+- `treated: false` → input sample
+
+Each replicate group is processed independently.
+
+#### Filtering logic
+
+For each genomic site:
+  
+  - Compute:
+    - `depth = T + C`
+    - `ratio = C / (T + C)`
+  - Remove sites with high input background (`input ratio ≥ cutoff.ratio`)
+  - Final BED sites must satisfy:
+    - Treated depth ≥ upper filter depth
+    - Treated ratio ≥ cutoff.ratio
+    - Input has coverage and low ratio
+
+**Key outputs**
+
+  - Per-group genome-wide site tables:
+    - `out/filter.{group}.genome.pseusite.txt.gz`
+  - **Final deliverables (current milestone):**
+    - `out/filter.{group}.genome.pseusite.bed`
+
+**Cutoffs used**
+  
+  - `cutoff.filterdep` (e.g. `5,20`)
+  - `cutoff.ratio`
+
+### Step 4: Replicate Merging, Annotation, and Differential Analysis
+
+#### Replicate / group merging (`p1_MergeSite.py`)
+
+  - Requires sites to pass depth + ratio thresholds in ≥2 replicates
+  - Uses:
+    - `cutoff.filterdep` (upper value)
+    - `cutoff.ratio`
+
+#### Genome annotation
+
+  - Annotate sites to rRNA, gene body, intron, transcript coordinates
+
+#### Differential testing
+  - MethylKit-based testing
+  - Produces:
+    - `plot/DMA.{group}.genome.pseusite.txt`
+    - clustering and PCA plots
+
+#### Summary plots (`R3_PlotSummary.R`)
+  
+  - **Genome-only**
+    - Applies:
+    - `cutoff.alpha` (FDR / q-value)
+    - `cutoff.diff` (effect size threshold)
+
+## Cutoff Usage Summary
+
+| Cutoff | Used in | Purpose |
+|------|--------|--------|
+| `mindep` | rRNA QC | QC visualization |
+| `filterdep` | p0 / p1 scripts | Site depth filtering |
+| `ratio` | p0 / p1 scripts | Treated enrichment |
+| `alpha` | R3 plots | Statistical significance |
+| `diff` | R3 plots | Effect size filtering |
+
+---
+
+
+
+
+
+
+
+
