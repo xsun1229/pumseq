@@ -428,10 +428,10 @@ changes </a>
 <div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown is untracked by Git. To know which version of the R
-Markdown file created these results, you’ll want to first commit it to
-the Git repo. If you’re still working on the analysis, you can ignore
-this warning. When you’re finished, you can run
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
 <code>wflow_publish</code> to commit the R Markdown file and build the
 HTML.</p>
 </div>
@@ -440,15 +440,15 @@ HTML.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeae38c124365df70a5a130854540823709e470a0dtargetblankae38c12a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree6c4d575e87773c7633b17a0609f2e8a5987836d8targetblank6c4d575a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/ae38c124365df70a5a130854540823709e470a0d" target="_blank">ae38c12</a>
+<a href="https://github.com/xsun1229/pumseq/tree/6c4d575e87773c7633b17a0609f2e8a5987836d8" target="_blank">6c4d575</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeae38c124365df70a5a130854540823709e470a0dtargetblankae38c12a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree6c4d575e87773c7633b17a0609f2e8a5987836d8targetblank6c4d575a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -458,7 +458,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/ae38c124365df70a5a130854540823709e470a0d" target="_blank">ae38c12</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/6c4d575e87773c7633b17a0609f2e8a5987836d8" target="_blank">6c4d575</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -472,11 +472,8 @@ depends on. Below is the status of the Git repository when the results
 were generated:
 </p>
 <pre><code>
-Untracked files:
-    Untracked:  analysis/project_overview.Rmd
-
 Unstaged changes:
-    Modified:   analysis/index.Rmd
+    Modified:   analysis/project_overview.Rmd
 
 </code></pre>
 <p>
@@ -491,10 +488,74 @@ have uncommitted changes.
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
+
 <p>
-There are no past versions. Publish this analysis with
-<code>wflow_publish()</code> to start tracking its development.
+These are the previous versions of the repository in which changes were
+made to the R Markdown (<code>analysis/project_overview.Rmd</code>) and
+HTML (<code>docs/project_overview.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
 </p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6c4d575e87773c7633b17a0609f2e8a5987836d8/analysis/project_overview.Rmd" target="_blank">6c4d575</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-02-02
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/6c4d575e87773c7633b17a0609f2e8a5987836d8/docs/project_overview.html" target="_blank">6c4d575</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-02-02
+</td>
+<td>
+update
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <hr>
 </div>
 </div>
@@ -716,95 +777,9 @@ matched input controls.</p>
 <li><code>cutoff.filterdep</code> (e.g. <code>5,20</code>)</li>
 <li><code>cutoff.ratio</code></li>
 </ul>
-</div>
-</div>
-<div id="step-4-replicate-merging-annotation-and-differential-analysis"
-class="section level3">
-<h3>Step 4: Replicate Merging, Annotation, and Differential
-Analysis</h3>
-<div id="replicate-group-merging-p1_mergesite.py"
-class="section level4">
-<h4>Replicate / group merging (<code>p1_MergeSite.py</code>)</h4>
-<ul>
-<li>Requires sites to pass depth + ratio thresholds in ≥2
-replicates</li>
-<li>Uses:
-<ul>
-<li><code>cutoff.filterdep</code> (upper value)</li>
-<li><code>cutoff.ratio</code></li>
-</ul></li>
-</ul>
-</div>
-<div id="genome-annotation" class="section level4">
-<h4>Genome annotation</h4>
-<ul>
-<li>Annotate sites to rRNA, gene body, intron, transcript
-coordinates</li>
-</ul>
-</div>
-<div id="differential-testing" class="section level4">
-<h4>Differential testing</h4>
-<ul>
-<li>MethylKit-based testing</li>
-<li>Produces:
-<ul>
-<li><code>plot/DMA.{group}.genome.pseusite.txt</code></li>
-<li>clustering and PCA plots</li>
-</ul></li>
-</ul>
-</div>
-<div id="summary-plots-r3_plotsummary.r" class="section level4">
-<h4>Summary plots (<code>R3_PlotSummary.R</code>)</h4>
-<ul>
-<li><strong>Genome-only</strong>
-<ul>
-<li>Applies:</li>
-<li><code>cutoff.alpha</code> (FDR / q-value)</li>
-<li><code>cutoff.diff</code> (effect size threshold)</li>
-</ul></li>
-</ul>
-</div>
-</div>
-</div>
-<div id="cutoff-usage-summary" class="section level2">
-<h2>Cutoff Usage Summary</h2>
-<table>
-<thead>
-<tr class="header">
-<th>Cutoff</th>
-<th>Used in</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>mindep</code></td>
-<td>rRNA QC</td>
-<td>QC visualization</td>
-</tr>
-<tr class="even">
-<td><code>filterdep</code></td>
-<td>p0 / p1 scripts</td>
-<td>Site depth filtering</td>
-</tr>
-<tr class="odd">
-<td><code>ratio</code></td>
-<td>p0 / p1 scripts</td>
-<td>Treated enrichment</td>
-</tr>
-<tr class="even">
-<td><code>alpha</code></td>
-<td>R3 plots</td>
-<td>Statistical significance</td>
-</tr>
-<tr class="odd">
-<td><code>diff</code></td>
-<td>R3 plots</td>
-<td>Effect size filtering</td>
-</tr>
-</tbody>
-</table>
 <hr />
+</div>
+</div>
 </div>
 </div>
 
