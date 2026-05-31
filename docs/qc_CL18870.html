@@ -1,0 +1,2173 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-05-30" />
+
+<title>Pipeline-testing: quality control for CL18870</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+<link href="site_libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="site_libs/datatables-binding-0.22/datatables.js"></script>
+<link href="site_libs/dt-core-1.11.3/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="site_libs/dt-core-1.11.3/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="site_libs/dt-core-1.11.3/js/jquery.dataTables.min.js"></script>
+<link href="site_libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Pipeline-testing: quality control for
+CL18870</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-05-30</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-05-31
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreecd728aa2495462da3f986f4c42eb42128b4b60e8targetblankcd728aaa">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/cd728aa2495462da3f986f4c42eb42128b4b60e8" target="_blank">cd728aa</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreecd728aa2495462da3f986f4c42eb42128b4b60e8targetblankcd728aaa"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/cd728aa2495462da3f986f4c42eb42128b4b60e8" target="_blank">cd728aa</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Untracked files:
+    Untracked:  analysis/overview.Rmd
+    Untracked:  analysis/pipeline.Rmd
+    Untracked:  analysis/qc_CL18870.Rmd
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<div id="overview" class="section level1">
+<h1>Overview</h1>
+<p>The pipeline(<a
+href="https://xsun1229.github.io/pumseq/pipeline.html"
+class="uri">https://xsun1229.github.io/pumseq/pipeline.html</a>)
+processes per-chromosome mpileup files (split by strand) and applies an
+input-subtraction filter to remove background noise. We evaluate:</p>
+<ul>
+<li>File inventory and raw site counts</li>
+<li>Sites surviving the initial input filter (sites are filtered to
+retain only those that are <strong>absent in the input</strong> or
+<strong>have an input C/(C+T) ratio &lt; 0.1</strong>. This removes
+background C-to-T mismatches present in untreated RNA (due to SNPs,
+sequencing errors, or natural modifications)</li>
+<li>Read depth and conversion ratio distributions</li>
+<li>Sensitivity of site calls to depth and ratio thresholds</li>
+</ul>
+<p>There are 4 treated samples and 2 input samples in this cell line. We
+pooled the sites from the input as described <a
+href="https://xsun1229.github.io/pumseq/pipeline.html">here</a></p>
+<table>
+<colgroup>
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="10%" />
+<col width="12%" />
+<col width="10%" />
+<col width="12%" />
+<col width="15%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Cell lines</th>
+<th>conditions</th>
+<th>sample NO.</th>
+<th>i7 Index Name</th>
+<th>i7 Index Sequence</th>
+<th>i5 Index Name</th>
+<th>i5 Index Sequence</th>
+<th>i5 reverse complement</th>
+<th>Index Cat no</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>18870</td>
+<td>input</td>
+<td>12-50-11</td>
+<td>719</td>
+<td>AAGCGACT</td>
+<td>506</td>
+<td>TAATCTTA</td>
+<td>TAAGATTA</td>
+<td>E7600&amp;E7780</td>
+</tr>
+<tr class="even">
+<td>18870</td>
+<td>input</td>
+<td>12-50-12</td>
+<td>720</td>
+<td>AAGCGTTC</td>
+<td>506</td>
+<td>TAATCTTA</td>
+<td>TAAGATTA</td>
+<td>E7600&amp;E7780</td>
+</tr>
+<tr class="odd">
+<td>18870</td>
+<td>Treatment</td>
+<td>12-187-59</td>
+<td>708</td>
+<td>TAATGCGC</td>
+<td>515</td>
+<td>TGTGGCAT</td>
+<td>ATGCCACA</td>
+<td>E7600&amp;E7780</td>
+</tr>
+<tr class="even">
+<td>18870</td>
+<td>Treatment</td>
+<td>12-187-60</td>
+<td>709</td>
+<td>CGGCTATG</td>
+<td>515</td>
+<td>TGTGGCAT</td>
+<td>ATGCCACA</td>
+<td>E7600&amp;E7780</td>
+</tr>
+<tr class="odd">
+<td>18870</td>
+<td>Treatment</td>
+<td>12-187-97</td>
+<td>Index 1</td>
+<td>ATCACG</td>
+<td>Universal</td>
+<td></td>
+<td></td>
+<td>NEBNext® Multiplex</td>
+</tr>
+<tr class="even">
+<td>18870</td>
+<td>Treatment</td>
+<td>12-187-98</td>
+<td>Index 2</td>
+<td>CGATGT</td>
+<td>Universal</td>
+<td></td>
+<td></td>
+<td>NEBNext® Multiplex</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<pre class="r"><code>library(tidyverse)
+library(data.table)
+library(scales)
+library(knitr)
+library(kableExtra)
+
+MPILE_DIR       &lt;- &quot;/project2/xinhe/xsun/pumseq/PUM-test-CL18870/mpile&quot;
+OUT_DIR         &lt;- &quot;/project2/xinhe/xsun/pumseq/PUM-test-CL18870/out&quot;
+CHECKPOINT      &lt;- &quot;/project2/xinhe/xsun/pumseq/PUM-test-CL18870/pp_QC/QC_checkpoint.RData&quot;
+LOAD_CHECKPOINT &lt;- TRUE    # set FALSE to re-run from raw files
+qc_dir &lt;- &quot;/project2/xinhe/xsun/pumseq/PUM-test-CL18870/pp_QC&quot;
+
+DEPTH_CUTOFFS &lt;- c(1, 5, 10, 20, 50)
+RATIO_CUTOFFS &lt;- c(0.0, 0.05, 0.1, 0.2)
+
+count_df        &lt;- readRDS(file.path(qc_dir, &quot;QC_count_df.rds&quot;))
+filter_count_df &lt;- readRDS(file.path(qc_dir, &quot;QC_filter_count_df.rds&quot;))
+all_filter      &lt;- readRDS(file.path(qc_dir, &quot;QC_all_filter.rds&quot;))
+cutoff_grid     &lt;- readRDS(file.path(qc_dir, &quot;QC_cutoff_grid.rds&quot;))
+ratio_summary   &lt;- readRDS(file.path(qc_dir, &quot;QC_ratio_summary.rds&quot;))
+strand_balance  &lt;- readRDS(file.path(qc_dir, &quot;QC_strand_balance.rds&quot;))
+chrom_summary   &lt;- readRDS(file.path(qc_dir, &quot;QC_chrom_summary.rds&quot;))
+depth_by_chrom  &lt;- readRDS(file.path(qc_dir, &quot;QC_depth_by_chrom.rds&quot;))
+filter_files    &lt;- readRDS(file.path(qc_dir, &quot;QC_filter_files.rds&quot;))
+treated_files   &lt;- readRDS(file.path(qc_dir, &quot;QC_treated_files.rds&quot;))
+input_files     &lt;- readRDS(file.path(qc_dir, &quot;QC_input_files.rds&quot;))
+pooled_sites    &lt;- readRDS(file.path(qc_dir, &quot;pooled_sites.RDS&quot;))
+# Read a gzipped tab-separated pseusite file
+read_pseusite &lt;- function(path, has_header = TRUE) {
+  fread(cmd = paste(&quot;zcat&quot;, path),
+        header     = has_header,
+        sep        = &quot;\t&quot;,
+        data.table = FALSE)
+}
+
+# Count lines in a gzipped file (fast, no full load)
+count_sites &lt;- function(file) {
+  as.integer(system(paste(&quot;zcat&quot;, file, &quot;| wc -l&quot;), intern = TRUE))
+}
+
+# Extract chromosome number from filename (token before .FOR/.REV)
+extract_chrom &lt;- function(paths) {
+  as.integer(str_extract(basename(paths), &quot;(?&lt;=\\.)(\\d+)(?=\\.(FOR|REV))&quot;))
+}
+
+# Extract sample ID from filename — handles hyphens in IDs like CL18870_12-187-059
+get_sample_id &lt;- function(path) {
+  basename(path) %&gt;%
+    str_extract(&quot;(?&lt;=mpileup\\.|filter\\.)[A-Za-z0-9_-]+(?=\\.\\d+\\.(FOR|REV))&quot;)
+}
+
+
+count_df        &lt;- count_df        %&gt;% mutate(sample_id = get_sample_id(file))
+filter_count_df &lt;- filter_count_df %&gt;% mutate(sample_id = get_sample_id(file))
+all_filter      &lt;- all_filter      %&gt;% mutate(sample_id = get_sample_id(source_file))
+
+treated_samples &lt;- unique(count_df$sample_id[count_df$group == &quot;treated&quot;])
+filter_samples  &lt;- unique(filter_count_df$sample_id)
+all_samples     &lt;- intersect(treated_samples, filter_samples)
+
+n_samp &lt;- length(all_samples)
+pdf_h  &lt;- 3 * ceiling(n_samp / 2)</code></pre>
+<hr />
+<!-- # File Inventory and Raw Site Counts {.tabset} -->
+</div>
+<div id="file-inventory-and-raw-site-counts"
+class="section level1 tabset">
+<h1 class="tabset">File Inventory and Raw Site Counts</h1>
+<div id="summary-table" class="section level2">
+<h2>Summary table</h2>
+<p>The table below shows the total number of candidate pU sites detected
+in each treated sample and in the pooled input before any filtering.
+Sites are counted across all autosomes (chr 1–22) and both strands. High
+site counts in the input are expected, as the input represents all C
+positions with any read coverage; the filtering step removes
+input-present sites.</p>
+<pre class="r"><code>table_sum &lt;- count_df %&gt;%
+  group_by(sample_id, group) %&gt;%
+  summarise(
+    total_sites  = sum(n_sites),
+    n_files      = n(),
+    mean_per_chr = round(mean(n_sites)),
+    .groups = &quot;drop&quot;
+  ) 
+
+table_sum$sample_id[table_sum$group == &quot;input&quot;] &lt;- &quot;CL18870_12-50-011.CL18870_12-50-012.pooledinput&quot;
+
+DT::datatable(table_sum,caption = htmltools::tags$caption( style = &#39;caption-side: left; text-align: left; color:black;  font-size:150% ;&#39;,&#39;Raw sites summary&#39;),options = list(pageLength = 10) )</code></pre>
+<div id="htmlwidget-6d9a48bc12b44bb244c9" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-6d9a48bc12b44bb244c9">{"x":{"filter":"none","vertical":false,"caption":"<caption style=\"caption-side: left; text-align: left; color:black;  font-size:150% ;\">Raw sites summary<\/caption>","data":[["1","2","3","4","5"],["CL18870_12-187-059","CL18870_12-187-060","CL18870_12-187-097","CL18870_12-187-098","CL18870_12-50-011.CL18870_12-50-012.pooledinput"],["treated","treated","treated","treated","input"],[328888742,316277634,651675817,407461947,527411762],[44,44,44,44,44],[7474744,7188128,14810814,9260499,11986631]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>sample_id<\/th>\n      <th>group<\/th>\n      <th>total_sites<\/th>\n      <th>n_files<\/th>\n      <th>mean_per_chr<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"columnDefs":[{"className":"dt-right","targets":[3,4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="raw-sites-per-chromosome" class="section level2">
+<h2>Raw sites per chromosome</h2>
+<p>The figure below shows the number of candidate pU sites detected per
+chromosome in each treated sample, split by strand (FOR = forward, REV =
+reverse). Counts at this stage include all C positions present in the
+treated mpileup <strong>regardless of input signal</strong>.</p>
+<!-- **What to look for:** -->
+<!-- - Broadly consistent counts across chromosomes (proportional to chromosome length). -->
+<!-- - Extreme outliers for individual chromosomes may indicate mapping artefacts or annotation issues. -->
+<!-- - FOR/REV imbalance within a sample is usually expected due to transcript orientation bias, but large asymmetries between samples warrant investigation. -->
+<pre class="r"><code>theme_set(theme_bw(base_size = 11) +
+            theme(panel.grid.minor  = element_blank(),
+                  strip.background  = element_rect(fill = &quot;grey92&quot;),
+                  strip.text        = element_text(size = 9)))
+
+count_df %&gt;%
+  filter(group == &quot;treated&quot;, sample_id %in% all_samples) %&gt;%
+  mutate(chrom = factor(chrom, levels = as.character(1:22))) %&gt;%
+  ggplot(aes(x = chrom, y = n_sites, fill = strand)) +
+  geom_col(position = &quot;dodge&quot;, width = 0.7) +
+  scale_fill_manual(values = c(FOR = &quot;#4CAF50&quot;, REV = &quot;#9C27B0&quot;)) +
+  scale_y_continuous(labels = comma) +
+  facet_wrap(~sample_id, ncol = 2, scales = &quot;free_y&quot;) +
+  labs(x = &quot;Chromosome&quot;, y = &quot;Number of sites&quot;, fill = &quot;Strand&quot;) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7))</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/qc_CL18870.Rmd/plot1-raw-sites-1.png" alt="Raw candidate sites per chromosome per sample before input filtering. Green = forward strand (FOR), purple = reverse strand (REV)." width="672" />
+<p class="caption">
+Raw candidate sites per chromosome per sample before input filtering.
+Green = forward strand (FOR), purple = reverse strand (REV).
+</p>
+</div>
+<hr />
+</div>
+</div>
+<div id="post-filter-site-counts" class="section level1">
+<h1>Post-filter Site Counts</h1>
+<p>After initial calling, sites are filtered to retain only those that
+are <strong>absent in the input</strong> or <strong>have an input
+C/(C+T) ratio &lt; 0.1</strong>. This removes background C-to-T
+mismatches present in untreated RNA (due to SNPs, sequencing errors, or
+natural modifications).</p>
+<pre class="r"><code>filter_count_df %&gt;%
+  group_by(sample_id) %&gt;%
+  summarise(
+    total_filtered = sum(n_sites),
+    n_files        = n(),
+    .groups = &quot;drop&quot;
+  ) %&gt;%
+  left_join(
+    count_df %&gt;%
+      filter(group == &quot;treated&quot;) %&gt;%
+      group_by(sample_id) %&gt;%
+      summarise(total_raw = sum(n_sites), .groups = &quot;drop&quot;),
+    by = &quot;sample_id&quot;
+  ) %&gt;%
+  mutate(pct_retained = round(total_filtered / total_raw * 100, 1)) %&gt;%
+  kable(
+    col.names = c(&quot;Sample&quot;, &quot;Sites after filter&quot;, &quot;Files&quot;, &quot;Raw sites&quot;, &quot;% retained&quot;),
+    format.args = list(big.mark = &quot;,&quot;),
+    caption = &quot;Sites retained after input subtraction filter.&quot;
+  ) %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;),
+                full_width = FALSE)</code></pre>
+<table class="table table-striped table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Sites retained after input subtraction filter.
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Sample
+</th>
+<th style="text-align:right;">
+Sites after filter
+</th>
+<th style="text-align:right;">
+Files
+</th>
+<th style="text-align:right;">
+Raw sites
+</th>
+<th style="text-align:right;">
+% retained
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+CL18870_12-187-059
+</td>
+<td style="text-align:right;">
+5,885,364
+</td>
+<td style="text-align:right;">
+44
+</td>
+<td style="text-align:right;">
+328,888,742
+</td>
+<td style="text-align:right;">
+1.8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CL18870_12-187-060
+</td>
+<td style="text-align:right;">
+5,737,911
+</td>
+<td style="text-align:right;">
+44
+</td>
+<td style="text-align:right;">
+316,277,634
+</td>
+<td style="text-align:right;">
+1.8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CL18870_12-187-097
+</td>
+<td style="text-align:right;">
+8,478,620
+</td>
+<td style="text-align:right;">
+44
+</td>
+<td style="text-align:right;">
+651,675,817
+</td>
+<td style="text-align:right;">
+1.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CL18870_12-187-098
+</td>
+<td style="text-align:right;">
+6,733,196
+</td>
+<td style="text-align:right;">
+44
+</td>
+<td style="text-align:right;">
+407,461,947
+</td>
+<td style="text-align:right;">
+1.7
+</td>
+</tr>
+</tbody>
+</table>
+<p>The figure below shows the per-chromosome breakdown of sites
+surviving the filter.</p>
+<pre class="r"><code>filter_count_df %&gt;%
+  filter(sample_id %in% all_samples) %&gt;%
+  mutate(chrom = factor(chrom, levels = as.character(1:22))) %&gt;%
+  ggplot(aes(x = chrom, y = n_sites, fill = strand)) +
+  geom_col(position = &quot;dodge&quot;, width = 0.7) +
+  scale_fill_manual(values = c(FOR = &quot;#4CAF50&quot;, REV = &quot;#9C27B0&quot;)) +
+  scale_y_continuous(labels = comma) +
+  facet_wrap(~sample_id, ncol = 2, scales = &quot;free_y&quot;) +
+  labs(x = &quot;Chromosome&quot;, y = &quot;Number of sites&quot;, fill = &quot;Strand&quot;) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7))</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/qc_CL18870.Rmd/plot2-filtered-sites-1.png" alt="Post-filter candidate pU sites per chromosome per sample. Sites shown here were absent in the pooled input or had an input C/(C+T) ratio &lt; 0.1." width="672" />
+<p class="caption">
+Post-filter candidate pU sites per chromosome per sample. Sites shown
+here were absent in the pooled input or had an input C/(C+T) ratio &lt;
+0.1.
+</p>
+</div>
+<hr />
+</div>
+<div id="sensitivity-analysis-depth-and-ratio-cutoffs"
+class="section level1">
+<h1>Sensitivity Analysis: Depth and Ratio Cutoffs</h1>
+<p>The initial filter only removes sites present in the input. Further
+thresholding on <strong>read depth</strong> and <strong>C/(C+T)
+ratio</strong> in the treated sample is needed to improve specificity.
+This section explores how many sites survive at different combinations
+of these two cutoffs.</p>
+<ul>
+<li><strong>Minimum depth</strong>: requires a minimum number of reads
+covering a site in the treated sample. Low-depth sites have unreliable
+ratio estimates.</li>
+<li><strong>Minimum ratio</strong>: requires a minimum fraction of reads
+showing the C mismatch. A ratio of 0 means all reads show T (no
+modification), while a ratio of 1 means all reads show C (complete
+modification or stop).</li>
+</ul>
+<p>The figure below shows a heatmap for each sample where each cell
+reports the absolute number of sites retained and the percentage of
+post-filter sites they represent. Cells towards the top-right (high
+depth AND high ratio) are the most stringent; cells at the bottom-left
+(low depth, any ratio) are the most permissive.</p>
+<p><strong>What to look for:</strong> - Consistent patterns across
+samples indicate reproducible signal. - A ratio cutoff of ~0.1 and depth
+≥ 20 are the default cutoffs from Yanming’s pipeline.</p>
+<div id="per-sample-sensitivity-analysis" class="section level2">
+<h2>Per-sample sensitivity analysis</h2>
+<pre class="r"><code>cutoff_all &lt;- map_dfr(all_samples, function(samp) {
+  dat &lt;- all_filter %&gt;% filter(sample_id == samp)
+  expand.grid(min_depth = DEPTH_CUTOFFS, min_ratio = RATIO_CUTOFFS) %&gt;%
+    mutate(
+      sample_id    = samp,
+      n_sites      = mapply(function(d, r)
+        sum(dat$depth &gt;= d &amp; dat$ratio &gt;= r, na.rm = TRUE),
+        min_depth, min_ratio),
+      pct_retained = n_sites / nrow(dat) * 100
+    )
+})
+
+cutoff_all %&gt;%
+  mutate(label = paste0(comma(n_sites), &quot;\n(&quot;, round(pct_retained, 1), &quot;%)&quot;)) %&gt;%
+  ggplot(aes(x = factor(min_ratio), y = factor(min_depth), fill = pct_retained)) +
+  geom_tile(color = &quot;white&quot;, linewidth = 0.6) +
+  geom_text(aes(label = label), size = 2.5) +
+  scale_fill_gradient2(low = &quot;#d73027&quot;, mid = &quot;#fee090&quot;, high = &quot;#1a9850&quot;,
+                       midpoint = 50, name = &quot;% retained&quot;) +
+  facet_wrap(~sample_id, ncol = 2) +
+  labs(x = &quot;Min C/(C+T) ratio (treated)&quot;, y = &quot;Min read depth (treated)&quot;)</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/qc_CL18870.Rmd/plot3-sensitivity-1.png" alt="Sensitivity heatmap showing sites retained at each combination of minimum read depth (y-axis) and minimum C/(C+T) ratio (x-axis) in the treated sample. Each cell shows the absolute count and percentage of post-filter sites retained. Color scale: red = few sites retained, green = many sites retained." width="672" />
+<p class="caption">
+Sensitivity heatmap showing sites retained at each combination of
+minimum read depth (y-axis) and minimum C/(C+T) ratio (x-axis) in the
+treated sample. Each cell shows the absolute count and percentage of
+post-filter sites retained. Color scale: red = few sites retained, green
+= many sites retained.
+</p>
+</div>
+</div>
+<div id="pooled-sensitivity-analysis" class="section level2">
+<h2>Pooled sensitivity analysis</h2>
+<p>In addition to per-sample cutoffs, it is useful to examine how many
+<strong>unique genomic positions</strong> survive across all samples
+combined. Here all post-filter sites from every treated sample are
+pooled into a single set and the same depth × ratio cutoff grid is
+applied.</p>
+<p><strong>What to look for:</strong></p>
+<ul>
+<li>The pooled count will always be ≥ the largest single-sample count,
+since different samples may cover different sites.</li>
+<li>If the pooled count is much larger than any individual sample,
+samples are capturing largely non-overlapping sites — possibly due to
+different transcript coverage or biological replicates.</li>
+<li>If pooled ≈ single-sample counts, samples are highly concordant in
+which sites they detect.</li>
+</ul>
+<pre class="r"><code># Combine all samples — one row per unique genomic position (ref + pos + strand)
+# For sites present in multiple samples,  sum C and T counts (and recompute depth and ratio from them depth and ratio observed)
+# (a site passes if it passes in at least one sample)
+
+pooled_sites_2samples &lt;- pooled_sites[pooled_sites$n_samples &gt;= 2, ]
+
+cat(&quot;Total unique genomic positions across all samples:&quot;, nrow(pooled_sites), &quot;\n&quot;)</code></pre>
+<pre><code>Total unique genomic positions across all samples: 10098835 </code></pre>
+<pre class="r"><code>cat(&quot;Total unique genomic positions in &gt;= 2 samples:&quot;, nrow(pooled_sites_2samples), &quot;\n&quot;)</code></pre>
+<pre><code>Total unique genomic positions in &gt;= 2 samples: 7069474 </code></pre>
+<pre class="r"><code>cutoff_pooled &lt;- expand.grid(min_depth = DEPTH_CUTOFFS,
+                             min_ratio = RATIO_CUTOFFS) %&gt;%
+  mutate(
+    n_sites      = mapply(function(d, r)
+      sum(pooled_sites$depth &gt;= d &amp; pooled_sites$ratio &gt;= r),
+      min_depth, min_ratio),
+    pct_retained = round(n_sites / nrow(pooled_sites) * 100, 1)
+  )
+
+cutoff_pooled %&gt;%
+  mutate(n_sites = comma(n_sites)) %&gt;%
+  pivot_wider(names_from  = min_ratio,
+              values_from = c(n_sites, pct_retained),
+              names_glue  = &quot;ratio_{min_ratio}_{.value}&quot;) </code></pre>
+<pre><code># A tibble: 5 x 9
+  min_depth ratio_0_n_sites ratio_0.05_n_sites ratio_0.1_n_sites
+      &lt;dbl&gt; &lt;chr&gt;           &lt;chr&gt;              &lt;chr&gt;            
+1         1 10,098,835      91,483             42,476           
+2         5 10,098,835      91,483             42,476           
+3        10 7,259,566       56,943             7,936            
+4        20 5,430,286       12,273             1,921            
+5        50 2,782,998       2,491              839              
+# i 5 more variables: ratio_0.2_n_sites &lt;chr&gt;, ratio_0_pct_retained &lt;dbl&gt;,
+#   ratio_0.05_pct_retained &lt;dbl&gt;, ratio_0.1_pct_retained &lt;dbl&gt;,
+#   ratio_0.2_pct_retained &lt;dbl&gt;</code></pre>
+<p>Figure below shows the pooled sensitivity as a heatmap, directly
+comparable to the per-sample Figure.</p>
+<pre class="r"><code>cutoff_pooled %&gt;%
+  mutate(label = paste0(comma(n_sites), &quot;\n(&quot;, pct_retained, &quot;%)&quot;)) %&gt;%
+  ggplot(aes(x = factor(min_ratio), y = factor(min_depth), fill = pct_retained)) +
+  geom_tile(color = &quot;white&quot;, linewidth = 0.8) +
+  geom_text(aes(label = label), size = 3.2) +
+  scale_fill_gradient2(low = &quot;#d73027&quot;, mid = &quot;#fee090&quot;, high = &quot;#1a9850&quot;,
+                       midpoint = 50, name = &quot;% retained&quot;) +
+  labs(title = paste0(&quot;Pooled sensitivity (&quot;, n_samp, &quot; samples, sites detected in &gt;=1 sample)&quot;),
+       x = &quot;Min C/(C+T) ratio (treated)&quot;, y = &quot;Min read depth (treated)&quot;)</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/qc_CL18870.Rmd/plot-pooled-sensitivity-1.png" alt="Sensitivity heatmap for the pooled site set (all samples combined)." width="672" />
+<p class="caption">
+Sensitivity heatmap for the pooled site set (all samples combined).
+</p>
+</div>
+<p>We also filtered the pooled sites based on the number of samples in
+which they were detected.</p>
+<pre class="r"><code>cutoff_pooled &lt;- expand.grid(min_depth = DEPTH_CUTOFFS,
+                             min_ratio = RATIO_CUTOFFS) %&gt;%
+  mutate(
+    n_sites      = mapply(function(d, r)
+      sum(pooled_sites_2samples$depth &gt;= d &amp; pooled_sites_2samples$ratio &gt;= r),
+      min_depth, min_ratio),
+    pct_retained = round(n_sites / nrow(pooled_sites_2samples) * 100, 1)
+  )
+
+cutoff_pooled %&gt;%
+  mutate(n_sites = comma(n_sites)) %&gt;%
+  pivot_wider(names_from  = min_ratio,
+              values_from = c(n_sites, pct_retained),
+              names_glue  = &quot;ratio_{min_ratio}_{.value}&quot;) </code></pre>
+<pre><code># A tibble: 5 x 9
+  min_depth ratio_0_n_sites ratio_0.05_n_sites ratio_0.1_n_sites
+      &lt;dbl&gt; &lt;chr&gt;           &lt;chr&gt;              &lt;chr&gt;            
+1         1 7,069,474       51,933             6,045            
+2         5 7,069,474       51,933             6,045            
+3        10 7,069,474       51,933             6,045            
+4        20 5,425,846       12,181             1,878            
+5        50 2,782,052       2,478              829              
+# i 5 more variables: ratio_0.2_n_sites &lt;chr&gt;, ratio_0_pct_retained &lt;dbl&gt;,
+#   ratio_0.05_pct_retained &lt;dbl&gt;, ratio_0.1_pct_retained &lt;dbl&gt;,
+#   ratio_0.2_pct_retained &lt;dbl&gt;</code></pre>
+<p>Figure below shows the pooled sensitivity as a heatmap, directly
+comparable to the per-sample Figure.</p>
+<pre class="r"><code>cutoff_pooled %&gt;%
+  mutate(label = paste0(comma(n_sites), &quot;\n(&quot;, pct_retained, &quot;%)&quot;)) %&gt;%
+  ggplot(aes(x = factor(min_ratio), y = factor(min_depth), fill = pct_retained)) +
+  geom_tile(color = &quot;white&quot;, linewidth = 0.8) +
+  geom_text(aes(label = label), size = 3.2) +
+  scale_fill_gradient2(low = &quot;#d73027&quot;, mid = &quot;#fee090&quot;, high = &quot;#1a9850&quot;,
+                       midpoint = 50, name = &quot;% retained&quot;) +
+  labs(title = paste0(&quot;Pooled sensitivity (&quot;, n_samp, &quot; samples, sites detected in &gt;= 2 sample)&quot;),
+       x = &quot;Min C/(C+T) ratio (treated)&quot;, y = &quot;Min read depth (treated)&quot;)</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/qc_CL18870.Rmd/plot-pooled-sensitivity2-1.png" alt="Sensitivity heatmap for the pooled site set (all samples combined)." width="672" />
+<p class="caption">
+Sensitivity heatmap for the pooled site set (all samples combined).
+</p>
+</div>
+<hr />
+</div>
+</div>
+<div id="read-depth-quality" class="section level1">
+<h1>Read Depth Quality</h1>
+<div id="depth-distribution" class="section level2">
+<h2>Depth distribution</h2>
+<p>Figure below shows the distribution of read depths across post-filter
+sites in each treated sample.</p>
+<p>Values above the 99th percentile are excluded to prevent extreme
+outliers (e.g., rRNA or highly expressed transcripts) from compressing
+the rest of the distribution.</p>
+<p><strong>What to look for:</strong></p>
+<ul>
+<li>A right-skewed distribution is normal: most sites will have modest
+depth, with a tail of deeply covered positions.</li>
+<li>Very few sites with depth &gt; 10–20 may indicate insufficient
+sequencing depth for reliable pU calling.</li>
+<li>Bimodal distributions could reflect a mixture of expressed and lowly
+expressed transcripts.</li>
+</ul>
+<pre class="r"><code>all_filter %&gt;%
+  filter(sample_id %in% all_samples, !is.na(depth)) %&gt;%
+  group_by(sample_id) %&gt;%
+  filter(depth &lt; quantile(depth, 0.99, na.rm = TRUE)) %&gt;%
+  ungroup() %&gt;%
+  ggplot(aes(x = depth)) +
+  geom_histogram(bins = 60, fill = &quot;#2196F3&quot;, alpha = 0.8) +
+  scale_y_continuous(labels = comma) +
+  facet_wrap(~sample_id, ncol = 2, scales = &quot;free&quot;) +
+  labs(x = &quot;Read depth (treated)&quot;, y = &quot;Number of sites&quot;)</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/qc_CL18870.Rmd/plot4-depth-dist-1.png" alt="Distribution of per-site read depth in treated samples (post-filter sites only, values below the 99th percentile shown). Higher depth improves the reliability of the C/(C+T) ratio estimate." width="672" />
+<p class="caption">
+Distribution of per-site read depth in treated samples (post-filter
+sites only, values below the 99th percentile shown). Higher depth
+improves the reliability of the C/(C+T) ratio estimate.
+</p>
+</div>
+</div>
+<div id="depth-by-chromosome" class="section level2">
+<h2>Depth by chromosome</h2>
+<pre class="r"><code>depth_by_chrom %&gt;%
+  mutate(across(where(is.numeric), ~round(., 1))) %&gt;%
+  kable(
+    col.names = c(&quot;Chrom&quot;, &quot;N sites&quot;, &quot;Mean depth&quot;, &quot;25th pct&quot;,
+                  &quot;Median&quot;, &quot;75th pct&quot;, &quot;95th pct&quot;),
+    caption = &quot;Per-chromosome read depth statistics across all samples (post-filter).&quot;
+  ) %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;),
+                full_width = FALSE) %&gt;%
+  scroll_box(height = &quot;300px&quot;)</code></pre>
+<div
+style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; ">
+<table class="table table-striped table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Per-chromosome read depth statistics across all samples (post-filter).
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Chrom
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+N sites
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+Mean depth
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+25th pct
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+Median
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+75th pct
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+95th pct
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:right;">
+2969824
+</td>
+<td style="text-align:right;">
+24.3
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+73.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:right;">
+2008703
+</td>
+<td style="text-align:right;">
+24.4
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+66.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:right;">
+1848547
+</td>
+<td style="text-align:right;">
+21.5
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+63.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:right;">
+1116020
+</td>
+<td style="text-align:right;">
+20.3
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+51.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+5
+</td>
+<td style="text-align:right;">
+1438094
+</td>
+<td style="text-align:right;">
+24.7
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+63.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+6
+</td>
+<td style="text-align:right;">
+1498028
+</td>
+<td style="text-align:right;">
+32.7
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+81.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+7
+</td>
+<td style="text-align:right;">
+1353987
+</td>
+<td style="text-align:right;">
+23.7
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+57.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+8
+</td>
+<td style="text-align:right;">
+962568
+</td>
+<td style="text-align:right;">
+22.0
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+61.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+9
+</td>
+<td style="text-align:right;">
+1075919
+</td>
+<td style="text-align:right;">
+22.2
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+55.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+10
+</td>
+<td style="text-align:right;">
+1080354
+</td>
+<td style="text-align:right;">
+20.2
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+61.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+11
+</td>
+<td style="text-align:right;">
+1401359
+</td>
+<td style="text-align:right;">
+28.8
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+22
+</td>
+<td style="text-align:right;">
+81.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+12
+</td>
+<td style="text-align:right;">
+1629740
+</td>
+<td style="text-align:right;">
+28.2
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+77.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+13
+</td>
+<td style="text-align:right;">
+606666
+</td>
+<td style="text-align:right;">
+22.6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+48.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+14
+</td>
+<td style="text-align:right;">
+1007838
+</td>
+<td style="text-align:right;">
+30.5
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+65.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:right;">
+975974
+</td>
+<td style="text-align:right;">
+29.9
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+54.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+16
+</td>
+<td style="text-align:right;">
+1150045
+</td>
+<td style="text-align:right;">
+21.4
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+57.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+17
+</td>
+<td style="text-align:right;">
+1577249
+</td>
+<td style="text-align:right;">
+25.1
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+66.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+18
+</td>
+<td style="text-align:right;">
+454814
+</td>
+<td style="text-align:right;">
+18.9
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+53.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+19
+</td>
+<td style="text-align:right;">
+1130234
+</td>
+<td style="text-align:right;">
+33.0
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+89.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+20
+</td>
+<td style="text-align:right;">
+652764
+</td>
+<td style="text-align:right;">
+20.5
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+60.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+21
+</td>
+<td style="text-align:right;">
+317515
+</td>
+<td style="text-align:right;">
+20.7
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+58.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+22
+</td>
+<td style="text-align:right;">
+578849
+</td>
+<td style="text-align:right;">
+26.0
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+22
+</td>
+<td style="text-align:right;">
+79.0
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr />
+</div>
+</div>
+<div id="cct-ratio-distribution" class="section level1">
+<h1>C/(C+T) Ratio Distribution</h1>
+<div id="global-ratio-summary" class="section level2">
+<h2>Global ratio summary</h2>
+<pre class="r"><code>all_filter %&gt;%
+  filter(sample_id %in% all_samples, !is.na(ratio)) %&gt;%
+  group_by(sample_id) %&gt;%
+  summarise(
+    mean_ratio   = round(mean(ratio), 3),
+    median_ratio = round(median(ratio), 3),
+    pct_gt0.05   = round(mean(ratio &gt;= 0.05) * 100, 1),
+    pct_gt0.1    = round(mean(ratio &gt;= 0.1)  * 100, 1),
+    pct_gt0.2    = round(mean(ratio &gt;= 0.2)  * 100, 1),
+    .groups = &quot;drop&quot;
+  ) %&gt;%
+  kable(
+    col.names = c(&quot;Sample&quot;, &quot;Mean ratio&quot;, &quot;Median ratio&quot;,
+                  &quot;% ≥ 0.05&quot;, &quot;% ≥ 0.10&quot;, &quot;% ≥ 0.20&quot;),
+    caption = &quot;C/(C+T) ratio summary for post-filter treated sites.&quot;
+  ) %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;),
+                full_width = FALSE)</code></pre>
+<table class="table table-striped table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+C/(C+T) ratio summary for post-filter treated sites.
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Sample
+</th>
+<th style="text-align:right;">
+Mean ratio
+</th>
+<th style="text-align:right;">
+Median ratio
+</th>
+<th style="text-align:right;">
+% &lt;U+2265&gt; 0.05
+</th>
+<th style="text-align:right;">
+% &lt;U+2265&gt; 0.10
+</th>
+<th style="text-align:right;">
+% &lt;U+2265&gt; 0.20
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+CL18870_12-187-059
+</td>
+<td style="text-align:right;">
+0.001
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CL18870_12-187-060
+</td>
+<td style="text-align:right;">
+0.001
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CL18870_12-187-097
+</td>
+<td style="text-align:right;">
+0.003
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.7
+</td>
+<td style="text-align:right;">
+0.9
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CL18870_12-187-098
+</td>
+<td style="text-align:right;">
+0.003
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.7
+</td>
+<td style="text-align:right;">
+0.8
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="ratio-distribution-0.05" class="section level2">
+<h2>Ratio distribution (≥ 0.05)</h2>
+<p>Figure below shows the distribution of C/(C+T) ratios
+<strong>restricted to sites with ratio ≥ 0.05</strong>. Sites with ratio
+= 0 are excluded here to focus on the informative part of the
+distribution.</p>
+<p><strong>What to look for:</strong> - A right-skewed distribution with
+a peak near low positive values is typical: most sites have modest
+conversion rates. - Large differences in the ratio distribution between
+samples could indicate technical variability in CMC treatment
+efficiency.</p>
+<pre class="r"><code>all_filter %&gt;%
+  filter(sample_id %in% all_samples, !is.na(ratio), ratio &gt;= 0.05) %&gt;%
+  ggplot(aes(x = ratio)) +
+  geom_histogram(bins = 60, fill = &quot;#2196F3&quot;, alpha = 0.8, boundary = 0) +
+  scale_y_continuous(labels = comma) +
+  facet_wrap(~sample_id, ncol = 2, scales = &quot;free_y&quot;) +
+  labs(x = &quot;C/(C+T) ratio (treated)&quot;, y = &quot;Number of sites&quot;)</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/qc_CL18870.Rmd/plot5-ratio-dist-1.png" alt=" Distribution of C/(C+T) ratios in treated samples, restricted to sites with ratio &lt;U+2265&gt; 0.05. Sites with ratio = 0 are omitted to focus on positions showing evidence of CMC-induced misincorporation. A higher ratio indicates stronger modification signal at that position." width="672" />
+<p class="caption">
+Distribution of C/(C+T) ratios in treated samples, restricted to sites
+with ratio &lt;U+2265&gt; 0.05. Sites with ratio = 0 are omitted to
+focus on positions showing evidence of CMC-induced misincorporation. A
+higher ratio indicates stronger modification signal at that position.
+</p>
+</div>
+<hr />
+</div>
+</div>
+<div id="strand-balance" class="section level1">
+<h1>Strand Balance</h1>
+<p>Balanced site counts across forward and reverse strands within each
+chromosome are expected for an unbiased experiment. Large imbalances
+could indicate strand-specific mapping issues or biased transcript
+coverage.</p>
+<pre class="r"><code>filter_count_df %&gt;%
+  filter(sample_id %in% all_samples) %&gt;%
+  group_by(sample_id, strand) %&gt;%
+  summarise(total_sites = sum(n_sites), .groups = &quot;drop&quot;) %&gt;%
+  pivot_wider(names_from = strand, values_from = total_sites) %&gt;%
+  mutate(FOR_REV_ratio = round(FOR / REV, 2)) %&gt;%
+  kable(
+    col.names = c(&quot;Sample&quot;, &quot;FOR sites&quot;, &quot;REV sites&quot;, &quot;FOR/REV ratio&quot;),
+    format.args = list(big.mark = &quot;,&quot;),
+    caption = &quot;Strand balance of post-filter sites per sample. FOR/REV ratio close to 1 indicates balanced strand coverage.&quot;
+  ) %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;),
+                full_width = FALSE)</code></pre>
+<table class="table table-striped table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Strand balance of post-filter sites per sample. FOR/REV ratio close to 1
+indicates balanced strand coverage.
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Sample
+</th>
+<th style="text-align:right;">
+FOR sites
+</th>
+<th style="text-align:right;">
+REV sites
+</th>
+<th style="text-align:right;">
+FOR/REV ratio
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+CL18870_12-187-059
+</td>
+<td style="text-align:right;">
+2,975,320
+</td>
+<td style="text-align:right;">
+2,910,044
+</td>
+<td style="text-align:right;">
+1.02
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CL18870_12-187-060
+</td>
+<td style="text-align:right;">
+2,894,603
+</td>
+<td style="text-align:right;">
+2,843,308
+</td>
+<td style="text-align:right;">
+1.02
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CL18870_12-187-097
+</td>
+<td style="text-align:right;">
+4,296,582
+</td>
+<td style="text-align:right;">
+4,182,038
+</td>
+<td style="text-align:right;">
+1.03
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CL18870_12-187-098
+</td>
+<td style="text-align:right;">
+3,421,005
+</td>
+<td style="text-align:right;">
+3,312,191
+</td>
+<td style="text-align:right;">
+1.03
+</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 7 (Core)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el7-x86_64/lib/libopenblas_haswellp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] kableExtra_1.4.0  knitr_1.39        scales_1.4.0      data.table_1.14.2
+ [5] forcats_0.5.1     stringr_1.5.1     dplyr_1.1.4       purrr_1.0.2      
+ [9] readr_2.1.2       tidyr_1.3.0       tibble_3.2.1      ggplot2_4.0.0    
+[13] tidyverse_1.3.1  
+
+loaded via a namespace (and not attached):
+ [1] httr_1.4.3         sass_0.4.1         jsonlite_1.8.0     viridisLite_0.4.0 
+ [5] modelr_0.1.8       bslib_0.3.1        S7_0.2.0           assertthat_0.2.1  
+ [9] highr_0.9          cellranger_1.1.0   yaml_2.3.5         pillar_1.9.0      
+[13] backports_1.4.1    glue_1.6.2         digest_0.6.29      RColorBrewer_1.1-3
+[17] promises_1.2.0.1   rvest_1.0.2        htmltools_0.5.2    httpuv_1.6.5      
+[21] pkgconfig_2.0.3    broom_0.8.0        haven_2.5.0        svglite_2.1.0     
+[25] later_1.3.0        tzdb_0.4.0         git2r_0.30.1       generics_0.1.4    
+[29] farver_2.1.0       ellipsis_0.3.2     DT_0.22            withr_2.5.0       
+[33] cli_3.6.1          magrittr_2.0.3     crayon_1.5.1       readxl_1.4.0      
+[37] evaluate_0.15      fs_1.5.2           fansi_1.0.3        xml2_1.3.3        
+[41] tools_4.2.0        hms_1.1.1          lifecycle_1.0.4    reprex_2.0.1      
+[45] compiler_4.2.0     jquerylib_0.1.4    systemfonts_1.0.4  rlang_1.1.2       
+[49] grid_4.2.0         dichromat_2.0-0.1  rstudioapi_0.13    htmlwidgets_1.5.4 
+[53] crosstalk_1.2.0    labeling_0.4.2     rmarkdown_2.25     gtable_0.3.6      
+[57] DBI_1.2.2          R6_2.5.1           lubridate_1.8.0    fastmap_1.1.0     
+[61] utf8_1.2.2         workflowr_1.7.0    rprojroot_2.0.3    stringi_1.7.6     
+[65] Rcpp_1.0.12        vctrs_0.6.5        dbplyr_2.1.1       tidyselect_1.2.0  
+[69] xfun_0.41         </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

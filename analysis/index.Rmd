@@ -9,5 +9,8 @@ editor_options:
 ---
 
 
-[Project overview and pipeline](project_overview.html)
+[Project overview](overview.html)
 
+[Pipeline](pipeline.html)
+
+[Pipeline-testing: quality control for CL18870](qc_CL18870.html)

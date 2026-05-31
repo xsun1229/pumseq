@@ -1,0 +1,211 @@
+---
+title: "pipeline"
+author: "XSun"
+date: "2026-05-25"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+# Overview
+
+This document describes the `PUM-250809` Snakemake workflow and the `PUM-250809.yaml` configuration file.
+The pipeline is structured across three main Snakemake files:
+
+- `smk/PUM-250809-rRNA.smk`
+- `smk/PUM-250809-genome.smk`
+- `smk/PUM-250812-sites.smk`
+
+It uses the YAML file `smk/PUM-250809.yaml` to define sample metadata, tool paths, genome references, and analysis parameters.
+
+# Configuration: `PUM-250809.yaml`
+
+The YAML file defines the experiment and runtime environment for the pipeline.
+
+## Key sections
+
+- `workdir`: working directory for pipeline outputs (here `PUM-test-CL18870`).
+- `path`: absolute paths to executables and helper scripts.
+- `adapters`: adapter sequences and trimming criteria.
+- `index`: reference indices used for alignment.
+- `fasta`: reference FASTA files for mapping and pileup.
+- `bed`: BED references used for annotation.
+- `anno`: annotation inputs used for site annotation and QC.
+- `samples`: sample metadata, input FASTQ files, group labels, and treatment status.
+
+## Samples
+
+The `samples:` section defines sequencing libraries and their metadata.
+Each sample entry includes:
+
+- `data.R1` and `data.R2`: paired-end FASTQ paths.
+- `repG`: replicate group label.
+
+## Cutoff parameters
+
+The `cutoff:` section in the YAML defines thresholds used throughout the pipeline for site filtering and significance classification:
+
+- `mindep: 20`  
+  - Minimum depth for mpileup-based site extraction and QC steps.  
+  - Applied in `smk/PUM-250809-rRNA.smk` (rule `rRNAQC`) when calling base-change sites.  
+  - Used as a global minimum coverage threshold.
+
+- `filterdep: "5,20"`  
+  - Two depth thresholds separated by comma: lower per-sample filter and output BED depth.  
+  - Applied in `smk/PUM-250812-sites.smk` (rules `filterSite_perLib`, `IPgrp`) when processing treatment/control comparisons.  
+  - First value (5): minimum depth when reading individual sample pseudo-site tables; rows below this are dropped early.  
+  - Second value (20): minimum depth required for a site to be written to the BED output.
+
+- `ratio: 0.1`  
+  - Conversion ratio threshold (as a fraction between 0 and 1).  
+  - Used in `smk/PUM-250812-sites.smk` by `bin/p0_FilterInput.py`.  
+  - A site is included in treatment output if treatment `ratio >= ratio`.  
+  - A site is excluded from further analysis if the input/control sample has `ratio.unt >= ratio` (i.e., high background signal).
+
+
+# `smk/PUM-250809-rRNA.smk`
+
+This file handles the small-RNA processing and quality control for ribosomal RNA.
+
+## Main stages
+
+1. **Cutadapt trimming**
+   - `rule cutadapt`
+   - `rule cutadapt_UMI`
+   - Input: raw FASTQ from `samples`.
+   - Output: trimmed FASTQ in `trim/`.
+
+2. **rRNA alignment**
+   - `rule align_rRNA`
+   - Align trimmed reads to the rRNA reference with Bowtie2.
+   - Produces intermediate BAM and unaligned read FASTQ in `align/` and `fastq/`.
+
+3. **rRNA filtering**
+   - `rule filter_rRNA`
+   - Filter aligned reads by mapping quality and mismatches.
+   - Produces filtered BAM and index.
+
+4. **rRNA deduplication**
+   - `rule dedup_rRNA`
+   - Deduplicate alignments and index the final BAM.
+
+5. **rRNA mpileup site extraction**
+   - `rule mpileup_rRNA`
+   - Creates a pseudo-site summary using `samtools mpileup` and a custom parsing step.
+   - Output files under `mpile/`:
+     - `mpileup.{sample}.rRNA.txt.gz`
+     - `mpileup.{sample}.rRNA.pseusite.txt.gz`
+
+6. **Quality control**
+   - `rule rRNAQC`
+   - Combines all `mpileup.*.rRNA.pseusite.txt.gz` files into a QC report:
+     - `qc/qc.pUFraction.rRNA.pdf`
+
+# `smk/PUM-250809-genome.smk`
+
+This file processes tRNA, snoRNA, and genome-aligned reads.
+
+## Main stages
+
+1. **Chromosome list generation**
+   - `rule getChr_genome`
+   - Reads `chrName.txt` from the genome index and writes `splitbam/chr.list.txt`.
+
+2. **tRNA alignment and filtering**
+   - `rule align_tRNA`
+   - `rule filter_tRNA`
+   - `rule dedup_tRNA`
+   - `rule mpileup_tRNA`
+   - Produces tRNA pseudo-site summaries in `mpile/`.
+
+3. **snoRNA alignment and filtering**
+   - `rule align_snoRNA`
+   - `rule filter_snoRNA`
+   - `rule dedup_snoRNA`
+   - `rule mpileup_snoRNA`
+   - Produces snoRNA pseudo-site summaries in `mpile/`.
+
+4. **Genome alignment with STAR**
+   - `rule align_genome`
+   - `rule filter_genome`
+   - `rule dedup_genome`
+   - Produces genome-aligned BAM files in `align/`.
+
+5. **Genome mpileup processing**
+   - Not explicitly included beyond alignment here, but the genome-aligned BAMs are used later in the site analysis workflow.
+
+# `smk/PUM-250812-sites.smk`
+
+This file builds the downstream site-level analysis from the pseudo-site summaries.
+
+## Main stages
+
+1. **Group pairing and pooling**
+   - Controls are pooled when multiple controls exist.
+   - `PAIR_LIST` and `PAIRS_BY_GROUP` determine treatment/control pairs.
+
+2. **Pooled control generation**
+   - `rule pool_pseusite_per_group`
+   - Creates pooled pseudo-site files for control groups from individual `mpileup` inputs.
+
+3. **Site filtering per library**
+   - `rule filterSite_perLib`
+   - Uses `bin/p0_FilterInput.py` to compare treatment vs control pseudo-site files.
+   - In the current config, control libraries include `CL18870_12-50-011` and `CL18870_12-50-012` (`treated: false`, `repG: input_pooled`) and treatment libraries include `CL18870_12-187-059`, `CL18870_12-187-060`, `CL18870_12-187-097`, `CL18870_12-187-098` (`treated: true`).
+   - It reads `mpile/mpileup.<sample>.<chr>.<strand>.pseusite.txt.gz` for both treatment and control.
+   - `p0_FilterInput.py` does the following:
+     - loads the treatment and input pseudo-site tables
+     - selects the original and converted base counts for the configured base-change pair
+     - computes `depth = converted + original` and `ratio = converted / depth`
+     - filters treatment sites with minimum depth and minimum conversion ratio
+     - removes sites where the input sample shows the same conversion signal above the input ratio threshold
+     - writes filtered results as `out/filter.<group>.<treat>.<untreat>.<chr>.<strand>.pseusite.txt.gz` plus a companion BED file.
+
+4. **Combine filtered site files**
+   - `rule Com_BedperLib`
+   - Combines all per-chromosome/strand filtered outputs for a sample group.
+   - The rule gathers `out/filter.<group>.<treat>.<untreat>.<chr>.<strand>.pseusite.txt.gz` and `.bed` across chromosomes and strands using `PAIRS_BY_GROUP`.
+   - It concatenates the text files with Python/Polars into `out/filter.<group>.genome.pseusite.txt.gz` and concatenates BED files into `out/filter.<group>.genome.pseusite.bed`.
+   - The resulting group-level `.txt.gz` is the merged filtered site matrix for the entire genome.
+
+# Expected directories and outputs
+
+The pipeline creates and uses these directories:
+
+- `trim/`: trimmed FASTQ files.
+- `fastq/`: intermediate unaligned read FASTQ files.
+- `align/`: BAM alignment files for rRNA, tRNA, snoRNA, and genome alignments.
+- `mpile/`: mpileup text and pseudo-site summary files.
+- `out/`: filtered site text and BED files for each group and library.
+- `qc/`: QC PDF report.
+- `log/`: log output for each rule.
+- `benchmark/`: benchmark records for rule performance.
+
+# How to run the workflow
+
+Use Snakemake with the YAML config file.
+
+```bash
+snakemake -n -p -s smk/combined.smk --configfile smk/PUM-250809.yaml
+```
+
+If you want to run only one module, choose the relevant Snakefile:
+
+```bash
+snakemake -n -p -s smk/PUM-250809-rRNA.smk --configfile smk/PUM-250809.yaml
+snakemake -n -p -s smk/PUM-250809-genome.smk --configfile smk/PUM-250809.yaml
+snakemake -n -p -s smk/PUM-250812-sites.smk --configfile smk/PUM-250809.yaml
+```
+
+# How to read key results
+
+## `qc/qc.pUFraction.rRNA.pdf`
+
+This PDF summarizes the rRNA QC metrics generated by `rule rRNAQC`.
+It is the primary quality report for the rRNA pseudo-site fraction.
+
+## `out/filter.*.genome.pseusite.bed`
+
+These BED files contain filtered genome-wide sites after comparing treated vs control samples.
+They are produced by the site-level filtering workflow in `smk/PUM-250812-sites.smk`.
+

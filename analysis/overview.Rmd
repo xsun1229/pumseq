@@ -1,0 +1,46 @@
+---
+title: "Project Overview"
+author: "XSun"
+date: "2026-05-25"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+# What is pseudouridine?
+
+Pseudouridine (Ψ, also referred to as pU) is the most abundant RNA modification in cellular RNA. It is an isomer of uridine in which the glycosidic bond is rearranged from an N–C bond
+(N1–C1′ in uridine) to a C–C bond (C5–C1′).
+
+This structural change:
+  - increases base-stacking interactions,
+  - enhances RNA backbone rigidity,
+  - and can stabilize RNA secondary and tertiary structure.
+
+Pseudouridine is found in many RNA classes, including:
+- rRNA (highly abundant, structural roles),
+- tRNA (decoding accuracy and stability),
+- sn/snoRNA,
+- and mRNA (regulatory roles affecting translation and RNA stability).
+
+# Aim of PUM-seq project
+
+PUM-seq project aims to systematically map pseudouridine (Ψ, pU) modifications on mRNA and, in the longer term, identify genetic variants that regulate pseudouridylation levels (pU-QTLs).
+
+# Principle of PUM-seq–based pU Detection
+
+PUM-seq relies on chemical treatment that selectively modifies pseudouridine residues. After treatment:
+
+- Unmodified uridine (U) behaves normally during reverse transcription. It is read as T. 
+- Pseudouridine (Ψ) undergoes chemical derivatization that increases the probability of
+  reverse-transcription misincorporation. It is read as C. 
+
+In the pipeline, pseudouridine is detected through **T→C mismatches** in sequencing data (`base_change: T,C`), where:
+
+\[
+\text{conversion ratio} = \frac{C}{T + C}
+\]
+
+A high T→C conversion fraction indicates the presence of pseudouridine at that position.
+
+

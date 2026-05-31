@@ -9,9 +9,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="XSun" />
 
+<meta name="date" content="2026-05-25" />
 
-<title>PUM-seq</title>
+<title>Project Overview</title>
 
 <script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -29,6 +31,9 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -231,6 +236,69 @@ $(document).ready(function () {
 
 
 
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
 
 </head>
 
@@ -238,6 +306,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -281,7 +359,9 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">PUM-seq</h1>
+<h1 class="title toc-ignore">Project Overview</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-05-25</h4>
 
 </div>
 
@@ -348,10 +428,10 @@ changes </a>
 <div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown file has unstaged changes. To know which version of
-the R Markdown file created these results, you’ll want to first commit
-it to the Git repo. If you’re still working on the analysis, you can
-ignore this warning. When you’re finished, you can run
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
 <code>wflow_publish</code> to commit the R Markdown file and build the
 HTML.</p>
 </div>
@@ -412,130 +492,54 @@ have uncommitted changes.
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
-
 <p>
-These are the previous versions of the repository in which changes were
-made to the R Markdown (<code>analysis/index.Rmd</code>) and HTML
-(<code>docs/index.html</code>) files. If you’ve configured a remote Git
-repository (see <code>?wflow_git_remote</code>), click on the hyperlinks
-in the table below to view the files as they were in that past version.
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
 </p>
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-File
-</th>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-<th>
-Message
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/cd728aa2495462da3f986f4c42eb42128b4b60e8/analysis/index.Rmd" target="_blank">cd728aa</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-02-03
-</td>
-<td>
-update
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/xsun1229/pumseq/cd728aa2495462da3f986f4c42eb42128b4b60e8/docs/index.html" target="_blank">cd728aa</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-02-03
-</td>
-<td>
-update
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/6c4d575e87773c7633b17a0609f2e8a5987836d8/analysis/index.Rmd" target="_blank">6c4d575</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-02-02
-</td>
-<td>
-update
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/xsun1229/pumseq/a1f705c104b21e8dfa0371daacf79e519d0acc28/docs/index.html" target="_blank">a1f705c</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-02-02
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/cad69b0a0c829b979b0dbdbfcb3a76b3e2887450/analysis/index.Rmd" target="_blank">cad69b0</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-02-02
-</td>
-<td>
-Start workflowr project.
-</td>
-</tr>
-</tbody>
-</table>
-</div>
 <hr>
 </div>
 </div>
 </div>
-<p><a href="overview.html">Project overview</a></p>
-<p><a href="pipeline.html">Pipeline</a></p>
+<div id="what-is-pseudouridine" class="section level1">
+<h1>What is pseudouridine?</h1>
+<p>Pseudouridine (Ψ, also referred to as pU) is the most abundant RNA
+modification in cellular RNA. It is an isomer of uridine in which the
+glycosidic bond is rearranged from an N–C bond (N1–C1′ in uridine) to a
+C–C bond (C5–C1′).</p>
+<p>This structural change: - increases base-stacking interactions, -
+enhances RNA backbone rigidity, - and can stabilize RNA secondary and
+tertiary structure.</p>
+<p>Pseudouridine is found in many RNA classes, including: - rRNA (highly
+abundant, structural roles), - tRNA (decoding accuracy and stability), -
+sn/snoRNA, - and mRNA (regulatory roles affecting translation and RNA
+stability).</p>
+</div>
+<div id="aim-of-pum-seq-project" class="section level1">
+<h1>Aim of PUM-seq project</h1>
+<p>PUM-seq project aims to systematically map pseudouridine (Ψ, pU)
+modifications on mRNA and, in the longer term, identify genetic variants
+that regulate pseudouridylation levels (pU-QTLs).</p>
+</div>
+<div id="principle-of-pum-seqbased-pu-detection" class="section level1">
+<h1>Principle of PUM-seq–based pU Detection</h1>
+<p>PUM-seq relies on chemical treatment that selectively modifies
+pseudouridine residues. After treatment:</p>
+<ul>
+<li>Unmodified uridine (U) behaves normally during reverse
+transcription. It is read as T.</li>
+<li>Pseudouridine (Ψ) undergoes chemical derivatization that increases
+the probability of reverse-transcription misincorporation. It is read as
+C.</li>
+</ul>
+<p>In the pipeline, pseudouridine is detected through <strong>T→C
+mismatches</strong> in sequencing data (<code>base_change: T,C</code>),
+where:</p>
+<p><span class="math display">\[
+\text{conversion ratio} = \frac{C}{T + C}
+\]</span></p>
+<p>A high T→C conversion fraction indicates the presence of
+pseudouridine at that position.</p>
+</div>
 
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
@@ -553,6 +557,8 @@ footer is added to webpages before the MathJax javascript. -->
 
 
 
+</div>
+</div>
 
 </div>
 
@@ -585,6 +591,35 @@ $(document).ready(function () {
 
 <!-- code folding -->
 
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

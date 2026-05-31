@@ -1,0 +1,444 @@
+---
+title: "Pipeline-testing: quality control for CL18870"
+author: "XSun"
+date: "2026-05-30"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+---
+
+# Overview
+
+The pipeline(https://xsun1229.github.io/pumseq/pipeline.html) processes per-chromosome mpileup files (split by strand) and applies an input-subtraction filter to remove background noise. We evaluate:
+
+- File inventory and raw site counts
+- Sites surviving the initial input filter (sites are filtered to retain only those that are **absent in the input** or **have an input C/(C+T) ratio < 0.1**. This removes background C-to-T mismatches present in untreated RNA (due to SNPs, sequencing errors, or natural modifications)
+- Read depth and conversion ratio distributions
+- Sensitivity of site calls to depth and ratio thresholds
+
+There are 4 treated samples and 2 input samples in this cell line. We pooled the sites from the input as described [here](https://xsun1229.github.io/pumseq/pipeline.html)
+
+| Cell lines | conditions | sample NO. | i7 Index Name | i7 Index Sequence | i5 Index Name | i5 Index Sequence | i5 reverse complement | Index  Cat no       |
+|------------|------------|------------|---------------|-------------------|---------------|-------------------|-----------------------|---------------------|
+| 18870      | input      | 12-50-11   | 719           | AAGCGACT          | 506           | TAATCTTA          | TAAGATTA              | E7600&E7780         |
+| 18870      | input      | 12-50-12   | 720           | AAGCGTTC          | 506           | TAATCTTA          | TAAGATTA              | E7600&E7780         |
+| 18870      | Treatment  | 12-187-59  | 708           | TAATGCGC          | 515           | TGTGGCAT          | ATGCCACA              | E7600&E7780         |
+| 18870      | Treatment  | 12-187-60  | 709           | CGGCTATG          | 515           | TGTGGCAT          | ATGCCACA              | E7600&E7780         |
+| 18870      | Treatment  | 12-187-97  | Index 1       | ATCACG            | Universal     |                   |                       | NEBNext® Multiplex  |
+| 18870      | Treatment  | 12-187-98  | Index 2       | CGATGT            | Universal     |                   |                       | NEBNext® Multiplex  |
+
+---
+
+```{r message=FALSE, warning=F}
+
+library(tidyverse)
+library(data.table)
+library(scales)
+library(knitr)
+library(kableExtra)
+
+MPILE_DIR       <- "/project2/xinhe/xsun/pumseq/PUM-test-CL18870/mpile"
+OUT_DIR         <- "/project2/xinhe/xsun/pumseq/PUM-test-CL18870/out"
+CHECKPOINT      <- "/project2/xinhe/xsun/pumseq/PUM-test-CL18870/pp_QC/QC_checkpoint.RData"
+LOAD_CHECKPOINT <- TRUE    # set FALSE to re-run from raw files
+qc_dir <- "/project2/xinhe/xsun/pumseq/PUM-test-CL18870/pp_QC"
+
+DEPTH_CUTOFFS <- c(1, 5, 10, 20, 50)
+RATIO_CUTOFFS <- c(0.0, 0.05, 0.1, 0.2)
+
+count_df        <- readRDS(file.path(qc_dir, "QC_count_df.rds"))
+filter_count_df <- readRDS(file.path(qc_dir, "QC_filter_count_df.rds"))
+all_filter      <- readRDS(file.path(qc_dir, "QC_all_filter.rds"))
+cutoff_grid     <- readRDS(file.path(qc_dir, "QC_cutoff_grid.rds"))
+ratio_summary   <- readRDS(file.path(qc_dir, "QC_ratio_summary.rds"))
+strand_balance  <- readRDS(file.path(qc_dir, "QC_strand_balance.rds"))
+chrom_summary   <- readRDS(file.path(qc_dir, "QC_chrom_summary.rds"))
+depth_by_chrom  <- readRDS(file.path(qc_dir, "QC_depth_by_chrom.rds"))
+filter_files    <- readRDS(file.path(qc_dir, "QC_filter_files.rds"))
+treated_files   <- readRDS(file.path(qc_dir, "QC_treated_files.rds"))
+input_files     <- readRDS(file.path(qc_dir, "QC_input_files.rds"))
+pooled_sites    <- readRDS(file.path(qc_dir, "pooled_sites.RDS"))
+# Read a gzipped tab-separated pseusite file
+read_pseusite <- function(path, has_header = TRUE) {
+  fread(cmd = paste("zcat", path),
+        header     = has_header,
+        sep        = "\t",
+        data.table = FALSE)
+}
+
+# Count lines in a gzipped file (fast, no full load)
+count_sites <- function(file) {
+  as.integer(system(paste("zcat", file, "| wc -l"), intern = TRUE))
+}
+
+# Extract chromosome number from filename (token before .FOR/.REV)
+extract_chrom <- function(paths) {
+  as.integer(str_extract(basename(paths), "(?<=\\.)(\\d+)(?=\\.(FOR|REV))"))
+}
+
+# Extract sample ID from filename — handles hyphens in IDs like CL18870_12-187-059
+get_sample_id <- function(path) {
+  basename(path) %>%
+    str_extract("(?<=mpileup\\.|filter\\.)[A-Za-z0-9_-]+(?=\\.\\d+\\.(FOR|REV))")
+}
+
+
+count_df        <- count_df        %>% mutate(sample_id = get_sample_id(file))
+filter_count_df <- filter_count_df %>% mutate(sample_id = get_sample_id(file))
+all_filter      <- all_filter      %>% mutate(sample_id = get_sample_id(source_file))
+
+treated_samples <- unique(count_df$sample_id[count_df$group == "treated"])
+filter_samples  <- unique(filter_count_df$sample_id)
+all_samples     <- intersect(treated_samples, filter_samples)
+
+n_samp <- length(all_samples)
+pdf_h  <- 3 * ceiling(n_samp / 2)
+
+```
+
+---
+
+<!-- # File Inventory and Raw Site Counts {.tabset} -->
+# File Inventory and Raw Site Counts {.tabset}
+
+## Summary table
+
+The table below shows the total number of candidate pU sites detected in each treated sample and in the pooled input before any filtering. Sites are counted across all autosomes (chr 1–22) and both strands. High site counts in the input are expected, as the input represents all C positions with any read coverage; the filtering step removes input-present sites.
+
+```{r file-summary-table}
+
+table_sum <- count_df %>%
+  group_by(sample_id, group) %>%
+  summarise(
+    total_sites  = sum(n_sites),
+    n_files      = n(),
+    mean_per_chr = round(mean(n_sites)),
+    .groups = "drop"
+  ) 
+
+table_sum$sample_id[table_sum$group == "input"] <- "CL18870_12-50-011.CL18870_12-50-012.pooledinput"
+
+DT::datatable(table_sum,caption = htmltools::tags$caption( style = 'caption-side: left; text-align: left; color:black;  font-size:150% ;','Raw sites summary'),options = list(pageLength = 10) )
+
+```
+
+## Raw sites per chromosome
+
+The figure below shows the number of candidate pU sites detected per chromosome in each treated sample, split by strand (FOR = forward, REV = reverse). Counts at this stage include all C positions present in the treated mpileup **regardless of input signal**.
+
+
+
+<!-- **What to look for:** -->
+<!-- - Broadly consistent counts across chromosomes (proportional to chromosome length). -->
+<!-- - Extreme outliers for individual chromosomes may indicate mapping artefacts or annotation issues. -->
+<!-- - FOR/REV imbalance within a sample is usually expected due to transcript orientation bias, but large asymmetries between samples warrant investigation. -->
+
+
+```{r plot1-raw-sites, fig.height=pdf_h, fig.cap="Raw candidate sites per chromosome per sample before input filtering. Green = forward strand (FOR), purple = reverse strand (REV)."}
+theme_set(theme_bw(base_size = 11) +
+            theme(panel.grid.minor  = element_blank(),
+                  strip.background  = element_rect(fill = "grey92"),
+                  strip.text        = element_text(size = 9)))
+
+count_df %>%
+  filter(group == "treated", sample_id %in% all_samples) %>%
+  mutate(chrom = factor(chrom, levels = as.character(1:22))) %>%
+  ggplot(aes(x = chrom, y = n_sites, fill = strand)) +
+  geom_col(position = "dodge", width = 0.7) +
+  scale_fill_manual(values = c(FOR = "#4CAF50", REV = "#9C27B0")) +
+  scale_y_continuous(labels = comma) +
+  facet_wrap(~sample_id, ncol = 2, scales = "free_y") +
+  labs(x = "Chromosome", y = "Number of sites", fill = "Strand") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7))
+```
+
+---
+
+# Post-filter Site Counts
+
+After initial calling, sites are filtered to retain only those that are **absent in the input** or **have an input C/(C+T) ratio < 0.1**. This removes background C-to-T mismatches present in untreated RNA (due to SNPs, sequencing errors, or natural modifications).
+
+```{r filter-summary-table}
+
+filter_count_df %>%
+  group_by(sample_id) %>%
+  summarise(
+    total_filtered = sum(n_sites),
+    n_files        = n(),
+    .groups = "drop"
+  ) %>%
+  left_join(
+    count_df %>%
+      filter(group == "treated") %>%
+      group_by(sample_id) %>%
+      summarise(total_raw = sum(n_sites), .groups = "drop"),
+    by = "sample_id"
+  ) %>%
+  mutate(pct_retained = round(total_filtered / total_raw * 100, 1)) %>%
+  kable(
+    col.names = c("Sample", "Sites after filter", "Files", "Raw sites", "% retained"),
+    format.args = list(big.mark = ","),
+    caption = "Sites retained after input subtraction filter."
+  ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE)
+```
+
+The figure below shows the per-chromosome breakdown of sites surviving the filter. 
+
+```{r plot2-filtered-sites, fig.height=pdf_h, fig.cap="Post-filter candidate pU sites per chromosome per sample. Sites shown here were absent in the pooled input or had an input C/(C+T) ratio < 0.1."}
+filter_count_df %>%
+  filter(sample_id %in% all_samples) %>%
+  mutate(chrom = factor(chrom, levels = as.character(1:22))) %>%
+  ggplot(aes(x = chrom, y = n_sites, fill = strand)) +
+  geom_col(position = "dodge", width = 0.7) +
+  scale_fill_manual(values = c(FOR = "#4CAF50", REV = "#9C27B0")) +
+  scale_y_continuous(labels = comma) +
+  facet_wrap(~sample_id, ncol = 2, scales = "free_y") +
+  labs(x = "Chromosome", y = "Number of sites", fill = "Strand") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7))
+```
+
+---
+
+# Sensitivity Analysis: Depth and Ratio Cutoffs
+
+The initial filter only removes sites present in the input. Further thresholding on **read depth** and **C/(C+T) ratio** in the treated sample is needed to improve specificity. This section explores how many sites survive at different combinations of these two cutoffs.
+
+- **Minimum depth**: requires a minimum number of reads covering a site in the treated sample. Low-depth sites have unreliable ratio estimates.
+- **Minimum ratio**: requires a minimum fraction of reads showing the C mismatch. A ratio of 0 means all reads show T (no modification), while a ratio of 1 means all reads show C (complete modification or stop).
+
+The figure below shows a heatmap for each sample where each cell reports the absolute number of sites retained and the percentage of post-filter sites they represent. Cells towards the top-right (high depth AND high ratio) are the most stringent; cells at the bottom-left (low depth, any ratio) are the most permissive.
+
+**What to look for:**
+- Consistent patterns across samples indicate reproducible signal.
+- A ratio cutoff of ~0.1 and depth ≥ 20 are the default cutoffs from Yanming's pipeline.
+
+## Per-sample sensitivity analysis
+
+```{r plot3-sensitivity, fig.height=pdf_h, fig.cap="Sensitivity heatmap showing sites retained at each combination of minimum read depth (y-axis) and minimum C/(C+T) ratio (x-axis) in the treated sample. Each cell shows the absolute count and percentage of post-filter sites retained. Color scale: red = few sites retained, green = many sites retained."}
+cutoff_all <- map_dfr(all_samples, function(samp) {
+  dat <- all_filter %>% filter(sample_id == samp)
+  expand.grid(min_depth = DEPTH_CUTOFFS, min_ratio = RATIO_CUTOFFS) %>%
+    mutate(
+      sample_id    = samp,
+      n_sites      = mapply(function(d, r)
+        sum(dat$depth >= d & dat$ratio >= r, na.rm = TRUE),
+        min_depth, min_ratio),
+      pct_retained = n_sites / nrow(dat) * 100
+    )
+})
+
+cutoff_all %>%
+  mutate(label = paste0(comma(n_sites), "\n(", round(pct_retained, 1), "%)")) %>%
+  ggplot(aes(x = factor(min_ratio), y = factor(min_depth), fill = pct_retained)) +
+  geom_tile(color = "white", linewidth = 0.6) +
+  geom_text(aes(label = label), size = 2.5) +
+  scale_fill_gradient2(low = "#d73027", mid = "#fee090", high = "#1a9850",
+                       midpoint = 50, name = "% retained") +
+  facet_wrap(~sample_id, ncol = 2) +
+  labs(x = "Min C/(C+T) ratio (treated)", y = "Min read depth (treated)")
+```
+
+
+## Pooled sensitivity analysis
+
+In addition to per-sample cutoffs, it is useful to examine how many **unique genomic positions** survive across all samples combined. Here all post-filter sites from every treated sample are pooled into a single set and the same depth × ratio cutoff grid is applied.
+
+
+**What to look for:**
+
+- The pooled count will always be ≥ the largest single-sample count, since different samples may cover different sites.
+- If the pooled count is much larger than any individual sample, samples are capturing largely non-overlapping sites — possibly due to different transcript coverage or biological replicates.
+- If pooled ≈ single-sample counts, samples are highly concordant in which sites they detect.
+
+```{r pooled-sites}
+# Combine all samples — one row per unique genomic position (ref + pos + strand)
+# For sites present in multiple samples,  sum C and T counts (and recompute depth and ratio from them depth and ratio observed)
+# (a site passes if it passes in at least one sample)
+
+pooled_sites_2samples <- pooled_sites[pooled_sites$n_samples >= 2, ]
+
+cat("Total unique genomic positions across all samples:", nrow(pooled_sites), "\n")
+cat("Total unique genomic positions in >= 2 samples:", nrow(pooled_sites_2samples), "\n")
+```
+
+```{r pooled-sensitivity-table}
+cutoff_pooled <- expand.grid(min_depth = DEPTH_CUTOFFS,
+                             min_ratio = RATIO_CUTOFFS) %>%
+  mutate(
+    n_sites      = mapply(function(d, r)
+      sum(pooled_sites$depth >= d & pooled_sites$ratio >= r),
+      min_depth, min_ratio),
+    pct_retained = round(n_sites / nrow(pooled_sites) * 100, 1)
+  )
+
+cutoff_pooled %>%
+  mutate(n_sites = comma(n_sites)) %>%
+  pivot_wider(names_from  = min_ratio,
+              values_from = c(n_sites, pct_retained),
+              names_glue  = "ratio_{min_ratio}_{.value}") 
+```
+
+Figure below shows the pooled sensitivity as a heatmap, directly comparable to the per-sample Figure. 
+
+```{r plot-pooled-sensitivity, fig.height=5, fig.cap="Sensitivity heatmap for the pooled site set (all samples combined)."}
+cutoff_pooled %>%
+  mutate(label = paste0(comma(n_sites), "\n(", pct_retained, "%)")) %>%
+  ggplot(aes(x = factor(min_ratio), y = factor(min_depth), fill = pct_retained)) +
+  geom_tile(color = "white", linewidth = 0.8) +
+  geom_text(aes(label = label), size = 3.2) +
+  scale_fill_gradient2(low = "#d73027", mid = "#fee090", high = "#1a9850",
+                       midpoint = 50, name = "% retained") +
+  labs(title = paste0("Pooled sensitivity (", n_samp, " samples, sites detected in >=1 sample)"),
+       x = "Min C/(C+T) ratio (treated)", y = "Min read depth (treated)")
+```
+
+We also filtered the pooled sites based on the number of samples in which they were detected.
+
+```{r pooled-sensitivity-table2}
+
+cutoff_pooled <- expand.grid(min_depth = DEPTH_CUTOFFS,
+                             min_ratio = RATIO_CUTOFFS) %>%
+  mutate(
+    n_sites      = mapply(function(d, r)
+      sum(pooled_sites_2samples$depth >= d & pooled_sites_2samples$ratio >= r),
+      min_depth, min_ratio),
+    pct_retained = round(n_sites / nrow(pooled_sites_2samples) * 100, 1)
+  )
+
+cutoff_pooled %>%
+  mutate(n_sites = comma(n_sites)) %>%
+  pivot_wider(names_from  = min_ratio,
+              values_from = c(n_sites, pct_retained),
+              names_glue  = "ratio_{min_ratio}_{.value}") 
+```
+
+Figure below shows the pooled sensitivity as a heatmap, directly comparable to the per-sample Figure. 
+
+```{r plot-pooled-sensitivity2, fig.height=5, fig.cap="Sensitivity heatmap for the pooled site set (all samples combined)."}
+cutoff_pooled %>%
+  mutate(label = paste0(comma(n_sites), "\n(", pct_retained, "%)")) %>%
+  ggplot(aes(x = factor(min_ratio), y = factor(min_depth), fill = pct_retained)) +
+  geom_tile(color = "white", linewidth = 0.8) +
+  geom_text(aes(label = label), size = 3.2) +
+  scale_fill_gradient2(low = "#d73027", mid = "#fee090", high = "#1a9850",
+                       midpoint = 50, name = "% retained") +
+  labs(title = paste0("Pooled sensitivity (", n_samp, " samples, sites detected in >= 2 sample)"),
+       x = "Min C/(C+T) ratio (treated)", y = "Min read depth (treated)")
+```
+
+
+---
+
+# Read Depth Quality
+
+## Depth distribution
+
+Figure below shows the distribution of read depths across post-filter sites in each treated sample. 
+
+Values above the 99th percentile are excluded to prevent extreme outliers (e.g., rRNA or highly expressed transcripts) from compressing the rest of the distribution.
+
+**What to look for:**
+
+- A right-skewed distribution is normal: most sites will have modest depth, with a tail of deeply covered positions.
+- Very few sites with depth > 10–20 may indicate insufficient sequencing depth for reliable pU calling.
+- Bimodal distributions could reflect a mixture of expressed and lowly expressed transcripts.
+
+```{r plot4-depth-dist, fig.height=pdf_h, fig.cap="Distribution of per-site read depth in treated samples (post-filter sites only, values below the 99th percentile shown). Higher depth improves the reliability of the C/(C+T) ratio estimate."}
+all_filter %>%
+  filter(sample_id %in% all_samples, !is.na(depth)) %>%
+  group_by(sample_id) %>%
+  filter(depth < quantile(depth, 0.99, na.rm = TRUE)) %>%
+  ungroup() %>%
+  ggplot(aes(x = depth)) +
+  geom_histogram(bins = 60, fill = "#2196F3", alpha = 0.8) +
+  scale_y_continuous(labels = comma) +
+  facet_wrap(~sample_id, ncol = 2, scales = "free") +
+  labs(x = "Read depth (treated)", y = "Number of sites")
+```
+
+## Depth by chromosome
+
+```{r depth-by-chrom-table}
+depth_by_chrom %>%
+  mutate(across(where(is.numeric), ~round(., 1))) %>%
+  kable(
+    col.names = c("Chrom", "N sites", "Mean depth", "25th pct",
+                  "Median", "75th pct", "95th pct"),
+    caption = "Per-chromosome read depth statistics across all samples (post-filter)."
+  ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE) %>%
+  scroll_box(height = "300px")
+```
+
+---
+
+# C/(C+T) Ratio Distribution
+
+## Global ratio summary
+
+```{r ratio-summary-table}
+all_filter %>%
+  filter(sample_id %in% all_samples, !is.na(ratio)) %>%
+  group_by(sample_id) %>%
+  summarise(
+    mean_ratio   = round(mean(ratio), 3),
+    median_ratio = round(median(ratio), 3),
+    pct_gt0.05   = round(mean(ratio >= 0.05) * 100, 1),
+    pct_gt0.1    = round(mean(ratio >= 0.1)  * 100, 1),
+    pct_gt0.2    = round(mean(ratio >= 0.2)  * 100, 1),
+    .groups = "drop"
+  ) %>%
+  kable(
+    col.names = c("Sample", "Mean ratio", "Median ratio",
+                  "% ≥ 0.05", "% ≥ 0.10", "% ≥ 0.20"),
+    caption = "C/(C+T) ratio summary for post-filter treated sites."
+  ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE)
+```
+
+## Ratio distribution (≥ 0.05)
+
+Figure below shows the distribution of C/(C+T) ratios **restricted to sites with ratio ≥ 0.05**. Sites with ratio = 0 are excluded here to focus on the informative part of the distribution.
+
+**What to look for:**
+- A right-skewed distribution with a peak near low positive values is typical: most sites have modest conversion rates.
+- Large differences in the ratio distribution between samples could indicate technical variability in CMC treatment efficiency.
+
+```{r plot5-ratio-dist, fig.height=pdf_h, fig.cap=" Distribution of C/(C+T) ratios in treated samples, restricted to sites with ratio ≥ 0.05. Sites with ratio = 0 are omitted to focus on positions showing evidence of CMC-induced misincorporation. A higher ratio indicates stronger modification signal at that position."}
+all_filter %>%
+  filter(sample_id %in% all_samples, !is.na(ratio), ratio >= 0.05) %>%
+  ggplot(aes(x = ratio)) +
+  geom_histogram(bins = 60, fill = "#2196F3", alpha = 0.8, boundary = 0) +
+  scale_y_continuous(labels = comma) +
+  facet_wrap(~sample_id, ncol = 2, scales = "free_y") +
+  labs(x = "C/(C+T) ratio (treated)", y = "Number of sites")
+```
+
+---
+
+# Strand Balance
+
+Balanced site counts across forward and reverse strands within each chromosome are expected for an unbiased experiment. Large imbalances could indicate strand-specific mapping issues or biased transcript coverage.
+
+```{r strand-balance-table}
+filter_count_df %>%
+  filter(sample_id %in% all_samples) %>%
+  group_by(sample_id, strand) %>%
+  summarise(total_sites = sum(n_sites), .groups = "drop") %>%
+  pivot_wider(names_from = strand, values_from = total_sites) %>%
+  mutate(FOR_REV_ratio = round(FOR / REV, 2)) %>%
+  kable(
+    col.names = c("Sample", "FOR sites", "REV sites", "FOR/REV ratio"),
+    format.args = list(big.mark = ","),
+    caption = "Strand balance of post-filter sites per sample. FOR/REV ratio close to 1 indicates balanced strand coverage."
+  ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE)
+```
+
+---
