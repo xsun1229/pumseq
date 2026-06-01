@@ -1,7 +1,7 @@
 ---
 title: "Pipeline-testing: quality control for CL18870"
 author: "XSun"
-date: "2026-05-30"
+date: "2026-06-01"
 output:
   workflowr::wflow_html:
     code_folding: hide
@@ -19,14 +19,14 @@ The pipeline(https://xsun1229.github.io/pumseq/pipeline.html) processes per-chro
 
 There are 4 treated samples and 2 input samples in this cell line. We pooled the sites from the input as described [here](https://xsun1229.github.io/pumseq/pipeline.html)
 
-| Cell lines | conditions | sample NO. | i7 Index Name | i7 Index Sequence | i5 Index Name | i5 Index Sequence | i5 reverse complement | Index  Cat no       |
-|------------|------------|------------|---------------|-------------------|---------------|-------------------|-----------------------|---------------------|
-| 18870      | input      | 12-50-11   | 719           | AAGCGACT          | 506           | TAATCTTA          | TAAGATTA              | E7600&E7780         |
-| 18870      | input      | 12-50-12   | 720           | AAGCGTTC          | 506           | TAATCTTA          | TAAGATTA              | E7600&E7780         |
-| 18870      | Treatment  | 12-187-59  | 708           | TAATGCGC          | 515           | TGTGGCAT          | ATGCCACA              | E7600&E7780         |
-| 18870      | Treatment  | 12-187-60  | 709           | CGGCTATG          | 515           | TGTGGCAT          | ATGCCACA              | E7600&E7780         |
-| 18870      | Treatment  | 12-187-97  | Index 1       | ATCACG            | Universal     |                   |                       | NEBNext® Multiplex  |
-| 18870      | Treatment  | 12-187-98  | Index 2       | CGATGT            | Universal     |                   |                       | NEBNext® Multiplex  |
+| Cell lines | conditions | sample NO. | i7 Index Name | i7 Index Sequence | i5 Index Name | i5 Index Sequence | i5 reverse complement | Index  Cat no |
+|------------|------------|------------|---------------|-------------------|---------------|-------------------|-----------------------|---------------|
+| 18909      | input      | 12-47-13   | 713           | TTCCTCCT          | 501           | TATAGCCT          | AGGCTATA              | E7600&E7780   |
+| 18909      | input      | 12-47-14   | 714           | TGCTTGCT          | 501           | TATAGCCT          | AGGCTATA              | E7600&E7780   |
+| 18909      | Treatment  | 12-187-13  | 713           | TTCCTCCT          | 503           | CCTATCCT          | AGGATAGG              | E7600&E7780   |
+| 18909      | Treatment  | 12-187-14  | 714           | TGCTTGCT          | 503           | CCTATCCT          | AGGATAGG              | E7600&E7780   |
+| 18909      | Treatment  | 13-32-23   | G3            | GTTGGCGT          |               | CAGCAGTC          | GACTGCTG              | E6440         |
+| 18909      | Treatment  | 13-32-24   | H3            | TAGCTGGC          |               | TACCGGCT          | AGCCGGTA              | E6440         |
 
 ---
 
@@ -44,11 +44,10 @@ library(patchwork)
 
 library(ggvenn)
 
-MPILE_DIR       <- "/project2/xinhe/xsun/pumseq/PUM-test-CL18870/mpile"
-OUT_DIR         <- "/project2/xinhe/xsun/pumseq/PUM-test-CL18870/out"
-CHECKPOINT      <- "/project2/xinhe/xsun/pumseq/PUM-test-CL18870/pp_QC/QC_checkpoint.RData"
+MPILE_DIR       <- "/project2/xinhe/xsun/pumseq_pipeline/PUM-CL18909/mpile"
+OUT_DIR         <- "/project2/xinhe/xsun/pumseq_pipeline/PUM-CL18909/out"
 LOAD_CHECKPOINT <- TRUE    # set FALSE to re-run from raw files
-qc_dir <- "/project2/xinhe/xsun/pumseq/PUM-test-CL18870/pp_QC"
+qc_dir <- "/project2/xinhe/xsun/pumseq_pipeline/PUM-CL18909/pp_QC"
 
 DEPTH_CUTOFFS <- c(1, 5, 10, 20, 50)
 RATIO_CUTOFFS <- c(0.0, 0.05, 0.1, 0.2)
@@ -123,7 +122,7 @@ table_sum <- count_df %>%
     .groups = "drop"
   ) 
 
-table_sum$sample_id[table_sum$group == "input"] <- "CL18870_12-50-011.CL18870_12-50-012.pooledinput"
+table_sum$sample_id[table_sum$group == "input"] <- "CL18909_12-47-013.CL18909_12-47-14.pooledinput"
 
 DT::datatable(table_sum,caption = htmltools::tags$caption( style = 'caption-side: left; text-align: left; color:black;  font-size:150% ;','Raw sites summary'),options = list(pageLength = 10) )
 
