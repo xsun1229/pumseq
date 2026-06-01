@@ -15,4 +15,4 @@ editor_options:
 
 [Pipeline-testing: quality control for CL18870](qc_CL18870.html)
 
-[Pipeline-testing: quality control for CL18870](qc_CL18909.html)
+[Pipeline-testing: quality control for CL18909](qc_CL18909.html)
