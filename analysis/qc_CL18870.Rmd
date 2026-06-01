@@ -38,6 +38,12 @@ library(scales)
 library(knitr)
 library(kableExtra)
 
+library(ggvenn)
+library(ggplot2)
+library(patchwork)
+
+library(ggvenn)
+
 MPILE_DIR       <- "/project2/xinhe/xsun/pumseq/PUM-test-CL18870/mpile"
 OUT_DIR         <- "/project2/xinhe/xsun/pumseq/PUM-test-CL18870/out"
 CHECKPOINT      <- "/project2/xinhe/xsun/pumseq/PUM-test-CL18870/pp_QC/QC_checkpoint.RData"
@@ -100,7 +106,7 @@ pdf_h  <- 3 * ceiling(n_samp / 2)
 ---
 
 <!-- # File Inventory and Raw Site Counts {.tabset} -->
-# File Inventory and Raw Site Counts {.tabset}
+# File Inventory and Raw Site Counts
 
 ## Summary table
 
@@ -439,6 +445,510 @@ filter_count_df %>%
   ) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
                 full_width = FALSE)
+```
+
+---
+
+
+# Comparison with Published pU Sites (PMID 39349603)
+
+To assess the biological validity of our candidate pU sites, we compare our pooled calls against a published pseudouridine dataset (PMID 39349603). Overlap is evaluated at the genomic position level (no strand consideration) across four combinations of depth and ratio cutoffs. 
+
+```{r overlap-settings}
+DATA_OTHERS_PATH <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID39349603.xlsx"
+
+# cutoff grid to compare
+cutoffs <- expand.grid(min_depth = c(10, 20),
+                       min_ratio = c(0.1, 0.2)) %>%
+  mutate(label = paste0("depth≥", min_depth, ", ratio≥", min_ratio))
+```
+
+```{r overlap-load, warning=F,message=F}
+data_others <- readxl::read_excel(DATA_OTHERS_PATH, sheet = 6)
+colnames(data_others) <- data_others[2, ]
+data_others <- data_others[-c(1:2), ]
+
+DT::datatable(data_others,caption = htmltools::tags$caption( style = 'caption-side: left; text-align: left; color:black;  font-size:150% ;','pU sites from PMID39349603'),options = list(pageLength = 10) )
+
+
+data_others_clean <- data_others %>%
+  mutate(ref = as.integer(str_remove(chr, "chr")),
+         pos = as.integer(pos))
+
+others_keys <- data_others_clean %>%
+  mutate(key = paste(ref, pos, sep = "_")) %>%
+  pull(key) %>% unique()
+
+cat("Published pU sites (unique positions):", length(others_keys), "\n")
+```
+
+## Compute overlap across cutoffs
+
+For each cutoff combination, `pooled_sites` is filtered and a site-level key (`ref_pos`) is used to identify positions present in both datasets, in only the published set, or in only our pooled calls.
+
+```{r overlap-compute}
+overlap_all <- map_dfr(seq_len(nrow(cutoffs)), function(i) {
+
+  d   <- cutoffs$min_depth[i]
+  r   <- cutoffs$min_ratio[i]
+  lab <- cutoffs$label[i]
+
+  pooled_clean <- pooled_sites %>%
+    filter(depth >= d, ratio >= r) %>%
+    mutate(ref = as.integer(ref))
+
+  pooled_keys <- pooled_clean %>%
+    mutate(key = paste(ref, pos, sep = "_")) %>%
+    pull(key) %>% unique()
+
+  bind_rows(
+    data.frame(key = others_keys, source = "data_others"),
+    data.frame(key = pooled_keys, source = "pooled_sites")
+  ) %>%
+    group_by(key) %>%
+    summarise(in_others = any(source == "data_others"),
+              in_pooled = any(source == "pooled_sites"),
+              .groups = "drop") %>%
+    mutate(
+      ref      = as.integer(str_extract(key, "^\\d+")),
+      category = case_when(
+        in_others & in_pooled ~ "Both",
+        in_others             ~ "data_others only",
+        TRUE                  ~ "pooled_sites only"
+      ),
+      cutoff    = lab,
+      min_depth = d,
+      min_ratio = r,
+      n_pooled  = length(pooled_keys),
+      n_others  = length(others_keys)
+    )
+})
+```
+
+```{r overlap-summary-table}
+summary_df <- overlap_all %>%
+  group_by(cutoff, min_depth, min_ratio, n_pooled, n_others) %>%
+  summarise(
+    n_both               = sum(category == "Both"),
+    n_pooled_only        = sum(category == "pooled_sites only"),
+    n_others_only        = sum(category == "data_others only"),
+    pct_others_in_pooled = round(n_both / first(n_others) * 100, 1),
+    pct_pooled_in_others = round(n_both / first(n_pooled) * 100, 1),
+    .groups = "drop"
+  )
+
+summary_df %>%
+  kable(
+    col.names = c("Cutoff", "Min depth", "Min ratio",
+                  "N pooled", "N published",
+                  "N overlap", "N pooled only", "N published only",
+                  "% published\nin pooled", "% pooled\nin published"),
+    format.args = list(big.mark = ","),
+    caption = "Overlap summary between pooled pU calls and published sites across cutoffs."
+  ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE)
+```
+
+Absolute site counts split by overlap category for each cutoff. Green = present in both datasets; blue = published only; orange = our pooled calls only. 
+
+```{r overlap-bar, fig.height=5, fig.cap="Site counts by overlap category across depth and ratio cutoffs."}
+overlap_all %>%
+  count(cutoff, category) %>%
+  mutate(cutoff   = factor(cutoff, levels = cutoffs$label),
+         category = factor(category,
+                           levels = c("Both", "data_others only", "pooled_sites only"))) %>%
+  ggplot(aes(x = cutoff, y = n, fill = category)) +
+  geom_col(position = "dodge", width = 0.7) +
+  geom_text(aes(label = comma(n)),
+            position = position_dodge(width = 0.7),
+            vjust = -0.4, size = 3) +
+  scale_fill_manual(values = c(Both               = "#4CAF50",
+                               `data_others only`  = "#2196F3",
+                               `pooled_sites only` = "#FF9800")) +
+  scale_y_continuous(labels = comma, expand = expansion(mult = c(0, 0.15))) +
+  labs(x = "Cutoff", y = "Number of sites", fill = NULL) +
+  theme_bw(base_size = 11) +
+  theme(axis.text.x = element_text(angle = 20, hjust = 1),
+        legend.position = "top")
+```
+
+Two recovery metrics tracked across cutoffs. The blue line shows what fraction of published pU sites are recovered in our pooled calls (sensitivity relative to the published set). The orange line shows what fraction of our pooled calls overlap the published set (precision relative to the published set). Ideally both lines increase or stay stable as cutoffs tighten.
+
+```{r overlap-pct, fig.height=5, fig.cap="Overlap percentages across cutoffs. Blue = % of published sites found in pooled calls; orange = % of pooled calls found in published sites."}
+summary_df %>%
+  select(cutoff,
+         `% published\nrecovered`     = pct_others_in_pooled,
+         `% pooled\nin published`     = pct_pooled_in_others) %>%
+  pivot_longer(cols = starts_with("%"), names_to = "metric", values_to = "pct") %>%
+  mutate(cutoff = factor(cutoff, levels = cutoffs$label)) %>%
+  ggplot(aes(x = cutoff, y = pct, color = metric, group = metric)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 3) +
+  geom_text(aes(label = paste0(pct, "%")),
+            vjust = -0.8, size = 3, show.legend = FALSE) +
+  scale_color_manual(values = c("#2196F3", "#FF9800")) +
+  scale_y_continuous(limits = c(0, 100), labels = function(x) paste0(x, "%")) +
+  labs(x = "Cutoff", y = "Percentage", color = NULL) +
+  theme_bw(base_size = 11) +
+  theme(axis.text.x = element_text(angle = 20, hjust = 1),
+        legend.position = "top")
+```
+
+
+Stacked bar charts showing the per-chromosome breakdown of site categories at each cutoff. This reveals whether overlap is uniformly distributed across the genome or concentrated on specific chromosomes, which could indicate chromosome-specific biases in either dataset.
+
+```{r overlap-chrom, fig.height=10, fig.cap="Per-chromosome site overlap at each cutoff combination. Green = both datasets; blue = published only; orange = pooled only."}
+overlap_all %>%
+  count(cutoff, ref, category) %>%
+  mutate(ref    = factor(ref, levels = as.character(1:22)),
+         cutoff = factor(cutoff, levels = cutoffs$label)) %>%
+  ggplot(aes(x = ref, y = n, fill = category)) +
+  geom_col(position = "stack", width = 0.8) +
+  scale_fill_manual(values = c(Both               = "#4CAF50",
+                               `data_others only`  = "#2196F3",
+                               `pooled_sites only` = "#FF9800")) +
+  scale_y_continuous(labels = comma) +
+  facet_wrap(~cutoff, ncol = 2, scales = "free_y") +
+  labs(x = "Chromosome", y = "Number of sites", fill = NULL) +
+  theme_bw(base_size = 11) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+        legend.position = "top")
+```
+
+
+Venn diagrams showing raw overlap counts for each cutoff. The numbers inside each circle region show: left circle only = published sites not in our calls; right circle only = our pooled calls not in the published set; intersection = sites present in both.
+
+```{r overlap-venn, fig.height=10, fig.cap=" Venn diagrams of site overlap between published pU sites and pooled calls at each cutoff."}
+
+
+venn_plots <- map(seq_len(nrow(cutoffs)), function(i) {
+  d   <- cutoffs$min_depth[i]
+  r   <- cutoffs$min_ratio[i]
+  lab <- cutoffs$label[i]
+
+  pk <- pooled_sites %>%
+    filter(depth >= d, ratio >= r) %>%
+    mutate(key = paste(as.integer(ref), pos, sep = "_")) %>%
+    pull(key) %>% unique()
+
+  ggvenn(list(`Published (PMID 39349603)` = others_keys,
+              `Pooled calls`              = pk),
+         fill_color    = c("#2196F3", "#FF9800"),
+         stroke_size   = 0.4,
+         set_name_size = 3.2,
+         text_size     = 3.5) +
+    labs(title = lab) +
+    theme(plot.title = element_text(size = 10, hjust = 0.5))
+})
+
+wrap_plots(venn_plots, ncol = 2)
+
+
+```
+
+
+
+
+# Comparison with Published pU Sites (PMID 36997645)
+
+
+```{r overlap2-settings}
+DATA_OTHERS2_PATH <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID36997645.xlsx" 
+
+cutoffs2 <- expand.grid(min_depth = c(10, 20),
+                        min_ratio = c(0.1, 0.2)) %>%
+  mutate(label = paste0("depth≥", min_depth, ", ratio≥", min_ratio))
+```
+
+Position information is extracted from `chr_site`: the chromosome number is taken from after `chr`, the start position from after `_`, and the end position from after `-` (for range sites). Single-position sites have `pos_start == pos_end`.
+
+```{r overlap2-load, warning=FALSE, message=FALSE}
+data_others2 <- readxl::read_excel(DATA_OTHERS2_PATH, sheet = 2)
+
+colnames(data_others2) <- data_others2[2,]
+data_others2  <- data_others2[-c(1:2),]
+
+DT::datatable(data_others2,caption = htmltools::tags$caption( style = 'caption-side: left; text-align: left; color:black;  font-size:150% ;','pU sites from PMID36997645'),options = list(pageLength = 10) )
+
+# columns expected: chr_name, site, rep1_total_counts, rep1_deletion_counts,
+# rep1_deletion_ratio, rep1_p_value, rep2_total_counts, rep2_deletion_counts,
+# rep2_deletion_ratio, rep2_p_value, ctrl_total_counts, ctrl_deletion_counts,
+# ctrl_deletion_ratio, gene_name, chr_site
+# chr_site format: chr14_73219165-73219168 (range) or chr17_80104560 (single)
+
+data_others2_clean <- data_others2 %>%
+  mutate(
+    ref       = as.integer(str_extract(chr_site, "(?<=chr)\\d+")),
+    pos_start = as.integer(str_extract(chr_site, "(?<=_)\\d+")),
+    pos_end   = as.integer(coalesce(
+                  str_extract(chr_site, "(?<=-)(\\d+)$"),
+                  as.character(as.integer(str_extract(chr_site, "(?<=_)\\d+")))
+                )),
+    is_range  = pos_start != pos_end
+  ) %>%
+  filter(!is.na(ref), !is.na(pos_start))
+
+cat("Published pU sites (total rows) :", nrow(data_others2_clean), "\n")
+cat("Single-position sites            :", sum(!data_others2_clean$is_range), "\n")
+cat("Range sites                      :", sum( data_others2_clean$is_range), "\n")
+```
+
+## Compute overlap across cutoffs
+
+For each cutoff, every pooled site is tested against all published intervals on the same chromosome. A pooled site overlaps a published entry if its position falls within `[pos_start, pos_end]`. Conversely, a published entry is counted as overlapping if at least one pooled site falls within its interval.
+
+```{r overlap2-compute}
+find_overlap2 <- function(pooled_clean) {
+
+  # for each pooled site: does it fall within any published interval?
+  pooled_with_overlap <- pooled_clean %>%
+    mutate(
+      in_others = map2_lgl(ref, pos, function(r, p) {
+        any(data_others2_clean$ref == r &
+            data_others2_clean$pos_start <= p &
+            data_others2_clean$pos_end   >= p)
+      })
+    )
+
+  # for each published interval: does any pooled site fall within it?
+  others_with_overlap <- data_others2_clean %>%
+    mutate(
+      in_pooled = pmap_lgl(list(ref, pos_start, pos_end), function(r, s, e) {
+        any(pooled_clean$ref == r &
+            pooled_clean$pos >= s &
+            pooled_clean$pos <= e)
+      })
+    )
+
+  list(pooled = pooled_with_overlap,
+       others = others_with_overlap)
+}
+
+results2 <- map(seq_len(nrow(cutoffs2)), function(i) {
+
+  d   <- cutoffs2$min_depth[i]
+  r   <- cutoffs2$min_ratio[i]
+  lab <- cutoffs2$label[i]
+
+  pooled_clean <- pooled_sites %>%
+    filter(depth >= d, ratio >= r) %>%
+    mutate(ref = as.integer(ref))
+
+  ov <- find_overlap2(pooled_clean)
+
+  list(
+    label          = lab,
+    min_depth      = d,
+    min_ratio      = r,
+    pooled         = ov$pooled,
+    others         = ov$others,
+    n_pooled       = nrow(pooled_clean),
+    n_others       = nrow(data_others2_clean),
+    n_pooled_in_ov = sum(ov$pooled$in_others),
+    n_others_in_ov = sum(ov$others$in_pooled)
+  )
+})
+names(results2) <- cutoffs2$label
+```
+
+
+```{r overlap2-summary-table}
+summary_df2 <- map_dfr(results2, function(x) {
+  data.frame(
+    cutoff               = x$label,
+    min_depth            = x$min_depth,
+    min_ratio            = x$min_ratio,
+    n_pooled             = x$n_pooled,
+    n_others             = x$n_others,
+    n_overlap_in_pooled  = x$n_pooled_in_ov,
+    n_overlap_in_others  = x$n_others_in_ov,
+    pct_pooled_in_others = round(x$n_pooled_in_ov / x$n_pooled * 100, 1),
+    pct_others_in_pooled = round(x$n_others_in_ov / x$n_others * 100, 1)
+  )
+})
+
+summary_df2 %>%
+  kable(
+    col.names = c("Cutoff", "Min depth", "Min ratio",
+                  "N pooled", "N published",
+                  "N pooled overlapping", "N published overlapping",
+                  "% pooled\nin published", "% published\nin pooled"),
+    format.args = list(big.mark = ","),
+    caption = "Overlap summary: pooled pU calls vs range-based published sites across cutoffs."
+  ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE)
+```
+
+Absolute site counts split by overlap category for each cutoff. Green = present in both datasets; blue = published only; orange = our pooled calls only.
+
+```{r overlap2-bar, fig.height=5, fig.cap="Site counts by overlap category (range-based published set) across depth and ratio cutoffs."}
+
+map_dfr(results2, function(x) {
+  bind_rows(
+    data.frame(category = "published overlapping", n = x$n_others_in_ov,               cutoff = x$label),
+    data.frame(category = "published only",        n = x$n_others - x$n_others_in_ov,  cutoff = x$label),
+    data.frame(category = "pooled only",           n = x$n_pooled - x$n_pooled_in_ov,  cutoff = x$label)
+  )
+}) %>%
+  mutate(
+    cutoff   = factor(cutoff, levels = cutoffs2$label),
+    category = factor(category,
+                      levels = c("published overlapping", "published only", "pooled only"))
+  ) %>%
+  ggplot(aes(x = cutoff, y = n, fill = category)) +
+  geom_col(position = "dodge", width = 0.7) +
+  geom_text(aes(label = comma(n)),
+            position = position_dodge(width = 0.7),
+            vjust = -0.4, size = 3) +
+  scale_fill_manual(values = c(`published overlapping` = "#4CAF50",
+                               `published only`         = "#2196F3",
+                               `pooled only`            = "#FF9800")) +
+  scale_y_continuous(labels = comma, expand = expansion(mult = c(0, 0.15))) +
+  labs(x = "Cutoff", y = "Number of sites", fill = NULL) +
+  theme_bw(base_size = 11) +
+  theme(axis.text.x = element_text(angle = 20, hjust = 1),
+        legend.position = "top")
+
+
+# bar_df2 <- map_dfr(results2, function(x) {
+#   bind_rows(
+#     data.frame(category = "In published",     n = x$n_others_in_ov,               cutoff = x$label),
+#     data.frame(category = "Not in published",  n = x$n_others - x$n_others_in_ov,  cutoff = x$label),
+#     data.frame(category = "Pooled in published", n = x$n_pooled_in_ov,             cutoff = x$label),
+#     data.frame(category = "Pooled not in published", n = x$n_pooled - x$n_pooled_in_ov, cutoff = x$label)
+#   )
+# })
+# 
+# # two-panel bar: one for published perspective, one for pooled perspective
+# p_bar2a <- map_dfr(results2, function(x) {
+#   data.frame(
+#     cutoff   = x$label,
+#     group    = c("Overlapping", "Not overlapping"),
+#     n        = c(x$n_others_in_ov, x$n_others - x$n_others_in_ov),
+#     pct      = round(c(x$n_others_in_ov, x$n_others - x$n_others_in_ov) /
+#                        x$n_others * 100, 1)
+#   )
+# }) %>%
+#   mutate(cutoff = factor(cutoff, levels = cutoffs2$label),
+#          group  = factor(group, levels = c("Overlapping", "Not overlapping"))) %>%
+#   ggplot(aes(x = cutoff, y = n, fill = group)) +
+#   geom_col(position = "dodge", width = 0.6) +
+#   geom_text(aes(label = paste0(comma(n), "\n(", pct, "%)")),
+#             position = position_dodge(width = 0.6),
+#             vjust = -0.3, size = 2.8) +
+#   scale_fill_manual(values = c(Overlapping = "#4CAF50", `Not overlapping` = "#2196F3")) +
+#   scale_y_continuous(labels = comma, expand = expansion(mult = c(0, 0.2))) +
+#   labs(title = "Published sites: overlap with pooled calls",
+#        x = "Cutoff", y = "N published sites", fill = NULL) +
+#   theme_bw(base_size = 11) +
+#   theme(axis.text.x = element_text(angle = 20, hjust = 1), legend.position = "top")
+# 
+# p_bar2b <- map_dfr(results2, function(x) {
+#   data.frame(
+#     cutoff = x$label,
+#     group  = c("Overlapping", "Not overlapping"),
+#     n      = c(x$n_pooled_in_ov, x$n_pooled - x$n_pooled_in_ov),
+#     pct    = round(c(x$n_pooled_in_ov, x$n_pooled - x$n_pooled_in_ov) /
+#                      x$n_pooled * 100, 1)
+#   )
+# }) %>%
+#   mutate(cutoff = factor(cutoff, levels = cutoffs2$label),
+#          group  = factor(group, levels = c("Overlapping", "Not overlapping"))) %>%
+#   ggplot(aes(x = cutoff, y = n, fill = group)) +
+#   geom_col(position = "dodge", width = 0.6) +
+#   geom_text(aes(label = paste0(comma(n), "\n(", pct, "%)")),
+#             position = position_dodge(width = 0.6),
+#             vjust = -0.3, size = 2.8) +
+#   scale_fill_manual(values = c(Overlapping = "#4CAF50", `Not overlapping` = "#FF9800")) +
+#   scale_y_continuous(labels = comma, expand = expansion(mult = c(0, 0.2))) +
+#   labs(title = "Pooled calls: overlap with published sites",
+#        x = "Cutoff", y = "N pooled sites", fill = NULL) +
+#   theme_bw(base_size = 11) +
+#   theme(axis.text.x = element_text(angle = 20, hjust = 1), legend.position = "top")
+# 
+# p_bar2a / p_bar2b
+```
+
+Two recovery metrics tracked across cutoffs. The blue line shows what fraction of published pU sites contain at least one pooled call within their interval. The orange line shows what fraction of pooled calls fall within a published interval.
+
+```{r overlap2-pct, fig.height=5, fig.cap="Overlap percentages across cutoffs (range-based). Blue = % of published intervals hit by a pooled call; orange = % of pooled calls falling within a published interval."}
+summary_df2 %>%
+  select(cutoff,
+         `% published\nrecovered`  = pct_others_in_pooled,
+         `% pooled\nin published`  = pct_pooled_in_others) %>%
+  pivot_longer(-cutoff, names_to = "metric", values_to = "pct") %>%
+  mutate(cutoff = factor(cutoff, levels = cutoffs2$label)) %>%
+  ggplot(aes(x = cutoff, y = pct, color = metric, group = metric)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 3) +
+  geom_text(aes(label = paste0(pct, "%")),
+            vjust = -0.8, size = 3, show.legend = FALSE) +
+  scale_color_manual(values = c("#2196F3", "#FF9800")) +
+  scale_y_continuous(limits = c(0, 100), labels = function(x) paste0(x, "%")) +
+  labs(x = "Cutoff", y = "Percentage", color = NULL) +
+  theme_bw(base_size = 11) +
+  theme(axis.text.x = element_text(angle = 20, hjust = 1),
+        legend.position = "top")
+```
+
+Per-chromosome breakdown: for each chromosome, the number of published intervals hit by at least one pooled call vs not hit, faceted by cutoff.
+
+```{r overlap2-chrom, fig.height=10, fig.cap="Per-chromosome published site overlap at each cutoff. Green = interval contains a pooled call; blue = no pooled call within interval."}
+map_dfr(results2, function(x) {
+  x$others %>%
+    count(ref, in_pooled) %>%
+    mutate(cutoff = x$label)
+}) %>%
+  mutate(
+    ref    = factor(ref, levels = as.character(1:22)),
+    cutoff = factor(cutoff, levels = cutoffs2$label),
+    group  = ifelse(in_pooled, "Has pooled call", "No pooled call")
+  ) %>%
+  ggplot(aes(x = ref, y = n, fill = group)) +
+  geom_col(position = "stack", width = 0.8) +
+  scale_fill_manual(values = c(`Has pooled call` = "#4CAF50",
+                               `No pooled call`  = "#2196F3")) +
+  scale_y_continuous(labels = comma) +
+  facet_wrap(~cutoff, ncol = 2, scales = "free_y") +
+  labs(x = "Chromosome", y = "Number of published sites", fill = NULL) +
+  theme_bw(base_size = 11) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+        legend.position = "top")
+```
+
+For overlapping sites, the scatter compares our pooled C/(C+T) ratio against the published rep1 deletion ratio. Points on the diagonal indicate concordant quantitative signal between the two experiments.
+
+```{r overlap2-scatter, fig.height=10, fig.cap="Overlapping sites: pooled C/(C+T) ratio vs rep1 deletion ratio. Each panel corresponds to one cutoff combination."}
+scatter2 <- map_dfr(results2, function(x) {
+  x$pooled %>%
+    filter(in_others) %>%
+    mutate(ref = as.integer(ref)) %>%
+    inner_join(
+      data_others2_clean %>%
+        mutate(deletion_ratio = as.numeric(rep1_deletion_ratio)) %>%
+        select(ref, pos_start, pos_end, deletion_ratio, gene_name),
+      by = join_by(ref, between(pos, pos_start, pos_end))
+    ) %>%
+    group_by(ref, pos) %>%
+    slice_max(deletion_ratio, n = 1, with_ties = FALSE) %>%
+    ungroup() %>%
+    mutate(cutoff = x$label)
+})
+
+scatter2 %>%
+  mutate(cutoff = factor(cutoff, levels = cutoffs2$label)) %>%
+  ggplot(aes(x = deletion_ratio, y = ratio)) +
+  geom_point(alpha = 0.4, size = 0.8, color = "#4CAF50") +
+  geom_abline(slope = 1, intercept = 0, color = "grey50", linetype = "dashed") +
+  geom_smooth(method = "lm", color = "#E53935", linewidth = 0.8, se = TRUE) +
+  scale_x_continuous(limits = c(0, 1)) +
+  scale_y_continuous(limits = c(0, 1)) +
+  facet_wrap(~cutoff, ncol = 2) +
+  labs(x = "Rep1 deletion ratio (published)",
+       y = "Pooled C/(C+T) ratio") +
+  theme_bw(base_size = 11)
 ```
 
 ---
