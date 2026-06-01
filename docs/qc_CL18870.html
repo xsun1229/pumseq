@@ -547,15 +547,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree061fcf85852cc687aded12e195edbcc2fcbc3311targetblank061fcf8a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree170742767e0b428f6407d14081ecef50e0aa8052targetblank1707427a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/061fcf85852cc687aded12e195edbcc2fcbc3311" target="_blank">061fcf8</a>
+<a href="https://github.com/xsun1229/pumseq/tree/170742767e0b428f6407d14081ecef50e0aa8052" target="_blank">1707427</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree061fcf85852cc687aded12e195edbcc2fcbc3311targetblank061fcf8a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree170742767e0b428f6407d14081ecef50e0aa8052targetblank1707427a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -565,7 +565,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/061fcf85852cc687aded12e195edbcc2fcbc3311" target="_blank">061fcf8</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/170742767e0b428f6407d14081ecef50e0aa8052" target="_blank">1707427</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -626,6 +626,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/170742767e0b428f6407d14081ecef50e0aa8052/analysis/qc_CL18870.Rmd" target="_blank">1707427</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-01
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/170742767e0b428f6407d14081ecef50e0aa8052/docs/qc_CL18870.html" target="_blank">1707427</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-01
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1156,7 +1190,7 @@ depth AND high ratio) are the most stringent; cells at the bottom-left
 (low depth, any ratio) are the most permissive.</p>
 <p><strong>What to look for:</strong> - Consistent patterns across
 samples indicate reproducible signal. - A ratio cutoff of ~0.1 and depth
-≥ 20 are the default cutoffs from Yanming’s pipeline.</p>
+&gt;= 20 are the default cutoffs from Yanming’s pipeline.</p>
 <div id="per-sample-sensitivity-analysis" class="section level2">
 <h2>Per-sample sensitivity analysis</h2>
 <pre class="r"><code>cutoff_all &lt;- map_dfr(all_samples, function(samp) {
@@ -1237,8 +1271,8 @@ pooled into a single set and the same depth × ratio cutoff grid is
 applied.</p>
 <p><strong>What to look for:</strong></p>
 <ul>
-<li>The pooled count will always be ≥ the largest single-sample count,
-since different samples may cover different sites.</li>
+<li>The pooled count will always be &gt;= the largest single-sample
+count, since different samples may cover different sites.</li>
 <li>If the pooled count is much larger than any individual sample,
 samples are capturing largely non-overlapping sites — possibly due to
 different transcript coverage or biological replicates.</li>
@@ -2065,7 +2099,7 @@ Median
   ) %&gt;%
   kable(
     col.names = c(&quot;Sample&quot;, &quot;Mean ratio&quot;, &quot;Median ratio&quot;,
-                  &quot;% ≥ 0.05&quot;, &quot;% ≥ 0.10&quot;, &quot;% ≥ 0.20&quot;),
+                  &quot;% &gt;= 0.05&quot;, &quot;% &gt;= 0.10&quot;, &quot;% &gt;= 0.20&quot;),
     caption = &quot;C/(C+T) ratio summary for post-filter treated sites.&quot;
   ) %&gt;%
   kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;),
@@ -2086,13 +2120,13 @@ Mean ratio
 Median ratio
 </th>
 <th style="text-align:right;">
-% &lt;U+2265&gt; 0.05
+% &gt;= 0.05
 </th>
 <th style="text-align:right;">
-% &lt;U+2265&gt; 0.10
+% &gt;= 0.10
 </th>
 <th style="text-align:right;">
-% &lt;U+2265&gt; 0.20
+% &gt;= 0.20
 </th>
 </tr>
 </thead>
@@ -2181,10 +2215,10 @@ CL18870_12-187-098
 </table>
 </div>
 <div id="ratio-distribution-0.05" class="section level2">
-<h2>Ratio distribution (≥ 0.05)</h2>
+<h2>Ratio distribution (&gt;= 0.05)</h2>
 <p>Figure below shows the distribution of C/(C+T) ratios
-<strong>restricted to sites with ratio ≥ 0.05</strong>. Sites with ratio
-= 0 are excluded here to focus on the informative part of the
+<strong>restricted to sites with ratio &gt;= 0.05</strong>. Sites with
+ratio = 0 are excluded here to focus on the informative part of the
 distribution.</p>
 <p><strong>What to look for:</strong> - A right-skewed distribution with
 a peak near low positive values is typical: most sites have modest
@@ -2199,12 +2233,12 @@ efficiency.</p>
   facet_wrap(~sample_id, ncol = 2, scales = &quot;free_y&quot;) +
   labs(x = &quot;C/(C+T) ratio (treated)&quot;, y = &quot;Number of sites&quot;)</code></pre>
 <div class="figure" style="text-align: center">
-<img src="figure/qc_CL18870.Rmd/plot5-ratio-dist-1.png" alt=" Distribution of C/(C+T) ratios in treated samples, restricted to sites with ratio &lt;U+2265&gt; 0.05. Sites with ratio = 0 are omitted to focus on positions showing evidence of CMC-induced misincorporation. A higher ratio indicates stronger modification signal at that position." width="672" />
+<img src="figure/qc_CL18870.Rmd/plot5-ratio-dist-1.png" alt=" Distribution of C/(C+T) ratios in treated samples, restricted to sites with ratio &gt;= 0.05. Sites with ratio = 0 are omitted to focus on positions showing evidence of CMC-induced misincorporation. A higher ratio indicates stronger modification signal at that position." width="672" />
 <p class="caption">
 Distribution of C/(C+T) ratios in treated samples, restricted to sites
-with ratio &lt;U+2265&gt; 0.05. Sites with ratio = 0 are omitted to
-focus on positions showing evidence of CMC-induced misincorporation. A
-higher ratio indicates stronger modification signal at that position.
+with ratio &gt;= 0.05. Sites with ratio = 0 are omitted to focus on
+positions showing evidence of CMC-induced misincorporation. A higher
+ratio indicates stronger modification signal at that position.
 </p>
 </div>
 <p>
@@ -2360,7 +2394,7 @@ consideration) across four combinations of depth and ratio cutoffs.</p>
 # cutoff grid to compare
 cutoffs &lt;- expand.grid(min_depth = c(10, 20),
                        min_ratio = c(0.1, 0.2)) %&gt;%
-  mutate(label = paste0(&quot;depth≥&quot;, min_depth, &quot;, ratio≥&quot;, min_ratio))</code></pre>
+  mutate(label = paste0(&quot;depth&gt;=&quot;, min_depth, &quot;, ratio&gt;=&quot;, min_ratio))</code></pre>
 <pre class="r"><code>data_others &lt;- readxl::read_excel(DATA_OTHERS_PATH, sheet = 6)
 colnames(data_others) &lt;- data_others[2, ]
 data_others &lt;- data_others[-c(1:2), ]
@@ -2484,7 +2518,7 @@ N published only
 <tbody>
 <tr>
 <td style="text-align:left;">
-depth&lt;U+2265&gt;10, ratio&lt;U+2265&gt;0.1
+depth&gt;=10, ratio&gt;=0.1
 </td>
 <td style="text-align:right;">
 10
@@ -2516,7 +2550,7 @@ depth&lt;U+2265&gt;10, ratio&lt;U+2265&gt;0.1
 </tr>
 <tr>
 <td style="text-align:left;">
-depth&lt;U+2265&gt;10, ratio&lt;U+2265&gt;0.2
+depth&gt;=10, ratio&gt;=0.2
 </td>
 <td style="text-align:right;">
 10
@@ -2548,7 +2582,7 @@ depth&lt;U+2265&gt;10, ratio&lt;U+2265&gt;0.2
 </tr>
 <tr>
 <td style="text-align:left;">
-depth&lt;U+2265&gt;20, ratio&lt;U+2265&gt;0.1
+depth&gt;=20, ratio&gt;=0.1
 </td>
 <td style="text-align:right;">
 20
@@ -2580,7 +2614,7 @@ depth&lt;U+2265&gt;20, ratio&lt;U+2265&gt;0.1
 </tr>
 <tr>
 <td style="text-align:left;">
-depth&lt;U+2265&gt;20, ratio&lt;U+2265&gt;0.2
+depth&gt;=20, ratio&gt;=0.2
 </td>
 <td style="text-align:right;">
 20
@@ -2639,6 +2673,43 @@ calls only.</p>
 Site counts by overlap category across depth and ratio cutoffs.
 </p>
 </div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-overlap-bar-1">
+Past versions of overlap-bar-1.png
+</button>
+</p>
+<div id="fig-overlap-bar-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/170742767e0b428f6407d14081ecef50e0aa8052/docs/figure/qc_CL18870.Rmd/overlap-bar-1.png" target="_blank">1707427</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Two recovery metrics tracked across cutoffs. The blue line shows what
 fraction of published pU sites are recovered in our pooled calls
 (sensitivity relative to the published set). The orange line shows what
@@ -2669,6 +2740,43 @@ Overlap percentages across cutoffs. Blue = % of published sites found in
 pooled calls; orange = % of pooled calls found in published sites.
 </p>
 </div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-overlap-pct-1">
+Past versions of overlap-pct-1.png
+</button>
+</p>
+<div id="fig-overlap-pct-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/170742767e0b428f6407d14081ecef50e0aa8052/docs/figure/qc_CL18870.Rmd/overlap-pct-1.png" target="_blank">1707427</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Stacked bar charts showing the per-chromosome breakdown of site
 categories at each cutoff. This reveals whether overlap is uniformly
 distributed across the genome or concentrated on specific chromosomes,
@@ -2694,6 +2802,43 @@ which could indicate chromosome-specific biases in either dataset.</p>
 Per-chromosome site overlap at each cutoff combination. Green = both
 datasets; blue = published only; orange = pooled only.
 </p>
+</div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-overlap-chrom-1">
+Past versions of overlap-chrom-1.png
+</button>
+</p>
+<div id="fig-overlap-chrom-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/170742767e0b428f6407d14081ecef50e0aa8052/docs/figure/qc_CL18870.Rmd/overlap-chrom-1.png" target="_blank">1707427</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <p>Venn diagrams showing raw overlap counts for each cutoff. The numbers
 inside each circle region show: left circle only = published sites not
@@ -2733,6 +2878,43 @@ Venn diagrams of site overlap between published pU sites and pooled
 calls at each cutoff.
 </p>
 </div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-overlap-venn-1">
+Past versions of overlap-venn-1.png
+</button>
+</p>
+<div id="fig-overlap-venn-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/170742767e0b428f6407d14081ecef50e0aa8052/docs/figure/qc_CL18870.Rmd/overlap-venn-1.png" target="_blank">1707427</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="comparison-with-published-pu-sites-pmid-36997645"
@@ -2742,7 +2924,7 @@ class="section level1">
 
 cutoffs2 &lt;- expand.grid(min_depth = c(10, 20),
                         min_ratio = c(0.1, 0.2)) %&gt;%
-  mutate(label = paste0(&quot;depth≥&quot;, min_depth, &quot;, ratio≥&quot;, min_ratio))</code></pre>
+  mutate(label = paste0(&quot;depth&gt;=&quot;, min_depth, &quot;, ratio&gt;=&quot;, min_ratio))</code></pre>
 <p>Position information is extracted from <code>chr_site</code>: the
 chromosome number is taken from after <code>chr</code>, the start
 position from after <code>_</code>, and the end position from after
@@ -2902,7 +3084,7 @@ N published overlapping
 <tbody>
 <tr>
 <td style="text-align:left;">
-depth&lt;U+2265&gt;10, ratio&lt;U+2265&gt;0.1
+depth&gt;=10, ratio&gt;=0.1
 </td>
 <td style="text-align:right;">
 10
@@ -2931,7 +3113,7 @@ depth&lt;U+2265&gt;10, ratio&lt;U+2265&gt;0.1
 </tr>
 <tr>
 <td style="text-align:left;">
-depth&lt;U+2265&gt;20, ratio&lt;U+2265&gt;0.1
+depth&gt;=20, ratio&gt;=0.1
 </td>
 <td style="text-align:right;">
 20
@@ -2960,7 +3142,7 @@ depth&lt;U+2265&gt;20, ratio&lt;U+2265&gt;0.1
 </tr>
 <tr>
 <td style="text-align:left;">
-depth&lt;U+2265&gt;10, ratio&lt;U+2265&gt;0.2
+depth&gt;=10, ratio&gt;=0.2
 </td>
 <td style="text-align:right;">
 10
@@ -2989,7 +3171,7 @@ depth&lt;U+2265&gt;10, ratio&lt;U+2265&gt;0.2
 </tr>
 <tr>
 <td style="text-align:left;">
-depth&lt;U+2265&gt;20, ratio&lt;U+2265&gt;0.2
+depth&gt;=20, ratio&gt;=0.2
 </td>
 <td style="text-align:right;">
 20
@@ -3052,6 +3234,43 @@ calls only.</p>
 Site counts by overlap category (range-based published set) across depth
 and ratio cutoffs.
 </p>
+</div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-overlap2-bar-1">
+Past versions of overlap2-bar-1.png
+</button>
+</p>
+<div id="fig-overlap2-bar-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/170742767e0b428f6407d14081ecef50e0aa8052/docs/figure/qc_CL18870.Rmd/overlap2-bar-1.png" target="_blank">1707427</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <pre class="r"><code># bar_df2 &lt;- map_dfr(results2, function(x) {
 #   bind_rows(
@@ -3139,6 +3358,43 @@ intervals hit by a pooled call; orange = % of pooled calls falling
 within a published interval.
 </p>
 </div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-overlap2-pct-1">
+Past versions of overlap2-pct-1.png
+</button>
+</p>
+<div id="fig-overlap2-pct-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/170742767e0b428f6407d14081ecef50e0aa8052/docs/figure/qc_CL18870.Rmd/overlap2-pct-1.png" target="_blank">1707427</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Per-chromosome breakdown: for each chromosome, the number of
 published intervals hit by at least one pooled call vs not hit, faceted
 by cutoff.</p>
@@ -3168,6 +3424,43 @@ by cutoff.</p>
 Per-chromosome published site overlap at each cutoff. Green = interval
 contains a pooled call; blue = no pooled call within interval.
 </p>
+</div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-overlap2-chrom-1">
+Past versions of overlap2-chrom-1.png
+</button>
+</p>
+<div id="fig-overlap2-chrom-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/170742767e0b428f6407d14081ecef50e0aa8052/docs/figure/qc_CL18870.Rmd/overlap2-chrom-1.png" target="_blank">1707427</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <p>For overlapping sites, the scatter compares our pooled C/(C+T) ratio
 against the published rep1 deletion ratio. Points on the diagonal
@@ -3207,6 +3500,43 @@ scatter2 %&gt;%
 Overlapping sites: pooled C/(C+T) ratio vs rep1 deletion ratio. Each
 panel corresponds to one cutoff combination.
 </p>
+</div>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-overlap2-scatter-1">
+Past versions of overlap2-scatter-1.png
+</button>
+</p>
+<div id="fig-overlap2-scatter-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/170742767e0b428f6407d14081ecef50e0aa8052/docs/figure/qc_CL18870.Rmd/overlap2-scatter-1.png" target="_blank">1707427</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <hr />
 <br>

@@ -219,7 +219,7 @@ The figure below shows a heatmap for each sample where each cell reports the abs
 
 **What to look for:**
 - Consistent patterns across samples indicate reproducible signal.
-- A ratio cutoff of ~0.1 and depth ≥ 20 are the default cutoffs from Yanming's pipeline.
+- A ratio cutoff of ~0.1 and depth >= 20 are the default cutoffs from Yanming's pipeline.
 
 ## Per-sample sensitivity analysis
 
@@ -255,7 +255,7 @@ In addition to per-sample cutoffs, it is useful to examine how many **unique gen
 
 **What to look for:**
 
-- The pooled count will always be ≥ the largest single-sample count, since different samples may cover different sites.
+- The pooled count will always be >= the largest single-sample count, since different samples may cover different sites.
 - If the pooled count is much larger than any individual sample, samples are capturing largely non-overlapping sites — possibly due to different transcript coverage or biological replicates.
 - If pooled ≈ single-sample counts, samples are highly concordant in which sites they detect.
 
@@ -400,22 +400,22 @@ all_filter %>%
   ) %>%
   kable(
     col.names = c("Sample", "Mean ratio", "Median ratio",
-                  "% ≥ 0.05", "% ≥ 0.10", "% ≥ 0.20"),
+                  "% >= 0.05", "% >= 0.10", "% >= 0.20"),
     caption = "C/(C+T) ratio summary for post-filter treated sites."
   ) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
                 full_width = FALSE)
 ```
 
-## Ratio distribution (≥ 0.05)
+## Ratio distribution (>= 0.05)
 
-Figure below shows the distribution of C/(C+T) ratios **restricted to sites with ratio ≥ 0.05**. Sites with ratio = 0 are excluded here to focus on the informative part of the distribution.
+Figure below shows the distribution of C/(C+T) ratios **restricted to sites with ratio >= 0.05**. Sites with ratio = 0 are excluded here to focus on the informative part of the distribution.
 
 **What to look for:**
 - A right-skewed distribution with a peak near low positive values is typical: most sites have modest conversion rates.
 - Large differences in the ratio distribution between samples could indicate technical variability in CMC treatment efficiency.
 
-```{r plot5-ratio-dist, fig.height=pdf_h, fig.cap=" Distribution of C/(C+T) ratios in treated samples, restricted to sites with ratio ≥ 0.05. Sites with ratio = 0 are omitted to focus on positions showing evidence of CMC-induced misincorporation. A higher ratio indicates stronger modification signal at that position."}
+```{r plot5-ratio-dist, fig.height=pdf_h, fig.cap=" Distribution of C/(C+T) ratios in treated samples, restricted to sites with ratio >= 0.05. Sites with ratio = 0 are omitted to focus on positions showing evidence of CMC-induced misincorporation. A higher ratio indicates stronger modification signal at that position."}
 all_filter %>%
   filter(sample_id %in% all_samples, !is.na(ratio), ratio >= 0.05) %>%
   ggplot(aes(x = ratio)) +
@@ -460,7 +460,7 @@ DATA_OTHERS_PATH <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID39349603.xls
 # cutoff grid to compare
 cutoffs <- expand.grid(min_depth = c(10, 20),
                        min_ratio = c(0.1, 0.2)) %>%
-  mutate(label = paste0("depth≥", min_depth, ", ratio≥", min_ratio))
+  mutate(label = paste0("depth>=", min_depth, ", ratio>=", min_ratio))
 ```
 
 ```{r overlap-load, warning=F,message=F}
@@ -658,7 +658,7 @@ DATA_OTHERS2_PATH <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID36997645.xl
 
 cutoffs2 <- expand.grid(min_depth = c(10, 20),
                         min_ratio = c(0.1, 0.2)) %>%
-  mutate(label = paste0("depth≥", min_depth, ", ratio≥", min_ratio))
+  mutate(label = paste0("depth>=", min_depth, ", ratio>=", min_ratio))
 ```
 
 Position information is extracted from `chr_site`: the chromosome number is taken from after `chr`, the start position from after `_`, and the end position from after `-` (for range sites). Single-position sites have `pos_start == pos_end`.
