@@ -1,5 +1,5 @@
 ---
-title: "Pipeline-testing: quality control for CL18870"
+title: "Pipeline-testing: quality control for CL18909"
 author: "XSun"
 date: "2026-06-01"
 output:
@@ -30,32 +30,34 @@ There are 4 treated samples and 2 input samples in this cell line. We pooled the
 
 ---
 
-```{r message=FALSE, warning=F}
+# Setup
 
+```{r setup-libraries, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(data.table)
 library(scales)
 library(knitr)
 library(kableExtra)
-
 library(ggvenn)
 library(ggplot2)
 library(patchwork)
-
-library(ggvenn)
-
 library(DT)
-library(dplyr)
+```
 
+```{r setup-paths}
 base_dir  <- "/project2/xinhe/xsun/pumseq_pipeline/PUM-CL18909"
 MPILE_DIR <- file.path(base_dir, "mpile")
 OUT_DIR   <- file.path(base_dir, "out")
 mrna_QC_DIR    <- file.path(base_dir, "pp_QC")
 nc_QC_DIR      <- file.path(base_dir, "pp_QC_ncRNA")
+```
 
+```{r setup-constants}
 DEPTH_CUTOFFS <- c(1, 5, 10, 20, 50)
 RATIO_CUTOFFS <- c(0.0, 0.05, 0.1, 0.2)
+```
 
+```{r setup-data-loading}
 count_df        <- readRDS(file.path(mrna_QC_DIR, "QC_count_df.rds"))
 filter_count_df <- readRDS(file.path(mrna_QC_DIR, "QC_filter_count_df.rds"))
 all_filter      <- readRDS(file.path(mrna_QC_DIR, "QC_all_filter.rds"))
@@ -68,6 +70,9 @@ filter_files    <- readRDS(file.path(mrna_QC_DIR, "QC_filter_files.rds"))
 treated_files   <- readRDS(file.path(mrna_QC_DIR, "QC_treated_files.rds"))
 input_files     <- readRDS(file.path(mrna_QC_DIR, "QC_input_files.rds"))
 pooled_sites    <- readRDS(file.path(mrna_QC_DIR, "pooled_sites.RDS"))
+```
+
+```{r setup-helper-functions}
 # Read a gzipped tab-separated pseusite file
 read_pseusite <- function(path, has_header = TRUE) {
   fread(cmd = paste("zcat", path),
@@ -91,7 +96,9 @@ get_sample_id <- function(path) {
   basename(path) %>%
     str_extract("(?<=mpileup\\.|filter\\.)[A-Za-z0-9_-]+(?=\\.\\d+\\.(FOR|REV))")
 }
+```
 
+```{r setup-sample-processing}
 count_df        <- count_df        %>% mutate(sample_id = get_sample_id(file))
 filter_count_df <- filter_count_df %>% mutate(sample_id = get_sample_id(file))
 all_filter      <- all_filter      %>% mutate(sample_id = get_sample_id(source_file))
@@ -102,12 +109,9 @@ all_samples     <- intersect(treated_samples, filter_samples)
 
 n_samp <- length(all_samples)
 pdf_h  <- 3 * ceiling(n_samp / 2)
-
 ```
 
 ---
-
-<!-- # File Inventory and Raw Site Counts {.tabset} -->
 
 # QC for sites from mRNA
 
@@ -126,7 +130,7 @@ table_sum <- count_df %>%
     n_files      = n(),
     mean_per_chr = round(mean(n_sites)),
     .groups = "drop"
-  ) 
+  )
 
 table_sum$sample_id[table_sum$group == "input"] <- "CL18909_12-47-013.CL18909_12-47-14.pooledinput"
 
@@ -137,14 +141,6 @@ DT::datatable(table_sum,caption = htmltools::tags$caption( style = 'caption-side
 ### Raw sites per chromosome
 
 The figure below shows the number of candidate pU sites detected per chromosome in each treated sample, split by strand (FOR = forward, REV = reverse). Counts at this stage include all C positions present in the treated mpileup **regardless of input signal**.
-
-
-
-<!-- **What to look for:** -->
-<!-- - Broadly consistent counts across chromosomes (proportional to chromosome length). -->
-<!-- - Extreme outliers for individual chromosomes may indicate mapping artefacts or annotation issues. -->
-<!-- - FOR/REV imbalance within a sample is usually expected due to transcript orientation bias, but large asymmetries between samples warrant investigation. -->
-
 
 ```{r plot1-raw-sites, fig.height=pdf_h, fig.cap="Raw candidate sites per chromosome per sample before input filtering. Green = forward strand (FOR), purple = reverse strand (REV)."}
 theme_set(theme_bw(base_size = 11) +
@@ -196,7 +192,7 @@ filter_count_df %>%
                 full_width = FALSE)
 ```
 
-The figure below shows the per-chromosome breakdown of sites surviving the filter. 
+The figure below shows the per-chromosome breakdown of sites surviving the filter.
 
 ```{r plot2-filtered-sites, fig.height=pdf_h, fig.cap="Post-filter candidate pU sites per chromosome per sample. Sites shown here were absent in the pooled input or had an input C/(C+T) ratio < 0.1."}
 filter_count_df %>%
@@ -226,7 +222,7 @@ The figure below shows a heatmap for each sample where each cell reports the abs
 - Consistent patterns across samples indicate reproducible signal.
 - A ratio cutoff of ~0.1 and depth >= 20 are the default cutoffs from Yanming's pipeline.
 
-#### Per-sample sensitivity analysis
+### Per-sample sensitivity analysis
 
 ```{r plot3-sensitivity, fig.height=pdf_h, fig.cap="Sensitivity heatmap showing sites retained at each combination of minimum read depth (y-axis) and minimum C/(C+T) ratio (x-axis) in the treated sample. Each cell shows the absolute count and percentage of post-filter sites retained. Color scale: red = few sites retained, green = many sites retained."}
 cutoff_all <- map_dfr(all_samples, function(samp) {
@@ -252,11 +248,9 @@ cutoff_all %>%
   labs(x = "Min C/(C+T) ratio (treated)", y = "Min read depth (treated)")
 ```
 
-
-#### Pooled sensitivity analysis
+### Pooled sensitivity analysis
 
 In addition to per-sample cutoffs, it is useful to examine how many **unique genomic positions** survive across all samples combined. Here all post-filter sites from every treated sample are pooled into a single set and the same depth × ratio cutoff grid is applied.
-
 
 **What to look for:**
 
@@ -264,7 +258,7 @@ In addition to per-sample cutoffs, it is useful to examine how many **unique gen
 - If the pooled count is much larger than any individual sample, samples are capturing largely non-overlapping sites — possibly due to different transcript coverage or biological replicates.
 - If pooled ≈ single-sample counts, samples are highly concordant in which sites they detect.
 
-```{r pooled-sites}
+```{r pooled-sites-summary}
 ## Combine all samples — one row per unique genomic position (ref + pos + strand)
 ## For sites present in multiple samples,  sum C and T counts (and recompute depth and ratio from them depth and ratio observed)
 ## (a site passes if it passes in at least one sample)
@@ -289,10 +283,10 @@ cutoff_pooled %>%
   mutate(n_sites = comma(n_sites)) %>%
   pivot_wider(names_from  = min_ratio,
               values_from = c(n_sites, pct_retained),
-              names_glue  = "ratio_{min_ratio}_{.value}") 
+              names_glue  = "ratio_{min_ratio}_{.value}")
 ```
 
-Figure below shows the pooled sensitivity as a heatmap, directly comparable to the per-sample Figure. 
+Figure below shows the pooled sensitivity as a heatmap, directly comparable to the per-sample Figure.
 
 ```{r plot-pooled-sensitivity, fig.height=5, fig.cap="Sensitivity heatmap for the pooled site set (all samples combined)."}
 cutoff_pooled %>%
@@ -323,10 +317,10 @@ cutoff_pooled %>%
   mutate(n_sites = comma(n_sites)) %>%
   pivot_wider(names_from  = min_ratio,
               values_from = c(n_sites, pct_retained),
-              names_glue  = "ratio_{min_ratio}_{.value}") 
+              names_glue  = "ratio_{min_ratio}_{.value}")
 ```
 
-Figure below shows the pooled sensitivity as a heatmap, directly comparable to the per-sample Figure. 
+Figure below shows the pooled sensitivity as a heatmap, directly comparable to the per-sample Figure.
 
 ```{r plot-pooled-sensitivity2, fig.height=5, fig.cap="Sensitivity heatmap for the pooled site set (all samples combined)."}
 cutoff_pooled %>%
@@ -340,14 +334,13 @@ cutoff_pooled %>%
        x = "Min C/(C+T) ratio (treated)", y = "Min read depth (treated)")
 ```
 
-
 ---
 
 ## Read Depth Quality
 
 ### Depth distribution
 
-Figure below shows the distribution of read depths across post-filter sites in each treated sample. 
+Figure below shows the distribution of read depths across post-filter sites in each treated sample.
 
 Values above the 99th percentile are excluded to prevent extreme outliers (e.g., rRNA or highly expressed transcripts) from compressing the rest of the distribution.
 
@@ -454,25 +447,22 @@ filter_count_df %>%
 
 ---
 
-
-
 # QC for sites from noncoding RNA (rRNA, tRNA and snoRNA)
 
 For these non-coding RNAs, we applied the same site-filtering strategy used for mRNAs to each sample individually. We then pooled the filtered sites across all samples. The figures below show sites that were identified in at least one sample.
 
-
-```{r }
+```{r nc-setup-colors}
 RNA_COLORS  <- c(tRNA = "#E69F00", rRNA = "#56B4E9", snoRNA = "#009E73")
 ```
 
-```{r}
+```{r nc-load-data}
 pooled <- readRDS(file.path(nc_QC_DIR, "QC_nc_pooled_sites.rds")) %>%
   mutate(rna_type = factor(rna_type, levels = c("tRNA", "rRNA", "snoRNA")))
 ```
 
 **Total pooled sites:** `r comma(nrow(pooled))`
 
-```{r site-counts}
+```{r nc-site-counts}
 knitr::kable(
   as.data.frame(table(RNA_type = pooled$rna_type)),
   col.names = c("RNA type", "N sites"),
@@ -486,7 +476,7 @@ knitr::kable(
 
 ### Distribution
 
-```{r depth-density}
+```{r nc-depth-density}
 ggplot(pooled, aes(x = log10(depth), fill = rna_type, color = rna_type)) +
   geom_density(alpha = 0.35, linewidth = 0.7) +
   scale_x_log10(labels = label_comma()) +
@@ -504,7 +494,7 @@ ggplot(pooled, aes(x = log10(depth), fill = rna_type, color = rna_type)) +
 
 ### Boxplot
 
-```{r depth-boxplot, fig.width=6}
+```{r nc-depth-boxplot, fig.width=6}
 ggplot(pooled, aes(x = rna_type, y = log10(depth), fill = rna_type)) +
   geom_boxplot(outlier.size = 0.5, outlier.alpha = 0.4, width = 0.5) +
   scale_y_log10(labels = label_comma()) +
@@ -517,10 +507,9 @@ ggplot(pooled, aes(x = rna_type, y = log10(depth), fill = rna_type)) +
   theme(legend.position = "none")
 ```
 
-
 ### Depth Summary Table
 
-```{r depth-table}
+```{r nc-depth-table}
 pooled %>%
   group_by(rna_type) %>%
   summarise(
@@ -541,7 +530,7 @@ pooled %>%
 
 ### Distribution (all sites)
 
-```{r ratio-density}
+```{r nc-ratio-density}
 ggplot(pooled, aes(x = ratio, fill = rna_type, color = rna_type)) +
   geom_density(alpha = 0.35, linewidth = 0.7) +
   scale_x_continuous(limits = c(0, 1), labels = percent_format()) +
@@ -559,7 +548,7 @@ ggplot(pooled, aes(x = ratio, fill = rna_type, color = rna_type)) +
 
 ### Distribution (ratio > 0.05 only)
 
-```{r ratio-density-pos}
+```{r nc-ratio-density-pos}
 pooled %>%
   filter(ratio > 0.05) %>%
   ggplot(aes(x = ratio, fill = rna_type, color = rna_type)) +
@@ -579,7 +568,7 @@ pooled %>%
 
 ### Boxplot
 
-```{r ratio-boxplot, fig.width=6}
+```{r nc-ratio-boxplot, fig.width=6}
 ggplot(pooled, aes(x = rna_type, y = ratio, fill = rna_type)) +
   geom_boxplot(outlier.size = 0.5, outlier.alpha = 0.4, width = 0.5) +
   scale_y_continuous(labels = percent_format()) +
@@ -594,7 +583,7 @@ ggplot(pooled, aes(x = rna_type, y = ratio, fill = rna_type)) +
 
 ### Ratio Summary Table
 
-```{r ratio-table}
+```{r nc-ratio-table}
 pooled %>%
   group_by(rna_type) %>%
   summarise(
@@ -615,7 +604,7 @@ pooled %>%
 
 ## Depth vs Ratio
 
-```{r scatter, fig.height=5}
+```{r nc-scatter, fig.height=5}
 ggplot(pooled, aes(x = log10(depth), y = ratio, color = rna_type)) +
   geom_point(alpha = 0.4, size = 0.8) +
   geom_hline(yintercept = c(0.05, 0.1, 0.2),
@@ -637,7 +626,7 @@ ggplot(pooled, aes(x = log10(depth), y = ratio, color = rna_type)) +
 
 ## High-Confidence Sites by Ratio Threshold
 
-```{r thresh-bar, fig.height=4}
+```{r nc-thresh-bar, fig.height=4}
 cutoff_grid_nc <- expand.grid(
   min_depth = c(1, 5, 10, 20, 50),
   min_ratio = c(0.0, 0.05, 0.1, 0.2),
@@ -656,7 +645,7 @@ cutoff_grid_nc <- cutoff_grid_nc %>%
   ungroup() %>%
   group_by(rna_type) %>%
   mutate(
-    total        = max(n_sites),                          # baseline = least-strict cutoff
+    total        = max(n_sites),
     pct_retained = round(n_sites / total * 100, 1),
     label        = paste0(comma(n_sites), "\n(", pct_retained, "%)")
   ) %>%
@@ -687,17 +676,13 @@ ggplot(cutoff_grid_nc,
   )
 ```
 
-
-
-
-
-
+---
 
 # Comparison with Published pU Sites (PMID 39349603)
 
 ## mRNA
 
-To assess the biological validity of our candidate pU sites, we compare our pooled calls against a published pseudouridine dataset (PMID 39349603). Overlap is evaluated at the genomic position level (no strand consideration) across four combinations of depth and ratio cutoffs. 
+To assess the biological validity of our candidate pU sites, we compare our pooled calls against a published pseudouridine dataset (PMID 39349603). Overlap is evaluated at the genomic position level (no strand consideration) across four combinations of depth and ratio cutoffs.
 
 ```{r overlap-settings}
 DATA_OTHERS_PATH <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID39349603.xlsx"
@@ -708,7 +693,7 @@ cutoffs <- expand.grid(min_depth = c(10, 20),
   mutate(label = paste0("depth>=", min_depth, ", ratio>=", min_ratio))
 ```
 
-```{r overlap-load, warning=F,message=F}
+```{r overlap-load, warning=FALSE, message=FALSE}
 data_others <- readxl::read_excel(DATA_OTHERS_PATH, sheet = 6)
 colnames(data_others) <- data_others[2, ]
 data_others <- data_others[-c(1:2), ]
@@ -731,7 +716,7 @@ cat("Published pU sites (unique positions):", length(others_keys), "\n")
 
 For each cutoff combination, `pooled_sites` is filtered and a site-level key (`ref_pos`) is used to identify positions present in both datasets, in only the published set, or in only our pooled calls.
 
-```{r}
+```{r overlap-compute}
 overlap_all <- map_dfr(seq_len(nrow(cutoffs)), function(i) {
 
   d   <- cutoffs$min_depth[i]
@@ -770,7 +755,7 @@ overlap_all <- map_dfr(seq_len(nrow(cutoffs)), function(i) {
 })
 ```
 
-```{r }
+```{r overlap-summary}
 summary_df <- overlap_all %>%
   group_by(cutoff, min_depth, min_ratio, n_pooled, n_others) %>%
   summarise(
@@ -795,7 +780,7 @@ summary_df %>%
                 full_width = FALSE)
 ```
 
-Absolute site counts split by overlap category for each cutoff. Green = present in both datasets; blue = published only; orange = our pooled calls only. 
+Absolute site counts split by overlap category for each cutoff. Green = present in both datasets; blue = published only; orange = our pooled calls only.
 
 ```{r overlap-bar, fig.height=5, fig.cap="Site counts by overlap category across depth and ratio cutoffs."}
 overlap_all %>%
@@ -840,7 +825,6 @@ summary_df %>%
         legend.position = "top")
 ```
 
-
 Stacked bar charts showing the per-chromosome breakdown of site categories at each cutoff. This reveals whether overlap is uniformly distributed across the genome or concentrated on specific chromosomes, which could indicate chromosome-specific biases in either dataset.
 
 ```{r overlap-chrom, fig.height=10, fig.cap="Per-chromosome site overlap at each cutoff combination. Green = both datasets; blue = published only; orange = pooled only."}
@@ -861,11 +845,9 @@ overlap_all %>%
         legend.position = "top")
 ```
 
-
 Venn diagrams showing raw overlap counts for each cutoff. The numbers inside each circle region show: left circle only = published sites not in our calls; right circle only = our pooled calls not in the published set; intersection = sites present in both.
 
 ```{r overlap-venn, fig.height=10, fig.cap=" Venn diagrams of site overlap between published pU sites and pooled calls at each cutoff."}
-
 
 venn_plots <- map(seq_len(nrow(cutoffs)), function(i) {
   d   <- cutoffs$min_depth[i]
@@ -888,18 +870,13 @@ venn_plots <- map(seq_len(nrow(cutoffs)), function(i) {
 })
 
 wrap_plots(venn_plots, ncol = 2)
-
-
 ```
 
+---
 
+## Non-coding RNA
 
-
-
-
-## non-coding RNA
-
-```{r, warning=FALSE, message=FALSE}
+```{r nc-pmid39-setup, warning=FALSE, message=FALSE}
 ## ── rRNA (sheet 2): key = trimmed chr prefix + pos ──────────────────────────
 raw_rrna <- readxl::read_excel(DATA_OTHERS_PATH, sheet = 2)
 colnames(raw_rrna) <- raw_rrna[2, ]
@@ -909,7 +886,7 @@ raw_rrna <- raw_rrna[complete.cases(raw_rrna$chr), ]
 # chr column looks like "NR_003285.3_RNA28S45_..." — keep only the accession
 others_rrna <- raw_rrna %>%
   transmute(
-    ref = str_extract(chr, "^[^_]+(?:_[^_]+)?"),   # e.g. NR_003285.3
+    ref = str_extract(chr, "^[^_]+(?:_[^_]+)?"),
     pos = as.integer(pos)
   ) %>%
   mutate(key = paste(ref, pos, sep = "_")) %>%
@@ -961,51 +938,47 @@ others_by_type <- list(
 
 cat("Published pU sites per RNA type:\n")
 purrr::imap(others_by_type, ~ cat(" ", .y, ":", nrow(.x), "unique positions\n"))
-
-
 ```
-
 
 ### RNA Modification Sites from the published data {.tabset}
 
 #### rRNA
 
-```{r rrna-raw}
+```{r nc-pmid39-rrna-raw}
 datatable(raw_rrna, filter = "top", rownames = FALSE,
           options = list(pageLength = 10, scrollX = TRUE))
 ```
 
 #### snoRNA
 
-```{r snorna-raw}
+```{r nc-pmid39-snorna-raw}
 datatable(raw_snorna, filter = "top", rownames = FALSE,
           options = list(pageLength = 10, scrollX = TRUE))
 ```
 
-#### tRNA 
+#### tRNA
 
-```{r trna-raw}
+```{r nc-pmid39-trna-raw}
 datatable(raw_trna, filter = "top", rownames = FALSE,
           options = list(pageLength = 10, scrollX = TRUE))
 ```
 
-
 ### Compute overlap across cutoffs (per RNA type)
 
-```{r }
+```{r nc-pmid39-overlap-compute}
 overlap_all_nc <- purrr::map_dfr(names(others_by_type), function(rna) {
-  
+
   others_keys <- others_by_type[[rna]]$key
-  
+
   pooled_sub <- pooled %>%
     filter(rna_type == rna)
-  
+
   purrr::map_dfr(seq_len(nrow(cutoffs)), function(i) {
-    
+
     d   <- cutoffs$min_depth[i]
     r   <- cutoffs$min_ratio[i]
     lab <- cutoffs$label[i]
-    
+
     # tRNA: match on amino_acid + anticodon + canonical_pos
     # rRNA/snoRNA: match on ref (accession) + pos
     if (rna == "tRNA") {
@@ -1023,7 +996,7 @@ overlap_all_nc <- purrr::map_dfr(names(others_by_type), function(rna) {
         mutate(key = paste(ref, pos, sep = "_")) %>%
         pull(key) %>% unique()
     }
-    
+
     bind_rows(
       data.frame(key = others_keys, source = "data_others"),
       data.frame(key = pooled_keys, source = "pooled_sites")
@@ -1053,7 +1026,7 @@ overlap_all_nc <- purrr::map_dfr(names(others_by_type), function(rna) {
 
 ### Summary table
 
-```{r }
+```{r nc-pmid39-summary}
 summary_nc <- overlap_all_nc %>%
   group_by(rna_type, cutoff, min_depth, min_ratio, n_pooled, n_others) %>%
   summarise(
@@ -1082,7 +1055,7 @@ summary_nc %>%
 
 ### Site counts by overlap category
 
-```{r overlap-bar-nc, fig.height=7, fig.width=11}
+```{r nc-pmid39-overlap-bar, fig.height=7, fig.width=11}
 overlap_all_nc %>%
   count(rna_type, cutoff, category) %>%
   mutate(
@@ -1112,7 +1085,7 @@ overlap_all_nc %>%
 
 Blue line: % of published sites recovered in our pooled calls (sensitivity). Orange line: % of our pooled calls that overlap the published set (precision).
 
-```{r overlap-pct-nc, fig.height=6, fig.width=10}
+```{r nc-pmid39-overlap-pct, fig.height=6, fig.width=10}
 summary_nc %>%
   select(rna_type, cutoff,
          `% published\nrecovered` = pct_others_in_pooled,
@@ -1140,20 +1113,17 @@ summary_nc %>%
 
 ### Venn diagrams
 
-```{r overlap-venn-nc, fig.height=10, fig.width=12, message=FALSE, warning=FALSE}
-# install.packages("ggvenn") if needed
-library(ggvenn)
-
+```{r nc-pmid39-overlap-venn, fig.height=10, fig.width=12, message=FALSE, warning=FALSE}
 venn_plots_nc <- purrr::map(names(others_by_type), function(rna) {
-  
+
   others_keys <- others_by_type[[rna]]$key
   pooled_sub  <- pooled %>% filter(rna_type == rna)
-  
+
   purrr::map(seq_len(nrow(cutoffs)), function(i) {
     d   <- cutoffs$min_depth[i]
     r   <- cutoffs$min_ratio[i]
     lab <- cutoffs$label[i]
-    
+
     pk <- if (rna == "tRNA") {
       pooled_sub %>%
         filter(depth >= d, ratio >= r) %>%
@@ -1169,7 +1139,7 @@ venn_plots_nc <- purrr::map(names(others_by_type), function(rna) {
         mutate(key = paste(ref, pos, sep = "_")) %>%
         pull(key) %>% unique()
     }
-    
+
     ggvenn(
       list(`Published (PMID 39349603)` = others_keys,
            `Pooled calls`              = pk),
@@ -1181,18 +1151,19 @@ venn_plots_nc <- purrr::map(names(others_by_type), function(rna) {
       labs(title = paste0(rna, " | ", lab)) +
       theme(plot.title = element_text(size = 9, hjust = 0.5))
   })
-}) %>% purrr::flatten()   # unlist one level: list of (n_rna * n_cutoffs) plots
+}) %>% purrr::flatten()
 
 patchwork::wrap_plots(venn_plots_nc, ncol = nrow(cutoffs))
-
 ```
+
+---
 
 # Comparison with Published pU Sites (PMID 36997645)
 
 ## mRNA
 
 ```{r overlap2-settings}
-DATA_OTHERS2_PATH <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID36997645.xlsx" 
+DATA_OTHERS2_PATH <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID36997645.xlsx"
 
 cutoffs2 <- expand.grid(min_depth = c(10, 20),
                         min_ratio = c(0.1, 0.2)) %>%
@@ -1211,12 +1182,6 @@ data_others2 <- data_others2 %>%
   filter(grepl("^NM_|^XM_", chr_name))
 
 DT::datatable(data_others2,caption = htmltools::tags$caption( style = 'caption-side: left; text-align: left; color:black;  font-size:150% ;','pU sites from PMID36997645'),options = list(pageLength = 10) )
-
-# columns expected: chr_name, site, rep1_total_counts, rep1_deletion_counts,
-# rep1_deletion_ratio, rep1_p_value, rep2_total_counts, rep2_deletion_counts,
-# rep2_deletion_ratio, rep2_p_value, ctrl_total_counts, ctrl_deletion_counts,
-# ctrl_deletion_ratio, gene_name, chr_site
-# chr_site format: chr14_73219165-73219168 (range) or chr17_80104560 (single)
 
 data_others2_clean <- data_others2 %>%
   mutate(
@@ -1239,7 +1204,7 @@ cat("Range sites                      :", sum( data_others2_clean$is_range), "\n
 
 For each cutoff, every pooled site is tested against all published intervals on the same chromosome. A pooled site overlaps a published entry if its position falls within `[pos_start, pos_end]`. Conversely, a published entry is counted as overlapping if at least one pooled site falls within its interval.
 
-```{r overlap2-compute}
+```{r overlap2-helper-function}
 find_overlap2 <- function(pooled_clean) {
 
   # for each pooled site: does it fall within any published interval?
@@ -1265,7 +1230,9 @@ find_overlap2 <- function(pooled_clean) {
   list(pooled = pooled_with_overlap,
        others = others_with_overlap)
 }
+```
 
+```{r overlap2-compute}
 results2 <- map(seq_len(nrow(cutoffs2)), function(i) {
 
   d   <- cutoffs2$min_depth[i]
@@ -1292,7 +1259,6 @@ results2 <- map(seq_len(nrow(cutoffs2)), function(i) {
 })
 names(results2) <- cutoffs2$label
 ```
-
 
 ```{r overlap2-summary-table}
 summary_df2 <- map_dfr(results2, function(x) {
@@ -1439,10 +1405,11 @@ scatter2 %>%
   theme_bw(base_size = 11)
 ```
 
+---
 
 ## rRNA
 
-```{r }
+```{r overlap2-rrna-settings}
 DATA_OTHERS2_PATH <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID36997645.xlsx"
 
 cutoffs2 <- expand.grid(min_depth = c(10, 20),
@@ -1452,7 +1419,7 @@ cutoffs2 <- expand.grid(min_depth = c(10, 20),
 
 `chr_name` format is `NR_003285_rRNA_5.8S` — accession is extracted before `_rRNA`. `site` can be a single position (`69`) or a range (`109-110`); ranges are kept as `pos_start`/`pos_end` for interval-based overlap matching (same approach as the mRNA version).
 
-```{r , warning=FALSE, message=FALSE}
+```{r overlap2-rrna-load, warning=FALSE, message=FALSE}
 data_others2 <- readxl::read_excel(DATA_OTHERS2_PATH, sheet = 1)
 colnames(data_others2) <- data_others2[2, ]
 data_others2 <- data_others2[-c(1:2), ]
@@ -1491,7 +1458,6 @@ data_others2_clean <- data_others2 %>%
   left_join(ref_lookup, by = "accession_bare") %>%
   filter(!is.na(ref), !is.na(pos_start))
 
-# Diagnostic: show which accessions matched / failed
 cat("Accession matching summary:\n")
 data_others2 %>%
   mutate(
@@ -1511,9 +1477,9 @@ print(sort(unique(data_others2_clean$ref)))
 
 For each cutoff, overlap is tested by position interval: a pooled site overlaps a published entry if its `pos` falls within `[pos_start, pos_end]` on the same transcript (`ref`). A published entry is counted as overlapping if at least one pooled site falls within its interval.
 
-```{r }
+```{r overlap2-rrna-compute}
 find_overlap2 <- function(pooled_clean) {
-  
+
   pooled_with_overlap <- pooled_clean %>%
     mutate(
       in_others = map2_lgl(ref, pos, function(r, p) {
@@ -1522,7 +1488,7 @@ find_overlap2 <- function(pooled_clean) {
               data_others2_clean$pos_end   >= p)
       })
     )
-  
+
   others_with_overlap <- data_others2_clean %>%
     mutate(
       in_pooled = pmap_lgl(list(ref, pos_start, pos_end), function(r, s, e) {
@@ -1531,7 +1497,7 @@ find_overlap2 <- function(pooled_clean) {
               pooled_clean$pos <= e)
       })
     )
-  
+
   list(pooled = pooled_with_overlap, others = others_with_overlap)
 }
 
@@ -1539,10 +1505,10 @@ results2 <- map(seq_len(nrow(cutoffs2)), function(i) {
   d   <- cutoffs2$min_depth[i]
   r   <- cutoffs2$min_ratio[i]
   lab <- cutoffs2$label[i]
-  
+
   pooled_clean <- pooled_rrna %>% filter(depth >= d, ratio >= r)
   ov <- find_overlap2(pooled_clean)
-  
+
   list(
     label          = lab,
     min_depth      = d,
@@ -1560,7 +1526,7 @@ names(results2) <- cutoffs2$label
 
 ### Summary table
 
-```{r }
+```{r overlap2-rrna-summary}
 summary_df2 <- map_dfr(results2, function(x) {
   data.frame(
     cutoff               = x$label,
@@ -1592,7 +1558,7 @@ summary_df2 %>%
 
 Absolute site counts split by overlap category. Green = present in both datasets; purple = published only; orange = our pooled calls only.
 
-```{r, fig.height=5, fig.width=8}
+```{r overlap2-rrna-bar, fig.height=5, fig.width=8}
 map_dfr(results2, function(x) {
   bind_rows(
     data.frame(category = "published overlapping", n = x$n_others_in_ov,               cutoff = x$label),
@@ -1622,7 +1588,7 @@ map_dfr(results2, function(x) {
 
 Blue line: % of published intervals hit by a pooled call. Orange line: % of pooled calls falling within a published interval.
 
-```{r, fig.height=5, fig.width=7}
+```{r overlap2-rrna-pct, fig.height=5, fig.width=7}
 summary_df2 %>%
   select(cutoff,
          `% published\nrecovered` = pct_others_in_pooled,
@@ -1640,32 +1606,5 @@ summary_df2 %>%
   theme_bw(base_size = 11) +
   theme(axis.text.x = element_text(angle = 20, hjust = 1), legend.position = "top")
 ```
-
-<!-- Per-transcript breakdown: published intervals hit vs not hit by pooled calls, faceted by cutoff. -->
-
-<!-- ```{r , fig.height=8, fig.width=9} -->
-<!-- map_dfr(results2, function(x) { -->
-<!--   bind_rows( -->
-<!--     x$others %>% filter( in_pooled) %>% count(ref) %>% mutate(category = "published overlapping"), -->
-<!--     x$others %>% filter(!in_pooled) %>% count(ref) %>% mutate(category = "published only"), -->
-<!--     x$pooled %>% filter(!in_others) %>% count(ref) %>% mutate(category = "pooled only") -->
-<!--   ) %>% mutate(cutoff = x$label) -->
-<!-- }) %>% -->
-<!--   mutate( -->
-<!--     cutoff   = factor(cutoff,   levels = cutoffs2$label), -->
-<!--     category = factor(category, levels = c("published overlapping", "published only", "pooled only")) -->
-<!--   ) %>% -->
-<!--   ggplot(aes(x = ref, y = n, fill = category)) + -->
-<!--   geom_col(position = "stack", width = 0.8) + -->
-<!--   scale_fill_manual(values = c(`published overlapping` = "#4CAF50", -->
-<!--                                `published only`         = "#2196F3", -->
-<!--                                `pooled only`            = "#FF9800")) + -->
-<!--   scale_y_continuous(labels = scales::comma) + -->
-<!--   facet_wrap(~ cutoff, ncol = 2, scales = "free_y") + -->
-<!--   labs(x = "Transcript (ref)", y = "Number of sites", fill = NULL) + -->
-<!--   theme_bw(base_size = 11) + -->
-<!--   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8), -->
-<!--         legend.position = "top") -->
-<!-- ``` -->
 
 ---
