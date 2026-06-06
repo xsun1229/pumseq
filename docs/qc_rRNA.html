@@ -449,10 +449,10 @@ changes </a>
 <div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown file has staged changes. To know which version of the
-R Markdown file created these results, you’ll want to first commit it to
-the Git repo. If you’re still working on the analysis, you can ignore
-this warning. When you’re finished, you can run
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
 <code>wflow_publish</code> to commit the R Markdown file and build the
 HTML.</p>
 </div>
@@ -545,15 +545,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree8f44c3419b510577654a6a816dfa2322ee8d4bebtargetblank8f44c34a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree6cda5545ec2bdace5945c95ad5d02df72542dfbetargetblank6cda554a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/8f44c3419b510577654a6a816dfa2322ee8d4beb" target="_blank">8f44c34</a>
+<a href="https://github.com/xsun1229/pumseq/tree/6cda5545ec2bdace5945c95ad5d02df72542dfbe" target="_blank">6cda554</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree8f44c3419b510577654a6a816dfa2322ee8d4bebtargetblank8f44c34a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree6cda5545ec2bdace5945c95ad5d02df72542dfbetargetblank6cda554a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -563,7 +563,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/8f44c3419b510577654a6a816dfa2322ee8d4beb" target="_blank">8f44c34</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/6cda5545ec2bdace5945c95ad5d02df72542dfbe" target="_blank">6cda554</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -579,17 +579,13 @@ were generated:
 <pre><code>
 Ignored files:
     Ignored:    .Rhistory
-    Ignored:    analysis/figure/
 
 Untracked files:
-    Untracked:  analysis/qc_rRNA_jaccard.Rmd
-    Untracked:  analysis/qc_rRNA_old.Rmd
+    Untracked:  analysis/qc_rRNA_copy.Rmd
 
 Unstaged changes:
     Modified:   analysis/qc_rRNA.Rmd
-
-Staged changes:
-    Modified:   analysis/qc_rRNA.Rmd
+    Deleted:    analysis/qc_rRNA_jaccard.Rmd
 
 </code></pre>
 <p>
@@ -635,6 +631,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/analysis/qc_rRNA.Rmd" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/qc_rRNA.html" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1093,6 +1123,43 @@ sites passing the depth filter, then those additionally requiring %pU
 parentheses.</p>
 <pre class="r"><code>grid.arrange(grobs = make_jaccard_heatmaps(dat$rep_psi, cl), ncol = 3)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18870-jaccard-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18870-jaccard-1">
+Past versions of v2-cl18870-jaccard-1.png
+</button>
+</p>
+<div id="fig-v2-cl18870-jaccard-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18870-jaccard-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pu-distribution-all-sites" class="section level3">
 <h3>%pU Distribution — all sites</h3>
@@ -1105,6 +1172,43 @@ library preparation and sequencing quality.</p>
 <pre class="r"><code>render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[[&quot;all sites&quot;]],
              ncol = 2)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18870-dist-all-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18870-dist-all-1">
+Past versions of v2-cl18870-dist-all-1.png
+</button>
+</p>
+<div id="fig-v2-cl18870-dist-all-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18870-dist-all-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pu-distribution-pu-0.1" class="section level3">
 <h3>%pU Distribution — %pU &gt;= 0.1</h3>
@@ -1113,6 +1217,43 @@ positions.</p>
 <pre class="r"><code>render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[[&quot;%pU &gt;= 0.1&quot;]],
              ncol = 2)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18870-dist-01-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18870-dist-01-1">
+Past versions of v2-cl18870-dist-01-1.png
+</button>
+</p>
+<div id="fig-v2-cl18870-dist-01-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18870-dist-01-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pu-distribution-pu-0.2" class="section level3">
 <h3>%pU Distribution — %pU &gt;= 0.2</h3>
@@ -1121,6 +1262,43 @@ threshold.</p>
 <pre class="r"><code>render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[[&quot;%pU &gt;= 0.2&quot;]],
              ncol = 2)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18870-dist-02-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18870-dist-02-1">
+Past versions of v2-cl18870-dist-02-1.png
+</button>
+</p>
+<div id="fig-v2-cl18870-dist-02-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18870-dist-02-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pairwise-correlation-all-sites" class="section level3">
 <h3>Pairwise correlation — all sites</h3>
@@ -1131,16 +1309,127 @@ number of shared sites are shown in the lower-right corner.</p>
 <p>Sites shared across all replicates: <strong>1180</strong></p>
 <pre class="r"><code>render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = NULL))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18870-cor-all-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18870-cor-all-1">
+Past versions of v2-cl18870-cor-all-1.png
+</button>
+</p>
+<div id="fig-v2-cl18870-cor-all-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18870-cor-all-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pairwise-correlation-pu-0.1" class="section level3">
 <h3>Pairwise correlation — %pU &gt;= 0.1</h3>
 <pre class="r"><code>render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = 0.1))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18870-cor-01-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18870-cor-01-1">
+Past versions of v2-cl18870-cor-01-1.png
+</button>
+</p>
+<div id="fig-v2-cl18870-cor-01-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18870-cor-01-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pairwise-correlation-pu-0.2" class="section level3">
 <h3>Pairwise correlation — %pU &gt;= 0.2</h3>
 <pre class="r"><code>render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = 0.2))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18870-cor-02-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18870-cor-02-1">
+Past versions of v2-cl18870-cor-02-1.png
+</button>
+</p>
+<div id="fig-v2-cl18870-cor-02-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18870-cor-02-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pairwise-pearson-heatmap" class="section level3">
 <h3>Pairwise Pearson heatmap</h3>
@@ -1149,6 +1438,43 @@ Pearson’s r and the number of shared sites used. Three panels correspond
 to the three %pU thresholds above.</p>
 <pre class="r"><code>render_plots(make_cor_heatmaps(dat$psi_mat, dat$pairs, dat$rep_names, cl), ncol = 3)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18870-heatmap-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18870-heatmap-1">
+Past versions of v2-cl18870-heatmap-1.png
+</button>
+</p>
+<div id="fig-v2-cl18870-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18870-heatmap-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 </div>
@@ -1158,45 +1484,341 @@ to the three %pU thresholds above.</p>
 <h3>Site overlap (Jaccard index)</h3>
 <pre class="r"><code>grid.arrange(grobs = make_jaccard_heatmaps(dat$rep_psi, cl), ncol = 3)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18909-jaccard-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18909-jaccard-1">
+Past versions of v2-cl18909-jaccard-1.png
+</button>
+</p>
+<div id="fig-v2-cl18909-jaccard-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18909-jaccard-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pu-distribution-all-sites-1" class="section level3">
 <h3>%pU Distribution — all sites</h3>
 <pre class="r"><code>render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[[&quot;all sites&quot;]],
              ncol = 2)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18909-dist-all-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18909-dist-all-1">
+Past versions of v2-cl18909-dist-all-1.png
+</button>
+</p>
+<div id="fig-v2-cl18909-dist-all-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18909-dist-all-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pu-distribution-pu-0.1-1" class="section level3">
 <h3>%pU Distribution — %pU &gt;= 0.1</h3>
 <pre class="r"><code>render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[[&quot;%pU &gt;= 0.1&quot;]],
              ncol = 2)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18909-dist-01-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18909-dist-01-1">
+Past versions of v2-cl18909-dist-01-1.png
+</button>
+</p>
+<div id="fig-v2-cl18909-dist-01-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18909-dist-01-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pu-distribution-pu-0.2-1" class="section level3">
 <h3>%pU Distribution — %pU &gt;= 0.2</h3>
 <pre class="r"><code>render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[[&quot;%pU &gt;= 0.2&quot;]],
              ncol = 2)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18909-dist-02-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18909-dist-02-1">
+Past versions of v2-cl18909-dist-02-1.png
+</button>
+</p>
+<div id="fig-v2-cl18909-dist-02-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18909-dist-02-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pairwise-correlation-all-sites-1" class="section level3">
 <h3>Pairwise correlation — all sites</h3>
 <p>Sites shared across all replicates: <strong>1172</strong></p>
 <pre class="r"><code>render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = NULL))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18909-cor-all-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18909-cor-all-1">
+Past versions of v2-cl18909-cor-all-1.png
+</button>
+</p>
+<div id="fig-v2-cl18909-cor-all-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18909-cor-all-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pairwise-correlation-pu-0.1-1" class="section level3">
 <h3>Pairwise correlation — %pU &gt;= 0.1</h3>
 <pre class="r"><code>render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = 0.1))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18909-cor-01-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18909-cor-01-1">
+Past versions of v2-cl18909-cor-01-1.png
+</button>
+</p>
+<div id="fig-v2-cl18909-cor-01-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18909-cor-01-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pairwise-correlation-pu-0.2-1" class="section level3">
 <h3>Pairwise correlation — %pU &gt;= 0.2</h3>
 <pre class="r"><code>render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = 0.2))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18909-cor-02-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18909-cor-02-1">
+Past versions of v2-cl18909-cor-02-1.png
+</button>
+</p>
+<div id="fig-v2-cl18909-cor-02-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18909-cor-02-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pairwise-pearson-heatmap-1" class="section level3">
 <h3>Pairwise Pearson heatmap</h3>
 <pre class="r"><code>render_plots(make_cor_heatmaps(dat$psi_mat, dat$pairs, dat$rep_names, cl), ncol = 3)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18909-heatmap-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18909-heatmap-1">
+Past versions of v2-cl18909-heatmap-1.png
+</button>
+</p>
+<div id="fig-v2-cl18909-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18909-heatmap-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 </div>
@@ -1206,45 +1828,341 @@ to the three %pU thresholds above.</p>
 <h3>Site overlap (Jaccard index)</h3>
 <pre class="r"><code>grid.arrange(grobs = make_jaccard_heatmaps(dat$rep_psi, cl), ncol = 3)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18916-jaccard-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18916-jaccard-1">
+Past versions of v2-cl18916-jaccard-1.png
+</button>
+</p>
+<div id="fig-v2-cl18916-jaccard-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18916-jaccard-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pu-distribution-all-sites-2" class="section level3">
 <h3>%pU Distribution — all sites</h3>
 <pre class="r"><code>render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[[&quot;all sites&quot;]],
              ncol = 2)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18916-dist-all-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18916-dist-all-1">
+Past versions of v2-cl18916-dist-all-1.png
+</button>
+</p>
+<div id="fig-v2-cl18916-dist-all-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18916-dist-all-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pu-distribution-pu-0.1-2" class="section level3">
 <h3>%pU Distribution — %pU &gt;= 0.1</h3>
 <pre class="r"><code>render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[[&quot;%pU &gt;= 0.1&quot;]],
              ncol = 2)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18916-dist-01-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18916-dist-01-1">
+Past versions of v2-cl18916-dist-01-1.png
+</button>
+</p>
+<div id="fig-v2-cl18916-dist-01-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18916-dist-01-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pu-distribution-pu-0.2-2" class="section level3">
 <h3>%pU Distribution — %pU &gt;= 0.2</h3>
 <pre class="r"><code>render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[[&quot;%pU &gt;= 0.2&quot;]],
              ncol = 2)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18916-dist-02-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18916-dist-02-1">
+Past versions of v2-cl18916-dist-02-1.png
+</button>
+</p>
+<div id="fig-v2-cl18916-dist-02-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18916-dist-02-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pairwise-correlation-all-sites-2" class="section level3">
 <h3>Pairwise correlation — all sites</h3>
 <p>Sites shared across all replicates: <strong>1190</strong></p>
 <pre class="r"><code>render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = NULL))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18916-cor-all-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18916-cor-all-1">
+Past versions of v2-cl18916-cor-all-1.png
+</button>
+</p>
+<div id="fig-v2-cl18916-cor-all-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18916-cor-all-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pairwise-correlation-pu-0.1-2" class="section level3">
 <h3>Pairwise correlation — %pU &gt;= 0.1</h3>
 <pre class="r"><code>render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = 0.1))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18916-cor-01-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18916-cor-01-1">
+Past versions of v2-cl18916-cor-01-1.png
+</button>
+</p>
+<div id="fig-v2-cl18916-cor-01-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18916-cor-01-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pairwise-correlation-pu-0.2-2" class="section level3">
 <h3>Pairwise correlation — %pU &gt;= 0.2</h3>
 <pre class="r"><code>render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = 0.2))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18916-cor-02-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18916-cor-02-1">
+Past versions of v2-cl18916-cor-02-1.png
+</button>
+</p>
+<div id="fig-v2-cl18916-cor-02-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18916-cor-02-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pairwise-pearson-heatmap-2" class="section level3">
 <h3>Pairwise Pearson heatmap</h3>
 <pre class="r"><code>render_plots(make_cor_heatmaps(dat$psi_mat, dat$pairs, dat$rep_names, cl), ncol = 3)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18916-heatmap-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18916-heatmap-1">
+Past versions of v2-cl18916-heatmap-1.png
+</button>
+</p>
+<div id="fig-v2-cl18916-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18916-heatmap-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 </div>
@@ -1254,45 +2172,341 @@ to the three %pU thresholds above.</p>
 <h3>Site overlap (Jaccard index)</h3>
 <pre class="r"><code>grid.arrange(grobs = make_jaccard_heatmaps(dat$rep_psi, cl), ncol = 3)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl19099-jaccard-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl19099-jaccard-1">
+Past versions of v2-cl19099-jaccard-1.png
+</button>
+</p>
+<div id="fig-v2-cl19099-jaccard-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl19099-jaccard-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pu-distribution-all-sites-3" class="section level3">
 <h3>%pU Distribution — all sites</h3>
 <pre class="r"><code>render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[[&quot;all sites&quot;]],
              ncol = 2)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl19099-dist-all-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl19099-dist-all-1">
+Past versions of v2-cl19099-dist-all-1.png
+</button>
+</p>
+<div id="fig-v2-cl19099-dist-all-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl19099-dist-all-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pu-distribution-pu-0.1-3" class="section level3">
 <h3>%pU Distribution — %pU &gt;= 0.1</h3>
 <pre class="r"><code>render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[[&quot;%pU &gt;= 0.1&quot;]],
              ncol = 2)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl19099-dist-01-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl19099-dist-01-1">
+Past versions of v2-cl19099-dist-01-1.png
+</button>
+</p>
+<div id="fig-v2-cl19099-dist-01-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl19099-dist-01-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pu-distribution-pu-0.2-3" class="section level3">
 <h3>%pU Distribution — %pU &gt;= 0.2</h3>
 <pre class="r"><code>render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[[&quot;%pU &gt;= 0.2&quot;]],
              ncol = 2)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl19099-dist-02-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl19099-dist-02-1">
+Past versions of v2-cl19099-dist-02-1.png
+</button>
+</p>
+<div id="fig-v2-cl19099-dist-02-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl19099-dist-02-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pairwise-correlation-all-sites-3" class="section level3">
 <h3>Pairwise correlation — all sites</h3>
 <p>Sites shared across all replicates: <strong>1124</strong></p>
 <pre class="r"><code>render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = NULL))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl19099-cor-all-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl19099-cor-all-1">
+Past versions of v2-cl19099-cor-all-1.png
+</button>
+</p>
+<div id="fig-v2-cl19099-cor-all-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl19099-cor-all-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pairwise-correlation-pu-0.1-3" class="section level3">
 <h3>Pairwise correlation — %pU &gt;= 0.1</h3>
 <pre class="r"><code>render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = 0.1))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl19099-cor-01-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl19099-cor-01-1">
+Past versions of v2-cl19099-cor-01-1.png
+</button>
+</p>
+<div id="fig-v2-cl19099-cor-01-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl19099-cor-01-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pairwise-correlation-pu-0.2-3" class="section level3">
 <h3>Pairwise correlation — %pU &gt;= 0.2</h3>
 <pre class="r"><code>render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = 0.2))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl19099-cor-02-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl19099-cor-02-1">
+Past versions of v2-cl19099-cor-02-1.png
+</button>
+</p>
+<div id="fig-v2-cl19099-cor-02-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl19099-cor-02-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pairwise-pearson-heatmap-3" class="section level3">
 <h3>Pairwise Pearson heatmap</h3>
 <pre class="r"><code>render_plots(make_cor_heatmaps(dat$psi_mat, dat$pairs, dat$rep_names, cl), ncol = 3)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl19099-heatmap-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl19099-heatmap-1">
+Past versions of v2-cl19099-heatmap-1.png
+</button>
+</p>
+<div id="fig-v2-cl19099-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl19099-heatmap-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 </div>
@@ -1406,25 +2620,199 @@ blue = more sites.</p>
 <h3>CL18870</h3>
 <pre class="r"><code>plot_count_heatmap(grid_list[[&quot;CL18870&quot;]], &quot;CL18870 – pU site counts&quot;)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18870-count-heatmap-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18870-count-heatmap-1">
+Past versions of v2-cl18870-count-heatmap-1.png
+</button>
+</p>
+<div id="fig-v2-cl18870-count-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18870-count-heatmap-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 <div id="cl18909-1" class="section level3">
 <h3>CL18909</h3>
 <pre class="r"><code>plot_count_heatmap(grid_list[[&quot;CL18909&quot;]], &quot;CL18909 – pU site counts&quot;)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18909-count-heatmap-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18909-count-heatmap-1">
+Past versions of v2-cl18909-count-heatmap-1.png
+</button>
+</p>
+<div id="fig-v2-cl18909-count-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18909-count-heatmap-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 <div id="cl18916-1" class="section level3">
 <h3>CL18916</h3>
 <pre class="r"><code>plot_count_heatmap(grid_list[[&quot;CL18916&quot;]], &quot;CL18916 – pU site counts&quot;)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18916-count-heatmap-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18916-count-heatmap-1">
+Past versions of v2-cl18916-count-heatmap-1.png
+</button>
+</p>
+<div id="fig-v2-cl18916-count-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18916-count-heatmap-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 <div id="cl19099-1" class="section level3">
 <h3>CL19099</h3>
 <pre class="r"><code>plot_count_heatmap(grid_list[[&quot;CL19099&quot;]], &quot;CL19099 – pU site counts&quot;)</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl19099-count-heatmap-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl19099-count-heatmap-1">
+Past versions of v2-cl19099-count-heatmap-1.png
+</button>
+</p>
+<div id="fig-v2-cl19099-count-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl19099-count-heatmap-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
+</div>
+<div id="pu-distribution-pooled-data" class="section level3 tabset">
+<h3 class="tabset">%pU Distribution — pooled data</h3>
+<p>Distribution of the pooled %ψ ratio (C/(C+T)) across all four cell
+lines, mirroring the per-replicate distributions above. Each panel shows
+one cell line. Red dashed = median; orange dotted = mean; green
+long-dash = ratio threshold(s).</p>
+<div id="pu-distribution-all-sites-4" class="section level4">
+<h4>%pU Distribution — all sites</h4>
+<pre class="r"><code>plots_all &lt;- lapply(CELL_LINES_V, plot_pooled_dist, thr = NULL)
+do.call(grid.arrange, c(Filter(Negate(is.null), plots_all), list(ncol = 4)))</code></pre>
+<p><img src="figure/qc_rRNA.Rmd/v2-pooled-dist-all-1.png" width="1344" style="display: block; margin: auto;" /></p>
+</div>
+<div id="pu-distribution-pu-0.1-4" class="section level4">
+<h4>%pU Distribution — %pU &gt;= 0.1</h4>
+<pre class="r"><code>plots_01 &lt;- lapply(CELL_LINES_V, plot_pooled_dist, thr = 0.1)
+do.call(grid.arrange, c(Filter(Negate(is.null), plots_01), list(ncol = 4)))</code></pre>
+<p><img src="figure/qc_rRNA.Rmd/v2-pooled-dist-01-1.png" width="1344" style="display: block; margin: auto;" /></p>
+</div>
+<div id="pu-distribution-pu-0.2-4" class="section level4">
+<h4>%pU Distribution — %pU &gt;= 0.2</h4>
+<pre class="r"><code>plots_02 &lt;- lapply(CELL_LINES_V, plot_pooled_dist, thr = 0.2)
+do.call(grid.arrange, c(Filter(Negate(is.null), plots_02), list(ncol = 4)))</code></pre>
+<p><img src="figure/qc_rRNA.Rmd/v2-pooled-dist-02-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
 </div>
 </div>
 <div id="cross-cell-line-comparison-of-site-counts"
@@ -1512,6 +2900,43 @@ ggplot(jaccard_cl_sym, aes(x = cl1, y = cl2, fill = jaccard)) +
     legend.position  = &quot;right&quot;
   )</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cross-cl-comparison-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cross-cl-comparison-1">
+Past versions of v2-cross-cl-comparison-1.png
+</button>
+</p>
+<div id="fig-v2-cross-cl-comparison-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cross-cl-comparison-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 <div id="pearsons-r-of-pu-between-cell-lines" class="section level2">
@@ -1613,6 +3038,43 @@ few common sites to compute r.</p>
     legend.position  = &quot;right&quot;
   )</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-pearson-heatmap-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-pearson-heatmap-1">
+Past versions of v2-pearson-heatmap-1.png
+</button>
+</p>
+<div id="fig-v2-pearson-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-pearson-heatmap-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="scatter-plots-depth-20-ratio-0.1-n_samples-2"
 class="section level3">
@@ -1655,6 +3117,43 @@ scatter_plots &lt;- Filter(Negate(is.null), scatter_plots)
 
 do.call(grid.arrange, c(scatter_plots, list(ncol = 3)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-pearson-scatter-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-pearson-scatter-1">
+Past versions of v2-pearson-scatter-1.png
+</button>
+</p>
+<div id="fig-v2-pearson-scatter-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-pearson-scatter-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 </div>
@@ -1807,6 +3306,43 @@ make_heatmap_publication(heatmap_data, &quot;n_praise&quot;, &quot;n_praise&quot
 plot_annotation(title = paste(cl, &quot;  site counts across depth &amp; ratio cutoffs&quot;),
                 theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;, size = 13)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18870-pub-heatmap-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18870-pub-heatmap-1">
+Past versions of v2-cl18870-pub-heatmap-1.png
+</button>
+</p>
+<div id="fig-v2-cl18870-pub-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18870-pub-heatmap-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-bacs-rep1" class="section level3">
 <h3>vs BACS (rep1)</h3>
@@ -1818,6 +3354,43 @@ indicates quantitative agreement with the BACS dataset.</p>
   plot_annotation(title = paste(cl, &quot;— Our pU ratio vs BACS pU level (rep1)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18870-pub-bacs-r1-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18870-pub-bacs-r1-1">
+Past versions of v2-cl18870-pub-bacs-r1-1.png
+</button>
+</p>
+<div id="fig-v2-cl18870-pub-bacs-r1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18870-pub-bacs-r1-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-bacs-rep2" class="section level3">
 <h3>vs BACS (rep2)</h3>
@@ -1825,6 +3398,43 @@ indicates quantitative agreement with the BACS dataset.</p>
   plot_annotation(title = paste(cl, &quot;— Our pU ratio vs BACS pU level (rep2)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18870-pub-bacs-r2-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18870-pub-bacs-r2-1">
+Past versions of v2-cl18870-pub-bacs-r2-1.png
+</button>
+</p>
+<div id="fig-v2-cl18870-pub-bacs-r2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18870-pub-bacs-r2-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-praise-rep1" class="section level3">
 <h3>vs PRAISE (rep1)</h3>
@@ -1836,6 +3446,43 @@ sites.</p>
   plot_annotation(title = paste(cl, &quot;— Our pU ratio vs PRAISE deletion ratio (rep1)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18870-pub-praise-r1-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18870-pub-praise-r1-1">
+Past versions of v2-cl18870-pub-praise-r1-1.png
+</button>
+</p>
+<div id="fig-v2-cl18870-pub-praise-r1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18870-pub-praise-r1-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-praise-rep2" class="section level3">
 <h3>vs PRAISE (rep2)</h3>
@@ -1843,6 +3490,43 @@ sites.</p>
   plot_annotation(title = paste(cl, &quot;— Our pU ratio vs PRAISE deletion ratio (rep2)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18870-pub-praise-r2-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18870-pub-praise-r2-1">
+Past versions of v2-cl18870-pub-praise-r2-1.png
+</button>
+</p>
+<div id="fig-v2-cl18870-pub-praise-r2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18870-pub-praise-r2-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 </div>
@@ -1863,6 +3547,43 @@ make_heatmap_publication(heatmap_data, &quot;n_praise&quot;, &quot;n_praise&quot
 plot_annotation(title = paste(cl, &quot;  site counts across depth &amp; ratio cutoffs&quot;),
                 theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;, size = 13)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18909-pub-heatmap-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18909-pub-heatmap-1">
+Past versions of v2-cl18909-pub-heatmap-1.png
+</button>
+</p>
+<div id="fig-v2-cl18909-pub-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18909-pub-heatmap-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-bacs-rep1-1" class="section level3">
 <h3>vs BACS (rep1)</h3>
@@ -1870,6 +3591,43 @@ plot_annotation(title = paste(cl, &quot;  site counts across depth &amp; ratio c
   plot_annotation(title = paste(cl, &quot;— Our pU ratio vs BACS pU level (rep1)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18909-pub-bacs-r1-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18909-pub-bacs-r1-1">
+Past versions of v2-cl18909-pub-bacs-r1-1.png
+</button>
+</p>
+<div id="fig-v2-cl18909-pub-bacs-r1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18909-pub-bacs-r1-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-bacs-rep2-1" class="section level3">
 <h3>vs BACS (rep2)</h3>
@@ -1877,6 +3635,43 @@ plot_annotation(title = paste(cl, &quot;  site counts across depth &amp; ratio c
   plot_annotation(title = paste(cl, &quot;— Our pU ratio vs BACS pU level (rep2)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18909-pub-bacs-r2-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18909-pub-bacs-r2-1">
+Past versions of v2-cl18909-pub-bacs-r2-1.png
+</button>
+</p>
+<div id="fig-v2-cl18909-pub-bacs-r2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18909-pub-bacs-r2-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-praise-rep1-1" class="section level3">
 <h3>vs PRAISE (rep1)</h3>
@@ -1884,6 +3679,43 @@ plot_annotation(title = paste(cl, &quot;  site counts across depth &amp; ratio c
   plot_annotation(title = paste(cl, &quot;— Our pU ratio vs PRAISE deletion ratio (rep1)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18909-pub-praise-r1-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18909-pub-praise-r1-1">
+Past versions of v2-cl18909-pub-praise-r1-1.png
+</button>
+</p>
+<div id="fig-v2-cl18909-pub-praise-r1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18909-pub-praise-r1-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-praise-rep2-1" class="section level3">
 <h3>vs PRAISE (rep2)</h3>
@@ -1891,6 +3723,43 @@ plot_annotation(title = paste(cl, &quot;  site counts across depth &amp; ratio c
   plot_annotation(title = paste(cl, &quot;— Our pU ratio vs PRAISE deletion ratio (rep2)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18909-pub-praise-r2-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18909-pub-praise-r2-1">
+Past versions of v2-cl18909-pub-praise-r2-1.png
+</button>
+</p>
+<div id="fig-v2-cl18909-pub-praise-r2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18909-pub-praise-r2-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 </div>
@@ -1911,6 +3780,43 @@ make_heatmap_publication(heatmap_data, &quot;n_praise&quot;, &quot;n_praise&quot
 plot_annotation(title = paste(cl, &quot;  site counts across depth &amp; ratio cutoffs&quot;),
                 theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;, size = 13)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18916-pub-heatmap-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18916-pub-heatmap-1">
+Past versions of v2-cl18916-pub-heatmap-1.png
+</button>
+</p>
+<div id="fig-v2-cl18916-pub-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18916-pub-heatmap-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-bacs-rep1-2" class="section level3">
 <h3>vs BACS (rep1)</h3>
@@ -1918,6 +3824,43 @@ plot_annotation(title = paste(cl, &quot;  site counts across depth &amp; ratio c
   plot_annotation(title = paste(cl, &quot;— Our pU ratio vs BACS pU level (rep1)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18916-pub-bacs-r1-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18916-pub-bacs-r1-1">
+Past versions of v2-cl18916-pub-bacs-r1-1.png
+</button>
+</p>
+<div id="fig-v2-cl18916-pub-bacs-r1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18916-pub-bacs-r1-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-bacs-rep2-2" class="section level3">
 <h3>vs BACS (rep2)</h3>
@@ -1925,6 +3868,43 @@ plot_annotation(title = paste(cl, &quot;  site counts across depth &amp; ratio c
   plot_annotation(title = paste(cl, &quot;— Our pU ratio vs BACS pU level (rep2)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18916-pub-bacs-r2-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18916-pub-bacs-r2-1">
+Past versions of v2-cl18916-pub-bacs-r2-1.png
+</button>
+</p>
+<div id="fig-v2-cl18916-pub-bacs-r2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18916-pub-bacs-r2-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-praise-rep1-2" class="section level3">
 <h3>vs PRAISE (rep1)</h3>
@@ -1932,6 +3912,43 @@ plot_annotation(title = paste(cl, &quot;  site counts across depth &amp; ratio c
   plot_annotation(title = paste(cl, &quot;— Our pU ratio vs PRAISE deletion ratio (rep1)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18916-pub-praise-r1-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18916-pub-praise-r1-1">
+Past versions of v2-cl18916-pub-praise-r1-1.png
+</button>
+</p>
+<div id="fig-v2-cl18916-pub-praise-r1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18916-pub-praise-r1-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-praise-rep2-2" class="section level3">
 <h3>vs PRAISE (rep2)</h3>
@@ -1939,6 +3956,43 @@ plot_annotation(title = paste(cl, &quot;  site counts across depth &amp; ratio c
   plot_annotation(title = paste(cl, &quot;— Our pU ratio vs PRAISE deletion ratio (rep2)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl18916-pub-praise-r2-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl18916-pub-praise-r2-1">
+Past versions of v2-cl18916-pub-praise-r2-1.png
+</button>
+</p>
+<div id="fig-v2-cl18916-pub-praise-r2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl18916-pub-praise-r2-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 </div>
@@ -1959,6 +4013,43 @@ make_heatmap_publication(heatmap_data, &quot;n_praise&quot;, &quot;n_praise&quot
 plot_annotation(title = paste(cl, &quot;  site counts across depth &amp; ratio cutoffs&quot;),
                 theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;, size = 13)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl19099-pub-heatmap-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl19099-pub-heatmap-1">
+Past versions of v2-cl19099-pub-heatmap-1.png
+</button>
+</p>
+<div id="fig-v2-cl19099-pub-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl19099-pub-heatmap-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-bacs-rep1-3" class="section level3">
 <h3>vs BACS (rep1)</h3>
@@ -1966,6 +4057,43 @@ plot_annotation(title = paste(cl, &quot;  site counts across depth &amp; ratio c
   plot_annotation(title = paste(cl, &quot;— Our pU ratio vs BACS pU level (rep1)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl19099-pub-bacs-r1-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl19099-pub-bacs-r1-1">
+Past versions of v2-cl19099-pub-bacs-r1-1.png
+</button>
+</p>
+<div id="fig-v2-cl19099-pub-bacs-r1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl19099-pub-bacs-r1-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-bacs-rep2-3" class="section level3">
 <h3>vs BACS (rep2)</h3>
@@ -1973,6 +4101,43 @@ plot_annotation(title = paste(cl, &quot;  site counts across depth &amp; ratio c
   plot_annotation(title = paste(cl, &quot;— Our pU ratio vs BACS pU level (rep2)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl19099-pub-bacs-r2-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl19099-pub-bacs-r2-1">
+Past versions of v2-cl19099-pub-bacs-r2-1.png
+</button>
+</p>
+<div id="fig-v2-cl19099-pub-bacs-r2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl19099-pub-bacs-r2-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-praise-rep1-3" class="section level3">
 <h3>vs PRAISE (rep1)</h3>
@@ -1980,6 +4145,43 @@ plot_annotation(title = paste(cl, &quot;  site counts across depth &amp; ratio c
   plot_annotation(title = paste(cl, &quot;— Our pU ratio vs PRAISE deletion ratio (rep1)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl19099-pub-praise-r1-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl19099-pub-praise-r1-1">
+Past versions of v2-cl19099-pub-praise-r1-1.png
+</button>
+</p>
+<div id="fig-v2-cl19099-pub-praise-r1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl19099-pub-praise-r1-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-praise-rep2-3" class="section level3">
 <h3>vs PRAISE (rep2)</h3>
@@ -1987,6 +4189,43 @@ plot_annotation(title = paste(cl, &quot;  site counts across depth &amp; ratio c
   plot_annotation(title = paste(cl, &quot;— Our pU ratio vs PRAISE deletion ratio (rep2)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_rRNA.Rmd/v2-cl19099-pub-praise-r2-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-v2-cl19099-pub-praise-r2-1">
+Past versions of v2-cl19099-pub-praise-r2-1.png
+</button>
+</p>
+<div id="fig-v2-cl19099-pub-praise-r2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6cda5545ec2bdace5945c95ad5d02df72542dfbe/docs/figure/qc_rRNA.Rmd/v2-cl19099-pub-praise-r2-1.png" target="_blank">6cda554</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
