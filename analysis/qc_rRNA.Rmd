@@ -1,7 +1,7 @@
 ---
 title: "Quality control using sites called from rRNA"
 author: "XSun"
-date: "2026-06-04"
+date: "2026-06-06"
 output:
   workflowr::wflow_html:
     code_folding: hide
@@ -10,14 +10,31 @@ output:
 
 # Introduction
 
-We ran the pipeline for several cell lines: CL18909, CL18870, CL18916, CL19099. 
+We ran the PUMSEQ pipeline on four cell lines: **CL18870**, **CL18909**,
+**CL18916**, and **CL19099**.  Each cell line has four treated replicates.
 
-We do quality control using the sites called from rRNA here. We compare the sites called from different cell lines and also, compare them with the published data: 
+Pseudouridine (pU) sites are identified from ribosomal RNA (rRNA) reads.  rRNA
+is an ideal positive control because its pU sites are abundant, well-conserved,
+and independently validated by multiple published methods.  A good sequencing
+run should:
 
-- Paper 1: PMID39349603 (BACS)
-- Paper 2: PMID36997645 (PRAISE)
+1. Show consistent %pU values across replicates of the same cell line.
+2. Detect the same set of sites reproducibly across replicates (high overlap).
+3. Agree with sites reported in published datasets.
 
-```{r warning=F, message=F}
+The pseudouridine ratio per site is defined as
+
+$$\%\psi = \frac{C}{C + T}$$
+
+where *C* counts cytosine calls (the signature of reverse-transcriptase stop at
+a pU site) and *T* counts unmodified thymidine calls at that position.
+
+We compare our results against two published datasets:
+
+- **BACS** — PMID 39349603: antibody-based capture sequencing.
+- **PRAISE** — PMID 36997645: deletion-based direct sequencing.
+
+```{r setup, warning=FALSE, message=FALSE}
 library(dplyr)
 library(stringr)
 library(ggplot2)
@@ -32,6 +49,8 @@ library(knitr)
 library(kableExtra)
 library(gridExtra)
 library(DT)
+library(UpSetR)
+library(grid)
 
 knitr::opts_chunk$set(
   echo      = TRUE,
@@ -42,19 +61,24 @@ knitr::opts_chunk$set(
 
 cutoffs <- expand.grid(min_depth = c(10, 20),
                        min_ratio = c(0.1, 0.2))
-
-
 ```
 
-# Examing replicates for each cell line
+---
 
-We performed QC on rRNA pseudouridine sites (%pU = C / (C + T)) across
-treated replicates for each cell line. For every cell line it shows:
+# Examining replicates for each cell line
 
-1. **%pU distribution** per replicate (histogram + density)
-2. **Pairwise Pearson correlation** — all sites, sites with %pU >= 0.1, and %pU >= 0.2
-3. **Pairwise Pearson heatmap**  — all sites, sites with %pU >= 0.1, and %pU >= 0.2
+For each cell line we run four quality checks across its treated replicates:
 
+1. **Site overlap (Jaccard index)** — how many sites are detected in common
+   between each pair of replicates, expressed as a set-similarity score.
+2. **%pU distribution** — histogram and density of the modification ratio per
+   replicate, used to judge overall signal strength and consistency.
+3. **Pairwise Pearson correlation** — quantitative agreement of %pU values at
+   shared sites.
+4. **Pairwise Pearson heatmap** — compact summary of all pairwise correlations.
+
+A minimum sequencing depth of **`r 20` reads** per site is required before a
+site is considered detected.
 
 ```{r config-replicate}
 RESULTS_DIR <- "/project2/xinhe/xsun/pumseq/pumseq_results"
@@ -92,7 +116,6 @@ CELL_LINES <- list(
 MIN_DEPTH <- 20
 ```
 
-
 ```{r helpers-replicate}
 # ── Data loading ──────────────────────────────────────────────────────────────
 read_rRNA_psi <- function(cl, sample_id, mpile_dir) {
@@ -120,18 +143,15 @@ read_rRNA_psi <- function(cl, sample_id, mpile_dir) {
 plot_distribution <- function(psi_mat, rep_names, cl) {
   thresholds <- list(
     list(thr = NULL, label = "all sites",   tag = "all"),
-    list(thr = 0.1,  label = "%\u03a8 \u2265 0.1", tag = "psi01"),
-    list(thr = 0.2,  label = "%\u03a8 \u2265 0.2", tag = "psi02")
+    list(thr = 0.1,  label = "%pU >= 0.1", tag = "psi01"),
+    list(thr = 0.2,  label = "%pU >= 0.2", tag = "psi02")
   )
 
   all_plots <- lapply(thresholds, function(th) {
     lapply(rep_names, function(samp) {
       df <- data.frame(psi = psi_mat[[samp]])
       df <- df[!is.na(df$psi), , drop = FALSE]
-
-      # apply threshold filter
       if (!is.null(th$thr)) df <- df[df$psi >= th$thr, , drop = FALSE]
-
       if (nrow(df) == 0) return(NULL)
 
       med_val  <- median(df$psi)
@@ -139,28 +159,23 @@ plot_distribution <- function(psi_mat, rep_names, cl) {
       n_01     <- sum(df$psi >= 0.1)
       n_02     <- sum(df$psi >= 0.2)
 
-      # annotation varies by threshold
       ann_text <- if (is.null(th$thr)) {
         sprintf(
-          "n = %d\nmedian = %.3f\nmean = %.3f\n\u22650.1: %d (%.1f%%)\n\u22650.2: %d (%.1f%%)",
+          "n = %d\nmedian = %.3f\nmean = %.3f\n>=0.1: %d (%.1f%%)\n>=0.2: %d (%.1f%%)",
           nrow(df), med_val, mean_val,
           n_01, 100 * n_01 / nrow(df),
           n_02, 100 * n_02 / nrow(df)
         )
       } else {
-        sprintf(
-          "n = %d\nmedian = %.3f\nmean = %.3f",
-          nrow(df), med_val, mean_val
-        )
+        sprintf("n = %d\nmedian = %.3f\nmean = %.3f", nrow(df), med_val, mean_val)
       }
 
-      # threshold lines: only show the ones still relevant
       vlines <- if (is.null(th$thr)) {
         c(0.1, 0.2)
       } else if (th$thr == 0.1) {
-        0.2   # only show 0.2 cutoff inside the >=0.1 plot
+        0.2
       } else {
-        NULL  # nothing extra to mark inside >=0.2 plot
+        NULL
       }
 
       p <- ggplot(df, aes(x = psi)) +
@@ -180,7 +195,7 @@ plot_distribution <- function(psi_mat, rep_names, cl) {
         labs(
           title    = samp,
           subtitle = th$label,
-          x        = "%\u03a8  (C / C+T)",
+          x        = "%pU  (C / C+T)",
           y        = "Density"
         ) +
         theme_bw(base_size = 10) +
@@ -193,15 +208,13 @@ plot_distribution <- function(psi_mat, rep_names, cl) {
     })
   })
 
-  # flatten and name: list of (threshold_group x replicates)
-  # return as a named list of plot groups for flexible rendering
   names(all_plots) <- sapply(thresholds, `[[`, "label")
   lapply(all_plots, function(grp) Filter(Negate(is.null), grp))
 }
 
-# ── Scatter plots for one threshold ──────────────────────────────────────────
+# ── Scatter plots ─────────────────────────────────────────────────────────────
 make_scatter_plots_replicate <- function(psi_mat, pairs, cl, thr = NULL) {
-  label <- if (is.null(thr)) "all sites" else sprintf("%%\u03a8 \u2265 %.1f", thr)
+  label <- if (is.null(thr)) "all sites" else sprintf("%%pU >= %.1f", thr)
 
   lapply(pairs, function(p) {
     df <- psi_mat[complete.cases(psi_mat[, p]), ]
@@ -219,14 +232,14 @@ make_scatter_plots_replicate <- function(psi_mat, pairs, cl, thr = NULL) {
                hjust = 1.1, vjust = -0.3, size = 3.5) +
       labs(
         title = sprintf("%s vs %s\n[%s]", p[1], p[2], label),
-        x     = sprintf("%%\u03a8  %s", p[1]),
-        y     = sprintf("%%\u03a8  %s", p[2])
+        x     = sprintf("%%pU  %s", p[1]),
+        y     = sprintf("%%pU  %s", p[2])
       ) +
       theme_bw(base_size = 10)
   })
 }
 
-# ── Arrange + render a list of plots inline ───────────────────────────────────
+# ── Arrange + render a list of plots ─────────────────────────────────────────
 render_plots <- function(plot_list, ncol = 3,
                          width_per = 5, height_per = 4.5) {
   plot_list <- Filter(Negate(is.null), plot_list)
@@ -236,14 +249,12 @@ render_plots <- function(plot_list, ncol = 3,
   }
   n      <- length(plot_list)
   ncol_p <- min(ncol, n)
-  nrow_p <- ceiling(n / ncol_p)
   grid.arrange(grobs = plot_list, ncol = ncol_p)
 }
 
-
-# ── Correlation heatmap for one threshold ─────────────────────────────────────
+# ── Pearson correlation heatmap ───────────────────────────────────────────────
 make_cor_heatmap <- function(psi_mat, pairs, rep_names, cl, thr = NULL) {
-  label <- if (is.null(thr)) "all sites" else sprintf("%%\u03a8 \u2265 %.1f", thr)
+  label <- if (is.null(thr)) "all sites" else sprintf("%%pU >= %.1f", thr)
 
   cor_df <- do.call(rbind, lapply(pairs, function(p) {
     df <- psi_mat[complete.cases(psi_mat[, p]), ]
@@ -255,24 +266,21 @@ make_cor_heatmap <- function(psi_mat, pairs, rep_names, cl, thr = NULL) {
                n = nrow(df), stringsAsFactors = FALSE)
   }))
 
-  # build a symmetric matrix (diagonal = 1)
   mat <- matrix(NA_real_, nrow = length(rep_names), ncol = length(rep_names),
                 dimnames = list(rep_names, rep_names))
   diag(mat) <- 1
-  for (i in seq_len(nrow(cor_df))) {
-    mat[cor_df$rep1[i], cor_df$rep2[i]] <- cor_df$r[i]
-    mat[cor_df$rep2[i], cor_df$rep1[i]] <- cor_df$r[i]
-  }
-
-  # n lookup (symmetric, diagonal = NA for display)
   n_mat <- matrix(NA_integer_, nrow = length(rep_names), ncol = length(rep_names),
                   dimnames = list(rep_names, rep_names))
   for (i in seq_len(nrow(cor_df))) {
+    mat[cor_df$rep1[i], cor_df$rep2[i]] <- cor_df$r[i]
+    mat[cor_df$rep2[i], cor_df$rep1[i]] <- cor_df$r[i]
     n_mat[cor_df$rep1[i], cor_df$rep2[i]] <- cor_df$n[i]
     n_mat[cor_df$rep2[i], cor_df$rep1[i]] <- cor_df$n[i]
   }
 
-  # tidy for ggplot
+  short <- function(s) sub("^[^_]+_", "", s)
+  lev   <- short(rep_names)
+
   plot_df <- expand.grid(x = rep_names, y = rep_names,
                          stringsAsFactors = FALSE) %>%
     rowwise() %>%
@@ -285,33 +293,21 @@ make_cor_heatmap <- function(psi_mat, pairs, rep_names, cl, thr = NULL) {
         TRUE ~ sprintf("%.3f\n(n=%d)", r, n)
       )
     ) %>%
-    ungroup()
-
-  # shorten sample IDs for axis labels (keep last 2 dash-fields)
-  short <- function(s) sub("^[^_]+_", "", s)   # drop "CLxxxxx_" prefix
-  plot_df$x_lab <- short(plot_df$x)
-  plot_df$y_lab <- short(plot_df$y)
-  lev <- short(rep_names)
-  plot_df$x_lab <- factor(plot_df$x_lab, levels = lev)
-  plot_df$y_lab <- factor(plot_df$y_lab, levels = rev(lev))
+    ungroup() %>%
+    mutate(
+      x_lab = factor(short(x), levels = lev),
+      y_lab = factor(short(y), levels = rev(lev))
+    )
 
   ggplot(plot_df, aes(x = x_lab, y = y_lab, fill = r)) +
     geom_tile(color = "white", linewidth = 0.8) +
     geom_text(aes(label = label), size = 3, lineheight = 0.9) +
-    scale_fill_gradientn(
-      colors  = c("#4575B4", "#91BFDB", "#E0F3F8", "#FFFFBF",
-                  "#FEE090", "#FC8D59", "#D73027"),
-      values  = scales::rescale(c(0, 0.5, 0.8, 0.9, 0.95, 0.99, 1)),
-      limits  = c(0, 1),
-      na.value = "grey90",
-      name    = "Pearson r"
+    scale_fill_gradient2(
+      low  = "#1a9641", mid = "#ffffbf", high = "#d7191c",
+      midpoint = 0.5, limits = c(0, 1), na.value = "grey90",
+      name = "Pearson r"
     ) +
-    labs(
-      title    = cl,
-      subtitle = label,
-      x        = NULL,
-      y        = NULL
-    ) +
+    labs(title = cl, subtitle = label, x = NULL, y = NULL) +
     coord_fixed() +
     theme_bw(base_size = 10) +
     theme(
@@ -322,7 +318,6 @@ make_cor_heatmap <- function(psi_mat, pairs, rep_names, cl, thr = NULL) {
     )
 }
 
-# ── Three-panel heatmap (all / >=0.1 / >=0.2) ────────────────────────────────
 make_cor_heatmaps <- function(psi_mat, pairs, rep_names, cl) {
   list(
     make_cor_heatmap(psi_mat, pairs, rep_names, cl, thr = NULL),
@@ -330,11 +325,93 @@ make_cor_heatmaps <- function(psi_mat, pairs, rep_names, cl) {
     make_cor_heatmap(psi_mat, pairs, rep_names, cl, thr = 0.2)
   )
 }
+
+# ── Jaccard index helpers ─────────────────────────────────────────────────────
+jaccard <- function(a, b) {
+  n_int <- length(intersect(a, b))
+  n_uni <- length(union(a, b))
+  if (n_uni == 0) return(NA_real_)
+  n_int / n_uni
+}
+
+make_jaccard_heatmap <- function(rep_psi, cl, thr = NULL) {
+  label     <- if (is.null(thr)) "all sites" else sprintf("%%pU >= %.1f", thr)
+  rep_names <- names(rep_psi)
+  pairs     <- combn(rep_names, 2, simplify = FALSE)
+
+  mat <- matrix(NA_real_, length(rep_names), length(rep_names),
+                dimnames = list(rep_names, rep_names))
+  diag(mat) <- 1
+  n_int_mat <- matrix(NA_integer_, length(rep_names), length(rep_names),
+                      dimnames = list(rep_names, rep_names))
+
+  for (p in pairs) {
+    sa <- rep_psi[[p[1]]]
+    sb <- rep_psi[[p[2]]]
+    if (!is.null(thr)) {
+      sa <- sa[sa >= thr]
+      sb <- sb[sb >= thr]
+    }
+    sites_a <- names(sa)
+    sites_b <- names(sb)
+    j   <- jaccard(sites_a, sites_b)
+    n_i <- length(intersect(sites_a, sites_b))
+    mat[p[1], p[2]]       <- j
+    mat[p[2], p[1]]       <- j
+    n_int_mat[p[1], p[2]] <- n_i
+    n_int_mat[p[2], p[1]] <- n_i
+  }
+
+  short <- function(s) sub("^[^_]+_", "", s)
+  lev   <- short(rep_names)
+
+  plot_df <- expand.grid(x = rep_names, y = rep_names,
+                         stringsAsFactors = FALSE) %>%
+    rowwise() %>%
+    mutate(
+      j     = mat[x, y],
+      n_int = n_int_mat[x, y],
+      label = case_when(
+        x == y   ~ "1.000",
+        is.na(j) ~ "NA",
+        TRUE     ~ sprintf("%.3f\n(n=%d)", j, n_int)
+      )
+    ) %>%
+    ungroup() %>%
+    mutate(
+      x_lab = factor(short(x), levels = lev),
+      y_lab = factor(short(y), levels = rev(lev))
+    )
+
+  ggplot(plot_df, aes(x = x_lab, y = y_lab, fill = j)) +
+    geom_tile(color = "white", linewidth = 0.8) +
+    geom_text(aes(label = label), size = 3, lineheight = 0.9) +
+    scale_fill_gradient2(
+      low      = "#1a9641", mid = "#ffffbf", high = "#d7191c",
+      midpoint = 0.5, limits = c(0, 1), na.value = "grey90",
+      name     = "Jaccard"
+    ) +
+    labs(title = cl, subtitle = label, x = NULL, y = NULL) +
+    coord_fixed() +
+    theme_bw(base_size = 10) +
+    theme(
+      axis.text.x       = element_text(angle = 35, hjust = 1),
+      panel.grid        = element_blank(),
+      panel.border      = element_blank(),
+      legend.key.height = unit(0.8, "cm")
+    )
+}
+
+make_jaccard_heatmaps <- function(rep_psi, cl) {
+  list(
+    make_jaccard_heatmap(rep_psi, cl, thr = NULL),
+    make_jaccard_heatmap(rep_psi, cl, thr = 0.1),
+    make_jaccard_heatmap(rep_psi, cl, thr = 0.2)
+  )
+}
 ```
 
-
 ```{r run-all-replicate, include=FALSE}
-# Pre-load all cell line data so each section chunk can reference it cleanly.
 cl_data <- list()
 
 for (cl in names(CELL_LINES)) {
@@ -368,273 +445,329 @@ for (cl in names(CELL_LINES)) {
     psi_mat   = psi_mat,
     rep_names = rep_names,
     pairs     = pairs,
-    n_sites   = nrow(merged)
+    n_sites   = nrow(merged),
+    site_sets = setNames(
+      lapply(rep_list, function(df) df$site),
+      sapply(rep_list, function(df) colnames(df)[2])
+    ),
+    # Named numeric vector (site -> psi) per replicate, used for Jaccard
+    rep_psi = setNames(
+      lapply(rep_list, function(df) setNames(df[[2]], df$site)),
+      sapply(rep_list, function(df) colnames(df)[2])
+    )
   )
 }
 ```
 
-
+---
 
 ## CL18870 {.tabset}
 
-```{r cl18870-check, include=FALSE}
+```{r v2-cl18870-check, include=FALSE}
 cl  <- "CL18870"
 dat <- cl_data[[cl]]
 ```
 
 `r if (!dat$ok) paste("**Skipped:**", dat$reason)`
 
-```{r cl18870-skip, eval=!dat$ok, echo=FALSE}
-## nothing to render — message printed above via inline R
+### Site overlap (Jaccard index)
+
+The **Jaccard index** measures set similarity between two replicates:
+
+$$J(A, B) = \frac{|A \cap B|}{|A \cup B|}$$
+
+A score of 1 means every detected site appears in both replicates; 0 means
+no shared sites.  Three thresholds are shown side by side: all sites passing
+the depth filter, then those additionally requiring %pU >= 0.1 or %pU >= 0.2.
+The intersection count is shown in parentheses.
+
+```{r v2-cl18870-jaccard, eval=dat$ok, fig.width=13.5, fig.height=4.8}
+grid.arrange(grobs = make_jaccard_heatmaps(dat$rep_psi, cl), ncol = 3)
 ```
 
-### %pU Distribution - All sites
+### %pU Distribution — all sites
 
-```{r cl18870-dist-all, eval=dat$ok, fig.width=11, fig.height=9}
+Each panel shows the %pU distribution for one replicate (histogram + density
+overlay).  The **red dashed** line marks the median; the **orange dotted**
+line marks the mean.  **Green dashed** lines indicate the 0.1 and 0.2 ratio
+cutoffs.  Consistently shaped distributions across replicates indicate
+stable library preparation and sequencing quality.
+
+```{r v2-cl18870-dist-all, eval=dat$ok, fig.width=11, fig.height=9}
 render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["all sites"]],
              ncol = 2)
 ```
 
-### %pU Distribution - %pU >= 0.1
-```{r cl18870-dist-01, eval=dat$ok, fig.width=11, fig.height=9}
-render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["%\u03a8 \u2265 0.1"]],
+### %pU Distribution — %pU >= 0.1
+
+Sites restricted to %pU >= 0.1, enriching for confidently modified positions.
+
+```{r v2-cl18870-dist-01, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["%pU >= 0.1"]],
              ncol = 2)
 ```
 
-### %pU Distribution - %pU >= 0.2
-```{r cl18870-dist-02, eval=dat$ok, fig.width=11, fig.height=9}
-render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["%\u03a8 \u2265 0.2"]],
+### %pU Distribution — %pU >= 0.2
+
+Sites restricted to %pU >= 0.2, the most stringent detection threshold.
+
+```{r v2-cl18870-dist-02, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["%pU >= 0.2"]],
              ncol = 2)
 ```
 
-### Pairwise correlation scatter plot— all sites
+### Pairwise correlation — all sites
 
-Sites with depth >= `r MIN_DEPTH` shared across all replicates: **`r if(dat$ok) dat$n_sites`**
+Scatter plots of %pU at sites detected (depth >= `r MIN_DEPTH`) in **both**
+replicates of each pair.  The **red dashed** diagonal is the identity line.
+Pearson's r and the number of shared sites are shown in the lower-right corner.
 
-```{r cl18870-cor-all, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+Sites shared across all replicates: **`r if(dat$ok) dat$n_sites`**
+
+```{r v2-cl18870-cor-all, eval=dat$ok, fig.width=13.5, fig.height=4.5}
 render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = NULL))
 ```
 
-### Pairwise correlation scatter plot— %pU >= 0.1
+### Pairwise correlation — %pU >= 0.1
 
-```{r cl18870-cor-01, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+```{r v2-cl18870-cor-01, eval=dat$ok, fig.width=13.5, fig.height=4.5}
 render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = 0.1))
 ```
 
-### Pairwise correlation scatter plot— %pU >= 0.2
+### Pairwise correlation — %pU >= 0.2
 
-```{r cl18870-cor-02, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+```{r v2-cl18870-cor-02, eval=dat$ok, fig.width=13.5, fig.height=4.5}
 render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = 0.2))
 ```
 
-
 ### Pairwise Pearson heatmap
 
-```{r cl18870-heatmap1, eval=dat$ok, fig.width=13.5, fig.height=4.8}
-render_plots(
-  make_cor_heatmaps(dat$psi_mat, dat$pairs, dat$rep_names, cl),
-  ncol = 3
-)
+Compact summary of all pairwise Pearson correlations.  Each cell shows
+Pearson's r and the number of shared sites used.  Three panels correspond to
+the three %pU thresholds above.
+
+```{r v2-cl18870-heatmap, eval=dat$ok, fig.width=13.5, fig.height=4.8}
+render_plots(make_cor_heatmaps(dat$psi_mat, dat$pairs, dat$rep_names, cl), ncol = 3)
 ```
 
 ---
 
 ## CL18909 {.tabset}
 
-```{r cl18909-check, include=FALSE}
+```{r v2-cl18909-check, include=FALSE}
 cl  <- "CL18909"
 dat <- cl_data[[cl]]
 ```
 
 `r if (!dat$ok) paste("**Skipped:**", dat$reason)`
 
-### %pU Distribution
+### Site overlap (Jaccard index)
 
-#### All sites
-```{r cl18909-dist-all, eval=dat$ok, fig.width=11, fig.height=9}
+```{r v2-cl18909-jaccard, eval=dat$ok, fig.width=13.5, fig.height=4.8}
+grid.arrange(grobs = make_jaccard_heatmaps(dat$rep_psi, cl), ncol = 3)
+```
+
+### %pU Distribution — all sites
+
+```{r v2-cl18909-dist-all, eval=dat$ok, fig.width=11, fig.height=9}
 render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["all sites"]],
              ncol = 2)
 ```
 
-### %pU Distribution - %pU >= 0.1
-```{r cl18909-dist-01, eval=dat$ok, fig.width=11, fig.height=9}
-render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["%\u03a8 \u2265 0.1"]],
+### %pU Distribution — %pU >= 0.1
+
+```{r v2-cl18909-dist-01, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["%pU >= 0.1"]],
              ncol = 2)
 ```
 
-### %pU Distribution - %pU >= 0.2
-```{r cl18909-dist-02, eval=dat$ok, fig.width=11, fig.height=9}
-render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["%\u03a8 \u2265 0.2"]],
+### %pU Distribution — %pU >= 0.2
+
+```{r v2-cl18909-dist-02, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["%pU >= 0.2"]],
              ncol = 2)
 ```
 
-### Pairwise correlation scatter plot— all sites
+### Pairwise correlation — all sites
 
-Sites with depth >= `r MIN_DEPTH` shared across all replicates: **`r if(dat$ok) dat$n_sites`**
+Sites shared across all replicates: **`r if(dat$ok) dat$n_sites`**
 
-```{r cl18909-cor-all, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+```{r v2-cl18909-cor-all, eval=dat$ok, fig.width=13.5, fig.height=4.5}
 render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = NULL))
 ```
 
-### Pairwise correlation scatter plot— %pU >= 0.1
+### Pairwise correlation — %pU >= 0.1
 
-```{r cl18909-cor-01, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+```{r v2-cl18909-cor-01, eval=dat$ok, fig.width=13.5, fig.height=4.5}
 render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = 0.1))
 ```
 
-### Pairwise correlation scatter plot— %pU >= 0.2
+### Pairwise correlation — %pU >= 0.2
 
-```{r cl18909-cor-02, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+```{r v2-cl18909-cor-02, eval=dat$ok, fig.width=13.5, fig.height=4.5}
 render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = 0.2))
 ```
 
 ### Pairwise Pearson heatmap
 
-```{r cl18909-heatmap2, eval=dat$ok, fig.width=13.5, fig.height=4.8}
-render_plots(
-  make_cor_heatmaps(dat$psi_mat, dat$pairs, dat$rep_names, cl),
-  ncol = 3
-)
+```{r v2-cl18909-heatmap, eval=dat$ok, fig.width=13.5, fig.height=4.8}
+render_plots(make_cor_heatmaps(dat$psi_mat, dat$pairs, dat$rep_names, cl), ncol = 3)
 ```
 
 ---
 
 ## CL18916 {.tabset}
 
-```{r cl18916-check, include=FALSE}
+```{r v2-cl18916-check, include=FALSE}
 cl  <- "CL18916"
 dat <- cl_data[[cl]]
 ```
 
 `r if (!dat$ok) paste("**Skipped:**", dat$reason)`
 
-### %pU Distribution
+### Site overlap (Jaccard index)
 
-#### All sites
-```{r cl18916-dist-all, eval=dat$ok, fig.width=11, fig.height=9}
+```{r v2-cl18916-jaccard, eval=dat$ok, fig.width=13.5, fig.height=4.8}
+grid.arrange(grobs = make_jaccard_heatmaps(dat$rep_psi, cl), ncol = 3)
+```
+
+### %pU Distribution — all sites
+
+```{r v2-cl18916-dist-all, eval=dat$ok, fig.width=11, fig.height=9}
 render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["all sites"]],
              ncol = 2)
 ```
 
-### %pU Distribution - %pU >= 0.1
-```{r cl18916-dist-01, eval=dat$ok, fig.width=11, fig.height=9}
-render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["%\u03a8 \u2265 0.1"]],
+### %pU Distribution — %pU >= 0.1
+
+```{r v2-cl18916-dist-01, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["%pU >= 0.1"]],
              ncol = 2)
 ```
 
-### %pU Distribution - %pU >= 0.2
-```{r cl18916-dist-02, eval=dat$ok, fig.width=11, fig.height=9}
-render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["%\u03a8 \u2265 0.2"]],
+### %pU Distribution — %pU >= 0.2
+
+```{r v2-cl18916-dist-02, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["%pU >= 0.2"]],
              ncol = 2)
 ```
 
-### Pairwise correlation scatter plot— all sites
+### Pairwise correlation — all sites
 
-Sites with depth >= `r MIN_DEPTH` shared across all replicates: **`r if(dat$ok) dat$n_sites`**
+Sites shared across all replicates: **`r if(dat$ok) dat$n_sites`**
 
-```{r cl18916-cor-all, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+```{r v2-cl18916-cor-all, eval=dat$ok, fig.width=13.5, fig.height=4.5}
 render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = NULL))
 ```
 
-### Pairwise correlation scatter plot— %pU >= 0.1
+### Pairwise correlation — %pU >= 0.1
 
-```{r cl18916-cor-01, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+```{r v2-cl18916-cor-01, eval=dat$ok, fig.width=13.5, fig.height=4.5}
 render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = 0.1))
 ```
 
-### Pairwise correlation scatter plot— %pU >= 0.2
+### Pairwise correlation — %pU >= 0.2
 
-```{r cl18916-cor-02, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+```{r v2-cl18916-cor-02, eval=dat$ok, fig.width=13.5, fig.height=4.5}
 render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = 0.2))
 ```
 
 ### Pairwise Pearson heatmap
 
-```{r cl18916-heatmap1, eval=dat$ok, fig.width=13.5, fig.height=4.8}
-render_plots(
-  make_cor_heatmaps(dat$psi_mat, dat$pairs, dat$rep_names, cl),
-  ncol = 3
-)
+```{r v2-cl18916-heatmap, eval=dat$ok, fig.width=13.5, fig.height=4.8}
+render_plots(make_cor_heatmaps(dat$psi_mat, dat$pairs, dat$rep_names, cl), ncol = 3)
 ```
 
 ---
 
 ## CL19099 {.tabset}
 
-```{r cl19099-check, include=FALSE}
+```{r v2-cl19099-check, include=FALSE}
 cl  <- "CL19099"
 dat <- cl_data[[cl]]
 ```
 
 `r if (!dat$ok) paste("**Skipped:**", dat$reason)`
 
-### %pU Distribution
+### Site overlap (Jaccard index)
 
-#### All sites
-```{r cl19099-dist-all, eval=dat$ok, fig.width=11, fig.height=9}
+```{r v2-cl19099-jaccard, eval=dat$ok, fig.width=13.5, fig.height=4.8}
+grid.arrange(grobs = make_jaccard_heatmaps(dat$rep_psi, cl), ncol = 3)
+```
+
+### %pU Distribution — all sites
+
+```{r v2-cl19099-dist-all, eval=dat$ok, fig.width=11, fig.height=9}
 render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["all sites"]],
              ncol = 2)
 ```
 
-### %pU Distribution - %pU >= 0.1
-```{r cl19099-dist-01, eval=dat$ok, fig.width=11, fig.height=9}
-render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["%\u03a8 \u2265 0.1"]],
+### %pU Distribution — %pU >= 0.1
+
+```{r v2-cl19099-dist-01, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["%pU >= 0.1"]],
              ncol = 2)
 ```
 
-### %pU Distribution - %pU >= 0.2
-```{r cl19099-dist-02, eval=dat$ok, fig.width=11, fig.height=9}
-render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["%\u03a8 \u2265 0.2"]],
+### %pU Distribution — %pU >= 0.2
+
+```{r v2-cl19099-dist-02, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots(plot_distribution(dat$psi_mat, dat$rep_names, cl)[["%pU >= 0.2"]],
              ncol = 2)
 ```
 
-### Pairwise correlation scatter plot— all sites
+### Pairwise correlation — all sites
 
-Sites with depth >= `r MIN_DEPTH` shared across all replicates: **`r if(dat$ok) dat$n_sites`**
+Sites shared across all replicates: **`r if(dat$ok) dat$n_sites`**
 
-```{r cl19099-cor-all, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+```{r v2-cl19099-cor-all, eval=dat$ok, fig.width=13.5, fig.height=4.5}
 render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = NULL))
 ```
 
-### Pairwise correlation scatter plot— %pU >= 0.1
+### Pairwise correlation — %pU >= 0.1
 
-```{r cl19099-cor-01, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+```{r v2-cl19099-cor-01, eval=dat$ok, fig.width=13.5, fig.height=4.5}
 render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = 0.1))
 ```
 
-### Pairwise correlation scatter plot— %pU >= 0.2
+### Pairwise correlation — %pU >= 0.2
 
-```{r cl19099-cor-02, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+```{r v2-cl19099-cor-02, eval=dat$ok, fig.width=13.5, fig.height=4.5}
 render_plots(make_scatter_plots_replicate(dat$psi_mat, dat$pairs, cl, thr = 0.2))
 ```
 
 ### Pairwise Pearson heatmap
 
-```{r cl19099-heatmap1, eval=dat$ok, fig.width=13.5, fig.height=4.8}
-render_plots(
-  make_cor_heatmaps(dat$psi_mat, dat$pairs, dat$rep_names, cl),
-  ncol = 3
-)
+```{r v2-cl19099-heatmap, eval=dat$ok, fig.width=13.5, fig.height=4.8}
+render_plots(make_cor_heatmaps(dat$psi_mat, dat$pairs, dat$rep_names, cl), ncol = 3)
 ```
 
 ---
 
+# Comparing pooled data among cell lines
 
+After per-replicate QC, replicates for each cell line are **pooled**: the
+depth and C-count across all four replicates are summed, and a pooled %pU ratio
+is computed.  Each site also records how many individual replicates it was
+detected in (`n_samples`).
 
+We explore the effect of three filtering dimensions simultaneously:
 
+| Dimension | Values |
+|-----------|--------|
+| Minimum pooled depth | 10, 20 |
+| Minimum pooled %pU ratio | 0.1, 0.2 |
+| Minimum number of replicates | 1, 2, 3, 4 |
 
-
-# Comparing pooled data among cell lines 
+Stricter cutoffs reduce noise at the cost of fewer sites.  Requiring detection
+in multiple replicates is a strong reproducibility filter.
 
 ```{r setup-comparingcellline, message=FALSE, warning=FALSE}
-
 RESULTS_DIR  <- "/project2/xinhe/xsun/pumseq/pumseq_results"
-CELL_LINES   <- c("CL18870", "CL18909", "CL18916", "CL19099")
+CELL_LINES_V <- c("CL18870", "CL18909", "CL18916", "CL19099")
 DEPTH_CUTS   <- c(10, 20)
 RATIO_CUTS   <- c(0.1, 0.2)
 NSAMP_CUTS   <- 1:4
-
-## ── Helpers ──────────────────────────────────────────────────────────────────
 
 load_pooled_rRNA <- function(cl) {
   f <- file.path(RESULTS_DIR, cl, "pooled_sites", "pooled_rRNA.txt")
@@ -645,12 +778,10 @@ load_pooled_rRNA <- function(cl) {
   dt
 }
 
-## Count sites passing (pooled depth >= d) AND (ratio >= r) AND (n_samples >= n)
 count_sites <- function(dt, min_depth, min_ratio, min_nsamp) {
   sum(dt$depth >= min_depth & dt$ratio >= min_ratio & dt$n_samples >= min_nsamp)
 }
 
-## Build the full site-count grid for one cell line
 build_count_grid <- function(dt) {
   expand.grid(
     min_depth  = DEPTH_CUTS,
@@ -668,8 +799,6 @@ build_count_grid <- function(dt) {
     )
 }
 
-## Heatmap (tile plot) of site counts across depth × ratio cutoffs,
-## faceted by min_n_samples.
 plot_count_heatmap <- function(grid, cl_title) {
   grid |>
     mutate(
@@ -682,7 +811,7 @@ plot_count_heatmap <- function(grid, cl_title) {
     geom_tile(color = "white", linewidth = 0.6) +
     geom_text(aes(label = comma(n_sites)), size = 4, fontface = "bold") +
     scale_fill_gradient(low = "#deebf7", high = "#2171b5",
-                        name = "## sites", labels = comma) +
+                        name = "# sites", labels = comma) +
     facet_wrap(~nsamp_label, nrow = 1) +
     labs(title = cl_title,
          x = "Depth cutoff (pooled)", y = "Ratio cutoff (pooled %pU)") +
@@ -692,25 +821,25 @@ plot_count_heatmap <- function(grid, cl_title) {
           strip.text = element_text(face = "bold"))
 }
 
-## ── Load all data ─────────────────────────────────────────────────────────────
-dat_list <- lapply(CELL_LINES, load_pooled_rRNA)
-names(dat_list) <- CELL_LINES
+dat_list   <- lapply(CELL_LINES_V, load_pooled_rRNA)
+names(dat_list) <- CELL_LINES_V
 
-grid_list <- lapply(dat_list, build_count_grid)
-names(grid_list) <- CELL_LINES
+grid_list  <- lapply(dat_list, build_count_grid)
+names(grid_list) <- CELL_LINES_V
 ```
 
 ## Per cell-line site counts at different cutoffs
 
-Each heatmap shows the number of rRNA sites passing a given combination of
-**pooled depth** (x-axis), **pooled %pU ratio** (y-axis), and
-**minimum number of replicates** (panels).
+Each heatmap shows the number of rRNA sites surviving a combination of
+**pooled depth** (x-axis), **pooled %pU ratio** (y-axis), and **minimum
+number of replicates** detecting the site (panels, left to right).
+Darker blue = more sites.
 
 ---
 
 ### CL18870
 
-```{r cl18870-heatmap, fig.width=12, fig.height=3.5}
+```{r v2-cl18870-count-heatmap, fig.width=12, fig.height=3.5}
 plot_count_heatmap(grid_list[["CL18870"]], "CL18870 – pU site counts")
 ```
 
@@ -718,7 +847,7 @@ plot_count_heatmap(grid_list[["CL18870"]], "CL18870 – pU site counts")
 
 ### CL18909
 
-```{r cl18909-heatmap, fig.width=12, fig.height=3.5}
+```{r v2-cl18909-count-heatmap, fig.width=12, fig.height=3.5}
 plot_count_heatmap(grid_list[["CL18909"]], "CL18909 – pU site counts")
 ```
 
@@ -726,7 +855,7 @@ plot_count_heatmap(grid_list[["CL18909"]], "CL18909 – pU site counts")
 
 ### CL18916
 
-```{r cl18916-heatmap, fig.width=12, fig.height=3.5}
+```{r v2-cl18916-count-heatmap, fig.width=12, fig.height=3.5}
 plot_count_heatmap(grid_list[["CL18916"]], "CL18916 – pU site counts")
 ```
 
@@ -734,7 +863,7 @@ plot_count_heatmap(grid_list[["CL18916"]], "CL18916 – pU site counts")
 
 ### CL19099
 
-```{r cl19099-heatmap, fig.width=12, fig.height=3.5}
+```{r v2-cl19099-count-heatmap, fig.width=12, fig.height=3.5}
 plot_count_heatmap(grid_list[["CL19099"]], "CL19099 – pU site counts")
 ```
 
@@ -742,58 +871,106 @@ plot_count_heatmap(grid_list[["CL19099"]], "CL19099 – pU site counts")
 
 ## Cross-cell-line comparison of site counts
 
-The n_sample below means minimum number of replicates the site identified. 
+We use the **Jaccard index** to quantify how much the detected site sets
+overlap between every pair of cell lines.  For each combination of depth,
+ratio, and n_samples cutoffs, sites passing all filters in each cell line are
+extracted and the pairwise Jaccard is computed:
 
+$$J(A, B) = \frac{|A \cap B|}{|A \cup B|}$$
 
-```{r cross-cl-comparison, fig.width=13, fig.height=9}
-## Combine grids
-all_grids <- bind_rows(
-  lapply(CELL_LINES, function(cl) {
-    grid_list[[cl]] |> mutate(cell_line = cl)
-  })
-) |>
+A high Jaccard index means the two cell lines call largely the same rRNA
+positions, consistent with constitutively modified sites shared across cell
+lines.  Each cell shows the Jaccard score and, in parentheses, the number of
+sites in the intersection.  The layout mirrors the Pearson heatmap below:
+rows = minimum n_samples, columns = depth × ratio cutoff.
+
+```{r v2-cross-cl-comparison, fig.width=14, fig.height=11}
+cl_pairs_v <- combn(CELL_LINES_V, 2, simplify = FALSE)
+
+jaccard_cl_rows <- do.call(rbind, lapply(cl_pairs_v, function(p) {
+  do.call(rbind, lapply(DEPTH_CUTS, function(d) {
+    do.call(rbind, lapply(RATIO_CUTS, function(r) {
+      do.call(rbind, lapply(NSAMP_CUTS, function(n) {
+        sites1  <- dat_list[[p[1]]][depth >= d & ratio >= r & n_samples >= n, site]
+        sites2  <- dat_list[[p[2]]][depth >= d & ratio >= r & n_samples >= n, site]
+        n_int   <- length(intersect(sites1, sites2))
+        n_uni   <- length(union(sites1, sites2))
+        j       <- if (n_uni == 0) NA_real_ else n_int / n_uni
+        data.frame(cl1 = p[1], cl2 = p[2],
+                   min_depth = d, min_ratio = r, min_nsamp = n,
+                   jaccard = round(j, 3), n_intersect = n_int)
+      }))
+    }))
+  }))
+}))
+
+jaccard_cl_sym <- jaccard_cl_rows |>
+  bind_rows(jaccard_cl_rows |> rename(cl1 = cl2, cl2 = cl1)) |>
+  bind_rows(
+    expand.grid(cl1 = CELL_LINES_V, cl2 = CELL_LINES_V,
+                min_depth = DEPTH_CUTS, min_ratio = RATIO_CUTS,
+                min_nsamp = NSAMP_CUTS) |>
+      filter(cl1 == cl2) |>
+      mutate(jaccard = 1, n_intersect = NA_integer_)
+  ) |>
   mutate(
-    cell_line   = factor(cell_line, levels = CELL_LINES),
-    depth_label = factor(depth_label, levels = paste0("depth>=", DEPTH_CUTS)),
-    ratio_label = factor(ratio_label, levels = paste0("ratio>=", rev(RATIO_CUTS))),
-    nsamp_label = factor(nsamp_label, levels = paste0("n_samples>=", NSAMP_CUTS))
+    cl1         = factor(cl1, levels = CELL_LINES_V),
+    cl2         = factor(cl2, levels = rev(CELL_LINES_V)),
+    nsamp_label = factor(paste0("n_samples>=", min_nsamp),
+                         levels = paste0("n_samples>=", NSAMP_CUTS)),
+    dr_label    = factor(
+      paste0("d>=", min_depth, " r>=", min_ratio),
+      levels = apply(expand.grid(d = DEPTH_CUTS, r = RATIO_CUTS), 1,
+                     function(x) paste0("d>=", x["d"], " r>=", x["r"]))
+    ),
+    cell_label  = case_when(
+      cl1 == cl2   ~ "1.000",
+      is.na(jaccard) ~ "NA",
+      TRUE         ~ sprintf("%.3f\n(n=%d)", jaccard, n_intersect)
+    )
   )
 
-## Grouped bar chart: x = cell line, fill = cell line, facet_grid(ratio × depth × n_samples)
-ggplot(all_grids, aes(x = cell_line, y = n_sites, fill = cell_line)) +
-  geom_col(width = 0.7, show.legend = FALSE) +
-  geom_text(aes(label = comma(n_sites)), vjust = -0.3, size = 2.8) +
-  scale_fill_brewer(palette = "Set2") +
-  scale_y_continuous(labels = comma, expand = expansion(mult = c(0, 0.15))) +
-  facet_grid(ratio_label ~ depth_label + nsamp_label) +
+ggplot(jaccard_cl_sym, aes(x = cl1, y = cl2, fill = jaccard)) +
+  geom_tile(color = "white", linewidth = 0.5) +
+  geom_text(aes(label = cell_label), size = 2.8, fontface = "bold",
+            lineheight = 0.9) +
+  scale_fill_gradient2(
+    low = "#1a9641", mid = "#ffffbf", high = "#d7191c",
+    midpoint = 0.5, limits = c(0, 1), na.value = "grey90",
+    name = "Jaccard"
+  ) +
+  facet_grid(nsamp_label ~ dr_label) +
   labs(
-    title = "pU site counts across cell lines",
-    x     = NULL,
-    y     = "Number of sites"
+    title = "Jaccard index of site overlap between cell lines (rRNA pooled sites)",
+    x = NULL, y = NULL
   ) +
   theme_bw(base_size = 10) +
   theme(
-    axis.text.x    = element_text(angle = 40, hjust = 1, size = 8),
+    axis.text.x      = element_text(angle = 30, hjust = 1, size = 9),
+    axis.text.y      = element_text(size = 9),
     strip.background = element_rect(fill = "#e8eaf6"),
-    strip.text     = element_text(face = "bold", size = 8),
-    panel.spacing  = unit(0.4, "lines")
+    strip.text       = element_text(face = "bold", size = 9),
+    panel.spacing    = unit(0.3, "lines"),
+    legend.position  = "right"
   )
 ```
-
-
 
 ---
 
 ## Pearson's r of %pU between cell lines
 
-For each cutoff combination, sites passing all three filters
-(depth, ratio, n_samples) in **both** cell lines are used to compute
-Pearson's r on the pooled %pU (`ratio`).
-Below the correlation matrices, scatter plots are shown for
-a representative cutoff (depth >= 20, ratio >= 0.1, n_samples >= 2).
+To assess whether the same sites are similarly modified across cell lines, we
+compute Pearson's r on the pooled %pU values at sites passing all three cutoff
+filters in **both** cell lines of each pair.  High r across cell lines
+suggests that the detected modification pattern is consistent — i.e., the
+same rRNA sites are strongly modified regardless of cell line — which is
+expected for constitutively modified rRNA residues.
 
-```{r pearson-setup}
-## For a given pair and cutoff, find common passing sites and return Pearson r
+Sites that pass in one cell line but not the other are excluded from the
+correlation (they contribute to the Jaccard-style overlap question, not the
+quantitative agreement question).
+
+```{r v2-pearson-setup}
 pearson_pair <- function(dt1, dt2, min_depth, min_ratio, min_nsamp) {
   pass1 <- dt1[depth >= min_depth & ratio >= min_ratio & n_samples >= min_nsamp,
                .(site, ratio1 = ratio)]
@@ -807,8 +984,7 @@ pearson_pair <- function(dt1, dt2, min_depth, min_ratio, min_nsamp) {
   )
 }
 
-## Build full correlation grid across all cell-line pairs and cutoff combos
-cl_pairs <- combn(CELL_LINES, 2, simplify = FALSE)
+cl_pairs <- combn(CELL_LINES_V, 2, simplify = FALSE)
 
 cor_grid <- do.call(rbind, lapply(cl_pairs, function(p) {
   do.call(rbind, lapply(DEPTH_CUTS, function(d) {
@@ -827,21 +1003,20 @@ cor_grid <- do.call(rbind, lapply(cl_pairs, function(p) {
   }))
 }))
 
-## Add symmetric entries (cl2, cl1) for heatmap matrix
 cor_sym <- cor_grid |>
   bind_rows(
     cor_grid |> rename(cl1 = cl2, cl2 = cl1)
   ) |>
   bind_rows(
-    expand.grid(cl1 = CELL_LINES, cl2 = CELL_LINES,
+    expand.grid(cl1 = CELL_LINES_V, cl2 = CELL_LINES_V,
                 min_depth = DEPTH_CUTS, min_ratio = RATIO_CUTS,
                 min_nsamp = NSAMP_CUTS) |>
       filter(cl1 == cl2) |>
       mutate(pearson_r = 1, n_common = NA_integer_)
   ) |>
   mutate(
-    cl1         = factor(cl1, levels = CELL_LINES),
-    cl2         = factor(cl2, levels = rev(CELL_LINES)),
+    cl1         = factor(cl1, levels = CELL_LINES_V),
+    cl2         = factor(cl2, levels = rev(CELL_LINES_V)),
     nsamp_label = factor(paste0("n_samples>=", min_nsamp),
                          levels = paste0("n_samples>=", NSAMP_CUTS)),
     dr_label    = factor(
@@ -856,10 +1031,12 @@ cor_sym <- cor_grid |>
 
 ### Correlation matrices
 
-Facets: rows = min n_samples, columns = depth × ratio cutoff.
-Values shown inside each cell are Pearson's r (diagonal = 1 by definition).
+The grid of heatmaps below shows Pearson's r between every pair of cell lines
+under all combinations of cutoffs.  Rows = minimum n_samples; columns = depth
+× ratio cutoff.  Diagonal cells equal 1 by definition.  Warmer (red) colours
+indicate higher agreement; a grey cell means too few common sites to compute r.
 
-```{r pearson-heatmap, fig.width=14, fig.height=11}
+```{r v2-pearson-heatmap, fig.width=14, fig.height=11}
 ggplot(cor_sym, aes(x = cl1, y = cl2, fill = pearson_r)) +
   geom_tile(color = "white", linewidth = 0.5) +
   geom_text(aes(label = ifelse(cl1 == cl2, "1", sprintf("%.3f", pearson_r))),
@@ -885,17 +1062,19 @@ ggplot(cor_sym, aes(x = cl1, y = cl2, fill = pearson_r)) +
   )
 ```
 
-
 ### Scatter plots (depth >= 20, ratio >= 0.1, n_samples >= 2)
 
-```{r pearson-scatter, fig.width=13, fig.height=8}
+Representative scatter plots at a moderate cutoff (depth >= 20, %pU >= 0.1,
+detected in >= 2 replicates).  Each point is one rRNA site.
+
+```{r v2-pearson-scatter, fig.width=13, fig.height=8}
 MIN_D <- 20; MIN_R <- 0.1; MIN_N <- 2
 
-scatter_data <- lapply(CELL_LINES, function(cl) {
+scatter_data <- lapply(CELL_LINES_V, function(cl) {
   dat_list[[cl]][depth >= MIN_D & ratio >= MIN_R & n_samples >= MIN_N,
                  .(site, ratio, cell_line = cl)]
 })
-names(scatter_data) <- CELL_LINES
+names(scatter_data) <- CELL_LINES_V
 
 scatter_plots <- lapply(cl_pairs, function(p) {
   d1 <- scatter_data[[p[1]]]
@@ -924,22 +1103,25 @@ scatter_plots <- Filter(Negate(is.null), scatter_plots)
 do.call(grid.arrange, c(scatter_plots, list(ncol = 3)))
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
+---
 
 # Comparing with published data
 
-```{r pub-helpers}
+We benchmark our pooled rRNA calls against two independent published datasets.
+Overlap with validated sites confirms that the pipeline is correctly identifying
+true pseudouridine modifications.
+
+- **BACS** (PMID 39349603) detects pU via antibody-based capture; it reports
+  absolute %pU levels for two replicates.
+- **PRAISE** (PMID 36997645) detects pU via the deletion signature at reverse-
+  transcription termination; it reports deletion ratios for two replicates.
+
+For each cell line and each combination of depth / ratio cutoffs we report:
+(a) how many of our pooled sites overlap with BACS sites, (b) how many overlap
+with PRAISE sites, and (c) scatter plots comparing the quantitative %pU or
+deletion ratio values at overlapping positions.
+
+```{r v2-pub-helpers}
 make_scatter_publication <- function(df, x, y, col, ttl, xlab, ylab) {
   if (nrow(df) == 0) {
     return(
@@ -974,7 +1156,6 @@ make_heatmap_publication <- function(data, fill_col, label_col, ttl, fill_label)
           axis.text  = element_text(size = 11))
 }
 
-# FIX: takes results as explicit argument to avoid global scoping issues
 combine_panels <- function(results, slot) {
   plots <- map(results, slot)
   wrap_plots(plots, ncol = 2) +
@@ -985,9 +1166,10 @@ combine_panels <- function(results, slot) {
 
 ## Published data overview
 
-We first check the site overlap in these two published data.
+Site counts and the overlap between BACS and PRAISE are shown first to
+establish the published reference landscape before comparing with our data.
 
-```{r pub-load, warning=FALSE, message=FALSE}
+```{r v2-pub-load, warning=FALSE, message=FALSE}
 path_BACS   <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID39349603.xlsx"
 path_PRAISE <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID36997645.xlsx"
 
@@ -1001,7 +1183,6 @@ colnames(rrna_PRAISE) <- rrna_PRAISE[2, ]
 rrna_PRAISE <- rrna_PRAISE[-c(1:2), ]
 rrna_PRAISE <- rrna_PRAISE %>% filter(!is.na(chr_name), !is.na(site))
 
-# --- Clean BACS ---
 rrna_BACS_clean <- rrna_BACS %>%
   mutate(
     rna_type = case_when(
@@ -1014,7 +1195,6 @@ rrna_BACS_clean <- rrna_BACS %>%
     pos_num = as.integer(str_extract(pos, "^[0-9]+"))
   )
 
-# --- Clean PRAISE ---
 rrna_PRAISE_clean <- rrna_PRAISE %>%
   mutate(
     rna_type  = str_extract(chr_name, "(5\\.8S|18S|28S|5S)"),
@@ -1025,7 +1205,6 @@ rrna_PRAISE_clean <- rrna_PRAISE %>%
     ))
   )
 
-# --- Overlap between the two published datasets ---
 overlap <- rrna_BACS_clean %>%
   inner_join(rrna_PRAISE_clean, by = "rna_type") %>%
   filter(pos_num >= pos_start & pos_num <= pos_end)
@@ -1042,7 +1221,6 @@ cat("Sites in BACS:    ", nrow(rrna_BACS_clean), "\n")
 cat("Sites in PRAISE:  ", nrow(rrna_PRAISE_clean), "\n")
 cat("Overlapping sites:", nrow(overlap), "\n")
 
-# --- Final cleaned versions used for all cell line comparisons ---
 rrna_BACS_clean <- rrna_BACS_clean %>%
   mutate(accession = str_extract(chr, "NR_[0-9]+"),
          pos_num   = as.integer(pos)) %>%
@@ -1053,9 +1231,7 @@ rrna_PRAISE_clean <- rrna_PRAISE_clean %>%
   mutate(accession = str_extract(chr_name, "NR_[0-9]+"))
 ```
 
-```{r pub-preload, include=FALSE}
-# FIX: pre-run all cell lines using lapply (not purrr::pmap) to avoid
-# data.table child-environment scoping issues with ours_filtered.
+```{r v2-pub-preload, include=FALSE}
 run_cl_comparison <- function(cl) {
   pooled_path <- file.path(RESULTS_DIR, cl, "pooled_sites", "pooled_rRNA.txt")
   if (!file.exists(pooled_path)) {
@@ -1063,7 +1239,7 @@ run_cl_comparison <- function(cl) {
     return(NULL)
   }
 
-  pooled_ours_rrna     <- fread(pooled_path)
+  pooled_ours_rrna <- fread(pooled_path)
 
   results <- lapply(seq_len(nrow(cutoffs)), function(i) {
     min_depth <- cutoffs$min_depth[i]
@@ -1074,7 +1250,6 @@ run_cl_comparison <- function(cl) {
       filter(depth >= min_depth, ratio >= min_ratio) %>%
       mutate(accession = str_extract(ref, "NR_[0-9]+"))
 
-    # vs BACS
     overlap_bacs <- ours_filtered %>%
       inner_join(rrna_BACS_clean, by = c("accession", "pos" = "pos_num")) %>%
       mutate(
@@ -1083,7 +1258,6 @@ run_cl_comparison <- function(cl) {
         label    = paste0(name, " pos", pos)
       )
 
-    # vs PRAISE
     overlap_praise <- ours_filtered %>%
       inner_join(rrna_PRAISE_clean, by = "accession", relationship = "many-to-many") %>%
       filter(pos >= pos_start & pos <= pos_end) %>%
@@ -1126,7 +1300,7 @@ names(pub_data) <- c("CL18870", "CL18909", "CL18916", "CL19099")
 
 ## CL18870 {.tabset}
 
-```{r cl18870-pub-check, include=FALSE}
+```{r v2-cl18870-pub-check, include=FALSE}
 cl      <- "CL18870"
 results <- pub_data[[cl]]
 ok      <- !is.null(results)
@@ -1136,7 +1310,13 @@ ok      <- !is.null(results)
 
 ### Site counts
 
-```{r cl18870-pub-heatmap, eval=ok, fig.width=12, fig.height=4}
+Tile colour indicates the number of sites: **Our sites** (left) are those
+passing the given depth and ratio cutoff in our pooled data; **Overlap with
+BACS/PRAISE** (middle, right) counts how many of those sites are also
+present in the respective published dataset.  Higher overlap validates the
+specificity of our site calls.
+
+```{r v2-cl18870-pub-heatmap, eval=ok, fig.width=12, fig.height=4}
 heatmap_data <- map_dfr(results, ~ tibble(
   min_depth = .x$min_depth, min_ratio = .x$min_ratio,
   n_ours = .x$n_ours, n_bacs = .x$n_bacs, n_praise = .x$n_praise
@@ -1153,7 +1333,12 @@ plot_annotation(title = paste(cl, "  site counts across depth & ratio cutoffs"),
 
 ### vs BACS (rep1)
 
-```{r cl18870-pub-bacs-r1, eval=ok, fig.width=8, fig.height=9}
+Scatter plots of our pooled %pU ratio (x-axis) vs. the BACS %pU level from
+replicate 1 (y-axis) at overlapping sites, faceted by depth/ratio cutoff.
+Points are coloured by rRNA subunit type.  A positive trend indicates
+quantitative agreement with the BACS dataset.
+
+```{r v2-cl18870-pub-bacs-r1, eval=ok, fig.width=8, fig.height=9}
 combine_panels(results, "p_bacs_r1") +
   plot_annotation(title = paste(cl, "— Our pU ratio vs BACS pU level (rep1)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1161,7 +1346,7 @@ combine_panels(results, "p_bacs_r1") +
 
 ### vs BACS (rep2)
 
-```{r cl18870-pub-bacs-r2, eval=ok, fig.width=8, fig.height=9}
+```{r v2-cl18870-pub-bacs-r2, eval=ok, fig.width=8, fig.height=9}
 combine_panels(results, "p_bacs_r2") +
   plot_annotation(title = paste(cl, "— Our pU ratio vs BACS pU level (rep2)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1169,7 +1354,11 @@ combine_panels(results, "p_bacs_r2") +
 
 ### vs PRAISE (rep1)
 
-```{r cl18870-pub-praise-r1, eval=ok, fig.width=8, fig.height=9}
+Our pooled %pU ratio vs. the PRAISE deletion ratio from replicate 1.  PRAISE
+uses a different biochemical readout, so the absolute scale differs; we expect
+a monotonic positive relationship at high-confidence sites.
+
+```{r v2-cl18870-pub-praise-r1, eval=ok, fig.width=8, fig.height=9}
 combine_panels(results, "p_praise_r1") +
   plot_annotation(title = paste(cl, "— Our pU ratio vs PRAISE deletion ratio (rep1)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1177,7 +1366,7 @@ combine_panels(results, "p_praise_r1") +
 
 ### vs PRAISE (rep2)
 
-```{r cl18870-pub-praise-r2, eval=ok, fig.width=8, fig.height=9}
+```{r v2-cl18870-pub-praise-r2, eval=ok, fig.width=8, fig.height=9}
 combine_panels(results, "p_praise_r2") +
   plot_annotation(title = paste(cl, "— Our pU ratio vs PRAISE deletion ratio (rep2)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1187,7 +1376,7 @@ combine_panels(results, "p_praise_r2") +
 
 ## CL18909 {.tabset}
 
-```{r cl18909-pub-check, include=FALSE}
+```{r v2-cl18909-pub-check, include=FALSE}
 cl      <- "CL18909"
 results <- pub_data[[cl]]
 ok      <- !is.null(results)
@@ -1197,7 +1386,7 @@ ok      <- !is.null(results)
 
 ### Site counts
 
-```{r cl18909-pub-heatmap, eval=ok, fig.width=12, fig.height=4}
+```{r v2-cl18909-pub-heatmap, eval=ok, fig.width=12, fig.height=4}
 heatmap_data <- map_dfr(results, ~ tibble(
   min_depth = .x$min_depth, min_ratio = .x$min_ratio,
   n_ours = .x$n_ours, n_bacs = .x$n_bacs, n_praise = .x$n_praise
@@ -1214,7 +1403,7 @@ plot_annotation(title = paste(cl, "  site counts across depth & ratio cutoffs"),
 
 ### vs BACS (rep1)
 
-```{r cl18909-pub-bacs-r1, eval=ok, fig.width=8, fig.height=9}
+```{r v2-cl18909-pub-bacs-r1, eval=ok, fig.width=8, fig.height=9}
 combine_panels(results, "p_bacs_r1") +
   plot_annotation(title = paste(cl, "— Our pU ratio vs BACS pU level (rep1)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1222,7 +1411,7 @@ combine_panels(results, "p_bacs_r1") +
 
 ### vs BACS (rep2)
 
-```{r cl18909-pub-bacs-r2, eval=ok, fig.width=8, fig.height=9}
+```{r v2-cl18909-pub-bacs-r2, eval=ok, fig.width=8, fig.height=9}
 combine_panels(results, "p_bacs_r2") +
   plot_annotation(title = paste(cl, "— Our pU ratio vs BACS pU level (rep2)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1230,7 +1419,7 @@ combine_panels(results, "p_bacs_r2") +
 
 ### vs PRAISE (rep1)
 
-```{r cl18909-pub-praise-r1, eval=ok, fig.width=8, fig.height=9}
+```{r v2-cl18909-pub-praise-r1, eval=ok, fig.width=8, fig.height=9}
 combine_panels(results, "p_praise_r1") +
   plot_annotation(title = paste(cl, "— Our pU ratio vs PRAISE deletion ratio (rep1)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1238,7 +1427,7 @@ combine_panels(results, "p_praise_r1") +
 
 ### vs PRAISE (rep2)
 
-```{r cl18909-pub-praise-r2, eval=ok, fig.width=8, fig.height=9}
+```{r v2-cl18909-pub-praise-r2, eval=ok, fig.width=8, fig.height=9}
 combine_panels(results, "p_praise_r2") +
   plot_annotation(title = paste(cl, "— Our pU ratio vs PRAISE deletion ratio (rep2)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1248,7 +1437,7 @@ combine_panels(results, "p_praise_r2") +
 
 ## CL18916 {.tabset}
 
-```{r cl18916-pub-check, include=FALSE}
+```{r v2-cl18916-pub-check, include=FALSE}
 cl      <- "CL18916"
 results <- pub_data[[cl]]
 ok      <- !is.null(results)
@@ -1258,7 +1447,7 @@ ok      <- !is.null(results)
 
 ### Site counts
 
-```{r cl18916-pub-heatmap, eval=ok, fig.width=12, fig.height=4}
+```{r v2-cl18916-pub-heatmap, eval=ok, fig.width=12, fig.height=4}
 heatmap_data <- map_dfr(results, ~ tibble(
   min_depth = .x$min_depth, min_ratio = .x$min_ratio,
   n_ours = .x$n_ours, n_bacs = .x$n_bacs, n_praise = .x$n_praise
@@ -1275,7 +1464,7 @@ plot_annotation(title = paste(cl, "  site counts across depth & ratio cutoffs"),
 
 ### vs BACS (rep1)
 
-```{r cl18916-pub-bacs-r1, eval=ok, fig.width=8, fig.height=9}
+```{r v2-cl18916-pub-bacs-r1, eval=ok, fig.width=8, fig.height=9}
 combine_panels(results, "p_bacs_r1") +
   plot_annotation(title = paste(cl, "— Our pU ratio vs BACS pU level (rep1)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1283,7 +1472,7 @@ combine_panels(results, "p_bacs_r1") +
 
 ### vs BACS (rep2)
 
-```{r cl18916-pub-bacs-r2, eval=ok, fig.width=8, fig.height=9}
+```{r v2-cl18916-pub-bacs-r2, eval=ok, fig.width=8, fig.height=9}
 combine_panels(results, "p_bacs_r2") +
   plot_annotation(title = paste(cl, "— Our pU ratio vs BACS pU level (rep2)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1291,7 +1480,7 @@ combine_panels(results, "p_bacs_r2") +
 
 ### vs PRAISE (rep1)
 
-```{r cl18916-pub-praise-r1, eval=ok, fig.width=8, fig.height=9}
+```{r v2-cl18916-pub-praise-r1, eval=ok, fig.width=8, fig.height=9}
 combine_panels(results, "p_praise_r1") +
   plot_annotation(title = paste(cl, "— Our pU ratio vs PRAISE deletion ratio (rep1)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1299,7 +1488,7 @@ combine_panels(results, "p_praise_r1") +
 
 ### vs PRAISE (rep2)
 
-```{r cl18916-pub-praise-r2, eval=ok, fig.width=8, fig.height=9}
+```{r v2-cl18916-pub-praise-r2, eval=ok, fig.width=8, fig.height=9}
 combine_panels(results, "p_praise_r2") +
   plot_annotation(title = paste(cl, "— Our pU ratio vs PRAISE deletion ratio (rep2)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1309,7 +1498,7 @@ combine_panels(results, "p_praise_r2") +
 
 ## CL19099 {.tabset}
 
-```{r cl19099-pub-check, include=FALSE}
+```{r v2-cl19099-pub-check, include=FALSE}
 cl      <- "CL19099"
 results <- pub_data[[cl]]
 ok      <- !is.null(results)
@@ -1319,7 +1508,7 @@ ok      <- !is.null(results)
 
 ### Site counts
 
-```{r cl19099-pub-heatmap, eval=ok, fig.width=12, fig.height=4}
+```{r v2-cl19099-pub-heatmap, eval=ok, fig.width=12, fig.height=4}
 heatmap_data <- map_dfr(results, ~ tibble(
   min_depth = .x$min_depth, min_ratio = .x$min_ratio,
   n_ours = .x$n_ours, n_bacs = .x$n_bacs, n_praise = .x$n_praise
@@ -1336,7 +1525,7 @@ plot_annotation(title = paste(cl, "  site counts across depth & ratio cutoffs"),
 
 ### vs BACS (rep1)
 
-```{r cl19099-pub-bacs-r1, eval=ok, fig.width=8, fig.height=9}
+```{r v2-cl19099-pub-bacs-r1, eval=ok, fig.width=8, fig.height=9}
 combine_panels(results, "p_bacs_r1") +
   plot_annotation(title = paste(cl, "— Our pU ratio vs BACS pU level (rep1)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1344,7 +1533,7 @@ combine_panels(results, "p_bacs_r1") +
 
 ### vs BACS (rep2)
 
-```{r cl19099-pub-bacs-r2, eval=ok, fig.width=8, fig.height=9}
+```{r v2-cl19099-pub-bacs-r2, eval=ok, fig.width=8, fig.height=9}
 combine_panels(results, "p_bacs_r2") +
   plot_annotation(title = paste(cl, "— Our pU ratio vs BACS pU level (rep2)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1352,7 +1541,7 @@ combine_panels(results, "p_bacs_r2") +
 
 ### vs PRAISE (rep1)
 
-```{r cl19099-pub-praise-r1, eval=ok, fig.width=8, fig.height=9}
+```{r v2-cl19099-pub-praise-r1, eval=ok, fig.width=8, fig.height=9}
 combine_panels(results, "p_praise_r1") +
   plot_annotation(title = paste(cl, "— Our pU ratio vs PRAISE deletion ratio (rep1)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1360,7 +1549,7 @@ combine_panels(results, "p_praise_r1") +
 
 ### vs PRAISE (rep2)
 
-```{r cl19099-pub-praise-r2, eval=ok, fig.width=8, fig.height=9}
+```{r v2-cl19099-pub-praise-r2, eval=ok, fig.width=8, fig.height=9}
 combine_panels(results, "p_praise_r2") +
   plot_annotation(title = paste(cl, "— Our pU ratio vs PRAISE deletion ratio (rep2)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))

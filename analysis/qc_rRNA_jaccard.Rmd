@@ -1,0 +1,371 @@
+---
+title: "Replicate site overlap — Jaccard index"
+author: "XSun"
+date: "2026-06-06"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+---
+
+# Introduction
+
+For each cell line we quantify how reproducibly the same sites are detected
+across replicates by computing the **Jaccard index** between every pair of
+replicates:
+
+$$J(A,B) = \frac{|A \cap B|}{|A \cup B|}$$
+
+A value of 1 means perfect overlap; 0 means no shared sites.
+
+We report the index at three detection thresholds:
+
+- **All sites**: any site passing the depth filter (≥ `r 20` reads)
+- **%ψ ≥ 0.1**: sites also requiring a C/(C+T) ratio ≥ 0.1
+- **%ψ ≥ 0.2**: sites also requiring a C/(C+T) ratio ≥ 0.2
+
+```{r setup, warning=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(data.table)
+library(gridExtra)
+
+knitr::opts_chunk$set(
+  echo      = TRUE,
+  warning   = FALSE,
+  message   = FALSE,
+  fig.align = "center"
+)
+```
+
+# Examining replicates for each cell line
+
+## Site overlap within replicates (Jaccard index)
+
+```{r config}
+RESULTS_DIR <- "/project2/xinhe/xsun/pumseq/pumseq_results"
+
+MPILE_COLS <- c("ref", "start", "pos", "strand", "base",
+                "AllDepth", "A", "C", "G", "T_count", "Gap")
+
+CELL_LINES <- list(
+  CL18870 = list(
+    rep1 = "CL18870_12-187-59",
+    rep2 = "CL18870_12-187-60",
+    rep3 = "CL18870_12-187-97",
+    rep4 = "CL18870_12-187-98"
+  ),
+  CL18909 = list(
+    rep1 = "CL18909_12-187-13",
+    rep2 = "CL18909_12-187-14",
+    rep3 = "CL18909_13-32-23",
+    rep4 = "CL18909_13-32-24"
+  ),
+  CL18916 = list(
+    rep1 = "CL18916_12-187-61",
+    rep2 = "CL18916_12-187-62",
+    rep3 = "CL18916_12-187-101",
+    rep4 = "CL18916_12-187-102"
+  ),
+  CL19099 = list(
+    rep1 = "CL19099_12-187-65",
+    rep2 = "CL19099_12-187-66",
+    rep3 = "CL19099_12-187-105",
+    rep4 = "CL19099_12-187-106"
+  )
+)
+
+MIN_DEPTH <- 20
+```
+
+```{r helpers}
+read_rRNA_psi_full <- function(cl, sample_id, mpile_dir) {
+  f <- file.path(mpile_dir,
+                 sprintf("mpileup.%s.rRNA.pseusite.txt.gz", sample_id))
+  if (!file.exists(f)) {
+    warning("File not found: ", f)
+    return(NULL)
+  }
+  dt <- fread(cmd = paste("zcat", f), header = FALSE, sep = "\t",
+              col.names = MPILE_COLS, data.table = FALSE)
+  dt %>%
+    mutate(
+      depth = C + T_count,
+      psi   = ifelse(depth >= MIN_DEPTH, C / depth, NA_real_),
+      site  = paste(ref, pos, sep = ":")
+    ) %>%
+    filter(!is.na(psi)) %>%
+    select(site, psi)
+}
+
+jaccard <- function(a, b) {
+  n_int <- length(intersect(a, b))
+  n_uni <- length(union(a, b))
+  if (n_uni == 0) return(NA_real_)
+  n_int / n_uni
+}
+
+make_jaccard_heatmap <- function(rep_data, cl, thr = NULL) {
+  label <- if (is.null(thr)) "all sites" else sprintf("%%Ψ ≥ %.1f", thr)
+
+  rep_names <- names(rep_data)
+  pairs     <- combn(rep_names, 2, simplify = FALSE)
+
+  # Build symmetric Jaccard matrix
+  mat <- matrix(NA_real_,
+                nrow = length(rep_names), ncol = length(rep_names),
+                dimnames = list(rep_names, rep_names))
+  diag(mat) <- 1
+
+  n_mat <- matrix(NA_integer_,
+                  nrow = length(rep_names), ncol = length(rep_names),
+                  dimnames = list(rep_names, rep_names))
+
+  for (p in pairs) {
+    sites_a <- rep_data[[p[1]]]
+    sites_b <- rep_data[[p[2]]]
+
+    if (!is.null(thr)) {
+      sites_a <- sites_a[rep_data[[p[1]]] >= thr]   # named vector: names = site
+      sites_b <- sites_b[rep_data[[p[2]]] >= thr]
+    }
+
+    j   <- jaccard(names(sites_a), names(sites_b))
+    n_i <- length(intersect(names(sites_a), names(sites_b)))
+
+    mat[p[1], p[2]] <- j
+    mat[p[2], p[1]] <- j
+    n_mat[p[1], p[2]] <- n_i
+    n_mat[p[2], p[1]] <- n_i
+  }
+
+  # Tidy for ggplot
+  short <- function(s) sub("^[^_]+_", "", s)
+  lev   <- short(rep_names)
+
+  plot_df <- expand.grid(x = rep_names, y = rep_names,
+                         stringsAsFactors = FALSE) %>%
+    rowwise() %>%
+    mutate(
+      j     = mat[x, y],
+      n_int = n_mat[x, y],
+      label = case_when(
+        x == y  ~ "1.000",
+        is.na(j) ~ "NA",
+        TRUE    ~ sprintf("%.3f\n(n=%d)", j, n_int)
+      )
+    ) %>%
+    ungroup() %>%
+    mutate(
+      x_lab = factor(short(x), levels = lev),
+      y_lab = factor(short(y), levels = rev(lev))
+    )
+
+  ggplot(plot_df, aes(x = x_lab, y = y_lab, fill = j)) +
+    geom_tile(color = "white", linewidth = 0.8) +
+    geom_text(aes(label = label), size = 3, lineheight = 0.9) +
+    scale_fill_gradient2(
+      low      = "#1a9641",
+      mid      = "#ffffbf",
+      high     = "#d7191c",
+      midpoint = 0.5,
+      limits   = c(0, 1),
+      na.value = "grey90",
+      name     = "Jaccard"
+    ) +
+    labs(
+      title    = cl,
+      subtitle = label,
+      x        = NULL,
+      y        = NULL
+    ) +
+    coord_fixed() +
+    theme_bw(base_size = 10) +
+    theme(
+      axis.text.x       = element_text(angle = 35, hjust = 1),
+      panel.grid        = element_blank(),
+      panel.border      = element_blank(),
+      legend.key.height = unit(0.8, "cm")
+    )
+}
+
+make_jaccard_heatmaps <- function(rep_data, cl) {
+  list(
+    make_jaccard_heatmap(rep_data, cl, thr = NULL),
+    make_jaccard_heatmap(rep_data, cl, thr = 0.1),
+    make_jaccard_heatmap(rep_data, cl, thr = 0.2)
+  )
+}
+```
+
+```{r load-data, include=FALSE}
+# Load per-replicate site+psi as named vectors (names = site IDs)
+cl_rep_data <- list()
+
+for (cl in names(CELL_LINES)) {
+  mpile_dir <- file.path(RESULTS_DIR, cl, "mpile")
+  reps      <- CELL_LINES[[cl]]
+
+  rep_list <- lapply(names(reps), function(rep_name) {
+    df <- read_rRNA_psi_full(cl, reps[[rep_name]], mpile_dir)
+    if (is.null(df)) return(NULL)
+    v <- setNames(df$psi, df$site)   # named numeric vector: site -> psi
+    v
+  })
+  names(rep_list) <- names(reps)
+  rep_list <- Filter(Negate(is.null), rep_list)
+
+  cl_rep_data[[cl]] <- list(
+    ok       = length(rep_list) >= 2,
+    rep_data = rep_list,
+    reason   = if (length(rep_list) < 2) "Not enough replicates found." else NULL
+  )
+}
+```
+
+---
+
+### CL18870 {.tabset}
+
+```{r cl18870-jac-check, include=FALSE}
+cl  <- "CL18870"
+dat <- cl_rep_data[[cl]]
+```
+
+`r if (!dat$ok) paste("**Skipped:**", dat$reason)`
+
+#### Jaccard heatmap
+
+```{r cl18870-jaccard, eval=dat$ok, fig.width=13.5, fig.height=4.8}
+gridExtra::grid.arrange(
+  grobs = make_jaccard_heatmaps(dat$rep_data, cl),
+  ncol  = 3
+)
+```
+
+---
+
+### CL18909 {.tabset}
+
+```{r cl18909-jac-check, include=FALSE}
+cl  <- "CL18909"
+dat <- cl_rep_data[[cl]]
+```
+
+`r if (!dat$ok) paste("**Skipped:**", dat$reason)`
+
+#### Jaccard heatmap
+
+```{r cl18909-jaccard, eval=dat$ok, fig.width=13.5, fig.height=4.8}
+gridExtra::grid.arrange(
+  grobs = make_jaccard_heatmaps(dat$rep_data, cl),
+  ncol  = 3
+)
+```
+
+---
+
+### CL18916 {.tabset}
+
+```{r cl18916-jac-check, include=FALSE}
+cl  <- "CL18916"
+dat <- cl_rep_data[[cl]]
+```
+
+`r if (!dat$ok) paste("**Skipped:**", dat$reason)`
+
+#### Jaccard heatmap
+
+```{r cl18916-jaccard, eval=dat$ok, fig.width=13.5, fig.height=4.8}
+gridExtra::grid.arrange(
+  grobs = make_jaccard_heatmaps(dat$rep_data, cl),
+  ncol  = 3
+)
+```
+
+---
+
+### CL19099 {.tabset}
+
+```{r cl19099-jac-check, include=FALSE}
+cl  <- "CL19099"
+dat <- cl_rep_data[[cl]]
+```
+
+`r if (!dat$ok) paste("**Skipped:**", dat$reason)`
+
+#### Jaccard heatmap
+
+```{r cl19099-jaccard, eval=dat$ok, fig.width=13.5, fig.height=4.8}
+gridExtra::grid.arrange(
+  grobs = make_jaccard_heatmaps(dat$rep_data, cl),
+  ncol  = 3
+)
+```
+
+---
+
+### Summary table — all cell lines
+
+Pairwise Jaccard indices across all cell lines and thresholds.
+
+```{r summary-table}
+library(knitr)
+library(kableExtra)
+
+summary_rows <- list()
+
+for (cl in names(CELL_LINES)) {
+  dat <- cl_rep_data[[cl]]
+  if (!dat$ok) next
+  rep_names <- names(dat$rep_data)
+  pairs     <- combn(rep_names, 2, simplify = FALSE)
+
+  for (thr_val in list(NULL, 0.1, 0.2)) {
+    thr_label <- if (is.null(thr_val)) "all" else as.character(thr_val)
+
+    for (p in pairs) {
+      sa <- dat$rep_data[[p[1]]]
+      sb <- dat$rep_data[[p[2]]]
+      if (!is.null(thr_val)) {
+        sa <- sa[sa >= thr_val]
+        sb <- sb[sb >= thr_val]
+      }
+      j   <- jaccard(names(sa), names(sb))
+      n_a <- length(sa)
+      n_b <- length(sb)
+      n_i <- length(intersect(names(sa), names(sb)))
+      n_u <- length(union(names(sa), names(sb)))
+
+      summary_rows[[length(summary_rows) + 1]] <- data.frame(
+        cell_line = cl,
+        rep_A     = p[1],
+        rep_B     = p[2],
+        threshold = thr_label,
+        n_A       = n_a,
+        n_B       = n_b,
+        n_intersect = n_i,
+        n_union     = n_u,
+        jaccard     = round(j, 4),
+        stringsAsFactors = FALSE
+      )
+    }
+  }
+}
+
+summary_df <- do.call(rbind, summary_rows)
+
+summary_df %>%
+  mutate(
+    rep_A = sub("^[^_]+_", "", rep_A),
+    rep_B = sub("^[^_]+_", "", rep_B)
+  ) %>%
+  kable(
+    col.names = c("Cell line", "Rep A", "Rep B", "Threshold",
+                  "n(A)", "n(B)", "n(A∩B)", "n(A∪B)", "Jaccard"),
+    align     = "llllrrrrc"
+  ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE) %>%
+  collapse_rows(columns = c(1, 4), valign = "top")
+```

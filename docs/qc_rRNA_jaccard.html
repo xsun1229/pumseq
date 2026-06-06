@@ -1,0 +1,2778 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-06-06" />
+
+<title>Replicate site overlap — Jaccard index</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Replicate site overlap — Jaccard index</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-06-06</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-06-06
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree8f44c3419b510577654a6a816dfa2322ee8d4bebtargetblank8f44c34a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/8f44c3419b510577654a6a816dfa2322ee8d4beb" target="_blank">8f44c34</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree8f44c3419b510577654a6a816dfa2322ee8d4bebtargetblank8f44c34a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/8f44c3419b510577654a6a816dfa2322ee8d4beb" target="_blank">8f44c34</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+
+Untracked files:
+    Untracked:  analysis/qc_rRNA_jaccard.Rmd
+
+Staged changes:
+    Modified:   analysis/qc_rRNA.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>For each cell line we quantify how reproducibly the same sites are
+detected across replicates by computing the <strong>Jaccard
+index</strong> between every pair of replicates:</p>
+<p><span class="math display">\[J(A,B) = \frac{|A \cap B|}{|A \cup
+B|}\]</span></p>
+<p>A value of 1 means perfect overlap; 0 means no shared sites.</p>
+<p>We report the index at three detection thresholds:</p>
+<ul>
+<li><strong>All sites</strong>: any site passing the depth filter (≥ 20
+reads)</li>
+<li><strong>%ψ ≥ 0.1</strong>: sites also requiring a C/(C+T) ratio ≥
+0.1</li>
+<li><strong>%ψ ≥ 0.2</strong>: sites also requiring a C/(C+T) ratio ≥
+0.2</li>
+</ul>
+<pre class="r"><code>library(dplyr)
+library(ggplot2)
+library(data.table)
+library(gridExtra)
+
+knitr::opts_chunk$set(
+  echo      = TRUE,
+  warning   = FALSE,
+  message   = FALSE,
+  fig.align = &quot;center&quot;
+)</code></pre>
+</div>
+<div id="examining-replicates-for-each-cell-line"
+class="section level1">
+<h1>Examining replicates for each cell line</h1>
+<div id="site-overlap-within-replicates-jaccard-index"
+class="section level2">
+<h2>Site overlap within replicates (Jaccard index)</h2>
+<pre class="r"><code>RESULTS_DIR &lt;- &quot;/project2/xinhe/xsun/pumseq/pumseq_results&quot;
+
+MPILE_COLS &lt;- c(&quot;ref&quot;, &quot;start&quot;, &quot;pos&quot;, &quot;strand&quot;, &quot;base&quot;,
+                &quot;AllDepth&quot;, &quot;A&quot;, &quot;C&quot;, &quot;G&quot;, &quot;T_count&quot;, &quot;Gap&quot;)
+
+CELL_LINES &lt;- list(
+  CL18870 = list(
+    rep1 = &quot;CL18870_12-187-59&quot;,
+    rep2 = &quot;CL18870_12-187-60&quot;,
+    rep3 = &quot;CL18870_12-187-97&quot;,
+    rep4 = &quot;CL18870_12-187-98&quot;
+  ),
+  CL18909 = list(
+    rep1 = &quot;CL18909_12-187-13&quot;,
+    rep2 = &quot;CL18909_12-187-14&quot;,
+    rep3 = &quot;CL18909_13-32-23&quot;,
+    rep4 = &quot;CL18909_13-32-24&quot;
+  ),
+  CL18916 = list(
+    rep1 = &quot;CL18916_12-187-61&quot;,
+    rep2 = &quot;CL18916_12-187-62&quot;,
+    rep3 = &quot;CL18916_12-187-101&quot;,
+    rep4 = &quot;CL18916_12-187-102&quot;
+  ),
+  CL19099 = list(
+    rep1 = &quot;CL19099_12-187-65&quot;,
+    rep2 = &quot;CL19099_12-187-66&quot;,
+    rep3 = &quot;CL19099_12-187-105&quot;,
+    rep4 = &quot;CL19099_12-187-106&quot;
+  )
+)
+
+MIN_DEPTH &lt;- 20</code></pre>
+<pre class="r"><code>read_rRNA_psi_full &lt;- function(cl, sample_id, mpile_dir) {
+  f &lt;- file.path(mpile_dir,
+                 sprintf(&quot;mpileup.%s.rRNA.pseusite.txt.gz&quot;, sample_id))
+  if (!file.exists(f)) {
+    warning(&quot;File not found: &quot;, f)
+    return(NULL)
+  }
+  dt &lt;- fread(cmd = paste(&quot;zcat&quot;, f), header = FALSE, sep = &quot;\t&quot;,
+              col.names = MPILE_COLS, data.table = FALSE)
+  dt %&gt;%
+    mutate(
+      depth = C + T_count,
+      psi   = ifelse(depth &gt;= MIN_DEPTH, C / depth, NA_real_),
+      site  = paste(ref, pos, sep = &quot;:&quot;)
+    ) %&gt;%
+    filter(!is.na(psi)) %&gt;%
+    select(site, psi)
+}
+
+jaccard &lt;- function(a, b) {
+  n_int &lt;- length(intersect(a, b))
+  n_uni &lt;- length(union(a, b))
+  if (n_uni == 0) return(NA_real_)
+  n_int / n_uni
+}
+
+make_jaccard_heatmap &lt;- function(rep_data, cl, thr = NULL) {
+  label &lt;- if (is.null(thr)) &quot;all sites&quot; else sprintf(&quot;%%Ψ ≥ %.1f&quot;, thr)
+
+  rep_names &lt;- names(rep_data)
+  pairs     &lt;- combn(rep_names, 2, simplify = FALSE)
+
+  # Build symmetric Jaccard matrix
+  mat &lt;- matrix(NA_real_,
+                nrow = length(rep_names), ncol = length(rep_names),
+                dimnames = list(rep_names, rep_names))
+  diag(mat) &lt;- 1
+
+  n_mat &lt;- matrix(NA_integer_,
+                  nrow = length(rep_names), ncol = length(rep_names),
+                  dimnames = list(rep_names, rep_names))
+
+  for (p in pairs) {
+    sites_a &lt;- rep_data[[p[1]]]
+    sites_b &lt;- rep_data[[p[2]]]
+
+    if (!is.null(thr)) {
+      sites_a &lt;- sites_a[rep_data[[p[1]]] &gt;= thr]   # named vector: names = site
+      sites_b &lt;- sites_b[rep_data[[p[2]]] &gt;= thr]
+    }
+
+    j   &lt;- jaccard(names(sites_a), names(sites_b))
+    n_i &lt;- length(intersect(names(sites_a), names(sites_b)))
+
+    mat[p[1], p[2]] &lt;- j
+    mat[p[2], p[1]] &lt;- j
+    n_mat[p[1], p[2]] &lt;- n_i
+    n_mat[p[2], p[1]] &lt;- n_i
+  }
+
+  # Tidy for ggplot
+  short &lt;- function(s) sub(&quot;^[^_]+_&quot;, &quot;&quot;, s)
+  lev   &lt;- short(rep_names)
+
+  plot_df &lt;- expand.grid(x = rep_names, y = rep_names,
+                         stringsAsFactors = FALSE) %&gt;%
+    rowwise() %&gt;%
+    mutate(
+      j     = mat[x, y],
+      n_int = n_mat[x, y],
+      label = case_when(
+        x == y  ~ &quot;1.000&quot;,
+        is.na(j) ~ &quot;NA&quot;,
+        TRUE    ~ sprintf(&quot;%.3f\n(n=%d)&quot;, j, n_int)
+      )
+    ) %&gt;%
+    ungroup() %&gt;%
+    mutate(
+      x_lab = factor(short(x), levels = lev),
+      y_lab = factor(short(y), levels = rev(lev))
+    )
+
+  ggplot(plot_df, aes(x = x_lab, y = y_lab, fill = j)) +
+    geom_tile(color = &quot;white&quot;, linewidth = 0.8) +
+    geom_text(aes(label = label), size = 3, lineheight = 0.9) +
+    scale_fill_gradient2(
+      low      = &quot;#1a9641&quot;,
+      mid      = &quot;#ffffbf&quot;,
+      high     = &quot;#d7191c&quot;,
+      midpoint = 0.5,
+      limits   = c(0, 1),
+      na.value = &quot;grey90&quot;,
+      name     = &quot;Jaccard&quot;
+    ) +
+    labs(
+      title    = cl,
+      subtitle = label,
+      x        = NULL,
+      y        = NULL
+    ) +
+    coord_fixed() +
+    theme_bw(base_size = 10) +
+    theme(
+      axis.text.x       = element_text(angle = 35, hjust = 1),
+      panel.grid        = element_blank(),
+      panel.border      = element_blank(),
+      legend.key.height = unit(0.8, &quot;cm&quot;)
+    )
+}
+
+make_jaccard_heatmaps &lt;- function(rep_data, cl) {
+  list(
+    make_jaccard_heatmap(rep_data, cl, thr = NULL),
+    make_jaccard_heatmap(rep_data, cl, thr = 0.1),
+    make_jaccard_heatmap(rep_data, cl, thr = 0.2)
+  )
+}</code></pre>
+<hr />
+<div id="cl18870" class="section level3 tabset">
+<h3 class="tabset">CL18870</h3>
+<div id="jaccard-heatmap" class="section level4">
+<h4>Jaccard heatmap</h4>
+<pre class="r"><code>gridExtra::grid.arrange(
+  grobs = make_jaccard_heatmaps(dat$rep_data, cl),
+  ncol  = 3
+)</code></pre>
+<p><img src="figure/qc_rRNA_jaccard.Rmd/cl18870-jaccard-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="cl18909" class="section level3 tabset">
+<h3 class="tabset">CL18909</h3>
+<div id="jaccard-heatmap-1" class="section level4">
+<h4>Jaccard heatmap</h4>
+<pre class="r"><code>gridExtra::grid.arrange(
+  grobs = make_jaccard_heatmaps(dat$rep_data, cl),
+  ncol  = 3
+)</code></pre>
+<p><img src="figure/qc_rRNA_jaccard.Rmd/cl18909-jaccard-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="cl18916" class="section level3 tabset">
+<h3 class="tabset">CL18916</h3>
+<div id="jaccard-heatmap-2" class="section level4">
+<h4>Jaccard heatmap</h4>
+<pre class="r"><code>gridExtra::grid.arrange(
+  grobs = make_jaccard_heatmaps(dat$rep_data, cl),
+  ncol  = 3
+)</code></pre>
+<p><img src="figure/qc_rRNA_jaccard.Rmd/cl18916-jaccard-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="cl19099" class="section level3 tabset">
+<h3 class="tabset">CL19099</h3>
+<div id="jaccard-heatmap-3" class="section level4">
+<h4>Jaccard heatmap</h4>
+<pre class="r"><code>gridExtra::grid.arrange(
+  grobs = make_jaccard_heatmaps(dat$rep_data, cl),
+  ncol  = 3
+)</code></pre>
+<p><img src="figure/qc_rRNA_jaccard.Rmd/cl19099-jaccard-1.png" width="1296" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="summary-table-all-cell-lines" class="section level3">
+<h3>Summary table — all cell lines</h3>
+<p>Pairwise Jaccard indices across all cell lines and thresholds.</p>
+<pre class="r"><code>library(knitr)
+library(kableExtra)
+
+summary_rows &lt;- list()
+
+for (cl in names(CELL_LINES)) {
+  dat &lt;- cl_rep_data[[cl]]
+  if (!dat$ok) next
+  rep_names &lt;- names(dat$rep_data)
+  pairs     &lt;- combn(rep_names, 2, simplify = FALSE)
+
+  for (thr_val in list(NULL, 0.1, 0.2)) {
+    thr_label &lt;- if (is.null(thr_val)) &quot;all&quot; else as.character(thr_val)
+
+    for (p in pairs) {
+      sa &lt;- dat$rep_data[[p[1]]]
+      sb &lt;- dat$rep_data[[p[2]]]
+      if (!is.null(thr_val)) {
+        sa &lt;- sa[sa &gt;= thr_val]
+        sb &lt;- sb[sb &gt;= thr_val]
+      }
+      j   &lt;- jaccard(names(sa), names(sb))
+      n_a &lt;- length(sa)
+      n_b &lt;- length(sb)
+      n_i &lt;- length(intersect(names(sa), names(sb)))
+      n_u &lt;- length(union(names(sa), names(sb)))
+
+      summary_rows[[length(summary_rows) + 1]] &lt;- data.frame(
+        cell_line = cl,
+        rep_A     = p[1],
+        rep_B     = p[2],
+        threshold = thr_label,
+        n_A       = n_a,
+        n_B       = n_b,
+        n_intersect = n_i,
+        n_union     = n_u,
+        jaccard     = round(j, 4),
+        stringsAsFactors = FALSE
+      )
+    }
+  }
+}
+
+summary_df &lt;- do.call(rbind, summary_rows)
+
+summary_df %&gt;%
+  mutate(
+    rep_A = sub(&quot;^[^_]+_&quot;, &quot;&quot;, rep_A),
+    rep_B = sub(&quot;^[^_]+_&quot;, &quot;&quot;, rep_B)
+  ) %&gt;%
+  kable(
+    col.names = c(&quot;Cell line&quot;, &quot;Rep A&quot;, &quot;Rep B&quot;, &quot;Threshold&quot;,
+                  &quot;n(A)&quot;, &quot;n(B)&quot;, &quot;n(A∩B)&quot;, &quot;n(A∪B)&quot;, &quot;Jaccard&quot;),
+    align     = &quot;llllrrrrc&quot;
+  ) %&gt;%
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;),
+                full_width = FALSE) %&gt;%
+  collapse_rows(columns = c(1, 4), valign = &quot;top&quot;)</code></pre>
+<table class="table table-striped table-hover table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Cell line
+</th>
+<th style="text-align:left;">
+Rep A
+</th>
+<th style="text-align:left;">
+Rep B
+</th>
+<th style="text-align:left;">
+Threshold
+</th>
+<th style="text-align:right;">
+n(A)
+</th>
+<th style="text-align:right;">
+n(B)
+</th>
+<th style="text-align:right;">
+n(A&lt;U+2229&gt;B)
+</th>
+<th style="text-align:right;">
+n(A&lt;U+222A&gt;B)
+</th>
+<th style="text-align:center;">
+Jaccard
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;vertical-align: top !important;" rowspan="18">
+CL18870
+</td>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;vertical-align: top !important;" rowspan="6">
+all
+</td>
+<td style="text-align:right;">
+1189
+</td>
+<td style="text-align:right;">
+1180
+</td>
+<td style="text-align:right;">
+1180
+</td>
+<td style="text-align:right;">
+1189
+</td>
+<td style="text-align:center;">
+0.9924
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+1189
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1189
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:center;">
+0.9983
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+1189
+</td>
+<td style="text-align:right;">
+1199
+</td>
+<td style="text-align:right;">
+1189
+</td>
+<td style="text-align:right;">
+1199
+</td>
+<td style="text-align:center;">
+0.9917
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+1180
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1180
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:center;">
+0.9908
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+1180
+</td>
+<td style="text-align:right;">
+1199
+</td>
+<td style="text-align:right;">
+1180
+</td>
+<td style="text-align:right;">
+1199
+</td>
+<td style="text-align:center;">
+0.9842
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1199
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1199
+</td>
+<td style="text-align:center;">
+0.9933
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;vertical-align: top !important;" rowspan="6">
+0.1
+</td>
+<td style="text-align:right;">
+120
+</td>
+<td style="text-align:right;">
+119
+</td>
+<td style="text-align:right;">
+114
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:center;">
+0.9120
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+120
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+120
+</td>
+<td style="text-align:center;">
+0.8667
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+120
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+120
+</td>
+<td style="text-align:center;">
+0.8583
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+119
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+99
+</td>
+<td style="text-align:right;">
+124
+</td>
+<td style="text-align:center;">
+0.7984
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+119
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+98
+</td>
+<td style="text-align:right;">
+124
+</td>
+<td style="text-align:center;">
+0.7903
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:center;">
+0.9904
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;vertical-align: top !important;" rowspan="6">
+0.2
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+99
+</td>
+<td style="text-align:right;">
+107
+</td>
+<td style="text-align:center;">
+0.9252
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+99
+</td>
+<td style="text-align:right;">
+95
+</td>
+<td style="text-align:right;">
+106
+</td>
+<td style="text-align:center;">
+0.8962
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+95
+</td>
+<td style="text-align:right;">
+107
+</td>
+<td style="text-align:center;">
+0.8879
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+99
+</td>
+<td style="text-align:right;">
+93
+</td>
+<td style="text-align:right;">
+110
+</td>
+<td style="text-align:center;">
+0.8455
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+93
+</td>
+<td style="text-align:right;">
+111
+</td>
+<td style="text-align:center;">
+0.8378
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+99
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+99
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:center;">
+0.9900
+</td>
+</tr>
+<tr>
+<td style="text-align:left;vertical-align: top !important;" rowspan="18">
+CL18909
+</td>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;vertical-align: top !important;" rowspan="6">
+all
+</td>
+<td style="text-align:right;">
+1180
+</td>
+<td style="text-align:right;">
+1173
+</td>
+<td style="text-align:right;">
+1172
+</td>
+<td style="text-align:right;">
+1181
+</td>
+<td style="text-align:center;">
+0.9924
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+1180
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1180
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:center;">
+0.9908
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+1180
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1180
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:center;">
+0.9908
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+1173
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1173
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:center;">
+0.9849
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+1173
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1173
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:center;">
+0.9849
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:center;">
+1.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;vertical-align: top !important;" rowspan="6">
+0.1
+</td>
+<td style="text-align:right;">
+157
+</td>
+<td style="text-align:right;">
+134
+</td>
+<td style="text-align:right;">
+127
+</td>
+<td style="text-align:right;">
+164
+</td>
+<td style="text-align:center;">
+0.7744
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+157
+</td>
+<td style="text-align:right;">
+56
+</td>
+<td style="text-align:right;">
+48
+</td>
+<td style="text-align:right;">
+165
+</td>
+<td style="text-align:center;">
+0.2909
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+157
+</td>
+<td style="text-align:right;">
+110
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+165
+</td>
+<td style="text-align:center;">
+0.6182
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+134
+</td>
+<td style="text-align:right;">
+56
+</td>
+<td style="text-align:right;">
+49
+</td>
+<td style="text-align:right;">
+141
+</td>
+<td style="text-align:center;">
+0.3475
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+134
+</td>
+<td style="text-align:right;">
+110
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+140
+</td>
+<td style="text-align:center;">
+0.7429
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+56
+</td>
+<td style="text-align:right;">
+110
+</td>
+<td style="text-align:right;">
+54
+</td>
+<td style="text-align:right;">
+112
+</td>
+<td style="text-align:center;">
+0.4821
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;vertical-align: top !important;" rowspan="6">
+0.2
+</td>
+<td style="text-align:right;">
+127
+</td>
+<td style="text-align:right;">
+117
+</td>
+<td style="text-align:right;">
+111
+</td>
+<td style="text-align:right;">
+133
+</td>
+<td style="text-align:center;">
+0.8346
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+127
+</td>
+<td style="text-align:right;">
+53
+</td>
+<td style="text-align:right;">
+40
+</td>
+<td style="text-align:right;">
+140
+</td>
+<td style="text-align:center;">
+0.2857
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+127
+</td>
+<td style="text-align:right;">
+76
+</td>
+<td style="text-align:right;">
+63
+</td>
+<td style="text-align:right;">
+140
+</td>
+<td style="text-align:center;">
+0.4500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+117
+</td>
+<td style="text-align:right;">
+53
+</td>
+<td style="text-align:right;">
+43
+</td>
+<td style="text-align:right;">
+127
+</td>
+<td style="text-align:center;">
+0.3386
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+117
+</td>
+<td style="text-align:right;">
+76
+</td>
+<td style="text-align:right;">
+67
+</td>
+<td style="text-align:right;">
+126
+</td>
+<td style="text-align:center;">
+0.5317
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+53
+</td>
+<td style="text-align:right;">
+76
+</td>
+<td style="text-align:right;">
+52
+</td>
+<td style="text-align:right;">
+77
+</td>
+<td style="text-align:center;">
+0.6753
+</td>
+</tr>
+<tr>
+<td style="text-align:left;vertical-align: top !important;" rowspan="18">
+CL18916
+</td>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;vertical-align: top !important;" rowspan="6">
+all
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1190
+</td>
+<td style="text-align:right;">
+1190
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:center;">
+0.9992
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:center;">
+1.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1232
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1232
+</td>
+<td style="text-align:center;">
+0.9667
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+1190
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1190
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:center;">
+0.9992
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+1190
+</td>
+<td style="text-align:right;">
+1232
+</td>
+<td style="text-align:right;">
+1190
+</td>
+<td style="text-align:right;">
+1232
+</td>
+<td style="text-align:center;">
+0.9659
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1232
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1232
+</td>
+<td style="text-align:center;">
+0.9667
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;vertical-align: top !important;" rowspan="6">
+0.1
+</td>
+<td style="text-align:right;">
+116
+</td>
+<td style="text-align:right;">
+130
+</td>
+<td style="text-align:right;">
+115
+</td>
+<td style="text-align:right;">
+131
+</td>
+<td style="text-align:center;">
+0.8779
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+116
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+118
+</td>
+<td style="text-align:center;">
+0.8644
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+116
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+101
+</td>
+<td style="text-align:right;">
+118
+</td>
+<td style="text-align:center;">
+0.8559
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+130
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+131
+</td>
+<td style="text-align:center;">
+0.7863
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+130
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+131
+</td>
+<td style="text-align:center;">
+0.7786
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:center;">
+0.9904
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;vertical-align: top !important;" rowspan="6">
+0.2
+</td>
+<td style="text-align:right;">
+105
+</td>
+<td style="text-align:right;">
+111
+</td>
+<td style="text-align:right;">
+97
+</td>
+<td style="text-align:right;">
+119
+</td>
+<td style="text-align:center;">
+0.8151
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+105
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+97
+</td>
+<td style="text-align:right;">
+110
+</td>
+<td style="text-align:center;">
+0.8818
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+105
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+97
+</td>
+<td style="text-align:right;">
+110
+</td>
+<td style="text-align:center;">
+0.8818
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+111
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+92
+</td>
+<td style="text-align:right;">
+121
+</td>
+<td style="text-align:center;">
+0.7603
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+111
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+92
+</td>
+<td style="text-align:right;">
+121
+</td>
+<td style="text-align:center;">
+0.7603
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:center;">
+1.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;vertical-align: top !important;" rowspan="18">
+CL19099
+</td>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;vertical-align: top !important;" rowspan="6">
+all
+</td>
+<td style="text-align:right;">
+1124
+</td>
+<td style="text-align:right;">
+1185
+</td>
+<td style="text-align:right;">
+1124
+</td>
+<td style="text-align:right;">
+1185
+</td>
+<td style="text-align:center;">
+0.9485
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+1124
+</td>
+<td style="text-align:right;">
+1253
+</td>
+<td style="text-align:right;">
+1124
+</td>
+<td style="text-align:right;">
+1253
+</td>
+<td style="text-align:center;">
+0.8970
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+1124
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1124
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:center;">
+0.9437
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+1185
+</td>
+<td style="text-align:right;">
+1253
+</td>
+<td style="text-align:right;">
+1185
+</td>
+<td style="text-align:right;">
+1253
+</td>
+<td style="text-align:center;">
+0.9457
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+1185
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1185
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:center;">
+0.9950
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+1253
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1191
+</td>
+<td style="text-align:right;">
+1253
+</td>
+<td style="text-align:center;">
+0.9505
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;vertical-align: top !important;" rowspan="6">
+0.1
+</td>
+<td style="text-align:right;">
+115
+</td>
+<td style="text-align:right;">
+122
+</td>
+<td style="text-align:right;">
+108
+</td>
+<td style="text-align:right;">
+129
+</td>
+<td style="text-align:center;">
+0.8372
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+115
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+94
+</td>
+<td style="text-align:right;">
+124
+</td>
+<td style="text-align:center;">
+0.7581
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+115
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+94
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:center;">
+0.7520
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+122
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+122
+</td>
+<td style="text-align:center;">
+0.8443
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+122
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+122
+</td>
+<td style="text-align:center;">
+0.8525
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:right;">
+103
+</td>
+<td style="text-align:right;">
+104
+</td>
+<td style="text-align:center;">
+0.9904
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;vertical-align: top !important;" rowspan="6">
+0.2
+</td>
+<td style="text-align:right;">
+90
+</td>
+<td style="text-align:right;">
+106
+</td>
+<td style="text-align:right;">
+86
+</td>
+<td style="text-align:right;">
+110
+</td>
+<td style="text-align:center;">
+0.7818
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+90
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+82
+</td>
+<td style="text-align:right;">
+110
+</td>
+<td style="text-align:center;">
+0.7455
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep1
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+90
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+82
+</td>
+<td style="text-align:right;">
+110
+</td>
+<td style="text-align:center;">
+0.7455
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:right;">
+106
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+101
+</td>
+<td style="text-align:right;">
+107
+</td>
+<td style="text-align:center;">
+0.9439
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep2
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+106
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+101
+</td>
+<td style="text-align:right;">
+107
+</td>
+<td style="text-align:center;">
+0.9439
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rep3
+</td>
+<td style="text-align:left;">
+rep4
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:center;">
+1.0000
+</td>
+</tr>
+</tbody>
+</table>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 7 (Core)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el7-x86_64/lib/libopenblas_haswellp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] kableExtra_1.4.0  knitr_1.39        gridExtra_2.3     data.table_1.14.2
+[5] ggplot2_4.0.0     dplyr_1.1.4      
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.12        highr_0.9          RColorBrewer_1.1-3 pillar_1.9.0      
+ [5] compiler_4.2.0     bslib_0.3.1        later_1.3.0        jquerylib_0.1.4   
+ [9] git2r_0.30.1       workflowr_1.7.0    tools_4.2.0        digest_0.6.29     
+[13] viridisLite_0.4.0  gtable_0.3.6       jsonlite_1.8.0     evaluate_0.15     
+[17] lifecycle_1.0.4    tibble_3.2.1       pkgconfig_2.0.3    rlang_1.1.2       
+[21] cli_3.6.1          rstudioapi_0.13    yaml_2.3.5         xfun_0.41         
+[25] fastmap_1.1.0      xml2_1.3.3         withr_2.5.0        stringr_1.5.1     
+[29] systemfonts_1.0.4  generics_0.1.4     fs_1.5.2           vctrs_0.6.5       
+[33] sass_0.4.1         grid_4.2.0         rprojroot_2.0.3    tidyselect_1.2.0  
+[37] svglite_2.1.0      glue_1.6.2         R6_2.5.1           fansi_1.0.3       
+[41] rmarkdown_2.25     farver_2.1.0       magrittr_2.0.3     scales_1.4.0      
+[45] promises_1.2.0.1   htmltools_0.5.2    dichromat_2.0-0.1  httpuv_1.6.5      
+[49] labeling_0.4.2     S7_0.2.0           utf8_1.2.2         stringi_1.7.6     </code></pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
