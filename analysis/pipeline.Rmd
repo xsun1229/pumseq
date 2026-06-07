@@ -160,6 +160,12 @@ This file builds the downstream site-level analysis from the pseudo-site summari
      - filters treatment sites with minimum depth and minimum conversion ratio
      - removes sites where the input sample shows the same conversion signal above the input ratio threshold
      - writes filtered results as `out/filter.<group>.<treat>.<untreat>.<chr>.<strand>.pseusite.txt.gz` plus a companion BED file.
+   - **Alternative strategy — chi-squared site calling** (`smk/PUM-sites-chisq.smk`, rules `filterSite_perSample` and `Com_BedperSample`)
+     - Runs alongside `filterSite_perLib`, reading the same `mpile/mpileup.<sample>.<chr>.<strand>.pseusite.txt.gz` inputs (and the same pooled-input logic) but writing to a separate `out_chisq/` directory, so it never touches the original `out/` outputs.
+     - Uses `bin/p0_FilterInput_chisq.py` to build, at every uridine (T) position, a 2x2 contingency table of converted vs. unconverted counts in the treated sample vs. the (pooled) untreated sample, and tests the null hypothesis that the conversion rate is equal in both with a chi-squared test.
+     - Per-chunk filtering (`rule filterSite_perSample`) keeps sites with minimum depth `cutoff["filterdep"]`, chi-squared **p-value < `cutoff["pval_chisq"]`** (default `1e-4`), and **conversion-rate difference (treated − untreated) > `cutoff["ratediff_chisq"]`** (default `0.05`); writes per-chunk results to `out_chisq/filter.<treat>.<chr>.<strand>.pseusite.txt.gz` (plus BED) and the equivalent small-RNA outputs `out_chisq/filter.<treat>.<small>.pseusite.{txt.gz,bed}`.
+     - `rule Com_BedperSample` merges the per-chr/strand outputs into a genome-level table and calls `bin/p1_GlobalFDR_chisq.py` to recompute the Benjamini-Hochberg FDR **globally** across all of that sample's sites (replacing the per-chunk approximation), then regenerates the genome BED by filtering on global **FDR < `cutoff["fdr_chisq"]`** (default `0.05`), `rate_diff > cutoff["ratediff_chisq"]`, and depth ≥ the configured output-depth cutoff.
+     - Final outputs: `out_chisq/filter.<treat>.genome.pseusite.txt.gz` / `.bed`, carrying `pval`, `fdr`, and `rate_diff` columns alongside the usual count/ratio columns.
 
 4. **Combine filtered site files**
    - `rule Com_BedperLib`

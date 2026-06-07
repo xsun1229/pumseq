@@ -31,8 +31,8 @@ a pU site) and *T* counts unmodified thymidine calls at that position.
 
 We compare our results against two published datasets:
 
-- **BACS** — PMID 39349603: antibody-based capture sequencing.
-- **PRAISE** — PMID 36997645: deletion-based direct sequencing.
+- **BACS** — PMID 39349603
+- **PRAISE** — PMID 36997645
 
 ```{r setup, warning=FALSE, message=FALSE}
 library(dplyr)

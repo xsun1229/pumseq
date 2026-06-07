@@ -17,4 +17,6 @@ editor_options:
 
 [Pipeline-testing: quality control for CL18909](qc_CL18909.html)
 
-[Quality control using rRNA](qc_rRNA.html)
+[Quality control using rRNA, sites filtered by depth & ratio](qc_rRNA.html)
+
+[Quality control using rRNA, sites filtered by chisq fdr & ratio diff](qc_rRNA_chisq.html)

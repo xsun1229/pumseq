@@ -26,31 +26,22 @@ and test the null hypothesis that the conversion rate is the same in both
 samples ($X^2 = \frac{n(ad-bc)^2}{(a+b)(c+d)(a+c)(b+d)}$, 1 d.f.). A site is
 called pseudouridylated when:
 
-1. the chi-squared **p-value < 1e-4** (further corrected for multiple testing
-   with Benjamini-Hochberg **FDR**), and
-2. the **conversion-rate difference** (treated − untreated) **> 5%**.
+1. the chi-squared Benjamini-Hochberg **FDR < cutoff**, and
+2. the **conversion-rate difference** (treated − untreated) **> cutoff**.
 
-This complements the original ratio/depth-based filter: instead of asking
-"is the treated ratio high and the input ratio low?" it asks "is the
-treated-vs-untreated difference at this position larger than expected by
-chance, given the sequencing depth?" — a test that naturally accounts for
-coverage when judging significance.
+<!-- This complements the original ratio/depth-based filter: instead of asking -->
+<!-- "is the treated ratio high and the input ratio low?" it asks "is the -->
+<!-- treated-vs-untreated difference at this position larger than expected by -->
+<!-- chance, given the sequencing depth?" — a test that naturally accounts for -->
+<!-- coverage when judging significance. -->
 
 We ran this strategy on the same four cell lines: **CL18870**, **CL18909**,
-**CL18916**, and **CL19099** (four treated replicates each), restricted here
-to sites called from ribosomal RNA (rRNA) reads — an ideal positive control
-because rRNA pU sites are abundant, well-conserved, and independently
-validated by multiple published methods. Per-replicate sequencing QC
-(library consistency, %pU distributions, replicate correlation) is identical
-to the original strategy — see [qc_rRNA.html](qc_rRNA.html) for that analysis;
-this report focuses on what is new: the chi-squared statistics themselves
-(p-value, FDR, rate difference) and how the resulting site calls compare
-across cell lines and against published datasets.
+**CL18916**, and **CL19099** (four treated replicates each).
 
 We compare our results against two published datasets:
 
-- **BACS** — PMID 39349603: antibody-based capture sequencing.
-- **PRAISE** — PMID 36997645: deletion-based direct sequencing.
+- **BACS** — PMID 39349603
+- **PRAISE** — PMID 36997645
 
 ```{r setup, warning=FALSE, message=FALSE}
 library(dplyr)
@@ -835,7 +826,7 @@ Darker blue = more sites.
 ### CL18870
 
 ```{r pooled-chisq-cl18870-count-heatmap, fig.width=8, fig.height=4}
-plot_count_heatmap_chisq(grid_list_pooled_chisq[["CL18870"]], "CL18870 – pooled chi-squared site counts")
+plot_count_heatmap_chisq(grid_list_pooled_chisq[["CL18870"]], "CL18870 - pooled chi-squared site counts")
 ```
 
 ---
@@ -843,7 +834,7 @@ plot_count_heatmap_chisq(grid_list_pooled_chisq[["CL18870"]], "CL18870 – poole
 ### CL18909
 
 ```{r pooled-chisq-cl18909-count-heatmap, fig.width=8, fig.height=4}
-plot_count_heatmap_chisq(grid_list_pooled_chisq[["CL18909"]], "CL18909 – pooled chi-squared site counts")
+plot_count_heatmap_chisq(grid_list_pooled_chisq[["CL18909"]], "CL18909 - pooled chi-squared site counts")
 ```
 
 ---
@@ -851,7 +842,7 @@ plot_count_heatmap_chisq(grid_list_pooled_chisq[["CL18909"]], "CL18909 – poole
 ### CL18916
 
 ```{r pooled-chisq-cl18916-count-heatmap, fig.width=8, fig.height=4}
-plot_count_heatmap_chisq(grid_list_pooled_chisq[["CL18916"]], "CL18916 – pooled chi-squared site counts")
+plot_count_heatmap_chisq(grid_list_pooled_chisq[["CL18916"]], "CL18916 - pooled chi-squared site counts")
 ```
 
 ---
@@ -859,7 +850,7 @@ plot_count_heatmap_chisq(grid_list_pooled_chisq[["CL18916"]], "CL18916 – poole
 ### CL19099
 
 ```{r pooled-chisq-cl19099-count-heatmap, fig.width=8, fig.height=4}
-plot_count_heatmap_chisq(grid_list_pooled_chisq[["CL19099"]], "CL19099 – pooled chi-squared site counts")
+plot_count_heatmap_chisq(grid_list_pooled_chisq[["CL19099"]], "CL19099 - pooled chi-squared site counts")
 ```
 
 ---
@@ -1399,7 +1390,7 @@ level from replicate 1 (y-axis) at overlapping sites, faceted by FDR /
 rate-difference cutoff combination. Points are coloured by rRNA subunit type.
 A positive trend indicates quantitative agreement with the BACS dataset.
 
-```{r pub-chisq-cl18870-bacs-r1, eval=ok, fig.width=8, fig.height=9}
+```{r pub-chisq-cl18870-bacs-r1, eval=ok, fig.width=12, fig.height=9}
 combine_panels_chisq(results, "p_bacs_r1") +
   plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs BACS pU level (rep1)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1407,7 +1398,7 @@ combine_panels_chisq(results, "p_bacs_r1") +
 
 ### vs BACS (rep2)
 
-```{r pub-chisq-cl18870-bacs-r2, eval=ok, fig.width=8, fig.height=9}
+```{r pub-chisq-cl18870-bacs-r2, eval=ok, fig.width=12, fig.height=9}
 combine_panels_chisq(results, "p_bacs_r2") +
   plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs BACS pU level (rep2)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1420,7 +1411,7 @@ replicate 1. PRAISE uses a different biochemical readout, so the absolute
 scale differs; we expect a monotonic positive relationship at high-confidence
 sites.
 
-```{r pub-chisq-cl18870-praise-r1, eval=ok, fig.width=8, fig.height=9}
+```{r pub-chisq-cl18870-praise-r1, eval=ok, fig.width=12, fig.height=9}
 combine_panels_chisq(results, "p_praise_r1") +
   plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep1)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1428,7 +1419,7 @@ combine_panels_chisq(results, "p_praise_r1") +
 
 ### vs PRAISE (rep2)
 
-```{r pub-chisq-cl18870-praise-r2, eval=ok, fig.width=8, fig.height=9}
+```{r pub-chisq-cl18870-praise-r2, eval=ok, fig.width=12, fig.height=9}
 combine_panels_chisq(results, "p_praise_r2") +
   plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep2)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1467,7 +1458,7 @@ plot_annotation(title = paste(cl, " pooled chi-squared site counts across FDR & 
 
 ### vs BACS (rep1)
 
-```{r pub-chisq-cl18909-bacs-r1, eval=ok, fig.width=8, fig.height=9}
+```{r pub-chisq-cl18909-bacs-r1, eval=ok, fig.width=12, fig.height=9}
 combine_panels_chisq(results, "p_bacs_r1") +
   plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs BACS pU level (rep1)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1475,7 +1466,7 @@ combine_panels_chisq(results, "p_bacs_r1") +
 
 ### vs BACS (rep2)
 
-```{r pub-chisq-cl18909-bacs-r2, eval=ok, fig.width=8, fig.height=9}
+```{r pub-chisq-cl18909-bacs-r2, eval=ok, fig.width=12, fig.height=9}
 combine_panels_chisq(results, "p_bacs_r2") +
   plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs BACS pU level (rep2)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1483,7 +1474,7 @@ combine_panels_chisq(results, "p_bacs_r2") +
 
 ### vs PRAISE (rep1)
 
-```{r pub-chisq-cl18909-praise-r1, eval=ok, fig.width=8, fig.height=9}
+```{r pub-chisq-cl18909-praise-r1, eval=ok, fig.width=12, fig.height=9}
 combine_panels_chisq(results, "p_praise_r1") +
   plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep1)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1491,7 +1482,7 @@ combine_panels_chisq(results, "p_praise_r1") +
 
 ### vs PRAISE (rep2)
 
-```{r pub-chisq-cl18909-praise-r2, eval=ok, fig.width=8, fig.height=9}
+```{r pub-chisq-cl18909-praise-r2, eval=ok, fig.width=12, fig.height=9}
 combine_panels_chisq(results, "p_praise_r2") +
   plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep2)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1530,7 +1521,7 @@ plot_annotation(title = paste(cl, " pooled chi-squared site counts across FDR & 
 
 ### vs BACS (rep1)
 
-```{r pub-chisq-cl18916-bacs-r1, eval=ok, fig.width=8, fig.height=9}
+```{r pub-chisq-cl18916-bacs-r1, eval=ok, fig.width=12, fig.height=9}
 combine_panels_chisq(results, "p_bacs_r1") +
   plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs BACS pU level (rep1)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1538,7 +1529,7 @@ combine_panels_chisq(results, "p_bacs_r1") +
 
 ### vs BACS (rep2)
 
-```{r pub-chisq-cl18916-bacs-r2, eval=ok, fig.width=8, fig.height=9}
+```{r pub-chisq-cl18916-bacs-r2, eval=ok, fig.width=12, fig.height=9}
 combine_panels_chisq(results, "p_bacs_r2") +
   plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs BACS pU level (rep2)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1546,7 +1537,7 @@ combine_panels_chisq(results, "p_bacs_r2") +
 
 ### vs PRAISE (rep1)
 
-```{r pub-chisq-cl18916-praise-r1, eval=ok, fig.width=8, fig.height=9}
+```{r pub-chisq-cl18916-praise-r1, eval=ok, fig.width=12, fig.height=9}
 combine_panels_chisq(results, "p_praise_r1") +
   plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep1)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1554,7 +1545,7 @@ combine_panels_chisq(results, "p_praise_r1") +
 
 ### vs PRAISE (rep2)
 
-```{r pub-chisq-cl18916-praise-r2, eval=ok, fig.width=8, fig.height=9}
+```{r pub-chisq-cl18916-praise-r2, eval=ok, fig.width=12, fig.height=9}
 combine_panels_chisq(results, "p_praise_r2") +
   plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep2)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1593,7 +1584,7 @@ plot_annotation(title = paste(cl, " pooled chi-squared site counts across FDR & 
 
 ### vs BACS (rep1)
 
-```{r pub-chisq-cl19099-bacs-r1, eval=ok, fig.width=8, fig.height=9}
+```{r pub-chisq-cl19099-bacs-r1, eval=ok, fig.width=12, fig.height=9}
 combine_panels_chisq(results, "p_bacs_r1") +
   plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs BACS pU level (rep1)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1601,7 +1592,7 @@ combine_panels_chisq(results, "p_bacs_r1") +
 
 ### vs BACS (rep2)
 
-```{r pub-chisq-cl19099-bacs-r2, eval=ok, fig.width=8, fig.height=9}
+```{r pub-chisq-cl19099-bacs-r2, eval=ok, fig.width=12, fig.height=9}
 combine_panels_chisq(results, "p_bacs_r2") +
   plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs BACS pU level (rep2)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1609,7 +1600,7 @@ combine_panels_chisq(results, "p_bacs_r2") +
 
 ### vs PRAISE (rep1)
 
-```{r pub-chisq-cl19099-praise-r1, eval=ok, fig.width=8, fig.height=9}
+```{r pub-chisq-cl19099-praise-r1, eval=ok, fig.width=12, fig.height=9}
 combine_panels_chisq(results, "p_praise_r1") +
   plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep1)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
@@ -1617,7 +1608,7 @@ combine_panels_chisq(results, "p_praise_r1") +
 
 ### vs PRAISE (rep2)
 
-```{r pub-chisq-cl19099-praise-r2, eval=ok, fig.width=8, fig.height=9}
+```{r pub-chisq-cl19099-praise-r2, eval=ok, fig.width=12, fig.height=9}
 combine_panels_chisq(results, "p_praise_r2") +
   plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep2)"),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
