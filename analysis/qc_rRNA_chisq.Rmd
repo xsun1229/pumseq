@@ -1,0 +1,1625 @@
+---
+title: "Quality control using sites called from rRNA — chi-squared strategy"
+author: "XSun"
+date: "2026-06-06"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+---
+
+# Introduction
+
+This report mirrors [qc_rRNA.html](qc_rRNA.html) but evaluates an **alternative
+site-calling strategy** based on a per-site contingency-table (chi-squared)
+test rather than simple ratio/depth thresholds.
+
+For every uridine (T) position we build a 2x2 table comparing the treated and
+(pooled) untreated samples:
+
+|            | Conversion (C) | No conversion (T) |
+|------------|----------------|-------------------|
+| Treated    | a              | b                 |
+| Untreated  | c              | d                 |
+
+and test the null hypothesis that the conversion rate is the same in both
+samples ($X^2 = \frac{n(ad-bc)^2}{(a+b)(c+d)(a+c)(b+d)}$, 1 d.f.). A site is
+called pseudouridylated when:
+
+1. the chi-squared **p-value < 1e-4** (further corrected for multiple testing
+   with Benjamini-Hochberg **FDR**), and
+2. the **conversion-rate difference** (treated − untreated) **> 5%**.
+
+This complements the original ratio/depth-based filter: instead of asking
+"is the treated ratio high and the input ratio low?" it asks "is the
+treated-vs-untreated difference at this position larger than expected by
+chance, given the sequencing depth?" — a test that naturally accounts for
+coverage when judging significance.
+
+We ran this strategy on the same four cell lines: **CL18870**, **CL18909**,
+**CL18916**, and **CL19099** (four treated replicates each), restricted here
+to sites called from ribosomal RNA (rRNA) reads — an ideal positive control
+because rRNA pU sites are abundant, well-conserved, and independently
+validated by multiple published methods. Per-replicate sequencing QC
+(library consistency, %pU distributions, replicate correlation) is identical
+to the original strategy — see [qc_rRNA.html](qc_rRNA.html) for that analysis;
+this report focuses on what is new: the chi-squared statistics themselves
+(p-value, FDR, rate difference) and how the resulting site calls compare
+across cell lines and against published datasets.
+
+We compare our results against two published datasets:
+
+- **BACS** — PMID 39349603: antibody-based capture sequencing.
+- **PRAISE** — PMID 36997645: deletion-based direct sequencing.
+
+```{r setup, warning=FALSE, message=FALSE}
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(ggrepel)
+library(purrr)
+library(patchwork)
+library(tidyverse)
+library(data.table)
+library(scales)
+library(knitr)
+library(gridExtra)
+library(DT)
+library(grid)
+
+knitr::opts_chunk$set(
+  echo      = TRUE,
+  warning   = FALSE,
+  message   = FALSE,
+  fig.align = "center"
+)
+```
+
+---
+
+# Examining replicates for each cell line
+
+For each cell line we examine how consistently the **chi-squared site-calling
+strategy** identifies pseudouridylated rRNA positions across its four treated
+replicates, using the per-replicate filtered chi-squared output
+(`out_chisq/filter.<sample>.rRNA.pseusite.txt.gz`), the same per-site table
+that feeds into the pooling step described below. Each row of this table
+already carries the chi-squared statistics (`pval`, `fdr`, `rate_diff`)
+alongside the treated conversion ratio (`ratio`) for every candidate site.
+
+Because "detection" under this strategy is a statistical call rather than a
+simple ratio/depth threshold, we repeat each check at **four cutoff
+combinations** spanning two stringency dimensions:
+
+| Combination | Max FDR | Min rate difference |
+|-------------|---------|----------------------|
+| 1           | < 0.001 | > 0.05               |
+| 2           | < 0.001 | > 0.10               |
+| 3           | < 0.01  | > 0.05               |
+| 4           | < 0.01  | > 0.10               |
+
+For each combination we run four checks:
+
+1. **Site overlap (Jaccard index)** — how many sites called significant are
+   shared between each pair of replicates, expressed as a set-similarity score.
+2. **%pU distribution** — histogram and density of the (treated) conversion
+   ratio at sites called significant in each replicate, used to judge overall
+   signal strength and consistency.
+3. **Pairwise Pearson correlation** — quantitative agreement of %pU at sites
+   called significant in **both** replicates of a pair.
+4. **Pairwise Pearson heatmap** — compact summary of all pairwise correlations.
+
+```{r config-replicate-chisq}
+RESULTS_DIR <- "/project2/xinhe/xsun/pumseq/pumseq_results"
+
+CELL_LINES <- list(
+  CL18870 = list(
+    rep1 = "CL18870_12-187-59",
+    rep2 = "CL18870_12-187-60",
+    rep3 = "CL18870_12-187-97",
+    rep4 = "CL18870_12-187-98"
+  ),
+  CL18909 = list(
+    rep1 = "CL18909_12-187-13",
+    rep2 = "CL18909_12-187-14",
+    rep3 = "CL18909_13-32-23",
+    rep4 = "CL18909_13-32-24"
+  ),
+  CL18916 = list(
+    rep1 = "CL18916_12-187-61",
+    rep2 = "CL18916_12-187-62",
+    rep3 = "CL18916_12-187-101",
+    rep4 = "CL18916_12-187-102"
+  ),
+  CL19099 = list(
+    rep1 = "CL19099_12-187-65",
+    rep2 = "CL19099_12-187-66",
+    rep3 = "CL19099_12-187-105",
+    rep4 = "CL19099_12-187-106"
+  )
+)
+
+# Cutoff combinations applied to each replicate's per-site chi-squared output
+CUTOFF_COMBOS <- list(
+  list(fdr = 0.001, diff = 0.05, label = "FDR < 0.001 & rate_diff > 0.05"),
+  list(fdr = 0.001, diff = 0.10, label = "FDR < 0.001 & rate_diff > 0.10"),
+  list(fdr = 0.01,  diff = 0.05, label = "FDR < 0.01 & rate_diff > 0.05"),
+  list(fdr = 0.01,  diff = 0.10, label = "FDR < 0.01 & rate_diff > 0.10")
+)
+```
+
+```{r helpers-replicate-chisq}
+# ── Data loading ──────────────────────────────────────────────────────────────
+read_rRNA_chisq_replicate <- function(cl, sample_id, chisq_dir) {
+  f <- file.path(chisq_dir, sprintf("filter.%s.rRNA.pseusite.txt.gz", sample_id))
+  if (!file.exists(f)) {
+    warning("File not found: ", f)
+    return(NULL)
+  }
+  dt <- fread(cmd = paste("zcat", f), header = TRUE, sep = "\t",
+              colClasses = list(character = "ref"), data.table = FALSE)
+  dt %>%
+    mutate(site = paste(ref, pos, strand, sep = ":")) %>%
+    select(site, ratio, fdr, rate_diff)
+}
+
+sites_passing <- function(dt, combo) dt$site[dt$fdr < combo$fdr & dt$rate_diff > combo$diff]
+
+shared_passing_pair <- function(rep_tabs, p, combo) {
+  d1 <- rep_tabs[[p[1]]]; d2 <- rep_tabs[[p[2]]]
+  s1 <- sites_passing(d1, combo); s2 <- sites_passing(d2, combo)
+  shared <- intersect(s1, s2)
+  if (length(shared) < 5) return(NULL)
+  merge(d1[d1$site %in% shared, c("site", "ratio")],
+        d2[d2$site %in% shared, c("site", "ratio")],
+        by = "site", suffixes = c("_1", "_2"))
+}
+
+# ── Distribution plots ────────────────────────────────────────────────────────
+plot_distribution_chisq <- function(rep_tabs, rep_names, cl, combo) {
+  lapply(rep_names, function(samp) {
+    dt <- rep_tabs[[samp]]
+    df <- dt[dt$fdr < combo$fdr & dt$rate_diff > combo$diff, , drop = FALSE]
+    if (nrow(df) == 0) return(NULL)
+
+    med_val  <- median(df$ratio)
+    mean_val <- mean(df$ratio)
+
+    ggplot(df, aes(x = ratio)) +
+      geom_histogram(aes(y = after_stat(density)),
+                     binwidth = 0.02, fill = "steelblue",
+                     color = "white", linewidth = 0.2, alpha = 0.7) +
+      geom_density(color = "navy", linewidth = 0.7) +
+      geom_vline(xintercept = med_val,  color = "red",
+                 linetype = "dashed",  linewidth = 0.6) +
+      geom_vline(xintercept = mean_val, color = "darkorange",
+                 linetype = "dotted",  linewidth = 0.6) +
+      annotate("text", x = Inf, y = Inf,
+               label = sprintf("n = %d\nmedian = %.3f\nmean = %.3f",
+                               nrow(df), med_val, mean_val),
+               hjust = 1.05, vjust = 1.05, size = 3, family = "mono") +
+      scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.1)) +
+      labs(
+        title    = samp,
+        subtitle = combo$label,
+        x        = "%pU  (C / C+T, treated)",
+        y        = "Density"
+      ) +
+      theme_bw(base_size = 10) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  })
+}
+
+# ── Scatter plots ─────────────────────────────────────────────────────────────
+make_scatter_plots_chisq <- function(rep_tabs, pairs, cl, combo) {
+  lapply(pairs, function(p) {
+    m <- shared_passing_pair(rep_tabs, p, combo)
+    if (is.null(m)) return(NULL)
+
+    r <- cor(m$ratio_1, m$ratio_2, method = "pearson")
+    ggplot(m, aes(x = ratio_1, y = ratio_2)) +
+      geom_point(alpha = 0.4, size = 0.8) +
+      geom_abline(slope = 1, intercept = 0,
+                  color = "red", linetype = "dashed") +
+      annotate("text", x = Inf, y = -Inf,
+               label = sprintf("r = %.3f\nn = %d", r, nrow(m)),
+               hjust = 1.1, vjust = -0.3, size = 3.5) +
+      labs(
+        title = sprintf("%s vs %s\n[%s]", p[1], p[2], combo$label),
+        x     = sprintf("%%pU  %s", p[1]),
+        y     = sprintf("%%pU  %s", p[2])
+      ) +
+      theme_bw(base_size = 10)
+  })
+}
+
+# ── Arrange + render a list of plots ─────────────────────────────────────────
+render_plots_chisq <- function(plot_list, ncol = 3) {
+  plot_list <- Filter(Negate(is.null), plot_list)
+  if (length(plot_list) == 0) {
+    message("No plots to render.")
+    return(invisible(NULL))
+  }
+  grid.arrange(grobs = plot_list, ncol = min(ncol, length(plot_list)))
+}
+
+# ── Pearson correlation heatmap ───────────────────────────────────────────────
+make_cor_heatmap_chisq <- function(rep_tabs, pairs, rep_names, cl, combo) {
+  cor_df <- do.call(rbind, lapply(pairs, function(p) {
+    m <- shared_passing_pair(rep_tabs, p, combo)
+    r <- if (!is.null(m)) round(cor(m$ratio_1, m$ratio_2, method = "pearson"), 4) else NA_real_
+    n <- if (!is.null(m)) nrow(m) else 0L
+    data.frame(rep1 = p[1], rep2 = p[2], r = r, n = n, stringsAsFactors = FALSE)
+  }))
+
+  mat <- matrix(NA_real_, length(rep_names), length(rep_names),
+                dimnames = list(rep_names, rep_names))
+  diag(mat) <- 1
+  n_mat <- matrix(NA_integer_, length(rep_names), length(rep_names),
+                  dimnames = list(rep_names, rep_names))
+  for (i in seq_len(nrow(cor_df))) {
+    mat[cor_df$rep1[i], cor_df$rep2[i]] <- cor_df$r[i]
+    mat[cor_df$rep2[i], cor_df$rep1[i]] <- cor_df$r[i]
+    n_mat[cor_df$rep1[i], cor_df$rep2[i]] <- cor_df$n[i]
+    n_mat[cor_df$rep2[i], cor_df$rep1[i]] <- cor_df$n[i]
+  }
+
+  short <- function(s) sub("^[^_]+_", "", s)
+  lev   <- short(rep_names)
+
+  plot_df <- expand.grid(x = rep_names, y = rep_names,
+                         stringsAsFactors = FALSE) |>
+    rowwise() |>
+    mutate(
+      r     = mat[x, y],
+      n     = n_mat[x, y],
+      label = case_when(
+        x == y   ~ "1.000",
+        is.na(r) ~ "NA",
+        TRUE     ~ sprintf("%.3f\n(n=%d)", r, n)
+      )
+    ) |>
+    ungroup() |>
+    mutate(
+      x_lab = factor(short(x), levels = lev),
+      y_lab = factor(short(y), levels = rev(lev))
+    )
+
+  ggplot(plot_df, aes(x = x_lab, y = y_lab, fill = r)) +
+    geom_tile(color = "white", linewidth = 0.8) +
+    geom_text(aes(label = label), size = 3, lineheight = 0.9) +
+    scale_fill_gradient2(
+      low  = "#1a9641", mid = "#ffffbf", high = "#d7191c",
+      midpoint = 0.5, limits = c(0, 1), na.value = "grey90",
+      name = "Pearson r"
+    ) +
+    labs(title = cl, subtitle = combo$label, x = NULL, y = NULL) +
+    coord_fixed() +
+    theme_bw(base_size = 10) +
+    theme(
+      axis.text.x       = element_text(angle = 35, hjust = 1),
+      panel.grid        = element_blank(),
+      panel.border      = element_blank(),
+      legend.key.height = unit(0.8, "cm")
+    )
+}
+
+# ── Jaccard index helpers ─────────────────────────────────────────────────────
+jaccard_index <- function(a, b) {
+  n_int <- length(intersect(a, b))
+  n_uni <- length(union(a, b))
+  if (n_uni == 0) return(NA_real_)
+  n_int / n_uni
+}
+
+make_jaccard_heatmap_chisq <- function(rep_tabs, pairs, rep_names, cl, combo) {
+  site_sets <- lapply(rep_tabs, sites_passing, combo = combo)
+
+  mat <- matrix(NA_real_, length(rep_names), length(rep_names),
+                dimnames = list(rep_names, rep_names))
+  diag(mat) <- 1
+  n_int_mat <- matrix(NA_integer_, length(rep_names), length(rep_names),
+                      dimnames = list(rep_names, rep_names))
+  for (p in pairs) {
+    sa <- site_sets[[p[1]]]; sb <- site_sets[[p[2]]]
+    j   <- jaccard_index(sa, sb)
+    n_i <- length(intersect(sa, sb))
+    mat[p[1], p[2]]       <- j;   mat[p[2], p[1]]       <- j
+    n_int_mat[p[1], p[2]] <- n_i; n_int_mat[p[2], p[1]] <- n_i
+  }
+
+  short <- function(s) sub("^[^_]+_", "", s)
+  lev   <- short(rep_names)
+
+  plot_df <- expand.grid(x = rep_names, y = rep_names,
+                         stringsAsFactors = FALSE) |>
+    rowwise() |>
+    mutate(
+      j     = mat[x, y],
+      n_int = n_int_mat[x, y],
+      label = case_when(
+        x == y   ~ "1.000",
+        is.na(j) ~ "NA",
+        TRUE     ~ sprintf("%.3f\n(n=%d)", j, n_int)
+      )
+    ) |>
+    ungroup() |>
+    mutate(
+      x_lab = factor(short(x), levels = lev),
+      y_lab = factor(short(y), levels = rev(lev))
+    )
+
+  ggplot(plot_df, aes(x = x_lab, y = y_lab, fill = j)) +
+    geom_tile(color = "white", linewidth = 0.8) +
+    geom_text(aes(label = label), size = 3, lineheight = 0.9) +
+    scale_fill_gradient2(
+      low      = "#1a9641", mid = "#ffffbf", high = "#d7191c",
+      midpoint = 0.5, limits = c(0, 1), na.value = "grey90",
+      name     = "Jaccard"
+    ) +
+    labs(title = cl, subtitle = combo$label, x = NULL, y = NULL) +
+    coord_fixed() +
+    theme_bw(base_size = 10) +
+    theme(
+      axis.text.x       = element_text(angle = 35, hjust = 1),
+      panel.grid        = element_blank(),
+      panel.border      = element_blank(),
+      legend.key.height = unit(0.8, "cm")
+    )
+}
+```
+
+```{r run-all-replicate-chisq, include=FALSE}
+cl_data_chisq <- list()
+
+for (cl in names(CELL_LINES)) {
+  chisq_dir  <- file.path(RESULTS_DIR, cl, "out_chisq")
+  reps       <- CELL_LINES[[cl]]
+  sample_ids <- unlist(reps, use.names = FALSE)
+
+  rep_tabs <- setNames(
+    lapply(sample_ids, function(sid) read_rRNA_chisq_replicate(cl, sid, chisq_dir)),
+    sample_ids
+  )
+  rep_tabs <- Filter(Negate(is.null), rep_tabs)
+
+  if (length(rep_tabs) < 2) {
+    cl_data_chisq[[cl]] <- list(ok = FALSE, reason = "Not enough replicates found.")
+    next
+  }
+
+  rep_names <- names(rep_tabs)
+  cl_data_chisq[[cl]] <- list(
+    ok        = TRUE,
+    rep_tabs  = rep_tabs,
+    rep_names = rep_names,
+    pairs     = combn(rep_names, 2, simplify = FALSE)
+  )
+}
+```
+
+---
+
+## CL18870 {.tabset}
+
+```{r rep-chisq-cl18870-check, include=FALSE}
+cl  <- "CL18870"
+dat <- cl_data_chisq[[cl]]
+```
+
+`r if (!dat$ok) paste("**Skipped:**", dat$reason)`
+
+### Site overlap (Jaccard index)
+
+The **Jaccard index** measures set similarity between the sets of sites called
+significant in two replicates at a given cutoff combination:
+
+$$J(A, B) = \frac{|A \cap B|}{|A \cup B|}$$
+
+A score of 1 means every called site appears in both replicates; 0 means no
+shared sites. The four panels correspond to the four cutoff combinations
+above (stricter combinations are more conservative and typically show fewer,
+but more reproducible, calls). The intersection count is shown in parentheses.
+
+```{r rep-chisq-cl18870-jaccard, eval=dat$ok, fig.width=15, fig.height=12}
+render_plots_chisq(
+  lapply(CUTOFF_COMBOS, function(combo)
+    make_jaccard_heatmap_chisq(dat$rep_tabs, dat$pairs, dat$rep_names, cl, combo)),
+  ncol = 2
+)
+```
+
+### %pU Distribution — FDR < 0.001 & rate_diff > 0.05
+
+Each panel shows the %pU (treated conversion ratio) distribution for one
+replicate, restricted to sites called significant under this cutoff
+combination (histogram + density overlay). The **red dashed** line marks the
+median; the **orange dotted** line marks the mean. Consistently shaped
+distributions across replicates indicate stable, reproducible site calling.
+
+```{r rep-chisq-cl18870-dist1, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots_chisq(plot_distribution_chisq(dat$rep_tabs, dat$rep_names, cl, CUTOFF_COMBOS[[1]]), ncol = 2)
+```
+
+### %pU Distribution — FDR < 0.001 & rate_diff > 0.10
+
+```{r rep-chisq-cl18870-dist2, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots_chisq(plot_distribution_chisq(dat$rep_tabs, dat$rep_names, cl, CUTOFF_COMBOS[[2]]), ncol = 2)
+```
+
+### %pU Distribution — FDR < 0.01 & rate_diff > 0.05
+
+```{r rep-chisq-cl18870-dist3, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots_chisq(plot_distribution_chisq(dat$rep_tabs, dat$rep_names, cl, CUTOFF_COMBOS[[3]]), ncol = 2)
+```
+
+### %pU Distribution — FDR < 0.01 & rate_diff > 0.10
+
+```{r rep-chisq-cl18870-dist4, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots_chisq(plot_distribution_chisq(dat$rep_tabs, dat$rep_names, cl, CUTOFF_COMBOS[[4]]), ncol = 2)
+```
+
+### Pairwise correlation — FDR < 0.001 & rate_diff > 0.05
+
+Scatter plots of %pU at sites called significant in **both** replicates of
+each pair under this cutoff combination. The **red dashed** diagonal is the
+identity line; Pearson's r and the number of shared sites are shown in the
+lower-right corner.
+
+```{r rep-chisq-cl18870-cor1, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+render_plots_chisq(make_scatter_plots_chisq(dat$rep_tabs, dat$pairs, cl, CUTOFF_COMBOS[[1]]))
+```
+
+### Pairwise correlation — FDR < 0.001 & rate_diff > 0.10
+
+```{r rep-chisq-cl18870-cor2, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+render_plots_chisq(make_scatter_plots_chisq(dat$rep_tabs, dat$pairs, cl, CUTOFF_COMBOS[[2]]))
+```
+
+### Pairwise correlation — FDR < 0.01 & rate_diff > 0.05
+
+```{r rep-chisq-cl18870-cor3, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+render_plots_chisq(make_scatter_plots_chisq(dat$rep_tabs, dat$pairs, cl, CUTOFF_COMBOS[[3]]))
+```
+
+### Pairwise correlation — FDR < 0.01 & rate_diff > 0.10
+
+```{r rep-chisq-cl18870-cor4, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+render_plots_chisq(make_scatter_plots_chisq(dat$rep_tabs, dat$pairs, cl, CUTOFF_COMBOS[[4]]))
+```
+
+### Pairwise Pearson heatmap
+
+Compact summary of all pairwise Pearson correlations of %pU at sites called
+significant in both replicates of each pair. Each cell shows Pearson's r and
+the number of shared sites used; the four panels correspond to the four
+cutoff combinations above.
+
+```{r rep-chisq-cl18870-heatmap, eval=dat$ok, fig.width=15, fig.height=12}
+render_plots_chisq(
+  lapply(CUTOFF_COMBOS, function(combo)
+    make_cor_heatmap_chisq(dat$rep_tabs, dat$pairs, dat$rep_names, cl, combo)),
+  ncol = 2
+)
+```
+
+---
+
+## CL18909 {.tabset}
+
+```{r rep-chisq-cl18909-check, include=FALSE}
+cl  <- "CL18909"
+dat <- cl_data_chisq[[cl]]
+```
+
+`r if (!dat$ok) paste("**Skipped:**", dat$reason)`
+
+### Site overlap (Jaccard index)
+
+```{r rep-chisq-cl18909-jaccard, eval=dat$ok, fig.width=15, fig.height=12}
+render_plots_chisq(
+  lapply(CUTOFF_COMBOS, function(combo)
+    make_jaccard_heatmap_chisq(dat$rep_tabs, dat$pairs, dat$rep_names, cl, combo)),
+  ncol = 2
+)
+```
+
+### %pU Distribution — FDR < 0.001 & rate_diff > 0.05
+
+```{r rep-chisq-cl18909-dist1, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots_chisq(plot_distribution_chisq(dat$rep_tabs, dat$rep_names, cl, CUTOFF_COMBOS[[1]]), ncol = 2)
+```
+
+### %pU Distribution — FDR < 0.001 & rate_diff > 0.10
+
+```{r rep-chisq-cl18909-dist2, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots_chisq(plot_distribution_chisq(dat$rep_tabs, dat$rep_names, cl, CUTOFF_COMBOS[[2]]), ncol = 2)
+```
+
+### %pU Distribution — FDR < 0.01 & rate_diff > 0.05
+
+```{r rep-chisq-cl18909-dist3, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots_chisq(plot_distribution_chisq(dat$rep_tabs, dat$rep_names, cl, CUTOFF_COMBOS[[3]]), ncol = 2)
+```
+
+### %pU Distribution — FDR < 0.01 & rate_diff > 0.10
+
+```{r rep-chisq-cl18909-dist4, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots_chisq(plot_distribution_chisq(dat$rep_tabs, dat$rep_names, cl, CUTOFF_COMBOS[[4]]), ncol = 2)
+```
+
+### Pairwise correlation — FDR < 0.001 & rate_diff > 0.05
+
+```{r rep-chisq-cl18909-cor1, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+render_plots_chisq(make_scatter_plots_chisq(dat$rep_tabs, dat$pairs, cl, CUTOFF_COMBOS[[1]]))
+```
+
+### Pairwise correlation — FDR < 0.001 & rate_diff > 0.10
+
+```{r rep-chisq-cl18909-cor2, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+render_plots_chisq(make_scatter_plots_chisq(dat$rep_tabs, dat$pairs, cl, CUTOFF_COMBOS[[2]]))
+```
+
+### Pairwise correlation — FDR < 0.01 & rate_diff > 0.05
+
+```{r rep-chisq-cl18909-cor3, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+render_plots_chisq(make_scatter_plots_chisq(dat$rep_tabs, dat$pairs, cl, CUTOFF_COMBOS[[3]]))
+```
+
+### Pairwise correlation — FDR < 0.01 & rate_diff > 0.10
+
+```{r rep-chisq-cl18909-cor4, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+render_plots_chisq(make_scatter_plots_chisq(dat$rep_tabs, dat$pairs, cl, CUTOFF_COMBOS[[4]]))
+```
+
+### Pairwise Pearson heatmap
+
+```{r rep-chisq-cl18909-heatmap, eval=dat$ok, fig.width=15, fig.height=12}
+render_plots_chisq(
+  lapply(CUTOFF_COMBOS, function(combo)
+    make_cor_heatmap_chisq(dat$rep_tabs, dat$pairs, dat$rep_names, cl, combo)),
+  ncol = 2
+)
+```
+
+---
+
+## CL18916 {.tabset}
+
+```{r rep-chisq-cl18916-check, include=FALSE}
+cl  <- "CL18916"
+dat <- cl_data_chisq[[cl]]
+```
+
+`r if (!dat$ok) paste("**Skipped:**", dat$reason)`
+
+### Site overlap (Jaccard index)
+
+```{r rep-chisq-cl18916-jaccard, eval=dat$ok, fig.width=15, fig.height=12}
+render_plots_chisq(
+  lapply(CUTOFF_COMBOS, function(combo)
+    make_jaccard_heatmap_chisq(dat$rep_tabs, dat$pairs, dat$rep_names, cl, combo)),
+  ncol = 2
+)
+```
+
+### %pU Distribution — FDR < 0.001 & rate_diff > 0.05
+
+```{r rep-chisq-cl18916-dist1, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots_chisq(plot_distribution_chisq(dat$rep_tabs, dat$rep_names, cl, CUTOFF_COMBOS[[1]]), ncol = 2)
+```
+
+### %pU Distribution — FDR < 0.001 & rate_diff > 0.10
+
+```{r rep-chisq-cl18916-dist2, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots_chisq(plot_distribution_chisq(dat$rep_tabs, dat$rep_names, cl, CUTOFF_COMBOS[[2]]), ncol = 2)
+```
+
+### %pU Distribution — FDR < 0.01 & rate_diff > 0.05
+
+```{r rep-chisq-cl18916-dist3, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots_chisq(plot_distribution_chisq(dat$rep_tabs, dat$rep_names, cl, CUTOFF_COMBOS[[3]]), ncol = 2)
+```
+
+### %pU Distribution — FDR < 0.01 & rate_diff > 0.10
+
+```{r rep-chisq-cl18916-dist4, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots_chisq(plot_distribution_chisq(dat$rep_tabs, dat$rep_names, cl, CUTOFF_COMBOS[[4]]), ncol = 2)
+```
+
+### Pairwise correlation — FDR < 0.001 & rate_diff > 0.05
+
+```{r rep-chisq-cl18916-cor1, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+render_plots_chisq(make_scatter_plots_chisq(dat$rep_tabs, dat$pairs, cl, CUTOFF_COMBOS[[1]]))
+```
+
+### Pairwise correlation — FDR < 0.001 & rate_diff > 0.10
+
+```{r rep-chisq-cl18916-cor2, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+render_plots_chisq(make_scatter_plots_chisq(dat$rep_tabs, dat$pairs, cl, CUTOFF_COMBOS[[2]]))
+```
+
+### Pairwise correlation — FDR < 0.01 & rate_diff > 0.05
+
+```{r rep-chisq-cl18916-cor3, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+render_plots_chisq(make_scatter_plots_chisq(dat$rep_tabs, dat$pairs, cl, CUTOFF_COMBOS[[3]]))
+```
+
+### Pairwise correlation — FDR < 0.01 & rate_diff > 0.10
+
+```{r rep-chisq-cl18916-cor4, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+render_plots_chisq(make_scatter_plots_chisq(dat$rep_tabs, dat$pairs, cl, CUTOFF_COMBOS[[4]]))
+```
+
+### Pairwise Pearson heatmap
+
+```{r rep-chisq-cl18916-heatmap, eval=dat$ok, fig.width=15, fig.height=12}
+render_plots_chisq(
+  lapply(CUTOFF_COMBOS, function(combo)
+    make_cor_heatmap_chisq(dat$rep_tabs, dat$pairs, dat$rep_names, cl, combo)),
+  ncol = 2
+)
+```
+
+---
+
+## CL19099 {.tabset}
+
+```{r rep-chisq-cl19099-check, include=FALSE}
+cl  <- "CL19099"
+dat <- cl_data_chisq[[cl]]
+```
+
+`r if (!dat$ok) paste("**Skipped:**", dat$reason)`
+
+### Site overlap (Jaccard index)
+
+```{r rep-chisq-cl19099-jaccard, eval=dat$ok, fig.width=15, fig.height=12}
+render_plots_chisq(
+  lapply(CUTOFF_COMBOS, function(combo)
+    make_jaccard_heatmap_chisq(dat$rep_tabs, dat$pairs, dat$rep_names, cl, combo)),
+  ncol = 2
+)
+```
+
+### %pU Distribution — FDR < 0.001 & rate_diff > 0.05
+
+```{r rep-chisq-cl19099-dist1, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots_chisq(plot_distribution_chisq(dat$rep_tabs, dat$rep_names, cl, CUTOFF_COMBOS[[1]]), ncol = 2)
+```
+
+### %pU Distribution — FDR < 0.001 & rate_diff > 0.10
+
+```{r rep-chisq-cl19099-dist2, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots_chisq(plot_distribution_chisq(dat$rep_tabs, dat$rep_names, cl, CUTOFF_COMBOS[[2]]), ncol = 2)
+```
+
+### %pU Distribution — FDR < 0.01 & rate_diff > 0.05
+
+```{r rep-chisq-cl19099-dist3, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots_chisq(plot_distribution_chisq(dat$rep_tabs, dat$rep_names, cl, CUTOFF_COMBOS[[3]]), ncol = 2)
+```
+
+### %pU Distribution — FDR < 0.01 & rate_diff > 0.10
+
+```{r rep-chisq-cl19099-dist4, eval=dat$ok, fig.width=11, fig.height=9}
+render_plots_chisq(plot_distribution_chisq(dat$rep_tabs, dat$rep_names, cl, CUTOFF_COMBOS[[4]]), ncol = 2)
+```
+
+### Pairwise correlation — FDR < 0.001 & rate_diff > 0.05
+
+```{r rep-chisq-cl19099-cor1, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+render_plots_chisq(make_scatter_plots_chisq(dat$rep_tabs, dat$pairs, cl, CUTOFF_COMBOS[[1]]))
+```
+
+### Pairwise correlation — FDR < 0.001 & rate_diff > 0.10
+
+```{r rep-chisq-cl19099-cor2, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+render_plots_chisq(make_scatter_plots_chisq(dat$rep_tabs, dat$pairs, cl, CUTOFF_COMBOS[[2]]))
+```
+
+### Pairwise correlation — FDR < 0.01 & rate_diff > 0.05
+
+```{r rep-chisq-cl19099-cor3, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+render_plots_chisq(make_scatter_plots_chisq(dat$rep_tabs, dat$pairs, cl, CUTOFF_COMBOS[[3]]))
+```
+
+### Pairwise correlation — FDR < 0.01 & rate_diff > 0.10
+
+```{r rep-chisq-cl19099-cor4, eval=dat$ok, fig.width=13.5, fig.height=4.5}
+render_plots_chisq(make_scatter_plots_chisq(dat$rep_tabs, dat$pairs, cl, CUTOFF_COMBOS[[4]]))
+```
+
+### Pairwise Pearson heatmap
+
+```{r rep-chisq-cl19099-heatmap, eval=dat$ok, fig.width=15, fig.height=12}
+render_plots_chisq(
+  lapply(CUTOFF_COMBOS, function(combo)
+    make_cor_heatmap_chisq(dat$rep_tabs, dat$pairs, dat$rep_names, cl, combo)),
+  ncol = 2
+)
+```
+
+---
+
+# Comparing pooled data among cell lines
+
+After per-replicate chi-squared filtering, sites for each cell line are
+**pooled** (`pooled_sites_chisq/pooled_rRNA.txt`): treated and untreated
+counts are summed across the four replicates and the chi-squared test is
+re-run on the pooled contingency table, yielding pooled `pval`, `fdr`, and
+`rate_diff` statistics alongside the pooled %pU ratio. Each row also records
+`n_samples`, the number of individual replicates in which the site was
+detected.
+
+We explore the effect of two filtering dimensions simultaneously, using the
+same four FDR / rate-difference combinations introduced above together with a
+minimum-replicate filter:
+
+| Dimension | Values |
+|-----------|--------|
+| FDR / rate-difference combination | the four combinations above |
+| Minimum number of replicates (`n_samples`) | 1, 2, 3, 4 |
+
+Stricter combinations (lower FDR, larger rate difference) reduce noise at the
+cost of fewer sites; requiring detection in multiple replicates is a strong
+reproducibility filter.
+
+```{r setup-pooled-chisq, message=FALSE, warning=FALSE}
+CELL_LINES_V      <- names(CELL_LINES)
+NSAMP_CUTS_POOLED <- 1:4
+COMBO_LABELS      <- vapply(CUTOFF_COMBOS, `[[`, character(1), "label")
+
+load_pooled_chisq_rRNA <- function(cl) {
+  f <- file.path(RESULTS_DIR, cl, "pooled_sites_chisq", "pooled_rRNA.txt")
+  dt <- fread(f, header = TRUE, sep = "\t",
+              colClasses = list(character = "ref"))
+  dt[, cell_line := cl]
+  dt[, site := paste(ref, pos, strand, sep = ":")]
+  dt
+}
+
+count_sites_chisq <- function(dt, combo, min_nsamp) {
+  sum(dt$fdr < combo$fdr & dt$rate_diff > combo$diff & dt$n_samples >= min_nsamp)
+}
+
+build_count_grid_chisq <- function(dt) {
+  do.call(rbind, lapply(seq_along(CUTOFF_COMBOS), function(i) {
+    combo <- CUTOFF_COMBOS[[i]]
+    data.frame(
+      combo_label = combo$label,
+      min_nsamp   = NSAMP_CUTS_POOLED,
+      n_sites     = vapply(NSAMP_CUTS_POOLED,
+                           function(n) count_sites_chisq(dt, combo, n),
+                           numeric(1))
+    )
+  })) |>
+    mutate(
+      combo_label = factor(combo_label, levels = COMBO_LABELS),
+      nsamp_label = factor(paste0("n_samples>=", min_nsamp),
+                           levels = paste0("n_samples>=", NSAMP_CUTS_POOLED))
+    )
+}
+
+plot_count_heatmap_chisq <- function(grid, cl_title) {
+  ggplot(grid, aes(x = combo_label, y = nsamp_label, fill = n_sites)) +
+    geom_tile(color = "white", linewidth = 0.6) +
+    geom_text(aes(label = comma(n_sites)), size = 4, fontface = "bold") +
+    scale_fill_gradient(low = "#deebf7", high = "#2171b5",
+                        name = "# sites", labels = comma) +
+    labs(title = cl_title,
+         x = "FDR / rate-difference cutoff (pooled)",
+         y = "Minimum number of replicates") +
+    theme_bw(base_size = 11) +
+    theme(axis.text.x = element_text(angle = 20, hjust = 1))
+}
+
+dat_list_pooled_chisq        <- lapply(CELL_LINES_V, load_pooled_chisq_rRNA)
+names(dat_list_pooled_chisq) <- CELL_LINES_V
+
+grid_list_pooled_chisq        <- lapply(dat_list_pooled_chisq, build_count_grid_chisq)
+names(grid_list_pooled_chisq) <- CELL_LINES_V
+
+cl_pairs_v_chisq <- combn(CELL_LINES_V, 2, simplify = FALSE)
+```
+
+## Per cell-line site counts at different cutoffs
+
+Each heatmap shows the number of pooled rRNA sites surviving a combination of
+**FDR / rate-difference cutoff** (x-axis, the four combinations introduced
+above) and **minimum number of replicates** detecting the site (y-axis).
+Darker blue = more sites.
+
+---
+
+### CL18870
+
+```{r pooled-chisq-cl18870-count-heatmap, fig.width=8, fig.height=4}
+plot_count_heatmap_chisq(grid_list_pooled_chisq[["CL18870"]], "CL18870 – pooled chi-squared site counts")
+```
+
+---
+
+### CL18909
+
+```{r pooled-chisq-cl18909-count-heatmap, fig.width=8, fig.height=4}
+plot_count_heatmap_chisq(grid_list_pooled_chisq[["CL18909"]], "CL18909 – pooled chi-squared site counts")
+```
+
+---
+
+### CL18916
+
+```{r pooled-chisq-cl18916-count-heatmap, fig.width=8, fig.height=4}
+plot_count_heatmap_chisq(grid_list_pooled_chisq[["CL18916"]], "CL18916 – pooled chi-squared site counts")
+```
+
+---
+
+### CL19099
+
+```{r pooled-chisq-cl19099-count-heatmap, fig.width=8, fig.height=4}
+plot_count_heatmap_chisq(grid_list_pooled_chisq[["CL19099"]], "CL19099 – pooled chi-squared site counts")
+```
+
+---
+
+### %pU Distribution — pooled data {.tabset}
+
+Distribution of the pooled %ψ ratio (C/(C+T)) at sites passing each FDR /
+rate-difference combination, shown for all four cell lines side by side
+(mirroring the per-replicate distributions above). Red dashed = median;
+orange dotted = mean.
+
+```{r pooled-chisq-dist-helper, include=FALSE}
+plot_pooled_dist_chisq <- function(cl, combo) {
+  dt <- dat_list_pooled_chisq[[cl]]
+  df <- as.data.frame(dt[fdr < combo$fdr & rate_diff > combo$diff, .(psi = ratio)])
+  if (nrow(df) == 0) return(NULL)
+
+  med_val  <- median(df$psi)
+  mean_val <- mean(df$psi)
+
+  ggplot(df, aes(x = psi)) +
+    geom_histogram(aes(y = after_stat(density)),
+                   binwidth = 0.02, fill = "steelblue",
+                   color = "white", linewidth = 0.2, alpha = 0.7) +
+    geom_density(color = "navy", linewidth = 0.7) +
+    geom_vline(xintercept = med_val,  color = "red",
+               linetype = "dashed",  linewidth = 0.6) +
+    geom_vline(xintercept = mean_val, color = "darkorange",
+               linetype = "dotted",  linewidth = 0.6) +
+    annotate("text", x = Inf, y = Inf,
+             label = sprintf("n = %d\nmedian = %.3f\nmean = %.3f",
+                             nrow(df), med_val, mean_val),
+             hjust = 1.05, vjust = 1.05, size = 3, family = "mono") +
+    scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.1)) +
+    labs(title = cl, subtitle = combo$label,
+         x = "%pU  (C / C+T, pooled)", y = "Density") +
+    theme_bw(base_size = 10) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+```
+
+#### %pU Distribution — FDR < 0.001 & rate_diff > 0.05
+
+```{r pooled-chisq-dist1, fig.width=14, fig.height=3.5}
+plots_pdist1 <- lapply(CELL_LINES_V, plot_pooled_dist_chisq, combo = CUTOFF_COMBOS[[1]])
+do.call(grid.arrange, c(Filter(Negate(is.null), plots_pdist1), list(ncol = 4)))
+```
+
+#### %pU Distribution — FDR < 0.001 & rate_diff > 0.10
+
+```{r pooled-chisq-dist2, fig.width=14, fig.height=3.5}
+plots_pdist2 <- lapply(CELL_LINES_V, plot_pooled_dist_chisq, combo = CUTOFF_COMBOS[[2]])
+do.call(grid.arrange, c(Filter(Negate(is.null), plots_pdist2), list(ncol = 4)))
+```
+
+#### %pU Distribution — FDR < 0.01 & rate_diff > 0.05
+
+```{r pooled-chisq-dist3, fig.width=14, fig.height=3.5}
+plots_pdist3 <- lapply(CELL_LINES_V, plot_pooled_dist_chisq, combo = CUTOFF_COMBOS[[3]])
+do.call(grid.arrange, c(Filter(Negate(is.null), plots_pdist3), list(ncol = 4)))
+```
+
+#### %pU Distribution — FDR < 0.01 & rate_diff > 0.10
+
+```{r pooled-chisq-dist4, fig.width=14, fig.height=3.5}
+plots_pdist4 <- lapply(CELL_LINES_V, plot_pooled_dist_chisq, combo = CUTOFF_COMBOS[[4]])
+do.call(grid.arrange, c(Filter(Negate(is.null), plots_pdist4), list(ncol = 4)))
+```
+
+---
+
+## Cross-cell-line comparison of site counts
+
+We use the **Jaccard index** to quantify how much the pooled, significance
+-filtered site sets overlap between every pair of cell lines. For each
+combination of FDR / rate-difference cutoff and minimum-replicate filter,
+sites passing both filters in each cell line are extracted and the pairwise
+Jaccard is computed:
+
+$$J(A, B) = \frac{|A \cap B|}{|A \cup B|}$$
+
+A high Jaccard index means the two cell lines call largely the same pooled
+rRNA positions, consistent with constitutively modified sites shared across
+cell lines. Each cell shows the Jaccard score and, in parentheses, the number
+of sites in the intersection. Rows = minimum n_samples; columns = FDR /
+rate-difference combination.
+
+```{r pooled-chisq-cross-cl-comparison, fig.width=14, fig.height=11}
+jaccard_pooled_rows <- do.call(rbind, lapply(cl_pairs_v_chisq, function(p) {
+  do.call(rbind, lapply(seq_along(CUTOFF_COMBOS), function(i) {
+    combo <- CUTOFF_COMBOS[[i]]
+    do.call(rbind, lapply(NSAMP_CUTS_POOLED, function(n) {
+      dt1 <- dat_list_pooled_chisq[[p[1]]]
+      dt2 <- dat_list_pooled_chisq[[p[2]]]
+      sites1 <- dt1$site[dt1$fdr < combo$fdr & dt1$rate_diff > combo$diff & dt1$n_samples >= n]
+      sites2 <- dt2$site[dt2$fdr < combo$fdr & dt2$rate_diff > combo$diff & dt2$n_samples >= n]
+      n_int  <- length(intersect(sites1, sites2))
+      n_uni  <- length(union(sites1, sites2))
+      j      <- if (n_uni == 0) NA_real_ else n_int / n_uni
+      data.frame(cl1 = p[1], cl2 = p[2],
+                 combo_idx = i, combo_label = combo$label, min_nsamp = n,
+                 jaccard = round(j, 3), n_intersect = n_int)
+    }))
+  }))
+}))
+
+jaccard_pooled_sym <- jaccard_pooled_rows |>
+  bind_rows(jaccard_pooled_rows |> rename(cl1 = cl2, cl2 = cl1)) |>
+  bind_rows(
+    expand.grid(cl1 = CELL_LINES_V, cl2 = CELL_LINES_V,
+                combo_idx = seq_along(CUTOFF_COMBOS),
+                min_nsamp = NSAMP_CUTS_POOLED) |>
+      filter(cl1 == cl2) |>
+      mutate(combo_label = COMBO_LABELS[combo_idx],
+             jaccard = 1, n_intersect = NA_integer_)
+  ) |>
+  mutate(
+    cl1         = factor(cl1, levels = CELL_LINES_V),
+    cl2         = factor(cl2, levels = rev(CELL_LINES_V)),
+    nsamp_label = factor(paste0("n_samples>=", min_nsamp),
+                         levels = paste0("n_samples>=", NSAMP_CUTS_POOLED)),
+    combo_label = factor(combo_label, levels = COMBO_LABELS),
+    cell_label  = case_when(
+      cl1 == cl2     ~ "1.000",
+      is.na(jaccard) ~ "NA",
+      TRUE           ~ sprintf("%.3f\n(n=%d)", jaccard, n_intersect)
+    )
+  )
+
+ggplot(jaccard_pooled_sym, aes(x = cl1, y = cl2, fill = jaccard)) +
+  geom_tile(color = "white", linewidth = 0.5) +
+  geom_text(aes(label = cell_label), size = 2.8, fontface = "bold",
+            lineheight = 0.9) +
+  scale_fill_gradient2(
+    low = "#1a9641", mid = "#ffffbf", high = "#d7191c",
+    midpoint = 0.5, limits = c(0, 1), na.value = "grey90",
+    name = "Jaccard"
+  ) +
+  facet_grid(nsamp_label ~ combo_label) +
+  labs(
+    title = "Jaccard index of site overlap between cell lines (pooled chi-squared rRNA sites)",
+    x = NULL, y = NULL
+  ) +
+  theme_bw(base_size = 10) +
+  theme(
+    axis.text.x      = element_text(angle = 30, hjust = 1, size = 9),
+    axis.text.y      = element_text(size = 9),
+    strip.background = element_rect(fill = "#e8eaf6"),
+    strip.text       = element_text(face = "bold", size = 9),
+    panel.spacing    = unit(0.3, "lines"),
+    legend.position  = "right"
+  )
+```
+
+---
+
+## Pearson's r of %pU between cell lines
+
+To assess whether the same sites are similarly modified across cell lines, we
+compute Pearson's r on the pooled %pU values at sites passing the FDR /
+rate-difference filter and the minimum-replicate filter in **both** cell
+lines of each pair. High r across cell lines suggests that the detected
+modification pattern is consistent — i.e., the same rRNA sites are strongly
+modified regardless of cell line — which is expected for constitutively
+modified rRNA residues.
+
+Sites that pass in one cell line but not the other are excluded from the
+correlation (they contribute to the Jaccard-style overlap question, not the
+quantitative agreement question).
+
+```{r pooled-chisq-pearson-setup}
+pearson_pair_chisq <- function(dt1, dt2, combo, min_nsamp) {
+  pass1 <- dt1[fdr < combo$fdr & rate_diff > combo$diff & n_samples >= min_nsamp,
+               .(site, ratio1 = ratio)]
+  pass2 <- dt2[fdr < combo$fdr & rate_diff > combo$diff & n_samples >= min_nsamp,
+               .(site, ratio2 = ratio)]
+  merged <- merge(pass1, pass2, by = "site")
+  if (nrow(merged) < 3) return(data.frame(r = NA_real_, n_common = nrow(merged)))
+  data.frame(
+    r        = cor(merged$ratio1, merged$ratio2, method = "pearson"),
+    n_common = nrow(merged)
+  )
+}
+
+cor_pooled_grid <- do.call(rbind, lapply(cl_pairs_v_chisq, function(p) {
+  do.call(rbind, lapply(seq_along(CUTOFF_COMBOS), function(i) {
+    combo <- CUTOFF_COMBOS[[i]]
+    do.call(rbind, lapply(NSAMP_CUTS_POOLED, function(n) {
+      res <- pearson_pair_chisq(
+        dat_list_pooled_chisq[[p[1]]], dat_list_pooled_chisq[[p[2]]],
+        combo = combo, min_nsamp = n
+      )
+      data.frame(cl1 = p[1], cl2 = p[2],
+                 combo_idx = i, combo_label = combo$label, min_nsamp = n,
+                 pearson_r = round(res$r, 3), n_common = res$n_common)
+    }))
+  }))
+}))
+
+cor_pooled_sym <- cor_pooled_grid |>
+  bind_rows(
+    cor_pooled_grid |> rename(cl1 = cl2, cl2 = cl1)
+  ) |>
+  bind_rows(
+    expand.grid(cl1 = CELL_LINES_V, cl2 = CELL_LINES_V,
+                combo_idx = seq_along(CUTOFF_COMBOS),
+                min_nsamp = NSAMP_CUTS_POOLED) |>
+      filter(cl1 == cl2) |>
+      mutate(combo_label = COMBO_LABELS[combo_idx],
+             pearson_r = 1, n_common = NA_integer_)
+  ) |>
+  mutate(
+    cl1         = factor(cl1, levels = CELL_LINES_V),
+    cl2         = factor(cl2, levels = rev(CELL_LINES_V)),
+    nsamp_label = factor(paste0("n_samples>=", min_nsamp),
+                         levels = paste0("n_samples>=", NSAMP_CUTS_POOLED)),
+    combo_label = factor(combo_label, levels = COMBO_LABELS)
+  )
+```
+
+### Correlation matrices
+
+The grid of heatmaps below shows Pearson's r between every pair of cell lines
+under all combinations of cutoffs. Rows = minimum n_samples; columns = FDR /
+rate-difference combination. Diagonal cells equal 1 by definition. Warmer
+(red) colours indicate higher agreement; a grey cell means too few common
+sites to compute r.
+
+```{r pooled-chisq-pearson-heatmap, fig.width=14, fig.height=11}
+ggplot(cor_pooled_sym, aes(x = cl1, y = cl2, fill = pearson_r)) +
+  geom_tile(color = "white", linewidth = 0.5) +
+  geom_text(aes(label = ifelse(cl1 == cl2, "1", sprintf("%.3f", pearson_r))),
+            size = 3, fontface = "bold") +
+  scale_fill_gradient2(
+    low = "#1a9641", mid = "#ffffbf", high = "#d7191c",
+    midpoint = 0.5, limits = c(0, 1), na.value = "grey90",
+    name = "Pearson r"
+  ) +
+  facet_grid(nsamp_label ~ combo_label) +
+  labs(
+    title = "Pearson's r of pooled %pU between cell lines (chi-squared rRNA sites)",
+    x = NULL, y = NULL
+  ) +
+  theme_bw(base_size = 10) +
+  theme(
+    axis.text.x      = element_text(angle = 30, hjust = 1, size = 9),
+    axis.text.y      = element_text(size = 9),
+    strip.background = element_rect(fill = "#e8eaf6"),
+    strip.text       = element_text(face = "bold", size = 9),
+    panel.spacing    = unit(0.3, "lines"),
+    legend.position  = "right"
+  )
+```
+
+### Scatter plots (FDR < 0.001 & rate_diff > 0.05, n_samples >= 2)
+
+Representative scatter plots at a moderately stringent cutoff (FDR < 0.001 &
+rate_diff > 0.05, detected in >= 2 replicates). Each point is one pooled rRNA
+site.
+
+```{r pooled-chisq-pearson-scatter, fig.width=13, fig.height=8}
+SCATTER_COMBO_POOLED <- CUTOFF_COMBOS[[1]]
+MIN_N_POOLED         <- 2
+
+scatter_data_chisq <- lapply(CELL_LINES_V, function(cl) {
+  dt <- dat_list_pooled_chisq[[cl]]
+  dt[fdr < SCATTER_COMBO_POOLED$fdr &
+       rate_diff > SCATTER_COMBO_POOLED$diff &
+       n_samples >= MIN_N_POOLED,
+     .(site, ratio, cell_line = cl)]
+})
+names(scatter_data_chisq) <- CELL_LINES_V
+
+scatter_plots_chisq <- lapply(cl_pairs_v_chisq, function(p) {
+  d1 <- scatter_data_chisq[[p[1]]]
+  d2 <- scatter_data_chisq[[p[2]]]
+  m  <- merge(d1, d2, by = "site", suffixes = c("_1", "_2"))
+  if (nrow(m) < 3) return(NULL)
+  r_val <- cor(m$ratio_1, m$ratio_2, method = "pearson")
+  ggplot(m, aes(x = ratio_1, y = ratio_2)) +
+    geom_point(alpha = 0.55, size = 1.2, color = "#2c7bb6") +
+    geom_abline(slope = 1, intercept = 0, color = "red",
+                linetype = "dashed", linewidth = 0.6) +
+    annotate("text", x = Inf, y = -Inf,
+             label = sprintf("r = %.3f\nn = %d", r_val, nrow(m)),
+             hjust = 1.1, vjust = -0.3, size = 3.5) +
+    scale_x_continuous(labels = percent_format(accuracy = 1)) +
+    scale_y_continuous(labels = percent_format(accuracy = 1)) +
+    labs(
+      title = paste(p[1], "vs", p[2]),
+      x     = paste0("%pU  ", p[1]),
+      y     = paste0("%pU  ", p[2])
+    ) +
+    theme_bw(base_size = 10)
+})
+scatter_plots_chisq <- Filter(Negate(is.null), scatter_plots_chisq)
+
+do.call(grid.arrange, c(scatter_plots_chisq, list(ncol = 3)))
+```
+
+---
+
+# Comparing with published data
+
+We benchmark our **pooled chi-squared** rRNA calls against two independent
+published datasets. Overlap with validated sites confirms that the
+chi-squared site-calling strategy is correctly identifying true
+pseudouridine modifications.
+
+- **BACS** (PMID 39349603) detects pU via antibody-based capture; it reports
+  absolute %pU levels for two replicates.
+- **PRAISE** (PMID 36997645) detects pU via the deletion signature at reverse-
+  transcription termination; it reports deletion ratios for two replicates.
+
+For each cell line and each of the four FDR / rate-difference cutoff
+combinations introduced above we report: (a) how many of our pooled,
+significance-filtered sites overlap with BACS sites, (b) how many overlap
+with PRAISE sites, and (c) scatter plots comparing the quantitative %pU or
+deletion ratio values at overlapping positions.
+
+```{r pub-chisq-helpers}
+make_scatter_publication_chisq <- function(df, x, y, col, ttl, xlab, ylab) {
+  if (nrow(df) == 0) {
+    return(
+      ggplot() +
+        annotate("text", x = 0.5, y = 0.5, label = "No overlapping sites",
+                 size = 4, color = "grey50") +
+        labs(title = ttl, x = xlab, y = ylab) +
+        theme_classic(base_size = 11) +
+        theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 10))
+    )
+  }
+  ggplot(df, aes(x = .data[[x]], y = .data[[y]],
+                 color = .data[[col]], label = label)) +
+    geom_point(size = 2.5, alpha = 0.8) +
+    geom_text_repel(size = 2.5, max.overlaps = 20) +
+    geom_smooth(method = "lm", se = TRUE, color = "grey40", linetype = "dashed") +
+    scale_color_manual(values = c("5.8S" = "#4E79A7", "18S" = "#F28E2B",
+                                  "28S"  = "#59A14F", "5S"  = "#E15759")) +
+    labs(title = ttl, x = xlab, y = ylab, color = "rRNA type") +
+    theme_classic(base_size = 11) +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 10))
+}
+
+make_heatmap_publication_chisq <- function(data, fill_col, label_col, ttl, fill_label) {
+  ggplot(data, aes(x = diff_label, y = fdr_label, fill = .data[[fill_col]])) +
+    geom_tile(color = "white", linewidth = 1.2) +
+    geom_text(aes(label = .data[[label_col]]), size = 6, fontface = "bold", color = "white") +
+    scale_fill_gradient(low = "#d0e8f2", high = "#1a6fa8") +
+    labs(title = ttl, x = "Min rate-difference cutoff", y = "Max FDR cutoff", fill = fill_label) +
+    theme_classic(base_size = 12) +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+          axis.text  = element_text(size = 11))
+}
+
+combine_panels_chisq <- function(results, slot) {
+  plots <- map(results, slot)
+  wrap_plots(plots, ncol = 2) +
+    plot_layout(guides = "collect") &
+    theme(legend.position = "bottom")
+}
+```
+
+## Published data overview
+
+Site counts and the overlap between BACS and PRAISE are shown first to
+establish the published reference landscape before comparing with our pooled
+chi-squared calls.
+
+```{r pub-chisq-load, warning=FALSE, message=FALSE}
+path_BACS   <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID39349603.xlsx"
+path_PRAISE <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID36997645.xlsx"
+
+rrna_BACS <- readxl::read_excel(path_BACS, sheet = 2)
+colnames(rrna_BACS) <- rrna_BACS[2, ]
+rrna_BACS <- rrna_BACS[-c(1:2), ]
+rrna_BACS <- rrna_BACS[complete.cases(rrna_BACS$chr), ]
+
+rrna_PRAISE <- readxl::read_excel(path_PRAISE, sheet = 1)
+colnames(rrna_PRAISE) <- rrna_PRAISE[2, ]
+rrna_PRAISE <- rrna_PRAISE[-c(1:2), ]
+rrna_PRAISE <- rrna_PRAISE %>% filter(!is.na(chr_name), !is.na(site))
+
+rrna_BACS_clean <- rrna_BACS %>%
+  mutate(
+    rna_type = case_when(
+      str_detect(chr, "RNA5_8S") ~ "5.8S",
+      str_detect(chr, "RNA18S")  ~ "18S",
+      str_detect(chr, "RNA28S")  ~ "28S",
+      str_detect(chr, "RNA5SN")  ~ "5S",
+      TRUE ~ NA_character_
+    ),
+    pos_num = as.integer(str_extract(pos, "^[0-9]+"))
+  )
+
+rrna_PRAISE_clean <- rrna_PRAISE %>%
+  mutate(
+    rna_type  = str_extract(chr_name, "(5\\.8S|18S|28S|5S)"),
+    pos_start = as.integer(str_extract(site, "^[0-9]+")),
+    pos_end   = as.integer(coalesce(
+      str_extract(site, "(?<=-)[0-9]+$"),
+      str_extract(site, "^[0-9]+")
+    ))
+  )
+
+overlap <- rrna_BACS_clean %>%
+  inner_join(rrna_PRAISE_clean, by = "rna_type") %>%
+  filter(pos_num >= pos_start & pos_num <= pos_end)
+
+DT::datatable(rrna_BACS, caption = htmltools::tags$caption(
+  style = 'caption-side: left; text-align: left; color:black; font-size:150%;',
+  'Sites from BACS'), options = list(pageLength = 5))
+
+DT::datatable(rrna_PRAISE, caption = htmltools::tags$caption(
+  style = 'caption-side: left; text-align: left; color:black; font-size:150%;',
+  'Sites from PRAISE'), options = list(pageLength = 5))
+
+cat("Sites in BACS:    ", nrow(rrna_BACS_clean), "\n")
+cat("Sites in PRAISE:  ", nrow(rrna_PRAISE_clean), "\n")
+cat("Overlapping sites:", nrow(overlap), "\n")
+
+rrna_BACS_clean <- rrna_BACS_clean %>%
+  mutate(accession = str_extract(chr, "NR_[0-9]+"),
+         pos_num   = as.integer(pos)) %>%
+  rename(`pU level_rep1` = `Ψ level_rep1`,
+         `pU level_rep2` = `Ψ level_rep2`)
+
+rrna_PRAISE_clean <- rrna_PRAISE_clean %>%
+  mutate(accession = str_extract(chr_name, "NR_[0-9]+"))
+```
+
+```{r pub-chisq-preload, include=FALSE}
+run_cl_comparison_chisq <- function(cl) {
+  pooled_path <- file.path(RESULTS_DIR, cl, "pooled_sites_chisq", "pooled_rRNA.txt")
+  if (!file.exists(pooled_path)) {
+    warning("File not found: ", pooled_path)
+    return(NULL)
+  }
+
+  pooled_ours_rrna_chisq <- fread(pooled_path)
+
+  results <- lapply(seq_along(CUTOFF_COMBOS), function(i) {
+    combo <- CUTOFF_COMBOS[[i]]
+    tag   <- combo$label
+
+    ours_filtered <- pooled_ours_rrna_chisq %>%
+      filter(fdr < combo$fdr, rate_diff > combo$diff) %>%
+      mutate(accession = str_extract(ref, "NR_[0-9]+"))
+
+    overlap_bacs <- ours_filtered %>%
+      inner_join(rrna_BACS_clean, by = c("accession", "pos" = "pos_num")) %>%
+      mutate(
+        psi_rep1 = as.numeric(`pU level_rep1`),
+        psi_rep2 = as.numeric(`pU level_rep2`),
+        label    = paste0(name, " pos", pos)
+      )
+
+    overlap_praise <- ours_filtered %>%
+      inner_join(rrna_PRAISE_clean, by = "accession", relationship = "many-to-many") %>%
+      filter(pos >= pos_start & pos <= pos_end) %>%
+      mutate(
+        deletion_rep1 = as.numeric(rep1_deletion_ratio),
+        deletion_rep2 = as.numeric(rep2_deletion_ratio),
+        label         = paste0(rna_type, " pos", pos)
+      )
+
+    list(
+      tag      = tag,
+      fdr_cut  = combo$fdr,
+      diff_cut = combo$diff,
+      n_ours   = nrow(ours_filtered),
+      n_bacs   = nrow(overlap_bacs),
+      n_praise = nrow(overlap_praise),
+      overlap_bacs   = overlap_bacs,
+      overlap_praise = overlap_praise,
+
+      p_bacs_r1   = make_scatter_publication_chisq(overlap_bacs, "ratio", "psi_rep1", "name",
+                                             tag, "Our pU ratio (pooled, chi-squared)", "BACS pU level (rep1)"),
+      p_bacs_r2   = make_scatter_publication_chisq(overlap_bacs, "ratio", "psi_rep2", "name",
+                                             tag, "Our pU ratio (pooled, chi-squared)", "BACS pU level (rep2)"),
+      p_praise_r1 = make_scatter_publication_chisq(overlap_praise, "ratio", "deletion_rep1", "rna_type",
+                                             tag, "Our pU ratio (pooled, chi-squared)", "PRAISE deletion ratio (rep1)"),
+      p_praise_r2 = make_scatter_publication_chisq(overlap_praise, "ratio", "deletion_rep2", "rna_type",
+                                             tag, "Our pU ratio (pooled, chi-squared)", "PRAISE deletion ratio (rep2)")
+    )
+  })
+
+  names(results) <- paste0("combo", seq_along(CUTOFF_COMBOS))
+  results
+}
+
+pub_data_chisq        <- lapply(CELL_LINES_V, run_cl_comparison_chisq)
+names(pub_data_chisq) <- CELL_LINES_V
+```
+
+---
+
+## CL18870 {.tabset}
+
+```{r pub-chisq-cl18870-check, include=FALSE}
+cl      <- "CL18870"
+results <- pub_data_chisq[[cl]]
+ok      <- !is.null(results)
+```
+
+`r if (!ok) paste("**Skipped:** pooled chi-squared file not found for", cl)`
+
+### Site counts
+
+Tile colour indicates the number of sites: **Our sites** (left) are those
+passing the given FDR / rate-difference cutoff combination in our pooled
+chi-squared data; **Overlap with BACS/PRAISE** (middle, right) counts how many
+of those sites are also present in the respective published dataset. Higher
+overlap validates the specificity of our chi-squared site calls.
+
+```{r pub-chisq-cl18870-heatmap, eval=ok, fig.width=12, fig.height=4}
+heatmap_data <- map_dfr(results, ~ tibble(
+  fdr_cut = .x$fdr_cut, diff_cut = .x$diff_cut,
+  n_ours = .x$n_ours, n_bacs = .x$n_bacs, n_praise = .x$n_praise
+)) %>%
+  mutate(fdr_label  = factor(paste0("FDR<", fdr_cut),
+                             levels = paste0("FDR<", c(0.001, 0.01))),
+         diff_label = factor(paste0("rate_diff>", diff_cut),
+                             levels = paste0("rate_diff>", c(0.05, 0.10))))
+
+make_heatmap_publication_chisq(heatmap_data, "n_ours",   "n_ours",   "Our sites passing cutoffs",  "# sites") +
+make_heatmap_publication_chisq(heatmap_data, "n_bacs",   "n_bacs",   "Overlap with BACS",          "# overlapping sites") +
+make_heatmap_publication_chisq(heatmap_data, "n_praise", "n_praise", "Overlap with PRAISE",        "# overlapping sites") +
+plot_annotation(title = paste(cl, " pooled chi-squared site counts across FDR & rate-diff cutoffs"),
+                theme = theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 13)))
+```
+
+### vs BACS (rep1)
+
+Scatter plots of our pooled chi-squared %pU ratio (x-axis) vs. the BACS %pU
+level from replicate 1 (y-axis) at overlapping sites, faceted by FDR /
+rate-difference cutoff combination. Points are coloured by rRNA subunit type.
+A positive trend indicates quantitative agreement with the BACS dataset.
+
+```{r pub-chisq-cl18870-bacs-r1, eval=ok, fig.width=8, fig.height=9}
+combine_panels_chisq(results, "p_bacs_r1") +
+  plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs BACS pU level (rep1)"),
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
+```
+
+### vs BACS (rep2)
+
+```{r pub-chisq-cl18870-bacs-r2, eval=ok, fig.width=8, fig.height=9}
+combine_panels_chisq(results, "p_bacs_r2") +
+  plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs BACS pU level (rep2)"),
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
+```
+
+### vs PRAISE (rep1)
+
+Our pooled chi-squared %pU ratio vs. the PRAISE deletion ratio from
+replicate 1. PRAISE uses a different biochemical readout, so the absolute
+scale differs; we expect a monotonic positive relationship at high-confidence
+sites.
+
+```{r pub-chisq-cl18870-praise-r1, eval=ok, fig.width=8, fig.height=9}
+combine_panels_chisq(results, "p_praise_r1") +
+  plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep1)"),
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
+```
+
+### vs PRAISE (rep2)
+
+```{r pub-chisq-cl18870-praise-r2, eval=ok, fig.width=8, fig.height=9}
+combine_panels_chisq(results, "p_praise_r2") +
+  plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep2)"),
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
+```
+
+---
+
+## CL18909 {.tabset}
+
+```{r pub-chisq-cl18909-check, include=FALSE}
+cl      <- "CL18909"
+results <- pub_data_chisq[[cl]]
+ok      <- !is.null(results)
+```
+
+`r if (!ok) paste("**Skipped:** pooled chi-squared file not found for", cl)`
+
+### Site counts
+
+```{r pub-chisq-cl18909-heatmap, eval=ok, fig.width=12, fig.height=4}
+heatmap_data <- map_dfr(results, ~ tibble(
+  fdr_cut = .x$fdr_cut, diff_cut = .x$diff_cut,
+  n_ours = .x$n_ours, n_bacs = .x$n_bacs, n_praise = .x$n_praise
+)) %>%
+  mutate(fdr_label  = factor(paste0("FDR<", fdr_cut),
+                             levels = paste0("FDR<", c(0.001, 0.01))),
+         diff_label = factor(paste0("rate_diff>", diff_cut),
+                             levels = paste0("rate_diff>", c(0.05, 0.10))))
+
+make_heatmap_publication_chisq(heatmap_data, "n_ours",   "n_ours",   "Our sites passing cutoffs",  "# sites") +
+make_heatmap_publication_chisq(heatmap_data, "n_bacs",   "n_bacs",   "Overlap with BACS",          "# overlapping sites") +
+make_heatmap_publication_chisq(heatmap_data, "n_praise", "n_praise", "Overlap with PRAISE",        "# overlapping sites") +
+plot_annotation(title = paste(cl, " pooled chi-squared site counts across FDR & rate-diff cutoffs"),
+                theme = theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 13)))
+```
+
+### vs BACS (rep1)
+
+```{r pub-chisq-cl18909-bacs-r1, eval=ok, fig.width=8, fig.height=9}
+combine_panels_chisq(results, "p_bacs_r1") +
+  plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs BACS pU level (rep1)"),
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
+```
+
+### vs BACS (rep2)
+
+```{r pub-chisq-cl18909-bacs-r2, eval=ok, fig.width=8, fig.height=9}
+combine_panels_chisq(results, "p_bacs_r2") +
+  plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs BACS pU level (rep2)"),
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
+```
+
+### vs PRAISE (rep1)
+
+```{r pub-chisq-cl18909-praise-r1, eval=ok, fig.width=8, fig.height=9}
+combine_panels_chisq(results, "p_praise_r1") +
+  plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep1)"),
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
+```
+
+### vs PRAISE (rep2)
+
+```{r pub-chisq-cl18909-praise-r2, eval=ok, fig.width=8, fig.height=9}
+combine_panels_chisq(results, "p_praise_r2") +
+  plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep2)"),
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
+```
+
+---
+
+## CL18916 {.tabset}
+
+```{r pub-chisq-cl18916-check, include=FALSE}
+cl      <- "CL18916"
+results <- pub_data_chisq[[cl]]
+ok      <- !is.null(results)
+```
+
+`r if (!ok) paste("**Skipped:** pooled chi-squared file not found for", cl)`
+
+### Site counts
+
+```{r pub-chisq-cl18916-heatmap, eval=ok, fig.width=12, fig.height=4}
+heatmap_data <- map_dfr(results, ~ tibble(
+  fdr_cut = .x$fdr_cut, diff_cut = .x$diff_cut,
+  n_ours = .x$n_ours, n_bacs = .x$n_bacs, n_praise = .x$n_praise
+)) %>%
+  mutate(fdr_label  = factor(paste0("FDR<", fdr_cut),
+                             levels = paste0("FDR<", c(0.001, 0.01))),
+         diff_label = factor(paste0("rate_diff>", diff_cut),
+                             levels = paste0("rate_diff>", c(0.05, 0.10))))
+
+make_heatmap_publication_chisq(heatmap_data, "n_ours",   "n_ours",   "Our sites passing cutoffs",  "# sites") +
+make_heatmap_publication_chisq(heatmap_data, "n_bacs",   "n_bacs",   "Overlap with BACS",          "# overlapping sites") +
+make_heatmap_publication_chisq(heatmap_data, "n_praise", "n_praise", "Overlap with PRAISE",        "# overlapping sites") +
+plot_annotation(title = paste(cl, " pooled chi-squared site counts across FDR & rate-diff cutoffs"),
+                theme = theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 13)))
+```
+
+### vs BACS (rep1)
+
+```{r pub-chisq-cl18916-bacs-r1, eval=ok, fig.width=8, fig.height=9}
+combine_panels_chisq(results, "p_bacs_r1") +
+  plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs BACS pU level (rep1)"),
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
+```
+
+### vs BACS (rep2)
+
+```{r pub-chisq-cl18916-bacs-r2, eval=ok, fig.width=8, fig.height=9}
+combine_panels_chisq(results, "p_bacs_r2") +
+  plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs BACS pU level (rep2)"),
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
+```
+
+### vs PRAISE (rep1)
+
+```{r pub-chisq-cl18916-praise-r1, eval=ok, fig.width=8, fig.height=9}
+combine_panels_chisq(results, "p_praise_r1") +
+  plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep1)"),
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
+```
+
+### vs PRAISE (rep2)
+
+```{r pub-chisq-cl18916-praise-r2, eval=ok, fig.width=8, fig.height=9}
+combine_panels_chisq(results, "p_praise_r2") +
+  plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep2)"),
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
+```
+
+---
+
+## CL19099 {.tabset}
+
+```{r pub-chisq-cl19099-check, include=FALSE}
+cl      <- "CL19099"
+results <- pub_data_chisq[[cl]]
+ok      <- !is.null(results)
+```
+
+`r if (!ok) paste("**Skipped:** pooled chi-squared file not found for", cl)`
+
+### Site counts
+
+```{r pub-chisq-cl19099-heatmap, eval=ok, fig.width=12, fig.height=4}
+heatmap_data <- map_dfr(results, ~ tibble(
+  fdr_cut = .x$fdr_cut, diff_cut = .x$diff_cut,
+  n_ours = .x$n_ours, n_bacs = .x$n_bacs, n_praise = .x$n_praise
+)) %>%
+  mutate(fdr_label  = factor(paste0("FDR<", fdr_cut),
+                             levels = paste0("FDR<", c(0.001, 0.01))),
+         diff_label = factor(paste0("rate_diff>", diff_cut),
+                             levels = paste0("rate_diff>", c(0.05, 0.10))))
+
+make_heatmap_publication_chisq(heatmap_data, "n_ours",   "n_ours",   "Our sites passing cutoffs",  "# sites") +
+make_heatmap_publication_chisq(heatmap_data, "n_bacs",   "n_bacs",   "Overlap with BACS",          "# overlapping sites") +
+make_heatmap_publication_chisq(heatmap_data, "n_praise", "n_praise", "Overlap with PRAISE",        "# overlapping sites") +
+plot_annotation(title = paste(cl, " pooled chi-squared site counts across FDR & rate-diff cutoffs"),
+                theme = theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 13)))
+```
+
+### vs BACS (rep1)
+
+```{r pub-chisq-cl19099-bacs-r1, eval=ok, fig.width=8, fig.height=9}
+combine_panels_chisq(results, "p_bacs_r1") +
+  plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs BACS pU level (rep1)"),
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
+```
+
+### vs BACS (rep2)
+
+```{r pub-chisq-cl19099-bacs-r2, eval=ok, fig.width=8, fig.height=9}
+combine_panels_chisq(results, "p_bacs_r2") +
+  plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs BACS pU level (rep2)"),
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
+```
+
+### vs PRAISE (rep1)
+
+```{r pub-chisq-cl19099-praise-r1, eval=ok, fig.width=8, fig.height=9}
+combine_panels_chisq(results, "p_praise_r1") +
+  plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep1)"),
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
+```
+
+### vs PRAISE (rep2)
+
+```{r pub-chisq-cl19099-praise-r2, eval=ok, fig.width=8, fig.height=9}
+combine_panels_chisq(results, "p_praise_r2") +
+  plot_annotation(title = paste(cl, "— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep2)"),
+                  theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
+```
+
