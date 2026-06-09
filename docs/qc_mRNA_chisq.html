@@ -449,10 +449,10 @@ changes </a>
 <div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown is untracked by Git. To know which version of the R
-Markdown file created these results, you’ll want to first commit it to
-the Git repo. If you’re still working on the analysis, you can ignore
-this warning. When you’re finished, you can run
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
 <code>wflow_publish</code> to commit the R Markdown file and build the
 HTML.</p>
 </div>
@@ -545,15 +545,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree0808a8727fbcd093df3b82be4ecf1fdc632e5b8ftargetblank0808a87a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreecab2ff2880b51a84c10a14f97a92588af109173btargetblankcab2ff2a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/0808a8727fbcd093df3b82be4ecf1fdc632e5b8f" target="_blank">0808a87</a>
+<a href="https://github.com/xsun1229/pumseq/tree/cab2ff2880b51a84c10a14f97a92588af109173b" target="_blank">cab2ff2</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree0808a8727fbcd093df3b82be4ecf1fdc632e5b8ftargetblank0808a87a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreecab2ff2880b51a84c10a14f97a92588af109173btargetblankcab2ff2a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -563,7 +563,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/0808a8727fbcd093df3b82be4ecf1fdc632e5b8f" target="_blank">0808a87</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/cab2ff2880b51a84c10a14f97a92588af109173b" target="_blank">cab2ff2</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -580,9 +580,9 @@ were generated:
 Ignored files:
     Ignored:    .Rhistory
 
-Untracked files:
-    Untracked:  analysis/qc_mRNA_chisq.Rmd
-    Untracked:  figure/
+Unstaged changes:
+    Modified:   analysis/qc_mRNA.Rmd
+    Modified:   analysis/qc_mRNA_chisq.Rmd
 
 </code></pre>
 <p>
@@ -597,20 +597,83 @@ have uncommitted changes.
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
+
 <p>
-There are no past versions. Publish this analysis with
-<code>wflow_publish()</code> to start tracking its development.
+These are the previous versions of the repository in which changes were
+made to the R Markdown (<code>analysis/qc_mRNA_chisq.Rmd</code>) and
+HTML (<code>docs/qc_mRNA_chisq.html</code>) files. If you’ve configured
+a remote Git repository (see <code>?wflow_git_remote</code>), click on
+the hyperlinks in the table below to view the files as they were in that
+past version.
 </p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/analysis/qc_mRNA_chisq.Rmd" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/cab2ff2880b51a84c10a14f97a92588af109173b/docs/qc_mRNA_chisq.html" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+<td>
+update
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <hr>
 </div>
 </div>
 </div>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>This report mirrors <a href="qc_rRNA.html">qc_rRNA.html</a> but
-evaluates an <strong>alternative site-calling strategy</strong> based on
-a per-site contingency-table (chi-squared) test rather than simple
-ratio/depth thresholds.</p>
+<p>This report mirrors <a
+href="qc_rRNA_chisq.html">qc_rRNA_chisq.html</a> but evaluates the sites
+called from mRNA.</p>
 <p>For every uridine (T) position we build a 2x2 table comparing the
 treated and (pooled) untreated samples:</p>
 <table>
@@ -820,24 +883,172 @@ sites.</p>
 <h3>CL18870</h3>
 <pre class="r"><code>plot_count_heatmap_chisq(grid_list_pooled_chisq[[&quot;CL18870&quot;]], &quot;CL18870 - pooled chi-squared site counts&quot;)</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pooled-chisq-cl18870-count-heatmap-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pooled-chisq-cl18870-count-heatmap-1">
+Past versions of pooled-chisq-cl18870-count-heatmap-1.png
+</button>
+</p>
+<div id="fig-pooled-chisq-cl18870-count-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pooled-chisq-cl18870-count-heatmap-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 <div id="cl18909" class="section level3">
 <h3>CL18909</h3>
 <pre class="r"><code>plot_count_heatmap_chisq(grid_list_pooled_chisq[[&quot;CL18909&quot;]], &quot;CL18909 - pooled chi-squared site counts&quot;)</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pooled-chisq-cl18909-count-heatmap-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pooled-chisq-cl18909-count-heatmap-1">
+Past versions of pooled-chisq-cl18909-count-heatmap-1.png
+</button>
+</p>
+<div id="fig-pooled-chisq-cl18909-count-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pooled-chisq-cl18909-count-heatmap-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 <div id="cl18916" class="section level3">
 <h3>CL18916</h3>
 <pre class="r"><code>plot_count_heatmap_chisq(grid_list_pooled_chisq[[&quot;CL18916&quot;]], &quot;CL18916 - pooled chi-squared site counts&quot;)</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pooled-chisq-cl18916-count-heatmap-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pooled-chisq-cl18916-count-heatmap-1">
+Past versions of pooled-chisq-cl18916-count-heatmap-1.png
+</button>
+</p>
+<div id="fig-pooled-chisq-cl18916-count-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pooled-chisq-cl18916-count-heatmap-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 <div id="cl19099" class="section level3">
 <h3>CL19099</h3>
 <pre class="r"><code>plot_count_heatmap_chisq(grid_list_pooled_chisq[[&quot;CL19099&quot;]], &quot;CL19099 - pooled chi-squared site counts&quot;)</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pooled-chisq-cl19099-count-heatmap-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pooled-chisq-cl19099-count-heatmap-1">
+Past versions of pooled-chisq-cl19099-count-heatmap-1.png
+</button>
+</p>
+<div id="fig-pooled-chisq-cl19099-count-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pooled-chisq-cl19099-count-heatmap-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 <div id="pu-distribution-pooled-data" class="section level3 tabset">
@@ -852,6 +1063,43 @@ class="section level4">
 <pre class="r"><code>plots_pdist1 &lt;- lapply(CELL_LINES_V, plot_pooled_dist_chisq, combo = CUTOFF_COMBOS[[1]])
 do.call(grid.arrange, c(Filter(Negate(is.null), plots_pdist1), list(ncol = 4)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pooled-chisq-dist1-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pooled-chisq-dist1-1">
+Past versions of pooled-chisq-dist1-1.png
+</button>
+</p>
+<div id="fig-pooled-chisq-dist1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pooled-chisq-dist1-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pu-distribution-fdr-0.001-rate_diff-0.10"
 class="section level4">
@@ -859,6 +1107,43 @@ class="section level4">
 <pre class="r"><code>plots_pdist2 &lt;- lapply(CELL_LINES_V, plot_pooled_dist_chisq, combo = CUTOFF_COMBOS[[2]])
 do.call(grid.arrange, c(Filter(Negate(is.null), plots_pdist2), list(ncol = 4)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pooled-chisq-dist2-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pooled-chisq-dist2-1">
+Past versions of pooled-chisq-dist2-1.png
+</button>
+</p>
+<div id="fig-pooled-chisq-dist2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pooled-chisq-dist2-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pu-distribution-fdr-0.01-rate_diff-0.05"
 class="section level4">
@@ -866,6 +1151,43 @@ class="section level4">
 <pre class="r"><code>plots_pdist3 &lt;- lapply(CELL_LINES_V, plot_pooled_dist_chisq, combo = CUTOFF_COMBOS[[3]])
 do.call(grid.arrange, c(Filter(Negate(is.null), plots_pdist3), list(ncol = 4)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pooled-chisq-dist3-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pooled-chisq-dist3-1">
+Past versions of pooled-chisq-dist3-1.png
+</button>
+</p>
+<div id="fig-pooled-chisq-dist3-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pooled-chisq-dist3-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pu-distribution-fdr-0.01-rate_diff-0.10"
 class="section level4">
@@ -873,6 +1195,43 @@ class="section level4">
 <pre class="r"><code>plots_pdist4 &lt;- lapply(CELL_LINES_V, plot_pooled_dist_chisq, combo = CUTOFF_COMBOS[[4]])
 do.call(grid.arrange, c(Filter(Negate(is.null), plots_pdist4), list(ncol = 4)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pooled-chisq-dist4-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pooled-chisq-dist4-1">
+Past versions of pooled-chisq-dist4-1.png
+</button>
+</p>
+<div id="fig-pooled-chisq-dist4-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pooled-chisq-dist4-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 </div>
@@ -956,6 +1315,43 @@ ggplot(jaccard_pooled_sym, aes(x = cl1, y = cl2, fill = jaccard)) +
     legend.position  = &quot;right&quot;
   )</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pooled-chisq-cross-cl-comparison-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pooled-chisq-cross-cl-comparison-1">
+Past versions of pooled-chisq-cross-cl-comparison-1.png
+</button>
+</p>
+<div id="fig-pooled-chisq-cross-cl-comparison-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pooled-chisq-cross-cl-comparison-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 <div id="pearsons-r-of-pu-between-cell-lines" class="section level2">
@@ -1047,6 +1443,43 @@ means too few common sites to compute r.</p>
     legend.position  = &quot;right&quot;
   )</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pooled-chisq-pearson-heatmap-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pooled-chisq-pearson-heatmap-1">
+Past versions of pooled-chisq-pearson-heatmap-1.png
+</button>
+</p>
+<div id="fig-pooled-chisq-pearson-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pooled-chisq-pearson-heatmap-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="scatter-plots-fdr-0.001-rate_diff-0.05-n_samples-2"
 class="section level3">
@@ -1093,6 +1526,43 @@ scatter_plots_chisq &lt;- Filter(Negate(is.null), scatter_plots_chisq)
 
 do.call(grid.arrange, c(scatter_plots_chisq, list(ncol = 3)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pooled-chisq-pearson-scatter-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pooled-chisq-pearson-scatter-1">
+Past versions of pooled-chisq-pearson-scatter-1.png
+</button>
+</p>
+<div id="fig-pooled-chisq-pearson-scatter-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pooled-chisq-pearson-scatter-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 </div>
@@ -1149,12 +1619,61 @@ quantitative %pU or deletion ratio values at overlapping positions.</p>
 make_heatmap_publication_chisq &lt;- function(data, fill_col, label_col, ttl, fill_label) {
   ggplot(data, aes(x = diff_label, y = fdr_label, fill = .data[[fill_col]])) +
     geom_tile(color = &quot;white&quot;, linewidth = 1.2) +
-    geom_text(aes(label = .data[[label_col]]), size = 6, fontface = &quot;bold&quot;, color = &quot;white&quot;) +
+    geom_text(aes(label = .data[[label_col]]), size = 5, fontface = &quot;bold&quot;, color = &quot;white&quot;) +
     scale_fill_gradient(low = &quot;#d0e8f2&quot;, high = &quot;#1a6fa8&quot;) +
+    facet_wrap(~ nsamp_label, ncol = 2) +
     labs(title = ttl, x = &quot;Min rate-difference cutoff&quot;, y = &quot;Max FDR cutoff&quot;, fill = fill_label) +
-    theme_classic(base_size = 12) +
-    theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;),
-          axis.text  = element_text(size = 11))
+    theme_classic(base_size = 11) +
+    theme(plot.title    = element_text(hjust = 0.5, face = &quot;bold&quot;),
+          axis.text     = element_text(size = 9),
+          strip.text    = element_text(size = 9, face = &quot;bold&quot;),
+          strip.background = element_rect(fill = &quot;#e8f0f7&quot;, color = NA))
+}
+
+make_pct_plot_chisq &lt;- function(data, cl_title) {
+  pal &lt;- c(BACS = &quot;#E41A1C&quot;, PRAISE = &quot;#377EB8&quot;)
+
+  combo_levels &lt;- data %&gt;%
+    arrange(fdr_cut, diff_cut) %&gt;%
+    mutate(combo = paste0(as.character(fdr_label), &quot;\n&quot;, as.character(diff_label))) %&gt;%
+    pull(combo) %&gt;% unique()
+
+  base &lt;- data %&gt;%
+    mutate(combo = factor(paste0(as.character(fdr_label), &quot;\n&quot;, as.character(diff_label)),
+                          levels = combo_levels))
+
+  long_ours &lt;- base %&gt;%
+    select(nsamp_label, combo, BACS = pct_ours_in_bacs, PRAISE = pct_ours_in_praise) %&gt;%
+    pivot_longer(c(BACS, PRAISE), names_to = &quot;dataset&quot;, values_to = &quot;pct&quot;)
+
+  long_pub &lt;- base %&gt;%
+    select(nsamp_label, combo, BACS = pct_bacs_in_ours, PRAISE = pct_praise_in_ours) %&gt;%
+    pivot_longer(c(BACS, PRAISE), names_to = &quot;dataset&quot;, values_to = &quot;pct&quot;)
+
+  bar_theme &lt;- theme_bw(base_size = 10) +
+    theme(legend.position  = &quot;bottom&quot;,
+          strip.text        = element_text(face = &quot;bold&quot;, size = 9),
+          axis.text.x       = element_text(size = 7.5, lineheight = 0.85))
+
+  p1 &lt;- ggplot(long_ours, aes(x = combo, y = pct, fill = dataset)) +
+    geom_col(position = &quot;dodge&quot;, width = 0.7) +
+    facet_wrap(~ nsamp_label, ncol = 2) +
+    scale_fill_manual(values = pal) +
+    labs(subtitle = &quot;% of our sites found in publication&quot;,
+         x = NULL, y = &quot;%&quot;, fill = &quot;&quot;) +
+    bar_theme
+
+  p2 &lt;- ggplot(long_pub, aes(x = combo, y = pct, fill = dataset)) +
+    geom_col(position = &quot;dodge&quot;, width = 0.7) +
+    facet_wrap(~ nsamp_label, ncol = 2) +
+    scale_fill_manual(values = pal) +
+    labs(subtitle = &quot;% of publication sites found in our data&quot;,
+         x = &quot;Cutoff combo&quot;, y = &quot;%&quot;, fill = &quot;&quot;) +
+    bar_theme
+
+  (p1 / p2) +
+    plot_annotation(title = cl_title,
+                    theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))
 }
 
 combine_panels_chisq &lt;- function(results, slot) {
@@ -1237,26 +1756,80 @@ DT::datatable(
 <h2 class="tabset">CL18870</h2>
 <div id="site-counts" class="section level3">
 <h3>Site counts</h3>
-<p>Tile colour indicates the number of sites: <strong>Our sites</strong>
-(left) are those passing the given FDR / rate-difference cutoff
-combination in our pooled chi-squared data; <strong>Overlap with
-BACS/PRAISE</strong> (middle, right) counts how many of those sites are
-also present in the respective published dataset.</p>
-<pre class="r"><code>heatmap_data &lt;- map_dfr(results, ~ tibble(
-  fdr_cut = .x$fdr_cut, diff_cut = .x$diff_cut,
+<p>Tile colour indicates the number of sites. <strong>Our sites</strong>
+(left): sites passing the given FDR / rate-difference and
+minimum-<code>n_samples</code> combination. <strong>Overlap with BACS /
+PRAISE</strong> (middle, right): each tile shows the overlap count plus
+two percentages — <em>X%</em> is the fraction of <strong>our</strong>
+sites found in the publication, and <em>Y%</em> is the fraction of
+<strong>publication</strong> sites recovered by our study. Facets
+correspond to the minimum-<code>n_samples</code> filter (1–4).</p>
+<pre class="r"><code>n_bacs_total   &lt;- nrow(mrna_BACS_clean)
+n_praise_total &lt;- nrow(mrna_PRAISE_clean)
+
+heatmap_data &lt;- map_dfr(results, ~ tibble(
+  fdr_cut   = .x$fdr_cut, diff_cut  = .x$diff_cut, min_nsamp = .x$min_nsamp,
   n_ours = .x$n_ours, n_bacs = .x$n_bacs, n_praise = .x$n_praise
 )) %&gt;%
-  mutate(fdr_label  = factor(paste0(&quot;FDR&lt;&quot;, fdr_cut),
-                             levels = paste0(&quot;FDR&lt;&quot;, c(0.001, 0.01))),
-         diff_label = factor(paste0(&quot;rate_diff&gt;&quot;, diff_cut),
-                             levels = paste0(&quot;rate_diff&gt;&quot;, c(0.05, 0.10))))
+  mutate(
+    fdr_label   = factor(paste0(&quot;FDR&lt;&quot;, fdr_cut),
+                         levels = paste0(&quot;FDR&lt;&quot;, c(0.001, 0.01))),
+    diff_label  = factor(paste0(&quot;rate_diff&gt;&quot;, diff_cut),
+                         levels = paste0(&quot;rate_diff&gt;&quot;, c(0.05, 0.10))),
+    nsamp_label = factor(paste0(&quot;n_samples&gt;=&quot;, min_nsamp),
+                         levels = paste0(&quot;n_samples&gt;=&quot;, NSAMP_CUTS_POOLED)),
+    pct_ours_in_bacs   = if_else(n_ours &gt; 0, round(n_bacs   / n_ours * 100, 1), 0),
+    pct_ours_in_praise = if_else(n_ours &gt; 0, round(n_praise / n_ours * 100, 1), 0),
+    pct_bacs_in_ours   = round(n_bacs   / n_bacs_total   * 100, 1),
+    pct_praise_in_ours = round(n_praise / n_praise_total * 100, 1)
+  )
 
 make_heatmap_publication_chisq(heatmap_data, &quot;n_ours&quot;,   &quot;n_ours&quot;,   &quot;Our sites passing cutoffs&quot;,  &quot;# sites&quot;) +
 make_heatmap_publication_chisq(heatmap_data, &quot;n_bacs&quot;,   &quot;n_bacs&quot;,   &quot;Overlap with BACS&quot;,          &quot;# overlapping sites&quot;) +
 make_heatmap_publication_chisq(heatmap_data, &quot;n_praise&quot;, &quot;n_praise&quot;, &quot;Overlap with PRAISE&quot;,        &quot;# overlapping sites&quot;) +
-plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across FDR &amp; rate-diff cutoffs&quot;),
+plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across FDR, rate-diff &amp; n_samples cutoffs&quot;),
                 theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;, size = 13)))</code></pre>
-<p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18870-heatmap-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18870-heatmap-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pub-chisq-cl18870-heatmap-1">
+Past versions of pub-chisq-cl18870-heatmap-1.png
+</button>
+</p>
+<div id="fig-pub-chisq-cl18870-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18870-heatmap-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>make_pct_plot_chisq(heatmap_data,
+  paste(cl, &quot;- Publication overlap % by n_samples &amp; cutoff&quot;))</code></pre>
+<p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18870-pct-lineplot-1.png" width="960" style="display: block; margin: auto;" /></p>
 </div>
 <div id="vs-bacs" class="section level3">
 <h3>vs BACS</h3>
@@ -1268,6 +1841,43 @@ rate-difference cutoff combination. Points are coloured by mRNA feature
   plot_annotation(title = paste(cl, &quot;— Our pU ratio (pooled, chi-squared) vs BACS Ψ level&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18870-bacs-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pub-chisq-cl18870-bacs-1">
+Past versions of pub-chisq-cl18870-bacs-1.png
+</button>
+</p>
+<div id="fig-pub-chisq-cl18870-bacs-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18870-bacs-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-praise-rep1" class="section level3">
 <h3>vs PRAISE (rep1)</h3>
@@ -1277,6 +1887,43 @@ replicate 1.</p>
   plot_annotation(title = paste(cl, &quot;— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep1)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18870-praise-r1-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pub-chisq-cl18870-praise-r1-1">
+Past versions of pub-chisq-cl18870-praise-r1-1.png
+</button>
+</p>
+<div id="fig-pub-chisq-cl18870-praise-r1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18870-praise-r1-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-praise-rep2" class="section level3">
 <h3>vs PRAISE (rep2)</h3>
@@ -1284,6 +1931,43 @@ replicate 1.</p>
   plot_annotation(title = paste(cl, &quot;— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep2)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18870-praise-r2-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pub-chisq-cl18870-praise-r2-1">
+Past versions of pub-chisq-cl18870-praise-r2-1.png
+</button>
+</p>
+<div id="fig-pub-chisq-cl18870-praise-r2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18870-praise-r2-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 </div>
@@ -1291,21 +1975,72 @@ replicate 1.</p>
 <h2 class="tabset">CL18909</h2>
 <div id="site-counts-1" class="section level3">
 <h3>Site counts</h3>
-<pre class="r"><code>heatmap_data &lt;- map_dfr(results, ~ tibble(
-  fdr_cut = .x$fdr_cut, diff_cut = .x$diff_cut,
+<pre class="r"><code>n_bacs_total   &lt;- nrow(mrna_BACS_clean)
+n_praise_total &lt;- nrow(mrna_PRAISE_clean)
+
+heatmap_data &lt;- map_dfr(results, ~ tibble(
+  fdr_cut   = .x$fdr_cut, diff_cut  = .x$diff_cut, min_nsamp = .x$min_nsamp,
   n_ours = .x$n_ours, n_bacs = .x$n_bacs, n_praise = .x$n_praise
 )) %&gt;%
-  mutate(fdr_label  = factor(paste0(&quot;FDR&lt;&quot;, fdr_cut),
-                             levels = paste0(&quot;FDR&lt;&quot;, c(0.001, 0.01))),
-         diff_label = factor(paste0(&quot;rate_diff&gt;&quot;, diff_cut),
-                             levels = paste0(&quot;rate_diff&gt;&quot;, c(0.05, 0.10))))
+  mutate(
+    fdr_label   = factor(paste0(&quot;FDR&lt;&quot;, fdr_cut),
+                         levels = paste0(&quot;FDR&lt;&quot;, c(0.001, 0.01))),
+    diff_label  = factor(paste0(&quot;rate_diff&gt;&quot;, diff_cut),
+                         levels = paste0(&quot;rate_diff&gt;&quot;, c(0.05, 0.10))),
+    nsamp_label = factor(paste0(&quot;n_samples&gt;=&quot;, min_nsamp),
+                         levels = paste0(&quot;n_samples&gt;=&quot;, NSAMP_CUTS_POOLED)),
+    pct_ours_in_bacs   = if_else(n_ours &gt; 0, round(n_bacs   / n_ours * 100, 1), 0),
+    pct_ours_in_praise = if_else(n_ours &gt; 0, round(n_praise / n_ours * 100, 1), 0),
+    pct_bacs_in_ours   = round(n_bacs   / n_bacs_total   * 100, 1),
+    pct_praise_in_ours = round(n_praise / n_praise_total * 100, 1)
+  )
 
 make_heatmap_publication_chisq(heatmap_data, &quot;n_ours&quot;,   &quot;n_ours&quot;,   &quot;Our sites passing cutoffs&quot;,  &quot;# sites&quot;) +
 make_heatmap_publication_chisq(heatmap_data, &quot;n_bacs&quot;,   &quot;n_bacs&quot;,   &quot;Overlap with BACS&quot;,          &quot;# overlapping sites&quot;) +
 make_heatmap_publication_chisq(heatmap_data, &quot;n_praise&quot;, &quot;n_praise&quot;, &quot;Overlap with PRAISE&quot;,        &quot;# overlapping sites&quot;) +
-plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across FDR &amp; rate-diff cutoffs&quot;),
+plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across FDR, rate-diff &amp; n_samples cutoffs&quot;),
                 theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;, size = 13)))</code></pre>
-<p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18909-heatmap-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18909-heatmap-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pub-chisq-cl18909-heatmap-1">
+Past versions of pub-chisq-cl18909-heatmap-1.png
+</button>
+</p>
+<div id="fig-pub-chisq-cl18909-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18909-heatmap-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>make_pct_plot_chisq(heatmap_data,
+  paste(cl, &quot;- Publication overlap % by n_samples &amp; cutoff&quot;))</code></pre>
+<p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18909-pct-lineplot-1.png" width="960" style="display: block; margin: auto;" /></p>
 </div>
 <div id="vs-bacs-1" class="section level3">
 <h3>vs BACS</h3>
@@ -1313,6 +2048,43 @@ plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across F
   plot_annotation(title = paste(cl, &quot;— Our pU ratio (pooled, chi-squared) vs BACS Ψ level&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18909-bacs-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pub-chisq-cl18909-bacs-1">
+Past versions of pub-chisq-cl18909-bacs-1.png
+</button>
+</p>
+<div id="fig-pub-chisq-cl18909-bacs-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18909-bacs-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-praise-rep1-1" class="section level3">
 <h3>vs PRAISE (rep1)</h3>
@@ -1320,6 +2092,43 @@ plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across F
   plot_annotation(title = paste(cl, &quot;— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep1)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18909-praise-r1-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pub-chisq-cl18909-praise-r1-1">
+Past versions of pub-chisq-cl18909-praise-r1-1.png
+</button>
+</p>
+<div id="fig-pub-chisq-cl18909-praise-r1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18909-praise-r1-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-praise-rep2-1" class="section level3">
 <h3>vs PRAISE (rep2)</h3>
@@ -1327,6 +2136,43 @@ plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across F
   plot_annotation(title = paste(cl, &quot;— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep2)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18909-praise-r2-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pub-chisq-cl18909-praise-r2-1">
+Past versions of pub-chisq-cl18909-praise-r2-1.png
+</button>
+</p>
+<div id="fig-pub-chisq-cl18909-praise-r2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18909-praise-r2-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 </div>
@@ -1334,21 +2180,72 @@ plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across F
 <h2 class="tabset">CL18916</h2>
 <div id="site-counts-2" class="section level3">
 <h3>Site counts</h3>
-<pre class="r"><code>heatmap_data &lt;- map_dfr(results, ~ tibble(
-  fdr_cut = .x$fdr_cut, diff_cut = .x$diff_cut,
+<pre class="r"><code>n_bacs_total   &lt;- nrow(mrna_BACS_clean)
+n_praise_total &lt;- nrow(mrna_PRAISE_clean)
+
+heatmap_data &lt;- map_dfr(results, ~ tibble(
+  fdr_cut   = .x$fdr_cut, diff_cut  = .x$diff_cut, min_nsamp = .x$min_nsamp,
   n_ours = .x$n_ours, n_bacs = .x$n_bacs, n_praise = .x$n_praise
 )) %&gt;%
-  mutate(fdr_label  = factor(paste0(&quot;FDR&lt;&quot;, fdr_cut),
-                             levels = paste0(&quot;FDR&lt;&quot;, c(0.001, 0.01))),
-         diff_label = factor(paste0(&quot;rate_diff&gt;&quot;, diff_cut),
-                             levels = paste0(&quot;rate_diff&gt;&quot;, c(0.05, 0.10))))
+  mutate(
+    fdr_label   = factor(paste0(&quot;FDR&lt;&quot;, fdr_cut),
+                         levels = paste0(&quot;FDR&lt;&quot;, c(0.001, 0.01))),
+    diff_label  = factor(paste0(&quot;rate_diff&gt;&quot;, diff_cut),
+                         levels = paste0(&quot;rate_diff&gt;&quot;, c(0.05, 0.10))),
+    nsamp_label = factor(paste0(&quot;n_samples&gt;=&quot;, min_nsamp),
+                         levels = paste0(&quot;n_samples&gt;=&quot;, NSAMP_CUTS_POOLED)),
+    pct_ours_in_bacs   = if_else(n_ours &gt; 0, round(n_bacs   / n_ours * 100, 1), 0),
+    pct_ours_in_praise = if_else(n_ours &gt; 0, round(n_praise / n_ours * 100, 1), 0),
+    pct_bacs_in_ours   = round(n_bacs   / n_bacs_total   * 100, 1),
+    pct_praise_in_ours = round(n_praise / n_praise_total * 100, 1)
+  )
 
 make_heatmap_publication_chisq(heatmap_data, &quot;n_ours&quot;,   &quot;n_ours&quot;,   &quot;Our sites passing cutoffs&quot;,  &quot;# sites&quot;) +
 make_heatmap_publication_chisq(heatmap_data, &quot;n_bacs&quot;,   &quot;n_bacs&quot;,   &quot;Overlap with BACS&quot;,          &quot;# overlapping sites&quot;) +
 make_heatmap_publication_chisq(heatmap_data, &quot;n_praise&quot;, &quot;n_praise&quot;, &quot;Overlap with PRAISE&quot;,        &quot;# overlapping sites&quot;) +
-plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across FDR &amp; rate-diff cutoffs&quot;),
+plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across FDR, rate-diff &amp; n_samples cutoffs&quot;),
                 theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;, size = 13)))</code></pre>
-<p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18916-heatmap-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18916-heatmap-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pub-chisq-cl18916-heatmap-1">
+Past versions of pub-chisq-cl18916-heatmap-1.png
+</button>
+</p>
+<div id="fig-pub-chisq-cl18916-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18916-heatmap-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>make_pct_plot_chisq(heatmap_data,
+  paste(cl, &quot;- Publication overlap % by n_samples &amp; cutoff&quot;))</code></pre>
+<p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18916-pct-lineplot-1.png" width="960" style="display: block; margin: auto;" /></p>
 </div>
 <div id="vs-bacs-2" class="section level3">
 <h3>vs BACS</h3>
@@ -1356,6 +2253,43 @@ plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across F
   plot_annotation(title = paste(cl, &quot;— Our pU ratio (pooled, chi-squared) vs BACS Ψ level&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18916-bacs-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pub-chisq-cl18916-bacs-1">
+Past versions of pub-chisq-cl18916-bacs-1.png
+</button>
+</p>
+<div id="fig-pub-chisq-cl18916-bacs-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18916-bacs-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-praise-rep1-2" class="section level3">
 <h3>vs PRAISE (rep1)</h3>
@@ -1363,6 +2297,43 @@ plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across F
   plot_annotation(title = paste(cl, &quot;— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep1)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18916-praise-r1-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pub-chisq-cl18916-praise-r1-1">
+Past versions of pub-chisq-cl18916-praise-r1-1.png
+</button>
+</p>
+<div id="fig-pub-chisq-cl18916-praise-r1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18916-praise-r1-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-praise-rep2-2" class="section level3">
 <h3>vs PRAISE (rep2)</h3>
@@ -1370,6 +2341,43 @@ plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across F
   plot_annotation(title = paste(cl, &quot;— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep2)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18916-praise-r2-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pub-chisq-cl18916-praise-r2-1">
+Past versions of pub-chisq-cl18916-praise-r2-1.png
+</button>
+</p>
+<div id="fig-pub-chisq-cl18916-praise-r2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pub-chisq-cl18916-praise-r2-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <hr />
 </div>
 </div>
@@ -1377,21 +2385,72 @@ plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across F
 <h2 class="tabset">CL19099</h2>
 <div id="site-counts-3" class="section level3">
 <h3>Site counts</h3>
-<pre class="r"><code>heatmap_data &lt;- map_dfr(results, ~ tibble(
-  fdr_cut = .x$fdr_cut, diff_cut = .x$diff_cut,
+<pre class="r"><code>n_bacs_total   &lt;- nrow(mrna_BACS_clean)
+n_praise_total &lt;- nrow(mrna_PRAISE_clean)
+
+heatmap_data &lt;- map_dfr(results, ~ tibble(
+  fdr_cut   = .x$fdr_cut, diff_cut  = .x$diff_cut, min_nsamp = .x$min_nsamp,
   n_ours = .x$n_ours, n_bacs = .x$n_bacs, n_praise = .x$n_praise
 )) %&gt;%
-  mutate(fdr_label  = factor(paste0(&quot;FDR&lt;&quot;, fdr_cut),
-                             levels = paste0(&quot;FDR&lt;&quot;, c(0.001, 0.01))),
-         diff_label = factor(paste0(&quot;rate_diff&gt;&quot;, diff_cut),
-                             levels = paste0(&quot;rate_diff&gt;&quot;, c(0.05, 0.10))))
+  mutate(
+    fdr_label   = factor(paste0(&quot;FDR&lt;&quot;, fdr_cut),
+                         levels = paste0(&quot;FDR&lt;&quot;, c(0.001, 0.01))),
+    diff_label  = factor(paste0(&quot;rate_diff&gt;&quot;, diff_cut),
+                         levels = paste0(&quot;rate_diff&gt;&quot;, c(0.05, 0.10))),
+    nsamp_label = factor(paste0(&quot;n_samples&gt;=&quot;, min_nsamp),
+                         levels = paste0(&quot;n_samples&gt;=&quot;, NSAMP_CUTS_POOLED)),
+    pct_ours_in_bacs   = if_else(n_ours &gt; 0, round(n_bacs   / n_ours * 100, 1), 0),
+    pct_ours_in_praise = if_else(n_ours &gt; 0, round(n_praise / n_ours * 100, 1), 0),
+    pct_bacs_in_ours   = round(n_bacs   / n_bacs_total   * 100, 1),
+    pct_praise_in_ours = round(n_praise / n_praise_total * 100, 1)
+  )
 
 make_heatmap_publication_chisq(heatmap_data, &quot;n_ours&quot;,   &quot;n_ours&quot;,   &quot;Our sites passing cutoffs&quot;,  &quot;# sites&quot;) +
 make_heatmap_publication_chisq(heatmap_data, &quot;n_bacs&quot;,   &quot;n_bacs&quot;,   &quot;Overlap with BACS&quot;,          &quot;# overlapping sites&quot;) +
 make_heatmap_publication_chisq(heatmap_data, &quot;n_praise&quot;, &quot;n_praise&quot;, &quot;Overlap with PRAISE&quot;,        &quot;# overlapping sites&quot;) +
-plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across FDR &amp; rate-diff cutoffs&quot;),
+plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across FDR, rate-diff &amp; n_samples cutoffs&quot;),
                 theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;, size = 13)))</code></pre>
-<p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl19099-heatmap-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl19099-heatmap-1.png" width="1344" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pub-chisq-cl19099-heatmap-1">
+Past versions of pub-chisq-cl19099-heatmap-1.png
+</button>
+</p>
+<div id="fig-pub-chisq-cl19099-heatmap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pub-chisq-cl19099-heatmap-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>make_pct_plot_chisq(heatmap_data,
+  paste(cl, &quot;- Publication overlap % by n_samples &amp; cutoff&quot;))</code></pre>
+<p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl19099-pct-lineplot-1.png" width="960" style="display: block; margin: auto;" /></p>
 </div>
 <div id="vs-bacs-3" class="section level3">
 <h3>vs BACS</h3>
@@ -1399,6 +2458,43 @@ plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across F
   plot_annotation(title = paste(cl, &quot;— Our pU ratio (pooled, chi-squared) vs BACS Ψ level&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl19099-bacs-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pub-chisq-cl19099-bacs-1">
+Past versions of pub-chisq-cl19099-bacs-1.png
+</button>
+</p>
+<div id="fig-pub-chisq-cl19099-bacs-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pub-chisq-cl19099-bacs-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-praise-rep1-3" class="section level3">
 <h3>vs PRAISE (rep1)</h3>
@@ -1406,6 +2502,43 @@ plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across F
   plot_annotation(title = paste(cl, &quot;— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep1)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl19099-praise-r1-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pub-chisq-cl19099-praise-r1-1">
+Past versions of pub-chisq-cl19099-praise-r1-1.png
+</button>
+</p>
+<div id="fig-pub-chisq-cl19099-praise-r1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pub-chisq-cl19099-praise-r1-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="vs-praise-rep2-3" class="section level3">
 <h3>vs PRAISE (rep2)</h3>
@@ -1413,6 +2546,43 @@ plot_annotation(title = paste(cl, &quot; pooled chi-squared site counts across F
   plot_annotation(title = paste(cl, &quot;— Our pU ratio (pooled, chi-squared) vs PRAISE deletion ratio (rep2)&quot;),
                   theme = theme(plot.title = element_text(hjust = 0.5, face = &quot;bold&quot;)))</code></pre>
 <p><img src="figure/qc_mRNA_chisq.Rmd/pub-chisq-cl19099-praise-r2-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pub-chisq-cl19099-praise-r2-1">
+Past versions of pub-chisq-cl19099-praise-r2-1.png
+</button>
+</p>
+<div id="fig-pub-chisq-cl19099-praise-r2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cab2ff2880b51a84c10a14f97a92588af109173b/docs/figure/qc_mRNA_chisq.Rmd/pub-chisq-cl19099-praise-r2-1.png" target="_blank">cab2ff2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-06-09
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -1451,18 +2621,18 @@ loaded via a namespace (and not attached):
 [13] pillar_1.9.0       backports_1.4.1    glue_1.6.2         digest_0.6.29     
 [17] RColorBrewer_1.1-3 promises_1.2.0.1   rvest_1.0.2        Matrix_1.5-3      
 [21] htmltools_0.5.2    httpuv_1.6.5       pkgconfig_2.0.3    broom_0.8.0       
-[25] haven_2.5.0        later_1.3.0        tzdb_0.4.0         git2r_0.30.1      
-[29] mgcv_1.8-40        generics_0.1.4     farver_2.1.0       ellipsis_0.3.2    
-[33] withr_2.5.0        cli_3.6.1          magrittr_2.0.3     crayon_1.5.1      
-[37] readxl_1.4.0       evaluate_0.15      fs_1.5.2           fansi_1.0.3       
-[41] nlme_3.1-157       xml2_1.3.3         tools_4.2.0        hms_1.1.1         
-[45] lifecycle_1.0.4    reprex_2.0.1       compiler_4.2.0     jquerylib_0.1.4   
-[49] rlang_1.1.2        dichromat_2.0-0.1  rstudioapi_0.13    htmlwidgets_1.5.4 
-[53] crosstalk_1.2.0    labeling_0.4.2     rmarkdown_2.25     gtable_0.3.6      
-[57] DBI_1.2.2          R6_2.5.1           lubridate_1.8.0    fastmap_1.1.0     
-[61] utf8_1.2.2         workflowr_1.7.0    rprojroot_2.0.3    stringi_1.7.6     
-[65] Rcpp_1.0.12        vctrs_0.6.5        dbplyr_2.1.1       tidyselect_1.2.0  
-[69] xfun_0.41         </code></pre>
+[25] haven_2.5.0        whisker_0.4        later_1.3.0        tzdb_0.4.0        
+[29] git2r_0.30.1       mgcv_1.8-40        generics_0.1.4     farver_2.1.0      
+[33] ellipsis_0.3.2     withr_2.5.0        cli_3.6.1          magrittr_2.0.3    
+[37] crayon_1.5.1       readxl_1.4.0       evaluate_0.15      fs_1.5.2          
+[41] fansi_1.0.3        nlme_3.1-157       xml2_1.3.3         tools_4.2.0       
+[45] hms_1.1.1          lifecycle_1.0.4    reprex_2.0.1       compiler_4.2.0    
+[49] jquerylib_0.1.4    rlang_1.1.2        dichromat_2.0-0.1  rstudioapi_0.13   
+[53] htmlwidgets_1.5.4  crosstalk_1.2.0    labeling_0.4.2     rmarkdown_2.25    
+[57] gtable_0.3.6       DBI_1.2.2          R6_2.5.1           lubridate_1.8.0   
+[61] fastmap_1.1.0      utf8_1.2.2         workflowr_1.7.0    rprojroot_2.0.3   
+[65] stringi_1.7.6      Rcpp_1.0.12        vctrs_0.6.5        dbplyr_2.1.1      
+[69] tidyselect_1.2.0   xfun_0.41         </code></pre>
 </div>
 </div>
 </div>

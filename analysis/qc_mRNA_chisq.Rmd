@@ -10,9 +10,7 @@ output:
 
 # Introduction
 
-This report mirrors [qc_rRNA.html](qc_rRNA.html) but evaluates an **alternative
-site-calling strategy** based on a per-site contingency-table (chi-squared)
-test rather than simple ratio/depth thresholds.
+This report mirrors [qc_rRNA_chisq.html](qc_rRNA_chisq.html) but evaluates the sites called from mRNA.
 
 For every uridine (T) position we build a 2x2 table comparing the treated and
 (pooled) untreated samples:
@@ -578,12 +576,61 @@ make_scatter_publication_chisq <- function(df, x, y, col, ttl, xlab, ylab) {
 make_heatmap_publication_chisq <- function(data, fill_col, label_col, ttl, fill_label) {
   ggplot(data, aes(x = diff_label, y = fdr_label, fill = .data[[fill_col]])) +
     geom_tile(color = "white", linewidth = 1.2) +
-    geom_text(aes(label = .data[[label_col]]), size = 6, fontface = "bold", color = "white") +
+    geom_text(aes(label = .data[[label_col]]), size = 5, fontface = "bold", color = "white") +
     scale_fill_gradient(low = "#d0e8f2", high = "#1a6fa8") +
+    facet_wrap(~ nsamp_label, ncol = 2) +
     labs(title = ttl, x = "Min rate-difference cutoff", y = "Max FDR cutoff", fill = fill_label) +
-    theme_classic(base_size = 12) +
-    theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-          axis.text  = element_text(size = 11))
+    theme_classic(base_size = 11) +
+    theme(plot.title    = element_text(hjust = 0.5, face = "bold"),
+          axis.text     = element_text(size = 9),
+          strip.text    = element_text(size = 9, face = "bold"),
+          strip.background = element_rect(fill = "#e8f0f7", color = NA))
+}
+
+make_pct_plot_chisq <- function(data, cl_title) {
+  pal <- c(BACS = "#E41A1C", PRAISE = "#377EB8")
+
+  combo_levels <- data %>%
+    arrange(fdr_cut, diff_cut) %>%
+    mutate(combo = paste0(as.character(fdr_label), "\n", as.character(diff_label))) %>%
+    pull(combo) %>% unique()
+
+  base <- data %>%
+    mutate(combo = factor(paste0(as.character(fdr_label), "\n", as.character(diff_label)),
+                          levels = combo_levels))
+
+  long_ours <- base %>%
+    select(nsamp_label, combo, BACS = pct_ours_in_bacs, PRAISE = pct_ours_in_praise) %>%
+    pivot_longer(c(BACS, PRAISE), names_to = "dataset", values_to = "pct")
+
+  long_pub <- base %>%
+    select(nsamp_label, combo, BACS = pct_bacs_in_ours, PRAISE = pct_praise_in_ours) %>%
+    pivot_longer(c(BACS, PRAISE), names_to = "dataset", values_to = "pct")
+
+  bar_theme <- theme_bw(base_size = 10) +
+    theme(legend.position  = "bottom",
+          strip.text        = element_text(face = "bold", size = 9),
+          axis.text.x       = element_text(size = 7.5, lineheight = 0.85))
+
+  p1 <- ggplot(long_ours, aes(x = combo, y = pct, fill = dataset)) +
+    geom_col(position = "dodge", width = 0.7) +
+    facet_wrap(~ nsamp_label, ncol = 2) +
+    scale_fill_manual(values = pal) +
+    labs(subtitle = "% of our sites found in publication",
+         x = NULL, y = "%", fill = "") +
+    bar_theme
+
+  p2 <- ggplot(long_pub, aes(x = combo, y = pct, fill = dataset)) +
+    geom_col(position = "dodge", width = 0.7) +
+    facet_wrap(~ nsamp_label, ncol = 2) +
+    scale_fill_manual(values = pal) +
+    labs(subtitle = "% of publication sites found in our data",
+         x = "Cutoff combo", y = "%", fill = "") +
+    bar_theme
+
+  (p1 / p2) +
+    plot_annotation(title = cl_title,
+                    theme = theme(plot.title = element_text(hjust = 0.5, face = "bold")))
 }
 
 combine_panels_chisq <- function(results, slot) {
@@ -672,56 +719,63 @@ run_cl_comparison_chisq <- function(cl) {
   pooled_ours_mrna_chisq <- fread(pooled_path,
                                    colClasses = list(character = "ref"))
 
-  results <- lapply(seq_along(CUTOFF_COMBOS), function(i) {
-    combo <- CUTOFF_COMBOS[[i]]
-    tag   <- combo$label
+  results_nested <- lapply(NSAMP_CUTS_POOLED, function(min_nsamp) {
+    lapply(seq_along(CUTOFF_COMBOS), function(i) {
+      combo <- CUTOFF_COMBOS[[i]]
+      tag   <- combo$label
 
-    ours_filtered <- pooled_ours_mrna_chisq %>%
-      filter(fdr < combo$fdr, rate_diff > combo$diff) %>%
-      mutate(chr_num = as.character(ref))
+      ours_filtered <- pooled_ours_mrna_chisq %>%
+        filter(fdr < combo$fdr, rate_diff > combo$diff, n_samples >= min_nsamp) %>%
+        mutate(chr_num = as.character(ref))
 
-    # Join with BACS by exact genomic coordinates (chr + pos + strand)
-    overlap_bacs <- ours_filtered %>%
-      inner_join(mrna_BACS_clean,
-                 by = c("chr_num", "pos" = "pos_num", "strand")) %>%
-      mutate(label = paste0(gene, " pos", pos))
+      # Join with BACS by exact genomic coordinates (chr + pos + strand)
+      overlap_bacs <- ours_filtered %>%
+        inner_join(mrna_BACS_clean,
+                   by = c("chr_num", "pos" = "pos_num", "strand")) %>%
+        mutate(label = paste0(gene, " pos", pos))
 
-    # Join with PRAISE by chr + genomic range (chr_site can span 1-4 bp)
-    overlap_praise <- ours_filtered %>%
-      inner_join(mrna_PRAISE_clean, by = "chr_num",
-                 relationship = "many-to-many") %>%
-      filter(pos >= pmin(genomic_start, genomic_end) &
-             pos <= pmax(genomic_start, genomic_end)) %>%
-      mutate(
-        deletion_rep1 = as.numeric(rep1_deletion_ratio),
-        deletion_rep2 = as.numeric(rep2_deletion_ratio),
-        feature       = "mRNA",
-        label         = paste0(gene_name, " pos", pos)
+      # Join with PRAISE by chr + genomic range (chr_site can span 1-4 bp)
+      overlap_praise <- ours_filtered %>%
+        inner_join(mrna_PRAISE_clean, by = "chr_num",
+                   relationship = "many-to-many") %>%
+        filter(pos >= pmin(genomic_start, genomic_end) &
+               pos <= pmax(genomic_start, genomic_end)) %>%
+        mutate(
+          deletion_rep1 = as.numeric(rep1_deletion_ratio),
+          deletion_rep2 = as.numeric(rep2_deletion_ratio),
+          feature       = "mRNA",
+          label         = paste0(gene_name, " pos", pos)
+        )
+
+      list(
+        tag       = tag,
+        fdr_cut   = combo$fdr,
+        diff_cut  = combo$diff,
+        min_nsamp = min_nsamp,
+        n_ours    = nrow(ours_filtered),
+        n_bacs    = nrow(overlap_bacs),
+        n_praise  = nrow(overlap_praise),
+        overlap_bacs   = overlap_bacs,
+        overlap_praise = overlap_praise,
+
+        p_bacs      = make_scatter_publication_chisq(
+                        overlap_bacs, "ratio", "psi_level", "feature",
+                        tag, "Our pU ratio (pooled, chi-squared)", "BACS Ψ level"),
+        p_praise_r1 = make_scatter_publication_chisq(
+                        overlap_praise, "ratio", "deletion_rep1", "feature",
+                        tag, "Our pU ratio (pooled, chi-squared)", "PRAISE deletion ratio (rep1)"),
+        p_praise_r2 = make_scatter_publication_chisq(
+                        overlap_praise, "ratio", "deletion_rep2", "feature",
+                        tag, "Our pU ratio (pooled, chi-squared)", "PRAISE deletion ratio (rep2)")
       )
-
-    list(
-      tag      = tag,
-      fdr_cut  = combo$fdr,
-      diff_cut = combo$diff,
-      n_ours   = nrow(ours_filtered),
-      n_bacs   = nrow(overlap_bacs),
-      n_praise = nrow(overlap_praise),
-      overlap_bacs   = overlap_bacs,
-      overlap_praise = overlap_praise,
-
-      p_bacs      = make_scatter_publication_chisq(
-                      overlap_bacs, "ratio", "psi_level", "feature",
-                      tag, "Our pU ratio (pooled, chi-squared)", "BACS Ψ level"),
-      p_praise_r1 = make_scatter_publication_chisq(
-                      overlap_praise, "ratio", "deletion_rep1", "feature",
-                      tag, "Our pU ratio (pooled, chi-squared)", "PRAISE deletion ratio (rep1)"),
-      p_praise_r2 = make_scatter_publication_chisq(
-                      overlap_praise, "ratio", "deletion_rep2", "feature",
-                      tag, "Our pU ratio (pooled, chi-squared)", "PRAISE deletion ratio (rep2)")
-    )
+    })
   })
 
-  names(results) <- paste0("combo", seq_along(CUTOFF_COMBOS))
+  results <- unlist(results_nested, recursive = FALSE)
+  names(results) <- paste0(
+    "nsamp", rep(NSAMP_CUTS_POOLED, each = length(CUTOFF_COMBOS)),
+    "_combo", rep(seq_along(CUTOFF_COMBOS), times = length(NSAMP_CUTS_POOLED))
+  )
   results
 }
 
@@ -743,26 +797,44 @@ ok      <- !is.null(results)
 
 ### Site counts
 
-Tile colour indicates the number of sites: **Our sites** (left) are those
-passing the given FDR / rate-difference cutoff combination in our pooled
-chi-squared data; **Overlap with BACS/PRAISE** (middle, right) counts how many
-of those sites are also present in the respective published dataset.
+Tile colour indicates the number of sites. **Our sites** (left): sites passing
+the given FDR / rate-difference and minimum-`n_samples` combination. **Overlap
+with BACS / PRAISE** (middle, right): each tile shows the overlap count plus
+two percentages — *X%* is the fraction of **our** sites found in the
+publication, and *Y%* is the fraction of **publication** sites recovered by our
+study. Facets correspond to the minimum-`n_samples` filter (1–4).
 
-```{r pub-chisq-cl18870-heatmap, eval=ok, fig.width=12, fig.height=4}
+```{r pub-chisq-cl18870-heatmap, eval=ok, fig.width=14, fig.height=9}
+n_bacs_total   <- nrow(mrna_BACS_clean)
+n_praise_total <- nrow(mrna_PRAISE_clean)
+
 heatmap_data <- map_dfr(results, ~ tibble(
-  fdr_cut = .x$fdr_cut, diff_cut = .x$diff_cut,
+  fdr_cut   = .x$fdr_cut, diff_cut  = .x$diff_cut, min_nsamp = .x$min_nsamp,
   n_ours = .x$n_ours, n_bacs = .x$n_bacs, n_praise = .x$n_praise
 )) %>%
-  mutate(fdr_label  = factor(paste0("FDR<", fdr_cut),
-                             levels = paste0("FDR<", c(0.001, 0.01))),
-         diff_label = factor(paste0("rate_diff>", diff_cut),
-                             levels = paste0("rate_diff>", c(0.05, 0.10))))
+  mutate(
+    fdr_label   = factor(paste0("FDR<", fdr_cut),
+                         levels = paste0("FDR<", c(0.001, 0.01))),
+    diff_label  = factor(paste0("rate_diff>", diff_cut),
+                         levels = paste0("rate_diff>", c(0.05, 0.10))),
+    nsamp_label = factor(paste0("n_samples>=", min_nsamp),
+                         levels = paste0("n_samples>=", NSAMP_CUTS_POOLED)),
+    pct_ours_in_bacs   = if_else(n_ours > 0, round(n_bacs   / n_ours * 100, 1), 0),
+    pct_ours_in_praise = if_else(n_ours > 0, round(n_praise / n_ours * 100, 1), 0),
+    pct_bacs_in_ours   = round(n_bacs   / n_bacs_total   * 100, 1),
+    pct_praise_in_ours = round(n_praise / n_praise_total * 100, 1)
+  )
 
 make_heatmap_publication_chisq(heatmap_data, "n_ours",   "n_ours",   "Our sites passing cutoffs",  "# sites") +
 make_heatmap_publication_chisq(heatmap_data, "n_bacs",   "n_bacs",   "Overlap with BACS",          "# overlapping sites") +
 make_heatmap_publication_chisq(heatmap_data, "n_praise", "n_praise", "Overlap with PRAISE",        "# overlapping sites") +
-plot_annotation(title = paste(cl, " pooled chi-squared site counts across FDR & rate-diff cutoffs"),
+plot_annotation(title = paste(cl, " pooled chi-squared site counts across FDR, rate-diff & n_samples cutoffs"),
                 theme = theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 13)))
+```
+
+```{r pub-chisq-cl18870-pct-lineplot, eval=ok, fig.width=10, fig.height=7}
+make_pct_plot_chisq(heatmap_data,
+  paste(cl, "- Publication overlap % by n_samples & cutoff"))
 ```
 
 ### vs BACS
@@ -810,21 +882,37 @@ ok      <- !is.null(results)
 
 ### Site counts
 
-```{r pub-chisq-cl18909-heatmap, eval=ok, fig.width=12, fig.height=4}
+```{r pub-chisq-cl18909-heatmap, eval=ok, fig.width=14, fig.height=9}
+n_bacs_total   <- nrow(mrna_BACS_clean)
+n_praise_total <- nrow(mrna_PRAISE_clean)
+
 heatmap_data <- map_dfr(results, ~ tibble(
-  fdr_cut = .x$fdr_cut, diff_cut = .x$diff_cut,
+  fdr_cut   = .x$fdr_cut, diff_cut  = .x$diff_cut, min_nsamp = .x$min_nsamp,
   n_ours = .x$n_ours, n_bacs = .x$n_bacs, n_praise = .x$n_praise
 )) %>%
-  mutate(fdr_label  = factor(paste0("FDR<", fdr_cut),
-                             levels = paste0("FDR<", c(0.001, 0.01))),
-         diff_label = factor(paste0("rate_diff>", diff_cut),
-                             levels = paste0("rate_diff>", c(0.05, 0.10))))
+  mutate(
+    fdr_label   = factor(paste0("FDR<", fdr_cut),
+                         levels = paste0("FDR<", c(0.001, 0.01))),
+    diff_label  = factor(paste0("rate_diff>", diff_cut),
+                         levels = paste0("rate_diff>", c(0.05, 0.10))),
+    nsamp_label = factor(paste0("n_samples>=", min_nsamp),
+                         levels = paste0("n_samples>=", NSAMP_CUTS_POOLED)),
+    pct_ours_in_bacs   = if_else(n_ours > 0, round(n_bacs   / n_ours * 100, 1), 0),
+    pct_ours_in_praise = if_else(n_ours > 0, round(n_praise / n_ours * 100, 1), 0),
+    pct_bacs_in_ours   = round(n_bacs   / n_bacs_total   * 100, 1),
+    pct_praise_in_ours = round(n_praise / n_praise_total * 100, 1)
+  )
 
 make_heatmap_publication_chisq(heatmap_data, "n_ours",   "n_ours",   "Our sites passing cutoffs",  "# sites") +
 make_heatmap_publication_chisq(heatmap_data, "n_bacs",   "n_bacs",   "Overlap with BACS",          "# overlapping sites") +
 make_heatmap_publication_chisq(heatmap_data, "n_praise", "n_praise", "Overlap with PRAISE",        "# overlapping sites") +
-plot_annotation(title = paste(cl, " pooled chi-squared site counts across FDR & rate-diff cutoffs"),
+plot_annotation(title = paste(cl, " pooled chi-squared site counts across FDR, rate-diff & n_samples cutoffs"),
                 theme = theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 13)))
+```
+
+```{r pub-chisq-cl18909-pct-lineplot, eval=ok, fig.width=10, fig.height=7}
+make_pct_plot_chisq(heatmap_data,
+  paste(cl, "- Publication overlap % by n_samples & cutoff"))
 ```
 
 ### vs BACS
@@ -865,21 +953,37 @@ ok      <- !is.null(results)
 
 ### Site counts
 
-```{r pub-chisq-cl18916-heatmap, eval=ok, fig.width=12, fig.height=4}
+```{r pub-chisq-cl18916-heatmap, eval=ok, fig.width=14, fig.height=9}
+n_bacs_total   <- nrow(mrna_BACS_clean)
+n_praise_total <- nrow(mrna_PRAISE_clean)
+
 heatmap_data <- map_dfr(results, ~ tibble(
-  fdr_cut = .x$fdr_cut, diff_cut = .x$diff_cut,
+  fdr_cut   = .x$fdr_cut, diff_cut  = .x$diff_cut, min_nsamp = .x$min_nsamp,
   n_ours = .x$n_ours, n_bacs = .x$n_bacs, n_praise = .x$n_praise
 )) %>%
-  mutate(fdr_label  = factor(paste0("FDR<", fdr_cut),
-                             levels = paste0("FDR<", c(0.001, 0.01))),
-         diff_label = factor(paste0("rate_diff>", diff_cut),
-                             levels = paste0("rate_diff>", c(0.05, 0.10))))
+  mutate(
+    fdr_label   = factor(paste0("FDR<", fdr_cut),
+                         levels = paste0("FDR<", c(0.001, 0.01))),
+    diff_label  = factor(paste0("rate_diff>", diff_cut),
+                         levels = paste0("rate_diff>", c(0.05, 0.10))),
+    nsamp_label = factor(paste0("n_samples>=", min_nsamp),
+                         levels = paste0("n_samples>=", NSAMP_CUTS_POOLED)),
+    pct_ours_in_bacs   = if_else(n_ours > 0, round(n_bacs   / n_ours * 100, 1), 0),
+    pct_ours_in_praise = if_else(n_ours > 0, round(n_praise / n_ours * 100, 1), 0),
+    pct_bacs_in_ours   = round(n_bacs   / n_bacs_total   * 100, 1),
+    pct_praise_in_ours = round(n_praise / n_praise_total * 100, 1)
+  )
 
 make_heatmap_publication_chisq(heatmap_data, "n_ours",   "n_ours",   "Our sites passing cutoffs",  "# sites") +
 make_heatmap_publication_chisq(heatmap_data, "n_bacs",   "n_bacs",   "Overlap with BACS",          "# overlapping sites") +
 make_heatmap_publication_chisq(heatmap_data, "n_praise", "n_praise", "Overlap with PRAISE",        "# overlapping sites") +
-plot_annotation(title = paste(cl, " pooled chi-squared site counts across FDR & rate-diff cutoffs"),
+plot_annotation(title = paste(cl, " pooled chi-squared site counts across FDR, rate-diff & n_samples cutoffs"),
                 theme = theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 13)))
+```
+
+```{r pub-chisq-cl18916-pct-lineplot, eval=ok, fig.width=10, fig.height=7}
+make_pct_plot_chisq(heatmap_data,
+  paste(cl, "- Publication overlap % by n_samples & cutoff"))
 ```
 
 ### vs BACS
@@ -920,21 +1024,37 @@ ok      <- !is.null(results)
 
 ### Site counts
 
-```{r pub-chisq-cl19099-heatmap, eval=ok, fig.width=12, fig.height=4}
+```{r pub-chisq-cl19099-heatmap, eval=ok, fig.width=14, fig.height=9}
+n_bacs_total   <- nrow(mrna_BACS_clean)
+n_praise_total <- nrow(mrna_PRAISE_clean)
+
 heatmap_data <- map_dfr(results, ~ tibble(
-  fdr_cut = .x$fdr_cut, diff_cut = .x$diff_cut,
+  fdr_cut   = .x$fdr_cut, diff_cut  = .x$diff_cut, min_nsamp = .x$min_nsamp,
   n_ours = .x$n_ours, n_bacs = .x$n_bacs, n_praise = .x$n_praise
 )) %>%
-  mutate(fdr_label  = factor(paste0("FDR<", fdr_cut),
-                             levels = paste0("FDR<", c(0.001, 0.01))),
-         diff_label = factor(paste0("rate_diff>", diff_cut),
-                             levels = paste0("rate_diff>", c(0.05, 0.10))))
+  mutate(
+    fdr_label   = factor(paste0("FDR<", fdr_cut),
+                         levels = paste0("FDR<", c(0.001, 0.01))),
+    diff_label  = factor(paste0("rate_diff>", diff_cut),
+                         levels = paste0("rate_diff>", c(0.05, 0.10))),
+    nsamp_label = factor(paste0("n_samples>=", min_nsamp),
+                         levels = paste0("n_samples>=", NSAMP_CUTS_POOLED)),
+    pct_ours_in_bacs   = if_else(n_ours > 0, round(n_bacs   / n_ours * 100, 1), 0),
+    pct_ours_in_praise = if_else(n_ours > 0, round(n_praise / n_ours * 100, 1), 0),
+    pct_bacs_in_ours   = round(n_bacs   / n_bacs_total   * 100, 1),
+    pct_praise_in_ours = round(n_praise / n_praise_total * 100, 1)
+  )
 
 make_heatmap_publication_chisq(heatmap_data, "n_ours",   "n_ours",   "Our sites passing cutoffs",  "# sites") +
 make_heatmap_publication_chisq(heatmap_data, "n_bacs",   "n_bacs",   "Overlap with BACS",          "# overlapping sites") +
 make_heatmap_publication_chisq(heatmap_data, "n_praise", "n_praise", "Overlap with PRAISE",        "# overlapping sites") +
-plot_annotation(title = paste(cl, " pooled chi-squared site counts across FDR & rate-diff cutoffs"),
+plot_annotation(title = paste(cl, " pooled chi-squared site counts across FDR, rate-diff & n_samples cutoffs"),
                 theme = theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 13)))
+```
+
+```{r pub-chisq-cl19099-pct-lineplot, eval=ok, fig.width=10, fig.height=7}
+make_pct_plot_chisq(heatmap_data,
+  paste(cl, "- Publication overlap % by n_samples & cutoff"))
 ```
 
 ### vs BACS
