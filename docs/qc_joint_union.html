@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-06-12" />
+
+<title>Joint pooling vs union-of-per-cell-line site calling</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Joint pooling vs union-of-per-cell-line
+site calling</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-06-12</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-06-12
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree5f3f0e67350f4725808c4698e4256c9d2454b6aetargetblank5f3f0e6a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/5f3f0e67350f4725808c4698e4256c9d2454b6ae" target="_blank">5f3f0e6</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree5f3f0e67350f4725808c4698e4256c9d2454b6aetargetblank5f3f0e6a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/5f3f0e67350f4725808c4698e4256c9d2454b6ae" target="_blank">5f3f0e6</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+
+Untracked files:
+    Untracked:  analysis/qc_joint_union.Rmd
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>output_root &lt;- &quot;/project2/xinhe/xsun/pumseq/pumseq_results/joint&quot;
+joint_run   &lt;- &quot;test_3CL_mRNA&quot;
+union_run   &lt;- &quot;test_3CL_mRNA_union&quot;
+
+results_root &lt;- &quot;/project2/xinhe/xsun/pumseq/pumseq_results&quot;
+cell_lines   &lt;- c(&quot;CL18870&quot;, &quot;CL18916&quot;, &quot;CL19099&quot;)
+
+joint_bed &lt;- file.path(output_root, joint_run, &quot;joint_mRNA.pseusite.bed&quot;)
+union_bed &lt;- file.path(output_root, union_run, &quot;union_mRNA.pseusite.bed&quot;)
+
+pooled_files &lt;- setNames(
+  file.path(results_root, cell_lines, &quot;pooled_sites_chisq&quot;, &quot;pooled_mRNA.txt&quot;),
+  cell_lines
+)</code></pre>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>We are trying to find a way to call sites jointly across samples.
+It’s much easier in QTL analysis to have a common set of sites/features
+across all samples, then we can associate with genotypes.</p>
+<p>We tried two strategies for getting a common mRNA pU site list across
+cell lines. Both end with the same two kinds of output, used for
+downstream analyses:</p>
+<ul>
+<li>A <strong>global site list</strong>
+(<code>*_mRNA.pseusite.bed</code> / <code>.txt.gz</code>) — the sites
+considered “real” pU sites for this cohort, one row of cross-cell-line
+pooled stats (C, T, depth, ratio, pval, fdr, rate_diff, …) per
+site.</li>
+<li>A <strong>global_sites annotation + matrices</strong>
+(<code>*_mRNA.global_sites.txt.gz</code>,
+<code>.ratio_matrix.txt.gz</code>, <code>.depth_matrix.txt.gz</code>) —
+for every site in the global list, every cell line’s own %pU
+(<code>C/(C+T)</code>) and read depth (<code>C+T</code>), computed
+directly from that cell line’s raw mpileup counts with <strong>no
+per-cell-line depth or significance filter</strong> (a cell line is
+<code>NA</code> only if it has zero reads at that site). The annotation
+table has a fixed number of columns regardless of cohort size; the
+matrices gain one column per cell line added.</li>
+</ul>
+<div id="joint" class="section level2">
+<h2>Joint</h2>
+<ol style="list-style-type: decimal">
+<li>Pool mpileup read counts (treated and untreated separately) across
+all cell lines, position by position.</li>
+<li>Run a single chi-squared test per site on the pooled counts, with a
+genome-wide BH-FDR.</li>
+<li>Sites passing
+<code>fdr &lt; fdr_chisq &amp; rate_diff &gt; ratediff_chisq &amp; depth &gt;=    out_depth</code>
+define the global site list (<code>joint_mRNA.pseusite.bed</code>).</li>
+<li>For that global site list, compute each cell line’s %pU/depth
+directly from its own raw mpileup counts -&gt;
+<code>joint_mRNA.global_sites.*</code>.</li>
+</ol>
+</div>
+<div id="union" class="section level2">
+<h2>Union</h2>
+<ol style="list-style-type: decimal">
+<li>For each cell line, take its own already-pooled chi-squared calls
+(<code>pooled_sites_chisq/pooled_mRNA.txt</code>) and filter by
+<code>fdr &lt; fdr_chisq_celline &amp; rate_diff &gt; ratediff_chisq &amp; depth &gt;=    out_depth &amp; n_samples &gt;= min_replicates</code>
+-&gt; per-cell-line called sites.</li>
+<li>Take the union of <code>(ref, pos, strand)</code> across all cell
+lines’ called sites, recording which cell line(s) called each site
+(<code>called_in</code>).</li>
+<li>Look up cross-cell-line pooled stats (C, T, depth, ratio, pval, fdr,
+rate_diff) for the union sites from an existing Joint run
+(<code>joint_mRNA.pseusite.txt.gz</code>) — <code>fdr</code> here is the
+Joint run’s genome-wide value, <strong>not recomputed</strong>. The
+union itself, with no further filtering, <strong>is</strong> the global
+site list (<code>union_mRNA.pseusite.bed</code>).</li>
+<li>Same as Joint step 4: per-cell-line %pU/depth computed directly from
+raw mpileup counts -&gt; <code>union_mRNA.global_sites.*</code>.</li>
+</ol>
+<p>The key difference is <em>which sites end up in the global list</em>:
+Joint requires significance in the pooled (mega-sample) test, while
+Union requires significance in at least one individual cell line.
+Union’s list is therefore typically a superset of Joint’s, and can
+include sites that are significant in one cell line but diluted away
+once pooled with the others.</p>
+</div>
+</div>
+<div id="comparing-the-sites-between-the-two-strategies"
+class="section level1">
+<h1>Comparing the sites between the two strategies</h1>
+<pre class="r"><code>read_bed_sites &lt;- function(path) {
+  bed &lt;- fread(path, header = FALSE,
+                col.names = c(&quot;ref&quot;, &quot;start&quot;, &quot;pos&quot;, &quot;name&quot;, &quot;score&quot;, &quot;strand&quot;))
+  bed[, ref := as.character(ref)]
+  unique(bed[, .(ref, pos, strand)])
+}
+
+joint_sites &lt;- read_bed_sites(joint_bed)
+union_sites &lt;- read_bed_sites(union_bed)
+setkey(joint_sites, ref, pos, strand)
+setkey(union_sites, ref, pos, strand)
+
+cat(&quot;Joint strategy final sites :&quot;, nrow(joint_sites), &quot;\n&quot;)</code></pre>
+<pre><code>Joint strategy final sites : 2328 </code></pre>
+<pre class="r"><code>cat(&quot;Union strategy final sites :&quot;, nrow(union_sites), &quot;\n&quot;)</code></pre>
+<pre><code>Union strategy final sites : 1748 </code></pre>
+<pre class="r"><code>site_id &lt;- function(dt) dt[, paste(ref, pos, strand, sep = &quot;:&quot;)]
+
+fit &lt;- euler(list(Joint = site_id(joint_sites), Union = site_id(union_sites)))
+plot(fit, quantities = TRUE, main = &quot;Overlap of global site lists&quot;,
+     fills = list(fill = c(&quot;#4E79A7&quot;, &quot;#F28E2B&quot;), alpha = 0.6))</code></pre>
+<p><img src="figure/qc_joint_union.Rmd/site-overlap-venn-1.png" width="480" style="display: block; margin: auto;" /></p>
+</div>
+<div id="per-cell-line-pu-lookup" class="section level1">
+<h1>Per-cell-line %pU lookup</h1>
+<p>For every site in a strategy’s final list, look up that site’s
+per-cell-line conversion rate (<code>ratio</code> = C / (C+T), i.e. %pU
+as a fraction) from each cell line’s own
+<code>pooled_sites_chisq/pooled_mRNA.txt</code>. A site missing from a
+given cell line’s table (insufficient depth in that cell line) becomes
+<code>NA</code> for that cell line.</p>
+<pre class="r"><code>load_ratio &lt;- function(path) {
+  dt &lt;- fread(path, select = c(&quot;ref&quot;, &quot;pos&quot;, &quot;strand&quot;, &quot;ratio&quot;),
+               colClasses = list(character = c(&quot;ref&quot;, &quot;strand&quot;)))
+  setkey(dt, ref, pos, strand)
+  dt
+}
+
+ratios &lt;- lapply(pooled_files, load_ratio)</code></pre>
+<pre class="r"><code>build_pu_matrix &lt;- function(sites, ratios) {
+  out &lt;- copy(sites)
+  for (cl in names(ratios)) {
+    out &lt;- merge(out, ratios[[cl]], by = c(&quot;ref&quot;, &quot;pos&quot;, &quot;strand&quot;), all.x = TRUE)
+    setnames(out, &quot;ratio&quot;, cl)
+  }
+  out
+}
+
+joint_pu &lt;- build_pu_matrix(joint_sites, ratios)
+union_pu &lt;- build_pu_matrix(union_sites, ratios)</code></pre>
+<pre class="r"><code>cl_pairs &lt;- combn(cell_lines, 2, simplify = FALSE)
+
+plot_pu_pair &lt;- function(pu, pair) {
+  sub &lt;- pu[, ..pair]
+  sub &lt;- sub[complete.cases(sub)]
+  r   &lt;- cor(sub[[1]], sub[[2]], method = &quot;pearson&quot;)
+  ggplot(pu, aes(x = .data[[pair[1]]], y = .data[[pair[2]]]))+
+    geom_point(alpha = 0.4, size = 0.8)+
+    geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, color = &quot;grey50&quot;)+
+    coord_equal(xlim = c(0, 1), ylim = c(0, 1))+
+    labs(title = sprintf(&quot;%s vs %s (r = %.3f)&quot;, pair[1], pair[2], r),
+         x = sprintf(&quot;%%pU: %s&quot;, pair[1]), y = sprintf(&quot;%%pU: %s&quot;, pair[2]))+
+    theme_bw()
+}</code></pre>
+<div id="correlation-of-pu-across-cell-lines" class="section level2">
+<h2>Correlation of %pU across cell lines</h2>
+<div id="joint-strategy" class="section level3">
+<h3>Joint strategy</h3>
+<pre class="r"><code>pearson  &lt;- cor(joint_pu[, ..cell_lines], use = &quot;pairwise.complete.obs&quot;, method = &quot;pearson&quot;)
+
+#knitr::kable(pearson, digits = 3, caption = &quot;Joint: Pearson correlation of %pU&quot;)</code></pre>
+<pre class="r"><code>corrplot(pearson, method = &quot;color&quot;, type = &quot;upper&quot;, addCoef.col = &quot;black&quot;,
+         tl.col = &quot;black&quot;, title = &quot;Joint: Pearson r (%pU)&quot;, mar = c(0,0,2,0),
+         col = colorRampPalette(c(&quot;#1a9641&quot;, &quot;#ffffbf&quot;, &quot;#d7191c&quot;))(200))</code></pre>
+<p><img src="figure/qc_joint_union.Rmd/corr-joint-plot-1.png" width="384" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>joint_scatter &lt;- lapply(cl_pairs, function(p) plot_pu_pair(joint_pu, p))
+wrap_plots(joint_scatter, ncol = 3) +
+  plot_annotation(title = sprintf(&quot;Joint strategy: %%pU across cell lines (n = %d sites)&quot;, nrow(joint_pu)))</code></pre>
+<p><img src="figure/qc_joint_union.Rmd/scatter-joint-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="union-strategy" class="section level3">
+<h3>Union strategy</h3>
+<pre class="r"><code>pearson_u  &lt;- cor(union_pu[, ..cell_lines], use = &quot;pairwise.complete.obs&quot;, method = &quot;pearson&quot;)
+
+#knitr::kable(pearson_u, digits = 3, caption = &quot;Union: Pearson correlation of %pU&quot;)</code></pre>
+<pre class="r"><code>corrplot(pearson_u, method = &quot;color&quot;, type = &quot;upper&quot;, addCoef.col = &quot;black&quot;,
+         tl.col = &quot;black&quot;, title = &quot;Union: Pearson r (%pU)&quot;, mar = c(0,0,2,0),
+         col = colorRampPalette(c(&quot;#1a9641&quot;, &quot;#ffffbf&quot;, &quot;#d7191c&quot;))(200))</code></pre>
+<p><img src="figure/qc_joint_union.Rmd/corr-union-plot-1.png" width="384" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>union_scatter &lt;- lapply(cl_pairs, function(p) plot_pu_pair(union_pu, p))
+wrap_plots(union_scatter, ncol = 3) +
+  plot_annotation(title = sprintf(&quot;Union strategy: %%pU across cell lines (n = %d sites)&quot;, nrow(union_pu)))</code></pre>
+<p><img src="figure/qc_joint_union.Rmd/scatter-union-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+</div>
+<div id="comparing-with-published-data" class="section level1">
+<h1>Comparing with published data</h1>
+<p>We benchmark the <strong>global site lists</strong> from both
+strategies against two independent published pU datasets. For each
+global site, <code>ratio</code> is the pooled %pU (C / (C+T)) across all
+three cell lines (for Union this value is looked up from the Joint run,
+see <a href="#strategy-descriptions">Strategy descriptions</a>).</p>
+<ul>
+<li><strong>BACS</strong> (PMID 39349603) HeLa polyA+ RNA Supplementary
+Table 8.</li>
+<li><strong>PRAISE</strong> (PMID 36997645) HEK293T mRNAs Supplementary
+Dataset 2, filtered to mRNA only</li>
+</ul>
+<p>Both published datasets use genomic coordinates, matching our
+<code>ref</code> / <code>pos</code> / <code>strand</code> columns. BACS
+mRNA sites with <code>feature == "ncRNA"</code> are excluded. PRAISE
+sites are filtered to <code>NM_</code> / <code>XM_</code> (mRNA)
+accessions, excluding <code>NR_</code> / <code>XR_</code> (ncRNA).</p>
+<div id="load-published-data" class="section level2">
+<h2>Load published data</h2>
+<pre class="r"><code>path_BACS   &lt;- &quot;/project2/xinhe/xsun/pumseq/data_others/pU_PMID39349603.xlsx&quot;
+path_PRAISE &lt;- &quot;/project2/xinhe/xsun/pumseq/data_others/pU_PMID36997645.xlsx&quot;
+
+# BACS mRNA: Supplementary Table 8 (sheet 6) - HeLa polyA+ RNA
+mrna_BACS &lt;- readxl::read_excel(path_BACS, sheet = 6, skip = 2)
+mrna_BACS_clean &lt;- mrna_BACS %&gt;%
+  filter(feature != &quot;ncRNA&quot;) %&gt;%
+  rename(psi_level = `Ψ level`) %&gt;%
+  mutate(chr_num   = sub(&quot;^chr&quot;, &quot;&quot;, chr),
+         pos_num   = as.integer(pos),
+         psi_level = as.numeric(psi_level))
+
+# PRAISE mRNA+ncRNA: Supplementary Dataset 2 (sheet 2) - HEK293T
+# Filter to mRNA only: keep NM_ and XM_ accessions.
+mrna_PRAISE &lt;- readxl::read_excel(path_PRAISE, sheet = 2, skip = 2)
+mrna_PRAISE_clean &lt;- mrna_PRAISE %&gt;%
+  filter(str_starts(chr_name, &quot;NM_&quot;) | str_starts(chr_name, &quot;XM_&quot;)) %&gt;%
+  mutate(
+    chr_num       = sub(&quot;^chr&quot;, &quot;&quot;, str_extract(chr_site, &quot;^chr[^_]+&quot;)),
+    genomic_start = as.integer(str_extract(chr_site, &quot;(?&lt;=_)[0-9]+&quot;)),
+    genomic_end   = as.integer(coalesce(
+      str_extract(chr_site, &quot;(?&lt;=-)[0-9]+$&quot;),
+      str_extract(chr_site, &quot;(?&lt;=_)[0-9]+&quot;)
+    ))
+  ) %&gt;%
+  filter(!is.na(chr_num))
+
+cat(&quot;BACS mRNA sites  :&quot;, nrow(mrna_BACS_clean), &quot;\n&quot;)</code></pre>
+<pre><code>BACS mRNA sites  : 1294 </code></pre>
+<pre class="r"><code>cat(&quot;PRAISE mRNA sites:&quot;, nrow(mrna_PRAISE_clean), &quot;\n&quot;)</code></pre>
+<pre><code>PRAISE mRNA sites: 1888 </code></pre>
+<pre class="r"><code>load_global_sites &lt;- function(path) {
+  dt &lt;- fread(path, select = c(&quot;ref&quot;, &quot;pos&quot;, &quot;strand&quot;, &quot;ratio&quot;),
+               colClasses = list(character = c(&quot;ref&quot;, &quot;strand&quot;)))
+  as.data.frame(dt)
+}
+
+joint_global &lt;- load_global_sites(file.path(output_root, joint_run, &quot;joint_mRNA.global_sites.txt.gz&quot;))
+union_global &lt;- load_global_sites(file.path(output_root, union_run, &quot;union_mRNA.global_sites.txt.gz&quot;))</code></pre>
+</div>
+<div id="overlap-with-bacs-and-praise" class="section level2">
+<h2>Overlap with BACS and PRAISE</h2>
+<p>For each strategy’s global site list we report how many sites overlap
+BACS and PRAISE (by exact <code>chr/pos/strand</code> for BACS, and by
+<code>chr</code> + genomic range for PRAISE), what fraction of
+<strong>our</strong> sites that represents, and what fraction of the
+<strong>published</strong> sites we recover.</p>
+<pre class="r"><code>overlap_bacs &lt;- function(dt) {
+  dt %&gt;%
+    mutate(chr_num = ref) %&gt;%
+    inner_join(mrna_BACS_clean, by = c(&quot;chr_num&quot;, &quot;pos&quot; = &quot;pos_num&quot;, &quot;strand&quot;))
+}
+
+overlap_praise &lt;- function(dt) {
+  dt %&gt;%
+    mutate(chr_num = ref) %&gt;%
+    inner_join(mrna_PRAISE_clean, by = &quot;chr_num&quot;, relationship = &quot;many-to-many&quot;) %&gt;%
+    filter(pos &gt;= pmin(genomic_start, genomic_end) &amp;
+           pos &lt;= pmax(genomic_start, genomic_end))
+}
+
+summarize_overlap &lt;- function(dt, label) {
+  ov_bacs   &lt;- overlap_bacs(dt)
+  ov_praise &lt;- overlap_praise(dt)
+  data.frame(
+    Strategy           = label,
+    n_global_sites     = nrow(dt),
+    n_BACS_overlap     = nrow(ov_bacs),
+    pct_ours_in_BACS   = round(nrow(ov_bacs) / nrow(dt) * 100, 1),
+    pct_BACS_in_ours   = round(nrow(ov_bacs) / nrow(mrna_BACS_clean) * 100, 1),
+    n_PRAISE_overlap   = nrow(ov_praise),
+    pct_ours_in_PRAISE = round(nrow(ov_praise) / nrow(dt) * 100, 1),
+    pct_PRAISE_in_ours = round(nrow(ov_praise) / nrow(mrna_PRAISE_clean) * 100, 1)
+  )
+}
+
+overlap_summary &lt;- rbind(
+  summarize_overlap(joint_global, &quot;Joint&quot;),
+  summarize_overlap(union_global, &quot;Union&quot;)
+)
+
+knitr::kable(
+  overlap_summary,
+  col.names = c(&quot;Strategy&quot;, &quot;# global sites&quot;,
+                 &quot;# overlap BACS&quot;, &quot;% ours in BACS&quot;, &quot;% BACS in ours&quot;,
+                 &quot;# overlap PRAISE&quot;, &quot;% ours in PRAISE&quot;, &quot;% PRAISE in ours&quot;),
+  caption = &quot;Overlap between our global site lists and published mRNA pU data&quot;
+)</code></pre>
+<table style="width:100%;">
+<caption>Overlap between our global site lists and published mRNA pU
+data</caption>
+<colgroup>
+<col width="7%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+<col width="14%" />
+<col width="14%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Strategy</th>
+<th align="right"># global sites</th>
+<th align="right"># overlap BACS</th>
+<th align="right">% ours in BACS</th>
+<th align="right">% BACS in ours</th>
+<th align="right"># overlap PRAISE</th>
+<th align="right">% ours in PRAISE</th>
+<th align="right">% PRAISE in ours</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Joint</td>
+<td align="right">2328</td>
+<td align="right">364</td>
+<td align="right">15.6</td>
+<td align="right">28.1</td>
+<td align="right">520</td>
+<td align="right">22.3</td>
+<td align="right">27.5</td>
+</tr>
+<tr class="even">
+<td align="left">Union</td>
+<td align="right">1748</td>
+<td align="right">301</td>
+<td align="right">17.2</td>
+<td align="right">23.3</td>
+<td align="right">385</td>
+<td align="right">22.0</td>
+<td align="right">20.4</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="pu-vs-published-pu-deletion-ratio" class="section level2">
+<h2>%pU vs published %pU / deletion ratio</h2>
+<p>For the overlapping sites, we compare our pooled %pU
+(<code>ratio</code>) against the BACS Ψ level and the PRAISE deletion
+ratios (replicate 1 and 2).</p>
+<pre class="r"><code>make_pub_scatter &lt;- function(df, xcol, ycol, ttl, xlab, ylab) {
+  if (nrow(df) == 0) {
+    return(
+      ggplot() +
+        annotate(&quot;text&quot;, x = 0.5, y = 0.5, label = &quot;No overlapping sites&quot;,
+                 size = 4, color = &quot;grey50&quot;) +
+        labs(title = ttl, x = xlab, y = ylab) +
+        theme_bw(base_size = 11)
+    )
+  }
+  r_val &lt;- cor(df[[xcol]], df[[ycol]], method = &quot;pearson&quot;)
+  ggplot(df, aes(x = .data[[xcol]], y = .data[[ycol]])) +
+    geom_point(alpha = 0.6, size = 1.5, color = &quot;#2c7bb6&quot;) +
+    geom_smooth(method = &quot;lm&quot;, se = TRUE, color = &quot;grey40&quot;, linetype = &quot;dashed&quot;) +
+    annotate(&quot;text&quot;, x = -Inf, y = Inf,
+             label = sprintf(&quot;r = %.3f\nn = %d&quot;, r_val, nrow(df)),
+             hjust = -0.1, vjust = 1.3, size = 3.5) +
+    labs(title = ttl, x = xlab, y = ylab) +
+    theme_bw(base_size = 11)
+}</code></pre>
+<div id="joint-strategy-1" class="section level3">
+<h3>Joint strategy</h3>
+<pre class="r"><code>j_bacs   &lt;- overlap_bacs(joint_global)
+j_praise &lt;- overlap_praise(joint_global)
+
+p1 &lt;- make_pub_scatter(j_bacs, &quot;ratio&quot;, &quot;psi_level&quot;,
+                        &quot;Joint vs BACS&quot;, &quot;Our %pU (Joint global sites)&quot;, &quot;BACS psi level&quot;)
+p2 &lt;- make_pub_scatter(j_praise, &quot;ratio&quot;, &quot;rep1_deletion_ratio&quot;,
+                        &quot;Joint vs PRAISE (rep1)&quot;, &quot;Our %pU (Joint global sites)&quot;, &quot;PRAISE deletion ratio (rep1)&quot;)
+p3 &lt;- make_pub_scatter(j_praise, &quot;ratio&quot;, &quot;rep2_deletion_ratio&quot;,
+                        &quot;Joint vs PRAISE (rep2)&quot;, &quot;Our %pU (Joint global sites)&quot;, &quot;PRAISE deletion ratio (rep2)&quot;)
+
+wrap_plots(p1, p2, p3, ncol = 3)</code></pre>
+<p><img src="figure/qc_joint_union.Rmd/pub-scatter-joint-1.png" width="1152" style="display: block; margin: auto;" /></p>
+</div>
+<div id="union-strategy-1" class="section level3">
+<h3>Union strategy</h3>
+<pre class="r"><code>u_bacs   &lt;- overlap_bacs(union_global)
+u_praise &lt;- overlap_praise(union_global)
+
+p1 &lt;- make_pub_scatter(u_bacs, &quot;ratio&quot;, &quot;psi_level&quot;,
+                        &quot;Union vs BACS&quot;, &quot;Our %pU (Union global sites)&quot;, &quot;BACS psi level&quot;)
+p2 &lt;- make_pub_scatter(u_praise, &quot;ratio&quot;, &quot;rep1_deletion_ratio&quot;,
+                        &quot;Union vs PRAISE (rep1)&quot;, &quot;Our %pU (Union global sites)&quot;, &quot;PRAISE deletion ratio (rep1)&quot;)
+p3 &lt;- make_pub_scatter(u_praise, &quot;ratio&quot;, &quot;rep2_deletion_ratio&quot;,
+                        &quot;Union vs PRAISE (rep2)&quot;, &quot;Our %pU (Union global sites)&quot;, &quot;PRAISE deletion ratio (rep2)&quot;)
+
+wrap_plots(p1, p2, p3, ncol = 3)</code></pre>
+<p><img src="figure/qc_joint_union.Rmd/pub-scatter-union-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 7 (Core)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el7-x86_64/lib/libopenblas_haswellp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] stringr_1.5.1        dplyr_1.1.4          patchwork_1.3.2.9000
+[4] eulerr_6.1.1         corrplot_0.92        ggplot2_4.0.3       
+[7] data.table_1.14.2   
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.2.0   xfun_0.41          bslib_0.3.1        lattice_0.20-45   
+ [5] splines_4.2.0      vctrs_0.6.5        generics_0.1.4     htmltools_0.5.2   
+ [9] mgcv_1.8-40        yaml_2.3.5         utf8_1.2.2         rlang_1.1.2       
+[13] R.oo_1.24.0        jquerylib_0.1.4    later_1.3.0        pillar_1.9.0      
+[17] R.utils_2.11.0     glue_1.6.2         withr_2.5.0        RColorBrewer_1.1-3
+[21] S7_0.2.0           readxl_1.4.0       lifecycle_1.0.4    gtable_0.3.6      
+[25] workflowr_1.7.0    cellranger_1.1.0   R.methodsS3_1.8.1  evaluate_0.15     
+[29] labeling_0.4.2     knitr_1.39         fastmap_1.1.0      httpuv_1.6.5      
+[33] fansi_1.0.3        highr_0.9          Rcpp_1.0.12        promises_1.2.0.1  
+[37] scales_1.4.0       jsonlite_1.8.0     farver_2.1.0       fs_1.5.2          
+[41] digest_0.6.29      stringi_1.7.6      polyclip_1.10-0    grid_4.2.0        
+[45] rprojroot_2.0.3    cli_3.6.1          tools_4.2.0        magrittr_2.0.3    
+[49] sass_0.4.1         tibble_3.2.1       dichromat_2.0-0.1  pkgconfig_2.0.3   
+[53] Matrix_1.5-3       polylabelr_0.2.0   rmarkdown_2.25     rstudioapi_0.13   
+[57] R6_2.5.1           nlme_3.1-157       git2r_0.30.1       compiler_4.2.0    </code></pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -9,12 +9,19 @@ editor_options:
 ---
 
 
-[Project overview](overview.html)
+# Overview
 
-[Pipeline](pipeline.html)
+* [Project overview](overview.html)
+* [Pipeline](pipeline.html)
 
-[Quality control using rRNA, sites filtered by depth & ratio](qc_rRNA.html)
+# Quality Control
 
-[Quality control using rRNA, sites filtered by chisq fdr & ratio diff](qc_rRNA_chisq.html)
+**rRNA**
 
-[Quality control using mRNA, sites filtered by chisq fdr & ratio diff](qc_mRNA_chisq.html)
+* [Sites filtered by depth & ratio](qc_rRNA.html)
+* [Sites filtered by chisq fdr & ratio diff](qc_rRNA_chisq.html)
+
+**mRNA**
+
+* [Sites filtered by chisq fdr & ratio diff, determining the fdr & ratio diff cutoffs](qc_mRNA_chisq.html)
+* [Joint pooling vs union-of-per-cell-line site calling](qc_joint_union.html)

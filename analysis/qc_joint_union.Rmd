@@ -1,0 +1,387 @@
+---
+title: "Joint pooling vs union-of-per-cell-line site calling"
+author: "XSun"
+date: "2026-06-12"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                       fig.width = 7, fig.height = 7)
+library(data.table)
+library(ggplot2)
+library(corrplot)
+library(eulerr)
+library(patchwork)
+library(dplyr)
+library(stringr)
+```
+
+
+```{r config}
+output_root <- "/project2/xinhe/xsun/pumseq/pumseq_results/joint"
+joint_run   <- "test_3CL_mRNA"
+union_run   <- "test_3CL_mRNA_union"
+
+results_root <- "/project2/xinhe/xsun/pumseq/pumseq_results"
+cell_lines   <- c("CL18870", "CL18916", "CL19099")
+
+joint_bed <- file.path(output_root, joint_run, "joint_mRNA.pseusite.bed")
+union_bed <- file.path(output_root, union_run, "union_mRNA.pseusite.bed")
+
+pooled_files <- setNames(
+  file.path(results_root, cell_lines, "pooled_sites_chisq", "pooled_mRNA.txt"),
+  cell_lines
+)
+```
+
+# Introduction
+
+We are trying to find a way to call sites jointly across samples. It’s much easier in QTL analysis to have a common set of sites/features across all samples, then we can associate with genotypes.
+
+We tried two strategies for getting a common mRNA pU site list across cell lines.
+Both end with the same two kinds of output, used for downstream analyses:
+
+- A **global site list** (`*_mRNA.pseusite.bed` / `.txt.gz`) — the sites
+  considered "real" pU sites for this cohort, one row of cross-cell-line
+  pooled stats (C, T, depth, ratio, pval, fdr, rate_diff, ...) per site.
+- A **global_sites annotation + matrices**
+  (`*_mRNA.global_sites.txt.gz`, `.ratio_matrix.txt.gz`,
+  `.depth_matrix.txt.gz`) — for every site in the global list, every cell
+  line's own %pU (`C/(C+T)`) and read depth (`C+T`), computed directly from
+  that cell line's raw mpileup counts with **no per-cell-line depth or
+  significance filter** (a cell line is `NA` only if it has zero reads at
+  that site). The annotation table has a fixed number of columns regardless
+  of cohort size; the matrices gain one column per cell line added.
+
+## Joint
+
+1. Pool mpileup read counts (treated and untreated separately) across all
+   cell lines, position by position.
+2. Run a single chi-squared test per site on the pooled counts, with a
+   genome-wide BH-FDR.
+3. Sites passing `fdr < fdr_chisq & rate_diff > ratediff_chisq & depth >=
+   out_depth` define the global site list (`joint_mRNA.pseusite.bed`).
+4. For that global site list, compute each cell line's %pU/depth directly
+   from its own raw mpileup counts -> `joint_mRNA.global_sites.*`.
+
+## Union
+
+1. For each cell line, take its own already-pooled chi-squared calls
+   (`pooled_sites_chisq/pooled_mRNA.txt`) and filter by
+   `fdr < fdr_chisq_celline & rate_diff > ratediff_chisq & depth >=
+   out_depth & n_samples >= min_replicates` -> per-cell-line called sites.
+2. Take the union of `(ref, pos, strand)` across all cell lines' called
+   sites, recording which cell line(s) called each site (`called_in`).
+3. Look up cross-cell-line pooled stats (C, T, depth, ratio, pval, fdr,
+   rate_diff) for the union sites from an existing Joint run
+   (`joint_mRNA.pseusite.txt.gz`) — `fdr` here is the Joint run's
+   genome-wide value, **not recomputed**. The union itself, with no further
+   filtering, **is** the global site list (`union_mRNA.pseusite.bed`).
+4. Same as Joint step 4: per-cell-line %pU/depth computed directly from raw
+   mpileup counts -> `union_mRNA.global_sites.*`.
+
+The key difference is *which sites end up in the global list*: Joint
+requires significance in the pooled (mega-sample) test, while Union requires
+significance in at least one individual cell line. Union's list is therefore
+typically a superset of Joint's, and can include sites that are significant
+in one cell line but diluted away once pooled with the others.
+
+# Comparing the sites between the two strategies
+
+```{r load-bed}
+read_bed_sites <- function(path) {
+  bed <- fread(path, header = FALSE,
+                col.names = c("ref", "start", "pos", "name", "score", "strand"))
+  bed[, ref := as.character(ref)]
+  unique(bed[, .(ref, pos, strand)])
+}
+
+joint_sites <- read_bed_sites(joint_bed)
+union_sites <- read_bed_sites(union_bed)
+setkey(joint_sites, ref, pos, strand)
+setkey(union_sites, ref, pos, strand)
+
+cat("Joint strategy final sites :", nrow(joint_sites), "\n")
+cat("Union strategy final sites :", nrow(union_sites), "\n")
+```
+
+
+```{r site-overlap-venn, fig.width=5, fig.height=5}
+site_id <- function(dt) dt[, paste(ref, pos, strand, sep = ":")]
+
+fit <- euler(list(Joint = site_id(joint_sites), Union = site_id(union_sites)))
+plot(fit, quantities = TRUE, main = "Overlap of global site lists",
+     fills = list(fill = c("#4E79A7", "#F28E2B"), alpha = 0.6))
+```
+
+
+# Per-cell-line %pU lookup
+
+For every site in a strategy's final list, look up that site's per-cell-line
+conversion rate (`ratio` = C / (C+T), i.e. %pU as a fraction) from each cell
+line's own `pooled_sites_chisq/pooled_mRNA.txt`. A site missing from a given
+cell line's table (insufficient depth in that cell line) becomes `NA` for
+that cell line.
+
+```{r load-ratios}
+load_ratio <- function(path) {
+  dt <- fread(path, select = c("ref", "pos", "strand", "ratio"),
+               colClasses = list(character = c("ref", "strand")))
+  setkey(dt, ref, pos, strand)
+  dt
+}
+
+ratios <- lapply(pooled_files, load_ratio)
+```
+
+```{r build-pu-matrix}
+build_pu_matrix <- function(sites, ratios) {
+  out <- copy(sites)
+  for (cl in names(ratios)) {
+    out <- merge(out, ratios[[cl]], by = c("ref", "pos", "strand"), all.x = TRUE)
+    setnames(out, "ratio", cl)
+  }
+  out
+}
+
+joint_pu <- build_pu_matrix(joint_sites, ratios)
+union_pu <- build_pu_matrix(union_sites, ratios)
+```
+
+```{r pu-scatter-helper}
+cl_pairs <- combn(cell_lines, 2, simplify = FALSE)
+
+plot_pu_pair <- function(pu, pair) {
+  sub <- pu[, ..pair]
+  sub <- sub[complete.cases(sub)]
+  r   <- cor(sub[[1]], sub[[2]], method = "pearson")
+  ggplot(pu, aes(x = .data[[pair[1]]], y = .data[[pair[2]]]))+
+    geom_point(alpha = 0.4, size = 0.8)+
+    geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey50")+
+    coord_equal(xlim = c(0, 1), ylim = c(0, 1))+
+    labs(title = sprintf("%s vs %s (r = %.3f)", pair[1], pair[2], r),
+         x = sprintf("%%pU: %s", pair[1]), y = sprintf("%%pU: %s", pair[2]))+
+    theme_bw()
+}
+```
+
+## Correlation of %pU across cell lines
+
+### Joint strategy
+
+```{r corr-joint-table}
+pearson  <- cor(joint_pu[, ..cell_lines], use = "pairwise.complete.obs", method = "pearson")
+
+#knitr::kable(pearson, digits = 3, caption = "Joint: Pearson correlation of %pU")
+```
+
+```{r corr-joint-plot, fig.width=4, fig.height=4}
+corrplot(pearson, method = "color", type = "upper", addCoef.col = "black",
+         tl.col = "black", title = "Joint: Pearson r (%pU)", mar = c(0,0,2,0),
+         col = colorRampPalette(c("#1a9641", "#ffffbf", "#d7191c"))(200))
+```
+
+```{r scatter-joint, fig.width=10, fig.height=3.5}
+joint_scatter <- lapply(cl_pairs, function(p) plot_pu_pair(joint_pu, p))
+wrap_plots(joint_scatter, ncol = 3) +
+  plot_annotation(title = sprintf("Joint strategy: %%pU across cell lines (n = %d sites)", nrow(joint_pu)))
+```
+
+### Union strategy
+
+```{r corr-union-table}
+pearson_u  <- cor(union_pu[, ..cell_lines], use = "pairwise.complete.obs", method = "pearson")
+
+#knitr::kable(pearson_u, digits = 3, caption = "Union: Pearson correlation of %pU")
+```
+
+```{r corr-union-plot, fig.width=4, fig.height=4}
+corrplot(pearson_u, method = "color", type = "upper", addCoef.col = "black",
+         tl.col = "black", title = "Union: Pearson r (%pU)", mar = c(0,0,2,0),
+         col = colorRampPalette(c("#1a9641", "#ffffbf", "#d7191c"))(200))
+```
+
+```{r scatter-union, fig.width=10, fig.height=3.5}
+union_scatter <- lapply(cl_pairs, function(p) plot_pu_pair(union_pu, p))
+wrap_plots(union_scatter, ncol = 3) +
+  plot_annotation(title = sprintf("Union strategy: %%pU across cell lines (n = %d sites)", nrow(union_pu)))
+```
+
+# Comparing with published data
+
+We benchmark the **global site lists** from both strategies against
+two independent published pU datasets. For each global site, `ratio` is the
+pooled %pU (C / (C+T)) across all three cell lines (for Union this value is
+looked up from the Joint run, see [Strategy descriptions](#strategy-descriptions)).
+
+- **BACS** (PMID 39349603) HeLa polyA+ RNA Supplementary Table 8.
+- **PRAISE** (PMID 36997645) HEK293T mRNAs Supplementary Dataset 2, filtered to mRNA
+  only
+
+Both published datasets use genomic coordinates, matching our `ref` / `pos` /
+`strand` columns. BACS mRNA sites with `feature == "ncRNA"` are excluded.
+PRAISE sites are filtered to `NM_` / `XM_` (mRNA) accessions, excluding
+`NR_` / `XR_` (ncRNA).
+
+## Load published data
+
+```{r pub-load}
+path_BACS   <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID39349603.xlsx"
+path_PRAISE <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID36997645.xlsx"
+
+# BACS mRNA: Supplementary Table 8 (sheet 6) - HeLa polyA+ RNA
+mrna_BACS <- readxl::read_excel(path_BACS, sheet = 6, skip = 2)
+mrna_BACS_clean <- mrna_BACS %>%
+  filter(feature != "ncRNA") %>%
+  rename(psi_level = `Ψ level`) %>%
+  mutate(chr_num   = sub("^chr", "", chr),
+         pos_num   = as.integer(pos),
+         psi_level = as.numeric(psi_level))
+
+# PRAISE mRNA+ncRNA: Supplementary Dataset 2 (sheet 2) - HEK293T
+# Filter to mRNA only: keep NM_ and XM_ accessions.
+mrna_PRAISE <- readxl::read_excel(path_PRAISE, sheet = 2, skip = 2)
+mrna_PRAISE_clean <- mrna_PRAISE %>%
+  filter(str_starts(chr_name, "NM_") | str_starts(chr_name, "XM_")) %>%
+  mutate(
+    chr_num       = sub("^chr", "", str_extract(chr_site, "^chr[^_]+")),
+    genomic_start = as.integer(str_extract(chr_site, "(?<=_)[0-9]+")),
+    genomic_end   = as.integer(coalesce(
+      str_extract(chr_site, "(?<=-)[0-9]+$"),
+      str_extract(chr_site, "(?<=_)[0-9]+")
+    ))
+  ) %>%
+  filter(!is.na(chr_num))
+
+cat("BACS mRNA sites  :", nrow(mrna_BACS_clean), "\n")
+cat("PRAISE mRNA sites:", nrow(mrna_PRAISE_clean), "\n")
+```
+
+```{r pub-load-ours}
+load_global_sites <- function(path) {
+  dt <- fread(path, select = c("ref", "pos", "strand", "ratio"),
+               colClasses = list(character = c("ref", "strand")))
+  as.data.frame(dt)
+}
+
+joint_global <- load_global_sites(file.path(output_root, joint_run, "joint_mRNA.global_sites.txt.gz"))
+union_global <- load_global_sites(file.path(output_root, union_run, "union_mRNA.global_sites.txt.gz"))
+
+```
+
+## Overlap with BACS and PRAISE
+
+For each strategy's global site list we report how many sites overlap BACS
+and PRAISE (by exact `chr/pos/strand` for BACS, and by `chr` + genomic range
+for PRAISE), what fraction of **our** sites that represents, and what fraction
+of the **published** sites we recover.
+
+```{r pub-overlap}
+overlap_bacs <- function(dt) {
+  dt %>%
+    mutate(chr_num = ref) %>%
+    inner_join(mrna_BACS_clean, by = c("chr_num", "pos" = "pos_num", "strand"))
+}
+
+overlap_praise <- function(dt) {
+  dt %>%
+    mutate(chr_num = ref) %>%
+    inner_join(mrna_PRAISE_clean, by = "chr_num", relationship = "many-to-many") %>%
+    filter(pos >= pmin(genomic_start, genomic_end) &
+           pos <= pmax(genomic_start, genomic_end))
+}
+
+summarize_overlap <- function(dt, label) {
+  ov_bacs   <- overlap_bacs(dt)
+  ov_praise <- overlap_praise(dt)
+  data.frame(
+    Strategy           = label,
+    n_global_sites     = nrow(dt),
+    n_BACS_overlap     = nrow(ov_bacs),
+    pct_ours_in_BACS   = round(nrow(ov_bacs) / nrow(dt) * 100, 1),
+    pct_BACS_in_ours   = round(nrow(ov_bacs) / nrow(mrna_BACS_clean) * 100, 1),
+    n_PRAISE_overlap   = nrow(ov_praise),
+    pct_ours_in_PRAISE = round(nrow(ov_praise) / nrow(dt) * 100, 1),
+    pct_PRAISE_in_ours = round(nrow(ov_praise) / nrow(mrna_PRAISE_clean) * 100, 1)
+  )
+}
+
+overlap_summary <- rbind(
+  summarize_overlap(joint_global, "Joint"),
+  summarize_overlap(union_global, "Union")
+)
+
+knitr::kable(
+  overlap_summary,
+  col.names = c("Strategy", "# global sites",
+                 "# overlap BACS", "% ours in BACS", "% BACS in ours",
+                 "# overlap PRAISE", "% ours in PRAISE", "% PRAISE in ours"),
+  caption = "Overlap between our global site lists and published mRNA pU data"
+)
+```
+
+## %pU vs published %pU / deletion ratio
+
+For the overlapping sites, we compare our pooled %pU (`ratio`) against the
+BACS Ψ level and the PRAISE deletion ratios (replicate 1 and 2).
+
+```{r pub-scatter-helper}
+make_pub_scatter <- function(df, xcol, ycol, ttl, xlab, ylab) {
+  if (nrow(df) == 0) {
+    return(
+      ggplot() +
+        annotate("text", x = 0.5, y = 0.5, label = "No overlapping sites",
+                 size = 4, color = "grey50") +
+        labs(title = ttl, x = xlab, y = ylab) +
+        theme_bw(base_size = 11)
+    )
+  }
+  r_val <- cor(df[[xcol]], df[[ycol]], method = "pearson")
+  ggplot(df, aes(x = .data[[xcol]], y = .data[[ycol]])) +
+    geom_point(alpha = 0.6, size = 1.5, color = "#2c7bb6") +
+    geom_smooth(method = "lm", se = TRUE, color = "grey40", linetype = "dashed") +
+    annotate("text", x = -Inf, y = Inf,
+             label = sprintf("r = %.3f\nn = %d", r_val, nrow(df)),
+             hjust = -0.1, vjust = 1.3, size = 3.5) +
+    labs(title = ttl, x = xlab, y = ylab) +
+    theme_bw(base_size = 11)
+}
+```
+
+### Joint strategy
+
+```{r pub-scatter-joint, fig.width=12, fig.height=4}
+j_bacs   <- overlap_bacs(joint_global)
+j_praise <- overlap_praise(joint_global)
+
+p1 <- make_pub_scatter(j_bacs, "ratio", "psi_level",
+                        "Joint vs BACS", "Our %pU (Joint global sites)", "BACS psi level")
+p2 <- make_pub_scatter(j_praise, "ratio", "rep1_deletion_ratio",
+                        "Joint vs PRAISE (rep1)", "Our %pU (Joint global sites)", "PRAISE deletion ratio (rep1)")
+p3 <- make_pub_scatter(j_praise, "ratio", "rep2_deletion_ratio",
+                        "Joint vs PRAISE (rep2)", "Our %pU (Joint global sites)", "PRAISE deletion ratio (rep2)")
+
+wrap_plots(p1, p2, p3, ncol = 3)
+```
+
+### Union strategy
+
+```{r pub-scatter-union, fig.width=12, fig.height=4}
+u_bacs   <- overlap_bacs(union_global)
+u_praise <- overlap_praise(union_global)
+
+p1 <- make_pub_scatter(u_bacs, "ratio", "psi_level",
+                        "Union vs BACS", "Our %pU (Union global sites)", "BACS psi level")
+p2 <- make_pub_scatter(u_praise, "ratio", "rep1_deletion_ratio",
+                        "Union vs PRAISE (rep1)", "Our %pU (Union global sites)", "PRAISE deletion ratio (rep1)")
+p3 <- make_pub_scatter(u_praise, "ratio", "rep2_deletion_ratio",
+                        "Union vs PRAISE (rep2)", "Our %pU (Union global sites)", "PRAISE deletion ratio (rep2)")
+
+wrap_plots(p1, p2, p3, ncol = 3)
+```
+
+
