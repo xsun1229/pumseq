@@ -1,0 +1,490 @@
+---
+title: "QC — rRNA pU sites after dropping problematic replicates"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+library(data.table)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(scales)
+
+knitr::opts_chunk$set(
+  echo = TRUE, warning = FALSE, message = FALSE,
+  fig.align = "center"
+)
+```
+
+# Introduction
+
+For selected cell lines, certain replicates were identified as problematic
+based on the rRNA pU fraction QC plot (high background T% and/or low pU
+signal) and lower site counts at FDR < 0.01 & rate_diff > 0.05. These
+replicates were removed and rRNA sites were re-pooled using only the
+remaining replicates.
+
+The re-pooled results are stored in
+`pooled_sites_chisq_probrep_dropped/pooled_rRNA.txt` within each cell line's
+results directory (original results in `pooled_sites_chisq/` are untouched).
+
+The filtering cutoff is **FDR < 0.01 & rate_diff > 0.05 &
+n_samples >= max(n_kept - 1, 1)**, where `n_kept` is the number of
+replicates remaining after dropping.
+
+```{r config}
+FDR_CUT  <- 0.01
+DIFF_CUT <- 0.05
+CUTOFF_LABEL <- "FDR < 0.01 & rate_diff > 0.05"
+
+RESULTS_DIRS <- c("/project2/xinhe/xsun/pumseq/pumseq_results",
+                  "/project/xinhe/xsun/pumseq/pumseq_results")
+
+# Cell lines and their dropped/kept replicates (short names without CL*_ prefix)
+DROP_INFO <- list(
+  CL18498 = list(dropped = c("13-32-54"),                        kept = c("12-187-85", "12-187-86", "13-32-53")),
+  CL18501 = list(dropped = c("13-32-43"),                        kept = c("12-187-75", "12-187-76", "13-32-44")),
+  CL18502 = list(dropped = c("13-32-45"),                        kept = c("12-187-77", "12-187-78", "13-32-46")),
+  CL18504 = list(dropped = c("13-32-48"),                        kept = c("12-187-79", "12-187-80", "13-32-47")),
+  CL18505 = list(dropped = c("13-32-49", "13-32-50"),            kept = c("12-187-81", "12-187-82")),
+  CL18510 = list(dropped = c("13-32-36"),                        kept = c("12-187-115", "12-187-35", "13-32-35")),
+  CL18517 = list(dropped = c("13-32-39", "13-32-40"),            kept = c("12-187-117", "12-187-37")),
+  CL18523 = list(dropped = c("13-32-41", "13-32-42"),            kept = c("12-187-118", "12-187-38")),
+  CL18909 = list(dropped = c("13-32-23"),                        kept = c("12-187-13", "12-187-14", "13-32-24")),
+  CL18913 = list(dropped = c("13-32-25"),                        kept = c("12-187-15", "12-187-16", "13-32-26")),
+  CL19039 = list(dropped = c("13-32-3", "13-32-4"),              kept = c("13-32-59", "13-32-60")),
+  CL19119 = list(dropped = c("12-187-127"),                      kept = c("12-187-33", "12-187-47")),
+  CL19137 = list(dropped = c("13-32-1", "13-32-2"),              kept = c("13-32-57", "13-32-58")),
+  CL19140 = list(dropped = c("13-32-14"),                        kept = c("13-32-13", "13-32-69", "13-32-70")),
+  CL19143 = list(dropped = c("13-32-21"),                        kept = c("12-187-11", "12-187-12", "13-32-22")),
+  CL19152 = list(dropped = c("13-32-10", "13-32-9"),             kept = c("13-32-65", "13-32-66")),
+  CL19159 = list(dropped = c("12-187-20", "13-32-29", "13-32-30"), kept = c("12-187-19")),
+  CL19193 = list(dropped = c("13-32-11"),                        kept = c("13-32-12", "13-32-67", "13-32-68")),
+  CL19204 = list(dropped = c("13-32-27", "13-32-28"),            kept = c("12-187-17", "12-187-18")),
+  CL19239 = list(dropped = c("13-32-33", "13-32-34"),            kept = c("12-187-23", "12-187-24")),
+  CL19257 = list(dropped = c("13-32-31", "13-32-32"),            kept = c("12-187-21", "12-187-22"))
+)
+
+DROP_CLS <- names(DROP_INFO)
+```
+
+## Replicates dropped and kept
+
+The table below lists, for each cell line, which replicates were dropped
+(identified as problematic) and which were kept for re-pooling.
+
+```{r rep-table}
+rep_df <- do.call(rbind, lapply(DROP_CLS, function(cl) {
+  info <- DROP_INFO[[cl]]
+  data.frame(
+    `Cell line` = cl,
+    `Kept replicates` = paste(info$kept, collapse = ", "),
+    `Dropped replicates` = paste(info$dropped, collapse = ", "),
+    `N kept` = length(info$kept),
+    `N dropped` = length(info$dropped),
+    check.names = FALSE
+  )
+}))
+
+knitr::kable(rep_df, caption = "Replicates kept and dropped for each cell line")
+```
+
+# Cross-cell-line comparison (pooled data)
+
+For each cell line, the best available pooled data is used: if problematic
+replicates were dropped, the re-pooled result from
+`pooled_sites_chisq_probrep_dropped/` is used; otherwise the original
+`pooled_sites_chisq/` result is used. The adaptive threshold
+**n_samples >= max(n_kept - 1, 1)** is applied for cell lines with dropped
+replicates; **n_samples >= 2** for unchanged cell lines.
+
+**Plots shown:**
+
+1. **Site counts** — number of pooled sites passing the cutoff per cell line.
+2. **%pU distribution** — histogram + density of pooled conversion ratio.
+3. **Jaccard index heatmap** — pairwise set similarity of called sites.
+4. **Pearson r heatmap** — pairwise correlation of %pU at shared sites.
+
+```{r load-all-pooled}
+RESULTS_DIRS <- c("/project2/xinhe/xsun/pumseq/pumseq_results",
+                  "/project/xinhe/xsun/pumseq/pumseq_results")
+
+find_results_dir <- function(cl) {
+  for (rd in RESULTS_DIRS) {
+    if (dir.exists(file.path(rd, cl))) return(file.path(rd, cl))
+  }
+  NULL
+}
+
+# Discover all cell lines with pooled data (original or dropped-rep)
+all_pooled_cls <- c()
+for (rd in RESULTS_DIRS) {
+  cls <- list.dirs(rd, recursive = FALSE, full.names = FALSE)
+  cls <- cls[grepl("^CL\\d+$", cls)]
+  for (cl in cls) {
+    has_orig <- file.exists(file.path(rd, cl, "pooled_sites_chisq", "pooled_rRNA.txt"))
+    has_drop <- file.exists(file.path(rd, cl, "pooled_sites_chisq_probrep_dropped", "pooled_rRNA.txt"))
+    if (has_orig || has_drop) all_pooled_cls <- c(all_pooled_cls, cl)
+  }
+}
+all_pooled_cls <- sort(unique(all_pooled_cls))
+
+# Load best available pooled data for each CL
+load_best_pooled <- function(cl) {
+  wdir <- find_results_dir(cl)
+  is_dropped <- cl %in% DROP_CLS
+  if (is_dropped) {
+    f <- file.path(wdir, "pooled_sites_chisq_probrep_dropped", "pooled_rRNA.txt")
+    n_kept <- length(DROP_INFO[[cl]]$kept)
+    min_nsamp <- max(n_kept - 1, 1)
+  } else {
+    f <- file.path(wdir, "pooled_sites_chisq", "pooled_rRNA.txt")
+    min_nsamp <- 2
+  }
+  if (!file.exists(f)) return(NULL)
+  dt <- fread(f, header = TRUE, sep = "\t", colClasses = list(character = "ref"))
+  dt[, site := paste(ref, pos, strand, sep = ":")]
+  dt[, cell_line := cl]
+  attr(dt, "min_nsamp") <- min_nsamp
+  dt
+}
+
+best_pooled <- setNames(lapply(all_pooled_cls, load_best_pooled), all_pooled_cls)
+best_pooled <- Filter(Negate(is.null), best_pooled)
+ALL_POOLED_CLS <- names(best_pooled)
+
+filter_best <- function(dt) {
+  mn <- attr(dt, "min_nsamp")
+  dt[fdr < FDR_CUT & rate_diff > DIFF_CUT & n_samples >= mn]
+}
+
+cat("Total cell lines with pooled data:", length(ALL_POOLED_CLS), "\n")
+cat("Using dropped-rep data for:", paste(intersect(DROP_CLS, ALL_POOLED_CLS), collapse = ", "), "\n")
+cat("Using original data for:", paste(setdiff(ALL_POOLED_CLS, DROP_CLS), collapse = ", "), "\n")
+```
+
+## Number of pooled sites per cell line
+
+```{r cross-site-counts, fig.width=10, fig.height=12}
+library(patchwork)
+library(gridExtra)
+
+cross_count_df <- data.frame(
+  cell_line = ALL_POOLED_CLS,
+  n_sites = sapply(ALL_POOLED_CLS, function(cl) nrow(filter_best(best_pooled[[cl]])))
+)
+cross_count_df$cell_line <- factor(cross_count_df$cell_line, levels = ALL_POOLED_CLS)
+
+n_per_panel <- ceiling(nrow(cross_count_df) / 5)
+cross_count_df$panel <- rep(1:5, each = n_per_panel, length.out = nrow(cross_count_df))
+
+cross_count_plots <- lapply(1:5, function(p) {
+  sub <- cross_count_df[cross_count_df$panel == p, ]
+  ggplot(sub, aes(x = cell_line, y = n_sites, fill = cell_line)) +
+    geom_col(width = 0.6, show.legend = FALSE) +
+    geom_text(aes(label = scales::comma(n_sites)), vjust = -0.3, size = 3.5) +
+    scale_y_continuous(labels = scales::comma,
+                       expand = expansion(mult = c(0, 0.15)),
+                       limits = c(0, max(cross_count_df$n_sites) * 1.15)) +
+    labs(x = NULL, y = "# sites") +
+    theme_bw(base_size = 11) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+})
+
+wrap_plots(cross_count_plots, ncol = 1) +
+  plot_annotation(title = "Number of pooled rRNA pU sites per cell line",
+                  subtitle = paste(CUTOFF_LABEL))
+```
+
+## %pU Distribution — pooled data
+
+```{r cross-dist, fig.width=14, fig.height=20}
+cross_dist_plots <- lapply(ALL_POOLED_CLS, function(cl) {
+  df <- as.data.frame(filter_best(best_pooled[[cl]])[, .(psi = ratio)])
+  if (nrow(df) == 0) return(NULL)
+  med_val <- median(df$psi); mean_val <- mean(df$psi)
+  ggplot(df, aes(x = psi)) +
+    geom_histogram(aes(y = after_stat(density)), binwidth = 0.02,
+                   fill = "steelblue", color = "white", alpha = 0.7) +
+    geom_density(color = "navy", linewidth = 0.7) +
+    geom_vline(xintercept = med_val, color = "red", linetype = "dashed") +
+    geom_vline(xintercept = mean_val, color = "darkorange", linetype = "dotted") +
+    annotate("text", x = Inf, y = Inf,
+             label = sprintf("n = %d\nmedian = %.3f\nmean = %.3f",
+                             nrow(df), med_val, mean_val),
+             hjust = 1.05, vjust = 1.05, size = 3, family = "mono") +
+    scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
+    labs(title = cl, x = "%pU (pooled)", y = "Density") +
+    theme_bw(base_size = 10)
+})
+cross_dist_plots <- Filter(Negate(is.null), cross_dist_plots)
+wrap_plots(cross_dist_plots, ncol = 5)
+```
+
+## Cross-cell-line Jaccard index
+
+```{r cross-jaccard, fig.width=max(8, length(ALL_POOLED_CLS)*0.6), fig.height=max(7, length(ALL_POOLED_CLS)*0.5)}
+jaccard <- function(a, b) {
+  n_int <- length(intersect(a, b))
+  n_uni <- length(union(a, b))
+  if (n_uni == 0) NA_real_ else n_int / n_uni
+}
+
+site_sets <- setNames(
+  lapply(ALL_POOLED_CLS, function(cl) filter_best(best_pooled[[cl]])$site),
+  ALL_POOLED_CLS
+)
+
+n_cl <- length(ALL_POOLED_CLS)
+j_mat <- matrix(NA_real_, n_cl, n_cl, dimnames = list(ALL_POOLED_CLS, ALL_POOLED_CLS))
+n_int_mat <- matrix(NA_integer_, n_cl, n_cl, dimnames = list(ALL_POOLED_CLS, ALL_POOLED_CLS))
+diag(j_mat) <- 1
+for (i in 1:(n_cl-1)) for (j in (i+1):n_cl) {
+  sa <- site_sets[[ALL_POOLED_CLS[i]]]; sb <- site_sets[[ALL_POOLED_CLS[j]]]
+  j_mat[i,j] <- j_mat[j,i] <- jaccard(sa, sb)
+  ni <- length(intersect(sa, sb))
+  n_int_mat[i,j] <- n_int_mat[j,i] <- ni
+}
+
+jac_df <- expand.grid(x = ALL_POOLED_CLS, y = ALL_POOLED_CLS, stringsAsFactors = FALSE) %>%
+  rowwise() %>%
+  mutate(j = j_mat[x, y], n_int = n_int_mat[x, y],
+         label = if (x == y) "1.000"
+                 else if (is.na(j)) "NA"
+                 else sprintf("%.3f\n(n=%d)", j, n_int)) %>%
+  ungroup() %>%
+  mutate(x = factor(x, levels = ALL_POOLED_CLS),
+         y = factor(y, levels = rev(ALL_POOLED_CLS)))
+
+ggplot(jac_df, aes(x = x, y = y, fill = j)) +
+  geom_tile(color = "white", linewidth = 0.5) +
+  geom_text(aes(label = label), size = 1.8, lineheight = 0.9) +
+  scale_fill_gradient2(low = "#1a9641", mid = "#ffffbf", high = "#d7191c",
+                       midpoint = 0.5, limits = c(0, 1), na.value = "grey90",
+                       name = "Jaccard") +
+  labs(title = "Jaccard index — pooled rRNA sites across cell lines",
+       subtitle = CUTOFF_LABEL,
+       x = NULL, y = NULL) +
+  coord_fixed() +
+  theme_bw(base_size = 10) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+        axis.text.y = element_text(size = 7),
+        panel.grid = element_blank(), panel.border = element_blank())
+```
+
+## Cross-cell-line Pearson's r of %pU
+
+```{r cross-pearson, fig.width=max(8, length(ALL_POOLED_CLS)*0.6), fig.height=max(7, length(ALL_POOLED_CLS)*0.5)}
+r_mat <- matrix(NA_real_, n_cl, n_cl, dimnames = list(ALL_POOLED_CLS, ALL_POOLED_CLS))
+n_com_mat <- matrix(NA_integer_, n_cl, n_cl, dimnames = list(ALL_POOLED_CLS, ALL_POOLED_CLS))
+diag(r_mat) <- 1
+for (i in 1:(n_cl-1)) for (j in (i+1):n_cl) {
+  d1 <- filter_best(best_pooled[[ALL_POOLED_CLS[i]]])[, .(site, ratio1 = ratio)]
+  d2 <- filter_best(best_pooled[[ALL_POOLED_CLS[j]]])[, .(site, ratio2 = ratio)]
+  m <- merge(d1, d2, by = "site")
+  if (nrow(m) < 3) next
+  r_mat[i,j] <- r_mat[j,i] <- cor(m$ratio1, m$ratio2, method = "pearson")
+  n_com_mat[i,j] <- n_com_mat[j,i] <- nrow(m)
+}
+
+cor_df <- expand.grid(x = ALL_POOLED_CLS, y = ALL_POOLED_CLS, stringsAsFactors = FALSE) %>%
+  rowwise() %>%
+  mutate(r = r_mat[x, y], n_com = n_com_mat[x, y],
+         label = if (x == y) "1.000"
+                 else if (is.na(r)) "NA"
+                 else sprintf("%.3f\n(n=%d)", r, n_com)) %>%
+  ungroup() %>%
+  mutate(x = factor(x, levels = ALL_POOLED_CLS),
+         y = factor(y, levels = rev(ALL_POOLED_CLS)))
+
+ggplot(cor_df, aes(x = x, y = y, fill = r)) +
+  geom_tile(color = "white", linewidth = 0.5) +
+  geom_text(aes(label = label), size = 1.8, lineheight = 0.9) +
+  scale_fill_gradient2(low = "#1a9641", mid = "#ffffbf", high = "#d7191c",
+                       midpoint = 0.5, limits = c(0, 1), na.value = "grey90",
+                       name = "Pearson r") +
+  labs(title = "Pearson's r of %pU — pooled rRNA sites across cell lines",
+       subtitle = CUTOFF_LABEL,
+       x = NULL, y = NULL) +
+  coord_fixed() +
+  theme_bw(base_size = 10) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+        axis.text.y = element_text(size = 7),
+        panel.grid = element_blank(), panel.border = element_blank())
+```
+
+---
+
+## Comparing with published data (BACS)
+
+We benchmark the re-pooled rRNA pU calls against the **BACS** dataset (PMID
+39349603), which detects pseudouridine via antibody-based capture and reports
+rRNA pU sites in HeLa polyA+ RNA (Supplementary Table, sheet 2). Sites are
+matched by rRNA accession (`NR_*`) and position.
+
+The grouped bar chart shows, for each cell line: the number of **our** sites
+passing the cutoff, the total number of **BACS** reference sites, and the
+**overlap** count. Higher overlap validates the specificity of our calls.
+
+```{r bacs-load}
+path_BACS <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID39349603.xlsx"
+
+rrna_BACS <- readxl::read_excel(path_BACS, sheet = 2)
+colnames(rrna_BACS) <- rrna_BACS[2, ]
+rrna_BACS <- rrna_BACS[-c(1:2), ]
+rrna_BACS <- rrna_BACS[complete.cases(rrna_BACS$chr), ]
+
+rrna_BACS_clean <- rrna_BACS %>%
+  mutate(accession = str_extract(chr, "NR_[0-9]+"),
+         pos_num   = as.integer(pos))
+
+n_bacs <- nrow(rrna_BACS_clean)
+cat("BACS rRNA sites:", n_bacs, "\n")
+```
+
+```{r bacs-overlap, fig.width=12, fig.height=6}
+find_results_dir <- function(cl) {
+  for (rd in RESULTS_DIRS) {
+    if (dir.exists(file.path(rd, cl))) return(file.path(rd, cl))
+  }
+  NULL
+}
+
+overlap_df <- do.call(rbind, lapply(DROP_CLS, function(cl) {
+  wdir <- find_results_dir(cl)
+  f <- file.path(wdir, "pooled_sites_chisq_probrep_dropped", "pooled_rRNA.txt")
+  dt <- fread(f, header = TRUE, sep = "\t", colClasses = list(character = "ref"))
+
+  n_kept <- length(DROP_INFO[[cl]]$kept)
+  min_nsamp <- max(n_kept - 1, 1)
+
+  filtered <- dt[fdr < FDR_CUT & rate_diff > DIFF_CUT & n_samples >= min_nsamp]
+  ours <- as.data.frame(filtered) %>%
+    mutate(accession = str_extract(ref, "NR_[0-9]+"))
+  n_ours <- nrow(ours)
+  n_overlap <- nrow(inner_join(ours, rrna_BACS_clean,
+                               by = c("accession", "pos" = "pos_num")))
+  data.frame(
+    cell_line = rep(cl, 3),
+    category  = c("Our sites", "BACS sites", "Overlap"),
+    count     = c(n_ours, n_bacs, n_overlap)
+  )
+}))
+
+overlap_df$category <- factor(overlap_df$category,
+                              levels = c("Our sites", "BACS sites", "Overlap"))
+
+ggplot(overlap_df, aes(x = cell_line, y = count, fill = category)) +
+  geom_col(position = position_dodge(width = 0.7), width = 0.6) +
+  geom_text(aes(label = count), position = position_dodge(width = 0.7),
+            vjust = -0.3, size = 3) +
+  scale_fill_manual(values = c("Our sites" = "#4E79A7",
+                                "BACS sites" = "#F28E2B",
+                                "Overlap" = "#59A14F")) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
+  labs(title = "Overlap of re-pooled rRNA pU sites with BACS (problematic reps dropped)",
+       subtitle = paste(CUTOFF_LABEL, "& n_samples >= max(n_kept-1, 1)"),
+       x = NULL, y = "# sites", fill = NULL) +
+  theme_bw(base_size = 12) +
+  theme(legend.position = "top",
+        axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+### Before vs. after comparison
+
+```{r bacs-before-after, fig.width=14, fig.height=6}
+comp_df <- do.call(rbind, lapply(DROP_CLS, function(cl) {
+  wdir <- find_results_dir(cl)
+  n_kept <- length(DROP_INFO[[cl]]$kept)
+  min_nsamp <- max(n_kept - 1, 1)
+
+  # After dropping
+  f_drop <- file.path(wdir, "pooled_sites_chisq_probrep_dropped", "pooled_rRNA.txt")
+  dt_drop <- fread(f_drop, header = TRUE, sep = "\t", colClasses = list(character = "ref"))
+  filt_drop <- dt_drop[fdr < FDR_CUT & rate_diff > DIFF_CUT & n_samples >= min_nsamp]
+  ours_drop <- as.data.frame(filt_drop) %>% mutate(accession = str_extract(ref, "NR_[0-9]+"))
+  ov_drop <- nrow(inner_join(ours_drop, rrna_BACS_clean, by = c("accession", "pos" = "pos_num")))
+
+  # Before dropping
+  f_orig <- file.path(wdir, "pooled_sites_chisq", "pooled_rRNA.txt")
+  ov_orig <- NA_integer_
+  if (file.exists(f_orig)) {
+    dt_orig <- fread(f_orig, header = TRUE, sep = "\t", colClasses = list(character = "ref"))
+    filt_orig <- dt_orig[fdr < FDR_CUT & rate_diff > DIFF_CUT & n_samples >= 2]
+    ours_orig <- as.data.frame(filt_orig) %>% mutate(accession = str_extract(ref, "NR_[0-9]+"))
+    ov_orig <- nrow(inner_join(ours_orig, rrna_BACS_clean, by = c("accession", "pos" = "pos_num")))
+  }
+
+  rbind(
+    data.frame(cell_line = cl, version = "Before", overlap = ov_orig,
+               pct = round(ov_orig / n_bacs * 100, 1)),
+    data.frame(cell_line = cl, version = "After", overlap = ov_drop,
+               pct = round(ov_drop / n_bacs * 100, 1))
+  )
+}))
+
+comp_df$version <- factor(comp_df$version, levels = c("Before", "After"))
+
+ggplot(comp_df, aes(x = cell_line, y = pct, fill = version)) +
+  geom_col(position = position_dodge(width = 0.7), width = 0.6) +
+  geom_text(aes(label = sprintf("%d/%d\n(%.0f%%)", overlap, n_bacs, pct)),
+            position = position_dodge(width = 0.7), vjust = -0.2, size = 2.8,
+            lineheight = 0.85) +
+  scale_fill_manual(values = c("Before" = "#E15759", "After" = "#59A14F")) +
+  scale_y_continuous(limits = c(0, 110), breaks = seq(0, 100, 20),
+                     labels = function(x) paste0(x, "%")) +
+  labs(title = "BACS overlap: before vs. after dropping problematic replicates",
+       subtitle = CUTOFF_LABEL,
+       x = NULL, y = "% BACS sites recovered", fill = NULL) +
+  theme_bw(base_size = 12) +
+  theme(legend.position = "top",
+        axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r bacs-table}
+summary_df <- do.call(rbind, lapply(DROP_CLS, function(cl) {
+  wdir <- find_results_dir(cl)
+
+  # After dropping
+  f_drop <- file.path(wdir, "pooled_sites_chisq_probrep_dropped", "pooled_rRNA.txt")
+  dt_drop <- fread(f_drop, header = TRUE, sep = "\t", colClasses = list(character = "ref"))
+  n_kept <- length(DROP_INFO[[cl]]$kept)
+  min_nsamp <- max(n_kept - 1, 1)
+  filt_drop <- dt_drop[fdr < FDR_CUT & rate_diff > DIFF_CUT & n_samples >= min_nsamp]
+  ours_drop <- as.data.frame(filt_drop) %>% mutate(accession = str_extract(ref, "NR_[0-9]+"))
+  n_drop <- nrow(ours_drop)
+  ov_drop <- nrow(inner_join(ours_drop, rrna_BACS_clean, by = c("accession", "pos" = "pos_num")))
+
+  # Before dropping (original pooled, n_samples >= 2)
+  f_orig <- file.path(wdir, "pooled_sites_chisq", "pooled_rRNA.txt")
+  n_orig <- NA_integer_; ov_orig <- NA_integer_
+  if (file.exists(f_orig)) {
+    dt_orig <- fread(f_orig, header = TRUE, sep = "\t", colClasses = list(character = "ref"))
+    filt_orig <- dt_orig[fdr < FDR_CUT & rate_diff > DIFF_CUT & n_samples >= 2]
+    ours_orig <- as.data.frame(filt_orig) %>% mutate(accession = str_extract(ref, "NR_[0-9]+"))
+    n_orig <- nrow(ours_orig)
+    ov_orig <- nrow(inner_join(ours_orig, rrna_BACS_clean, by = c("accession", "pos" = "pos_num")))
+  }
+
+  data.frame(
+    `Cell line` = cl,
+    `N kept` = n_kept,
+    `Sites (before)` = n_orig,
+    `Overlap (before)` = ov_orig,
+    `% BACS (before)` = round(ov_orig / n_bacs * 100, 1),
+    `Sites (after)` = n_drop,
+    `Overlap (after)` = ov_drop,
+    `% BACS (after)` = round(ov_drop / n_bacs * 100, 1),
+    check.names = FALSE
+  )
+}))
+
+knitr::kable(summary_df,
+             caption = "BACS overlap: before vs. after dropping problematic replicates")
+```
