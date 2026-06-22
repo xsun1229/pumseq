@@ -1,0 +1,592 @@
+---
+title: "QC — rRNA pU sites (chi-squared strategy)"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+library(data.table)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(patchwork)
+library(gridExtra)
+library(scales)
+
+knitr::opts_chunk$set(
+  echo = TRUE, warning = FALSE, message = FALSE,
+  fig.align = "center"
+)
+```
+
+# Introduction
+
+Quality control of rRNA pseudouridine (pU) site calls using the **chi-squared
+strategy**. All analyses use a single cutoff: **FDR < 0.01, rate_diff > 0.05,
+n_samples >= 2**.
+
+```{r config}
+RESULTS_DIRS <- c("/project2/xinhe/xsun/pumseq/pumseq_results",
+                  "/project/xinhe/xsun/pumseq/pumseq_results")
+
+FDR_CUT  <- 0.01
+DIFF_CUT <- 0.05
+CUTOFF_LABEL <- "FDR < 0.01 & rate_diff > 0.05"
+MIN_NSAMP <- 2
+```
+
+```{r discover-cell-lines}
+discover_cell_lines <- function() {
+  all_cls <- list()
+  for (rd in RESULTS_DIRS) {
+    cl_dirs <- sort(list.dirs(rd, recursive = FALSE, full.names = TRUE))
+    for (d in cl_dirs) {
+      cl <- basename(d)
+      if (!grepl("^CL\\d+$", cl)) next
+      rRNA_files <- list.files(file.path(d, "out_chisq"),
+                               pattern = "filter\\..*\\.rRNA\\.pseusite\\.txt\\.gz",
+                               full.names = TRUE)
+      if (length(rRNA_files) == 0) next
+      reps <- sub("\\.rRNA\\.pseusite\\.txt\\.gz$", "",
+                  sub("^filter\\.", "", basename(rRNA_files)))
+      has_pooled <- file.exists(file.path(d, "pooled_sites_chisq", "pooled_rRNA.txt"))
+      qc_png <- file.path(d, "qc", "qc.pUFraction.rRNA.png")
+      has_qc_png <- file.exists(qc_png)
+      all_cls[[cl]] <- list(
+        results_dir = rd, reps = sort(reps),
+        has_pooled = has_pooled, has_qc_png = has_qc_png, qc_png = qc_png
+      )
+    }
+  }
+  all_cls
+}
+
+ALL_CLS <- discover_cell_lines()
+CL_NAMES <- names(ALL_CLS)
+POOLED_CLS <- CL_NAMES[sapply(ALL_CLS, `[[`, "has_pooled")]
+
+cat("Cell lines with per-replicate rRNA data:", length(CL_NAMES), "\n")
+cat("Cell lines with pooled rRNA data:", length(POOLED_CLS), "\n")
+cat("All:", paste(CL_NAMES, collapse = ", "), "\n")
+cat("Pooled:", paste(POOLED_CLS, collapse = ", "), "\n")
+```
+
+```{r helpers}
+read_rep_rRNA <- function(cl, sample_id) {
+  rd <- ALL_CLS[[cl]]$results_dir
+  f <- file.path(rd, cl, "out_chisq",
+                 sprintf("filter.%s.rRNA.pseusite.txt.gz", sample_id))
+  if (!file.exists(f)) { warning("Missing: ", f); return(NULL) }
+  dt <- fread(f, header = TRUE, sep = "\t",
+              colClasses = list(character = "ref"), data.table = FALSE)
+  dt %>% mutate(site = paste(ref, pos, strand, sep = ":"))
+}
+
+sites_pass <- function(dt) {
+  dt$site[dt$fdr < FDR_CUT & dt$rate_diff > DIFF_CUT]
+}
+
+jaccard <- function(a, b) {
+  n_int <- length(intersect(a, b))
+  n_uni <- length(union(a, b))
+  if (n_uni == 0) NA_real_ else n_int / n_uni
+}
+
+make_jaccard_heatmap <- function(rep_tabs, rep_names, title_text) {
+  site_sets <- lapply(rep_tabs, sites_pass)
+  n <- length(rep_names)
+  mat <- matrix(NA_real_, n, n, dimnames = list(rep_names, rep_names))
+  n_mat <- matrix(NA_integer_, n, n, dimnames = list(rep_names, rep_names))
+  diag(mat) <- 1
+  for (i in 1:(n-1)) for (j in (i+1):n) {
+    sa <- site_sets[[rep_names[i]]]; sb <- site_sets[[rep_names[j]]]
+    mat[i,j] <- mat[j,i] <- jaccard(sa, sb)
+    ni <- length(intersect(sa, sb))
+    n_mat[i,j] <- n_mat[j,i] <- ni
+  }
+  short <- function(s) sub("^[^_]+_", "", s)
+  lev <- short(rep_names)
+  plot_df <- expand.grid(x = rep_names, y = rep_names, stringsAsFactors = FALSE) %>%
+    rowwise() %>%
+    mutate(j = mat[x, y], n_int = n_mat[x, y],
+           label = if (x == y) "1.000"
+                   else if (is.na(j)) "NA"
+                   else sprintf("%.3f\n(n=%d)", j, n_int)) %>%
+    ungroup() %>%
+    mutate(x_lab = factor(short(x), levels = lev),
+           y_lab = factor(short(y), levels = rev(lev)))
+  ggplot(plot_df, aes(x = x_lab, y = y_lab, fill = j)) +
+    geom_tile(color = "white", linewidth = 0.8) +
+    geom_text(aes(label = label), size = 3, lineheight = 0.9) +
+    scale_fill_gradient2(low = "#1a9641", mid = "#ffffbf", high = "#d7191c",
+                         midpoint = 0.5, limits = c(0, 1), na.value = "grey90",
+                         name = "Jaccard") +
+    labs(title = title_text, subtitle = CUTOFF_LABEL, x = NULL, y = NULL) +
+    coord_fixed() +
+    theme_bw(base_size = 10) +
+    theme(axis.text.x = element_text(angle = 35, hjust = 1),
+          panel.grid = element_blank(), panel.border = element_blank())
+}
+
+make_pU_dist <- function(rep_tabs, rep_names, title_prefix) {
+  lapply(rep_names, function(samp) {
+    dt <- rep_tabs[[samp]]
+    df <- dt[dt$fdr < FDR_CUT & dt$rate_diff > DIFF_CUT, , drop = FALSE]
+    if (nrow(df) == 0) return(NULL)
+    med_val <- median(df$ratio); mean_val <- mean(df$ratio)
+    ggplot(df, aes(x = ratio)) +
+      geom_histogram(aes(y = after_stat(density)), binwidth = 0.02,
+                     fill = "steelblue", color = "white", alpha = 0.7) +
+      geom_density(color = "navy", linewidth = 0.7) +
+      geom_vline(xintercept = med_val, color = "red", linetype = "dashed") +
+      geom_vline(xintercept = mean_val, color = "darkorange", linetype = "dotted") +
+      annotate("text", x = Inf, y = Inf,
+               label = sprintf("n = %d\nmedian = %.3f\nmean = %.3f",
+                               nrow(df), med_val, mean_val),
+               hjust = 1.05, vjust = 1.05, size = 3, family = "mono") +
+      scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
+      labs(title = samp, x = "%pU (C/(C+T))", y = "Density") +
+      theme_bw(base_size = 10)
+  })
+}
+
+make_pearson_heatmap <- function(rep_tabs, rep_names, title_text) {
+  n <- length(rep_names)
+  mat <- matrix(NA_real_, n, n, dimnames = list(rep_names, rep_names))
+  n_mat <- matrix(NA_integer_, n, n, dimnames = list(rep_names, rep_names))
+  diag(mat) <- 1
+  for (i in 1:(n-1)) for (j in (i+1):n) {
+    d1 <- rep_tabs[[rep_names[i]]]; d2 <- rep_tabs[[rep_names[j]]]
+    s1 <- sites_pass(d1); s2 <- sites_pass(d2)
+    shared <- intersect(s1, s2)
+    if (length(shared) < 3) next
+    m <- merge(d1[d1$site %in% shared, c("site","ratio")],
+               d2[d2$site %in% shared, c("site","ratio")],
+               by = "site", suffixes = c("_1","_2"))
+    r <- cor(m$ratio_1, m$ratio_2, method = "pearson")
+    mat[i,j] <- mat[j,i] <- r
+    n_mat[i,j] <- n_mat[j,i] <- nrow(m)
+  }
+  short <- function(s) sub("^[^_]+_", "", s)
+  lev <- short(rep_names)
+  plot_df <- expand.grid(x = rep_names, y = rep_names, stringsAsFactors = FALSE) %>%
+    rowwise() %>%
+    mutate(r = mat[x, y], n_common = n_mat[x, y],
+           label = if (x == y) "1.000"
+                   else if (is.na(r)) "NA"
+                   else sprintf("%.3f\n(n=%d)", r, n_common)) %>%
+    ungroup() %>%
+    mutate(x_lab = factor(short(x), levels = lev),
+           y_lab = factor(short(y), levels = rev(lev)))
+  ggplot(plot_df, aes(x = x_lab, y = y_lab, fill = r)) +
+    geom_tile(color = "white", linewidth = 0.8) +
+    geom_text(aes(label = label), size = 3, lineheight = 0.9) +
+    scale_fill_gradient2(low = "#1a9641", mid = "#ffffbf", high = "#d7191c",
+                         midpoint = 0.5, limits = c(0, 1), na.value = "grey90",
+                         name = "Pearson r") +
+    labs(title = title_text, subtitle = CUTOFF_LABEL, x = NULL, y = NULL) +
+    coord_fixed() +
+    theme_bw(base_size = 10) +
+    theme(axis.text.x = element_text(angle = 35, hjust = 1),
+          panel.grid = element_blank(), panel.border = element_blank())
+}
+```
+
+```{r load-replicate-data, include=FALSE}
+cl_rep_data <- list()
+for (cl in CL_NAMES) {
+  sids <- ALL_CLS[[cl]]$reps
+  tabs <- setNames(lapply(sids, function(s) read_rep_rRNA(cl, s)), sids)
+  tabs <- Filter(Negate(is.null), tabs)
+  cl_rep_data[[cl]] <- tabs
+}
+```
+
+# Examining replicates for each cell line
+
+For each cell line we show four QC panels:
+
+**1. rRNA pU fraction** — Per-sample lollipop plot of the conversion rate
+C/(C+T) at every uridine position along the human 45S rRNA (18S, 5.8S, 28S;
+positions with depth >= 20 only).
+
+- **Green** dots/lines: annotated pseudouridine (pU) sites.
+- **Grey** dots/lines: unannotated T positions (background).
+- **Top-left** (`T=X%`): mean conversion at unannotated positions (background noise).
+- **Top-right** (`pU=X%`): mean conversion at annotated pU sites (signal).
+- Untreated samples should show near-zero signal; treated samples should show
+  high green (pU) and low grey (T).
+
+**2. Jaccard index** — Set similarity of called sites between each pair of
+replicates at FDR < 0.01 & rate_diff > 0.05:
+$J(A, B) = |A \cap B| / |A \cup B|$. The intersection count is shown in
+parentheses. Higher values indicate more reproducible site calling.
+
+**3. %pU distribution** — Histogram + density of the treated conversion ratio
+at sites passing FDR < 0.01 & rate_diff > 0.05 in each replicate. Red dashed
+line = median; orange dotted line = mean.
+
+**4. Pairwise Pearson heatmap** — Pearson correlation of %pU values at sites
+called significant in **both** replicates of each pair. High r indicates
+quantitative agreement.
+
+```{r per-cl-replicate-sections, results='asis', fig.width=10, fig.height=8}
+for (cl in CL_NAMES) {
+  tabs <- cl_rep_data[[cl]]
+  nms  <- names(tabs)
+  info <- ALL_CLS[[cl]]
+
+  cat("\n\n---\n\n")
+  cat(sprintf("## %s {.tabset}\n\n", cl))
+
+  if (info$has_qc_png) {
+    cat("### rRNA pU fraction\n\n")
+    cat(sprintf("![%s rRNA QC](%s){width=100%%}\n\n", cl, info$qc_png))
+  }
+
+  if (length(tabs) < 2) {
+    cat("Not enough replicates found.\n\n")
+    next
+  }
+
+  cat("### Jaccard index\n\n")
+  print(make_jaccard_heatmap(tabs, nms, cl))
+  cat("\n\n")
+
+  cat("### %pU distribution\n\n")
+  plots <- make_pU_dist(tabs, nms, cl)
+  plots <- Filter(Negate(is.null), plots)
+  if (length(plots) > 0) {
+    ncol_dist <- min(2, length(plots))
+    do.call(grid.arrange, c(plots, list(ncol = ncol_dist)))
+  }
+  cat("\n\n")
+
+  cat("### Pearson heatmap\n\n")
+  print(make_pearson_heatmap(tabs, nms, cl))
+  cat("\n\n")
+}
+```
+
+---
+
+# Cross-cell-line comparison (pooled data)
+
+All comparisons below use the **pooled** rRNA data
+(`pooled_sites_chisq/pooled_rRNA.txt`) filtered at FDR < 0.01, rate_diff >
+0.05, and n_samples >= 2. In the pooled data, treated counts (C, T, depth)
+are summed across all replicates of a cell line and the chi-squared test is
+re-run on the combined contingency table, yielding higher statistical power.
+`n_samples` records how many individual replicates detected the site.
+
+**Plots shown:**
+
+1. **Site counts** — Bar chart of the number of pooled sites passing the
+   cutoff for each cell line. Consistent counts across cell lines suggest
+   stable site calling.
+2. **%pU distribution** — Histogram + density of the pooled conversion ratio
+   C/(C+T) at passing sites. Red dashed = median; orange dotted = mean.
+3. **Jaccard index heatmap** — Pairwise set similarity of called sites
+   between cell lines. High Jaccard indicates the same rRNA positions are
+   detected across cell lines (expected for constitutive modifications).
+4. **Pearson r heatmap** — Pairwise correlation of %pU at sites called in
+   **both** cell lines. High r indicates quantitative agreement in
+   modification levels.
+
+Cell lines with pooled data: **`r paste(POOLED_CLS, collapse = ", ")`**
+
+```{r load-pooled}
+load_pooled <- function(cl) {
+  rd <- ALL_CLS[[cl]]$results_dir
+  f <- file.path(rd, cl, "pooled_sites_chisq", "pooled_rRNA.txt")
+  dt <- fread(f, header = TRUE, sep = "\t",
+              colClasses = list(character = "ref"))
+  dt[, site := paste(ref, pos, strand, sep = ":")]
+  dt[, cell_line := cl]
+  dt
+}
+
+pooled_list <- setNames(lapply(POOLED_CLS, load_pooled), POOLED_CLS)
+
+filter_pooled <- function(dt) {
+  dt[fdr < FDR_CUT & rate_diff > DIFF_CUT & n_samples >= MIN_NSAMP]
+}
+```
+
+## Number of pooled sites per cell line
+
+```{r pooled-site-counts, fig.width=max(6, length(POOLED_CLS)*0.8), fig.height=4}
+count_df <- data.frame(
+  cell_line = POOLED_CLS,
+  n_sites = sapply(POOLED_CLS, function(cl) nrow(filter_pooled(pooled_list[[cl]])))
+)
+count_df$cell_line <- factor(count_df$cell_line, levels = POOLED_CLS)
+
+ggplot(count_df, aes(x = cell_line, y = n_sites, fill = cell_line)) +
+  geom_col(width = 0.6, show.legend = FALSE) +
+  geom_text(aes(label = comma(n_sites)), vjust = -0.3, size = 3.5) +
+  scale_y_continuous(labels = comma, expand = expansion(mult = c(0, 0.15))) +
+  labs(title = "Number of pooled rRNA pU sites per cell line",
+       subtitle = paste(CUTOFF_LABEL, "& n_samples >=", MIN_NSAMP),
+       x = NULL, y = "# sites") +
+  theme_bw(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## %pU Distribution — pooled data
+
+```{r pooled-dist, fig.width=min(20, length(POOLED_CLS)*3), fig.height=4}
+dist_plots <- lapply(POOLED_CLS, function(cl) {
+  df <- as.data.frame(filter_pooled(pooled_list[[cl]])[, .(psi = ratio)])
+  if (nrow(df) == 0) return(NULL)
+  med_val <- median(df$psi); mean_val <- mean(df$psi)
+  ggplot(df, aes(x = psi)) +
+    geom_histogram(aes(y = after_stat(density)), binwidth = 0.02,
+                   fill = "steelblue", color = "white", alpha = 0.7) +
+    geom_density(color = "navy", linewidth = 0.7) +
+    geom_vline(xintercept = med_val, color = "red", linetype = "dashed") +
+    geom_vline(xintercept = mean_val, color = "darkorange", linetype = "dotted") +
+    annotate("text", x = Inf, y = Inf,
+             label = sprintf("n = %d\nmedian = %.3f\nmean = %.3f",
+                             nrow(df), med_val, mean_val),
+             hjust = 1.05, vjust = 1.05, size = 3, family = "mono") +
+    scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
+    labs(title = cl, x = "%pU (pooled)", y = "Density") +
+    theme_bw(base_size = 10)
+})
+ncol_pd <- min(4, length(POOLED_CLS))
+do.call(grid.arrange, c(Filter(Negate(is.null), dist_plots), list(ncol = ncol_pd)))
+```
+
+## Cross-cell-line Jaccard index
+
+```{r pooled-jaccard, fig.width=max(6, length(POOLED_CLS)*1.2), fig.height=max(5, length(POOLED_CLS)*1.0)}
+site_sets_pooled <- setNames(
+  lapply(POOLED_CLS, function(cl) filter_pooled(pooled_list[[cl]])$site),
+  POOLED_CLS
+)
+
+n_cl <- length(POOLED_CLS)
+j_mat <- matrix(NA_real_, n_cl, n_cl, dimnames = list(POOLED_CLS, POOLED_CLS))
+n_int_mat <- matrix(NA_integer_, n_cl, n_cl, dimnames = list(POOLED_CLS, POOLED_CLS))
+diag(j_mat) <- 1
+for (i in 1:(n_cl-1)) for (j in (i+1):n_cl) {
+  sa <- site_sets_pooled[[POOLED_CLS[i]]]; sb <- site_sets_pooled[[POOLED_CLS[j]]]
+  j_mat[i,j] <- j_mat[j,i] <- jaccard(sa, sb)
+  ni <- length(intersect(sa, sb))
+  n_int_mat[i,j] <- n_int_mat[j,i] <- ni
+}
+
+jac_df <- expand.grid(x = POOLED_CLS, y = POOLED_CLS, stringsAsFactors = FALSE) %>%
+  rowwise() %>%
+  mutate(j = j_mat[x, y], n_int = n_int_mat[x, y],
+         label = if (x == y) "1.000"
+                 else if (is.na(j)) "NA"
+                 else sprintf("%.3f\n(n=%d)", j, n_int)) %>%
+  ungroup() %>%
+  mutate(x = factor(x, levels = POOLED_CLS),
+         y = factor(y, levels = rev(POOLED_CLS)))
+
+ggplot(jac_df, aes(x = x, y = y, fill = j)) +
+  geom_tile(color = "white", linewidth = 0.8) +
+  geom_text(aes(label = label), size = 3, lineheight = 0.9) +
+  scale_fill_gradient2(low = "#1a9641", mid = "#ffffbf", high = "#d7191c",
+                       midpoint = 0.5, limits = c(0, 1), na.value = "grey90",
+                       name = "Jaccard") +
+  labs(title = "Jaccard index — pooled rRNA sites across cell lines",
+       subtitle = paste(CUTOFF_LABEL, "& n_samples >=", MIN_NSAMP),
+       x = NULL, y = NULL) +
+  coord_fixed() +
+  theme_bw(base_size = 11) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid = element_blank(), panel.border = element_blank())
+```
+
+## Cross-cell-line Pearson's r of %pU
+
+```{r pooled-pearson, fig.width=max(6, length(POOLED_CLS)*1.2), fig.height=max(5, length(POOLED_CLS)*1.0)}
+r_mat <- matrix(NA_real_, n_cl, n_cl, dimnames = list(POOLED_CLS, POOLED_CLS))
+n_com_mat <- matrix(NA_integer_, n_cl, n_cl, dimnames = list(POOLED_CLS, POOLED_CLS))
+diag(r_mat) <- 1
+for (i in 1:(n_cl-1)) for (j in (i+1):n_cl) {
+  d1 <- filter_pooled(pooled_list[[POOLED_CLS[i]]])[, .(site, ratio1 = ratio)]
+  d2 <- filter_pooled(pooled_list[[POOLED_CLS[j]]])[, .(site, ratio2 = ratio)]
+  m <- merge(d1, d2, by = "site")
+  if (nrow(m) < 3) next
+  r_mat[i,j] <- r_mat[j,i] <- cor(m$ratio1, m$ratio2, method = "pearson")
+  n_com_mat[i,j] <- n_com_mat[j,i] <- nrow(m)
+}
+
+cor_df <- expand.grid(x = POOLED_CLS, y = POOLED_CLS, stringsAsFactors = FALSE) %>%
+  rowwise() %>%
+  mutate(r = r_mat[x, y], n_com = n_com_mat[x, y],
+         label = if (x == y) "1.000"
+                 else if (is.na(r)) "NA"
+                 else sprintf("%.3f\n(n=%d)", r, n_com)) %>%
+  ungroup() %>%
+  mutate(x = factor(x, levels = POOLED_CLS),
+         y = factor(y, levels = rev(POOLED_CLS)))
+
+ggplot(cor_df, aes(x = x, y = y, fill = r)) +
+  geom_tile(color = "white", linewidth = 0.8) +
+  geom_text(aes(label = label), size = 3, lineheight = 0.9) +
+  scale_fill_gradient2(low = "#1a9641", mid = "#ffffbf", high = "#d7191c",
+                       midpoint = 0.5, limits = c(0, 1), na.value = "grey90",
+                       name = "Pearson r") +
+  labs(title = "Pearson's r of %pU — pooled rRNA sites across cell lines",
+       subtitle = paste(CUTOFF_LABEL, "& n_samples >=", MIN_NSAMP),
+       x = NULL, y = NULL) +
+  coord_fixed() +
+  theme_bw(base_size = 11) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid = element_blank(), panel.border = element_blank())
+```
+
+---
+
+# Comparing with published data (BACS)
+
+We benchmark our pooled rRNA pU calls against the **BACS** dataset (PMID
+39349603), which detects pseudouridine via antibody-based capture and reports
+rRNA pU sites in HeLa polyA+ RNA (Supplementary Table, sheet 2). Sites are
+matched by rRNA accession (`NR_*`) and position.
+
+The grouped bar chart shows, for each cell line: the number of **our** pooled
+sites passing the cutoff, the total number of **BACS** reference sites, and
+the **overlap** count. Higher overlap validates the specificity of our calls.
+
+```{r pub-bacs-overlap, fig.width=max(8, length(POOLED_CLS)*1.2), fig.height=5}
+path_BACS <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID39349603.xlsx"
+
+rrna_BACS <- readxl::read_excel(path_BACS, sheet = 2)
+colnames(rrna_BACS) <- rrna_BACS[2, ]
+rrna_BACS <- rrna_BACS[-c(1:2), ]
+rrna_BACS <- rrna_BACS[complete.cases(rrna_BACS$chr), ]
+
+rrna_BACS_clean <- rrna_BACS %>%
+  mutate(accession = str_extract(chr, "NR_[0-9]+"),
+         pos_num   = as.integer(pos))
+
+n_bacs <- nrow(rrna_BACS_clean)
+
+overlap_df <- do.call(rbind, lapply(POOLED_CLS, function(cl) {
+  dt <- filter_pooled(pooled_list[[cl]])
+  ours <- as.data.frame(dt) %>%
+    mutate(accession = str_extract(ref, "NR_[0-9]+"))
+  n_ours <- nrow(ours)
+  n_overlap <- nrow(inner_join(ours, rrna_BACS_clean,
+                               by = c("accession", "pos" = "pos_num")))
+  data.frame(
+    cell_line = rep(cl, 3),
+    category  = c("Our sites", "BACS sites", "Overlap"),
+    count     = c(n_ours, n_bacs, n_overlap)
+  )
+}))
+
+overlap_df$category <- factor(overlap_df$category,
+                              levels = c("Our sites", "BACS sites", "Overlap"))
+
+ggplot(overlap_df, aes(x = cell_line, y = count, fill = category)) +
+  geom_col(position = position_dodge(width = 0.7), width = 0.6) +
+  geom_text(aes(label = count), position = position_dodge(width = 0.7),
+            vjust = -0.3, size = 3) +
+  scale_fill_manual(values = c("Our sites" = "#4E79A7",
+                                "BACS sites" = "#F28E2B",
+                                "Overlap" = "#59A14F")) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
+  labs(title = "Overlap of pooled rRNA pU sites with BACS",
+       subtitle = paste(CUTOFF_LABEL, "& n_samples >=", MIN_NSAMP),
+       x = NULL, y = "# sites", fill = NULL) +
+  theme_bw(base_size = 12) +
+  theme(legend.position = "top",
+        axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+---
+
+# Effect of dropping some replicates
+
+For selected cell lines we test whether removing certain replicates improves
+BACS overlap. For each cell line, the per-replicate chi-squared output files
+for the **kept** replicates are symlinked into a separate `CL*_drop2rep/`
+directory and pooled independently (original results are untouched).
+
+The bar chart shows **% of BACS sites recovered** (overlap / 107 BACS sites)
+for each cell line under both conditions: red = all replicates, green = some
+replicates dropped. The exact overlap counts are annotated on each bar and
+listed in the table below.
+
+```{r drop2rep-compare, fig.width=10, fig.height=6}
+DROP_TEST_CLS <- c("CL18502", "CL18504", "CL18909", "CL18517", "CL18523", "CL18913")
+DROP2REP_DIR  <- "/project2/xinhe/xsun/pumseq/pumseq_results"
+
+orig_sources <- list(
+  CL18502 = "/project2/xinhe/xsun/pumseq/pumseq_results",
+  CL18504 = "/project2/xinhe/xsun/pumseq/pumseq_results",
+  CL18909 = "/project2/xinhe/xsun/pumseq/pumseq_results",
+  CL18517 = "/project/xinhe/xsun/pumseq/pumseq_results",
+  CL18523 = "/project/xinhe/xsun/pumseq/pumseq_results",
+  CL18913 = "/project/xinhe/xsun/pumseq/pumseq_results"
+)
+
+compare_bacs <- function(pooled_path) {
+  dt <- fread(pooled_path, header = TRUE, sep = "\t",
+              colClasses = list(character = "ref"))
+  filtered <- dt[fdr < FDR_CUT & rate_diff > DIFF_CUT & n_samples >= MIN_NSAMP]
+  ours <- as.data.frame(filtered) %>%
+    mutate(accession = str_extract(ref, "NR_[0-9]+"))
+  ov <- inner_join(ours, rrna_BACS_clean, by = c("accession", "pos" = "pos_num"))
+  list(n_ours = nrow(ours), n_overlap = nrow(ov))
+}
+
+comp_df <- do.call(rbind, lapply(DROP_TEST_CLS, function(cl) {
+  orig_path <- file.path(orig_sources[[cl]], cl,
+                         "pooled_sites_chisq", "pooled_rRNA.txt")
+  test_path <- file.path(DROP2REP_DIR, paste0(cl, "_drop2rep"),
+                         "pooled_sites_chisq", "pooled_rRNA.txt")
+  orig <- compare_bacs(orig_path)
+  test <- compare_bacs(test_path)
+  rbind(
+    data.frame(cell_line = cl, version = "All replicates",
+               n_ours = orig$n_ours, n_overlap = orig$n_overlap,
+               pct_bacs = round(orig$n_overlap / n_bacs * 100, 1)),
+    data.frame(cell_line = cl, version = "Some reps dropped",
+               n_ours = test$n_ours, n_overlap = test$n_overlap,
+               pct_bacs = round(test$n_overlap / n_bacs * 100, 1))
+  )
+}))
+
+comp_df$version <- factor(comp_df$version,
+                          levels = c("All replicates", "Some reps dropped"))
+
+ggplot(comp_df, aes(x = cell_line, y = pct_bacs, fill = version)) +
+  geom_col(position = position_dodge(width = 0.7), width = 0.6) +
+  geom_text(aes(label = sprintf("%d/%d\n(%.0f%%)", n_overlap, n_bacs, pct_bacs)),
+            position = position_dodge(width = 0.7), vjust = -0.2, size = 3,
+            lineheight = 0.85) +
+  scale_fill_manual(values = c("All replicates" = "#E15759",
+                                "Some reps dropped" = "#59A14F")) +
+  scale_y_continuous(limits = c(0, 110), breaks = seq(0, 100, 20),
+                     labels = function(x) paste0(x, "%")) +
+  labs(title = "BACS overlap: all replicates vs. some reps dropped",
+       subtitle = paste(CUTOFF_LABEL, "& n_samples >=", MIN_NSAMP),
+       x = NULL, y = "% BACS sites recovered", fill = NULL) +
+  theme_bw(base_size = 12) +
+  theme(legend.position = "top",
+        axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r drop2rep-table}
+knitr::kable(
+  comp_df %>% select(cell_line, version, n_ours, n_overlap, pct_bacs) %>%
+    rename(`Cell line` = cell_line, Version = version,
+           `Our sites` = n_ours, `Overlap with BACS` = n_overlap,
+           `% BACS recovered` = pct_bacs),
+  caption = "Effect of dropping some replicates on BACS overlap"
+)
+```

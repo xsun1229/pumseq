@@ -20,6 +20,7 @@ editor_options:
 
 * [Sites filtered by depth & ratio](qc_rRNA.html)
 * [Sites filtered by chisq fdr & ratio diff](qc_rRNA_chisq.html)
+* [Quality control for all cell lines](qc_rRNA_chisq_allcellline.html)
 
 **mRNA**
 
