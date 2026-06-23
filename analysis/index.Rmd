@@ -22,6 +22,8 @@ editor_options:
 * [Sites filtered by chisq fdr & ratio diff](qc_rRNA_chisq.html)
 * [Quality control for all cell lines](qc_rRNA_chisq_allcellline.html)
 * [Quality control for all cell lines -- problematic replicates removed](qc_rRNA_chisq_probrep_dropped.html)
+* [Quality control for all cell lines, compare Pearson R with BACS](qc_rRNA_replicate_vs_BACS.html)
+* [Quality control for all cell lines, compare Pearson R with BACS, problematic replicates removed](qc_rRNA_chisq_r03_dropped.html)
 
 
 **mRNA**
