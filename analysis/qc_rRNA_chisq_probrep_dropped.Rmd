@@ -1,12 +1,11 @@
 ---
-title: "QC — rRNA pU sites after dropping problematic replicates"
+title: "QC — rRNA pU sites after dropping problematic replicates (by Jaccard index)"
 author: "XSun"
 date: "`r Sys.Date()`"
 output:
-  html_document:
-    toc: true
-    toc_float: true
+  workflowr::wflow_html:
     code_folding: hide
+    toc: true
 ---
 
 ```{r setup, warning=FALSE, message=FALSE}

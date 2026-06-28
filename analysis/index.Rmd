@@ -21,12 +21,12 @@ editor_options:
 * [Sites filtered by depth & ratio](qc_rRNA.html)
 * [Sites filtered by chisq fdr & ratio diff](qc_rRNA_chisq.html)
 * [Quality control for all cell lines](qc_rRNA_chisq_allcellline.html)
-* [Quality control for all cell lines -- problematic replicates removed](qc_rRNA_chisq_probrep_dropped.html)
+* [Quality control for all cell lines -- problematic replicates dropped, by Jaccard index](qc_rRNA_chisq_probrep_dropped.html)
 * [Quality control for all cell lines, compare Pearson R with BACS](qc_rRNA_replicate_vs_BACS.html)
-* [Quality control for all cell lines, compare Pearson R with BACS, problematic replicates removed](qc_rRNA_chisq_r03_dropped.html)
+* [Quality control for all cell lines, compare Pearson R with BACS, problematic replicates dropped, by Pearson R with BACS](qc_rRNA_chisq_r03_dropped.html)
 
 
 **mRNA**
 
 * [Sites filtered by chisq fdr & ratio diff, determining the fdr & ratio diff cutoffs](qc_mRNA_chisq.html)
-* [Joint pooling vs union-of-per-cell-line site calling](qc_joint_union.html)
+* [Joint pooling vs union-of-per-cell-line site calling, 3 cell lines for testing](qc_joint_union.html)
