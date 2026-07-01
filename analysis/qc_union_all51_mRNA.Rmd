@@ -1,0 +1,917 @@
+---
+title: "QC — Union cross-cell-line mRNA pU sites (51 cell lines)"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+library(data.table)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(patchwork)
+library(corrplot)
+library(scales)
+
+knitr::opts_chunk$set(
+  echo = TRUE, warning = FALSE, message = FALSE,
+  fig.align = "center", fig.width = 10, fig.height = 8
+)
+```
+
+# Introduction
+
+Quality control of the **union cross-cell-line mRNA pU site calling** across
+all 51 cell lines (with problematic replicates dropped based on BACS r < 0.3
+in both reps).
+
+The union strategy calls pU sites independently per cell line (FDR < 0.01,
+rate_diff > 0.05, depth ≥ 20, n_samples ≥ 1 if ≤2 replicates else ≥ 2),
+then takes the union across all 51 CLs. A site enters the global list if
+**any** cell line passes the per-CL threshold. The `called_in` field records
+which cell line(s) independently called each site. Cross-cell-line pooled
+stats are looked up from the existing joint all-51 run.
+
+The primary quality stratification for union sites is **n_called** — the
+number of independent cell lines that called the site. All analyses below
+are tabbed by n_called threshold (≥1, ≥2, ≥3, ≥5, ≥10 CLs).
+
+```{r load-data}
+OUT_DIR       <- "/project2/xinhe/xsun/pumseq/pumseq_results/union/all51_mRNA"
+JOINT_OUT_DIR <- "/project2/xinhe/xsun/pumseq/pumseq_results/joint/all51_mRNA"
+
+global_sites <- fread(
+  file.path(OUT_DIR, "union_mRNA.global_sites.txt.gz"),
+  header = TRUE, sep = "\t", colClasses = list(character = c("ref", "strand")))
+
+ratio_mat <- fread(
+  file.path(OUT_DIR, "union_mRNA.global_sites.ratio_matrix.txt.gz"),
+  header = TRUE, sep = "\t", colClasses = list(character = c("ref", "strand")))
+
+depth_mat <- fread(
+  file.path(OUT_DIR, "union_mRNA.global_sites.depth_matrix.txt.gz"),
+  header = TRUE, sep = "\t", colClasses = list(character = c("ref", "strand")))
+
+CL_NAMES <- setdiff(colnames(ratio_mat), c("ref", "pos", "strand"))
+
+global_sites$n_called <- sapply(strsplit(global_sites$called_in, ","), length)
+
+n_sites <- nrow(global_sites)
+n_cls   <- length(CL_NAMES)
+
+cat("Union sites (total):", n_sites, "\n")
+cat("Cell lines:", n_cls, "\n")
+
+ncalled_cutoffs <- list(
+  list(min_cls = 1,  label = ">=1 CL (all)"),
+  list(min_cls = 2,  label = ">=2 CLs"),
+  list(min_cls = 3,  label = ">=3 CLs"),
+  list(min_cls = 5,  label = ">=5 CLs"),
+  list(min_cls = 10, label = ">=10 CLs")
+)
+```
+
+# Number of cell lines calling each site
+
+```{r called-in, fig.width=9, fig.height=5}
+called_df <- as.data.frame(table(global_sites$n_called))
+colnames(called_df) <- c("n_cls_called", "n_sites")
+called_df$n_cls_called <- as.integer(as.character(called_df$n_cls_called))
+called_df$pct <- round(called_df$n_sites / n_sites * 100, 1)
+
+# Summary at each threshold
+thresh_df <- do.call(rbind, lapply(ncalled_cutoffs, function(cc) {
+  n <- sum(global_sites$n_called >= cc$min_cls)
+  data.frame(Threshold = cc$label, n_sites = n,
+             pct = round(n / n_sites * 100, 1))
+}))
+knitr::kable(thresh_df,
+             col.names = c("n_called threshold", "# sites", "% of total"),
+             caption = "Union sites retained at each n_called threshold")
+
+ggplot(called_df, aes(x = factor(n_cls_called), y = n_sites)) +
+  geom_col(fill = "steelblue", width = 0.8) +
+  scale_y_continuous(labels = scales::comma,
+                     expand = expansion(mult = c(0, 0.1))) +
+  scale_x_discrete(breaks = c(1, 5, 10, 20, 30, 40, 51)) +
+  labs(title = "Union sites by number of cell lines calling the site",
+       x = "# cell lines calling the site", y = "# sites") +
+  theme_bw(base_size = 12)
+```
+
+# BACS overlap by n_called threshold
+
+```{r bacs-rec}
+path_BACS_early <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID39349603.xlsx"
+bacs_early <- readxl::read_excel(path_BACS_early, sheet = 6, skip = 2) %>%
+  filter(feature != "ncRNA") %>%
+  mutate(chr_num   = sub("^chr", "", chr),
+         pos_num   = as.integer(pos),
+         psi_level = as.numeric(`Ψ level`))
+n_bacs_early <- nrow(bacs_early)
+
+rec_table <- do.call(rbind, lapply(ncalled_cutoffs, function(cc) {
+  idx <- which(global_sites$n_called >= cc$min_cls)
+  sub <- global_sites[idx, ]
+  ov  <- sub %>% mutate(chr_num = ref) %>%
+    inner_join(bacs_early, by = c("chr_num", "pos" = "pos_num", "strand"))
+  r_val <- if (nrow(ov) >= 3) round(cor(ov$ratio, ov$psi_level,
+                                         method = "pearson", use = "complete.obs"), 3) else NA
+  data.frame(
+    Threshold        = cc$label,
+    Sites            = length(idx),
+    BACS_overlap     = nrow(ov),
+    pct_ours_in_BACS = round(nrow(ov) / length(idx)    * 100, 1),
+    pct_BACS_in_ours = round(nrow(ov) / n_bacs_early   * 100, 1),
+    Pearson_r        = r_val
+  )
+}))
+
+knitr::kable(rec_table,
+             col.names = c("n_called threshold", "# sites", "# BACS overlap",
+                           "% ours in BACS", "% BACS in ours", "Pearson r"),
+             caption = "BACS overlap and %pU correlation by n_called threshold")
+```
+
+# Summary statistics
+
+## Site counts at each n_called threshold
+
+```{r site-cutoff-bar, fig.width=8, fig.height=4}
+bar_df <- data.frame(
+  label   = sapply(ncalled_cutoffs, `[[`, "label"),
+  n_sites = sapply(ncalled_cutoffs, function(cc) sum(global_sites$n_called >= cc$min_cls))
+)
+bar_df$label <- factor(bar_df$label, levels = rev(bar_df$label))
+
+ggplot(bar_df, aes(x = label, y = n_sites)) +
+  geom_col(fill = "steelblue", width = 0.6) +
+  geom_text(aes(label = scales::comma(n_sites)), hjust = -0.1, size = 4) +
+  coord_flip(ylim = c(0, max(bar_df$n_sites) * 1.1)) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(title = "Union sites at each n_called threshold",
+       x = NULL, y = "# sites") +
+  theme_bw(base_size = 12)
+```
+
+## Distribution of pooled %pU {.tabset}
+
+Distribution of the mega-pooled conversion ratio C/(C+T) at each n_called
+threshold. Red dashed = median; orange dotted = mean.
+
+```{r pooled-pU-dist, results='asis', fig.width=8, fig.height=5}
+for (cc in ncalled_cutoffs) {
+  idx   <- which(global_sites$n_called >= cc$min_cls)
+  n_sub <- length(idx)
+
+  cat(sprintf("\n\n### %s\n\n", cc$label))
+  cat(sprintf("**%s sites**\n\n", scales::comma(n_sub)))
+
+  if (n_sub < 10) { cat("Too few sites.\n\n"); next }
+
+  sub      <- global_sites[idx, ]
+  med_val  <- median(sub$ratio)
+  mean_val <- mean(sub$ratio)
+
+  print(
+    ggplot(sub, aes(x = ratio)) +
+      geom_histogram(aes(y = after_stat(density)), binwidth = 0.01,
+                     fill = "steelblue", color = "white", alpha = 0.7) +
+      geom_density(color = "navy", linewidth = 0.7) +
+      geom_vline(xintercept = med_val,  color = "red",       linetype = "dashed") +
+      geom_vline(xintercept = mean_val, color = "darkorange", linetype = "dotted") +
+      annotate("text", x = Inf, y = Inf,
+               label = sprintf("n = %s\nmedian = %.3f\nmean = %.3f",
+                               scales::comma(n_sub), med_val, mean_val),
+               hjust = 1.05, vjust = 1.05, size = 4, family = "mono") +
+      labs(title = sprintf("Pooled %%pU distribution (%s)", cc$label),
+           x = "%pU (C/(C+T), mega-pooled)", y = "Density") +
+      theme_bw(base_size = 12)
+  )
+  cat("\n\n")
+}
+```
+
+## Per-cell-line coverage at different n_called thresholds {.tabset}
+
+```{r coverage-setup}
+ratio_only <- as.matrix(ratio_mat[, ..CL_NAMES])
+depth_only <- as.matrix(depth_mat[, ..CL_NAMES])
+```
+
+```{r coverage-cutoffs, results='asis', fig.width=10, fig.height=14}
+for (cc in ncalled_cutoffs) {
+  idx   <- which(global_sites$n_called >= cc$min_cls)
+  n_sub <- length(idx)
+
+  cat(sprintf("\n\n### %s\n\n", cc$label))
+  cat(sprintf("**%s sites**\n\n", scales::comma(n_sub)))
+
+  if (n_sub == 0) { cat("No sites.\n\n"); next }
+
+  sub_ratio <- ratio_only[idx, , drop = FALSE]
+
+  cov_df <- data.frame(
+    cell_line   = CL_NAMES,
+    pct_covered = round(colSums(!is.na(sub_ratio)) / n_sub * 100, 1)
+  )
+  cov_df$cell_line <- factor(cov_df$cell_line, levels = CL_NAMES)
+  n_per <- ceiling(nrow(cov_df) / 5)
+  cov_df$panel <- rep(1:5, each = n_per, length.out = nrow(cov_df))
+
+  cov_plots <- lapply(1:5, function(p) {
+    sub <- cov_df[cov_df$panel == p, ]
+    ggplot(sub, aes(x = cell_line, y = pct_covered, fill = cell_line)) +
+      geom_col(width = 0.6, show.legend = FALSE) +
+      geom_text(aes(label = sprintf("%.0f%%", pct_covered)), vjust = -0.3, size = 2.5) +
+      scale_y_continuous(limits = c(0, 105)) +
+      labs(x = NULL, y = "% covered") +
+      theme_bw(base_size = 9) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7))
+  })
+
+  print(
+    wrap_plots(cov_plots, ncol = 1) +
+      plot_annotation(title = sprintf("Coverage (%s)", cc$label),
+                      subtitle = sprintf("%s sites", scales::comma(n_sub)))
+  )
+  cat("\n\n")
+}
+```
+
+# Correlation of %pU across cell lines {.tabset}
+
+```{r cor-cutoffs, results='asis', fig.width=12, fig.height=12}
+for (cc in ncalled_cutoffs) {
+  idx   <- which(global_sites$n_called >= cc$min_cls)
+  n_sub <- length(idx)
+
+  cat(sprintf("\n\n## %s\n\n", cc$label))
+  cat(sprintf("**%s sites**\n\n", scales::comma(n_sub)))
+
+  if (n_sub < 10) { cat("Too few sites.\n\n"); next }
+
+  sub_ratio <- ratio_only[idx, , drop = FALSE]
+  cor_mat   <- cor(sub_ratio, use = "pairwise.complete.obs", method = "pearson")
+
+  corrplot(cor_mat, method = "color", type = "lower",
+           tl.cex = 0.5, tl.col = "black", cl.cex = 0.7,
+           title = sprintf("Pearson r (%s, n=%s)", cc$label, scales::comma(n_sub)),
+           mar = c(0, 0, 2, 0))
+
+  upper_tri <- cor_mat[upper.tri(cor_mat)]
+
+  print(
+    ggplot(data.frame(r = upper_tri), aes(x = r)) +
+      geom_histogram(binwidth = 0.01, fill = "steelblue", color = "white", alpha = 0.8) +
+      geom_vline(xintercept = median(upper_tri, na.rm = TRUE),
+                 color = "red", linetype = "dashed") +
+      annotate("text", x = median(upper_tri, na.rm = TRUE), y = Inf,
+               label = sprintf("median = %.3f", median(upper_tri, na.rm = TRUE)),
+               hjust = -0.1, vjust = 1.5, size = 4) +
+      labs(title = sprintf("Pairwise r distribution (%s)", cc$label),
+           x = "Pearson r", y = "Count") +
+      theme_bw(base_size = 12)
+  )
+  cat("\n\n")
+}
+```
+
+# Comparing with published data (BACS) {.tabset}
+
+```{r bacs-load}
+path_BACS <- "/project2/xinhe/xsun/pumseq/data_others/pU_PMID39349603.xlsx"
+bacs_mRNA <- readxl::read_excel(path_BACS, sheet = 6, skip = 2) %>%
+  filter(feature != "ncRNA") %>%
+  mutate(chr_num   = sub("^chr", "", chr),
+         pos_num   = as.integer(pos),
+         psi_level = as.numeric(`Ψ level`))
+n_bacs <- nrow(bacs_mRNA)
+cat("BACS mRNA sites:", n_bacs, "\n")
+```
+
+```{r bacs-cutoffs, results='asis', fig.width=8, fig.height=6}
+for (cc in ncalled_cutoffs) {
+  idx   <- which(global_sites$n_called >= cc$min_cls)
+  n_sub <- length(idx)
+
+  cat(sprintf("\n\n## %s\n\n", cc$label))
+
+  sub <- global_sites[idx, ]
+  ov  <- sub %>% mutate(chr_num = ref) %>%
+    inner_join(bacs_mRNA, by = c("chr_num", "pos" = "pos_num", "strand"))
+
+  cat(sprintf("Our sites: **%s** | BACS sites: **%s** | Overlap: **%d** (%.1f%% of ours, %.1f%% of BACS)\n\n",
+      scales::comma(n_sub), scales::comma(n_bacs), nrow(ov),
+      nrow(ov)/n_sub*100, nrow(ov)/n_bacs*100))
+
+  if (nrow(ov) >= 3) {
+    r_val <- cor(ov$ratio, ov$psi_level, method = "pearson", use = "complete.obs")
+    print(
+      ggplot(ov, aes(x = ratio, y = psi_level)) +
+        geom_point(alpha = 0.4, size = 1.5, color = "#2c7bb6") +
+        geom_smooth(method = "lm", se = TRUE, color = "grey40", linetype = "dashed") +
+        annotate("text", x = -Inf, y = Inf,
+                 label = sprintf("r = %.3f\nn = %d", r_val, nrow(ov)),
+                 hjust = -0.1, vjust = 1.3, size = 4) +
+        labs(title = sprintf("vs BACS (%s)", cc$label),
+             x = "Our %pU (mega-pooled)", y = "BACS Ψ level") +
+        theme_bw(base_size = 12)
+    )
+  }
+  cat("\n\n")
+}
+```
+
+## Summary table
+
+```{r bacs-summary-table}
+bacs_summary <- do.call(rbind, lapply(ncalled_cutoffs, function(cc) {
+  idx <- which(global_sites$n_called >= cc$min_cls)
+  sub <- global_sites[idx, ]
+  ov  <- sub %>% mutate(chr_num = ref) %>%
+    inner_join(bacs_mRNA, by = c("chr_num", "pos" = "pos_num", "strand"))
+  r_val <- if (nrow(ov) >= 3) round(cor(ov$ratio, ov$psi_level,
+                                         method = "pearson", use = "complete.obs"), 3) else NA
+  data.frame(
+    Threshold        = cc$label,
+    Sites            = length(idx),
+    BACS_overlap     = nrow(ov),
+    pct_ours_in_BACS = round(nrow(ov)/length(idx)*100, 1),
+    pct_BACS_in_ours = round(nrow(ov)/n_bacs*100, 1),
+    Pearson_r        = r_val
+  )
+}))
+
+knitr::kable(bacs_summary,
+             col.names = c("n_called threshold", "# sites", "# overlap",
+                           "% ours in BACS", "% BACS in ours", "Pearson r"),
+             caption = "BACS overlap at each n_called threshold")
+```
+
+# Motif analysis around pU sites
+
+We extract ±10 bp flanking sequences around each union pU site from the
+reference genome, then compute position-specific nucleotide frequencies.
+
+Known mRNA pseudouridine motifs:
+
+- **TRUB1**: GUΨCNANNC (genomic DNA: G at -2, T at -1, C at +1, A at +3, C at +6)
+- **PUS7**: UGΨAR (genomic DNA: T at -2, G at -1, A at +1, A/G at +2)
+
+```{r motif-load}
+library(Biostrings)
+library(reshape2)
+
+genome_fasta <- "/project/xinhe/xsun/data/genome_reference/Reference/Human/ensembl.v112/fasta/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
+bed_file <- file.path(OUT_DIR, "union_mRNA.pseusite.bed")
+flank <- 10
+
+genome <- readDNAStringSet(genome_fasta)
+names(genome) <- sub(" .*", "", names(genome))
+
+bed <- fread(bed_file, header = FALSE, sep = "\t",
+             col.names = c("chr", "start", "end", "name", "score", "strand"))
+```
+
+```{r motif-extract}
+seqs  <- character(nrow(bed))
+valid <- logical(nrow(bed))
+
+for (i in seq_len(nrow(bed))) {
+  chr    <- bed$chr[i]
+  center <- bed$end[i]
+  st     <- bed$strand[i]
+  if (!chr %in% names(genome)) next
+  chr_len <- length(genome[[chr]])
+  left    <- center - flank
+  right   <- center + flank
+  if (left < 1 || right > chr_len) next
+  s <- subseq(genome[[chr]], start = left, end = right)
+  if (st == "-") s <- reverseComplement(s)
+  seqs[i]  <- as.character(s)
+  valid[i] <- TRUE
+}
+
+valid_indices <- which(valid)
+seqs <- seqs[valid]
+cat("Valid sequences:", length(seqs), "out of", nrow(bed), "\n")
+
+seq_width  <- 2 * flank + 1
+positions  <- (-flank):flank
+base_order <- c("A", "C", "G", "T")
+
+dna_seqs        <- DNAStringSet(seqs)
+center_idx      <- flank + 1
+motif_9mer_char <- as.character(subseq(dna_seqs, start = center_idx - 2, end = center_idx + 6))
+
+classify_pus <- function(mer9) {
+  b <- strsplit(mer9, "")[[1]]
+  if (b[1] == "T" && b[2] == "G" && b[4] == "A" && b[5] %in% c("A", "G")) return("PUS7")
+  if (b[1] == "G" && b[2] == "T" && b[4] == "C" && b[6] == "A" && b[9] == "C") return("TRUB1")
+  return("Other")
+}
+classes <- sapply(motif_9mer_char, classify_pus, USE.NAMES = FALSE)
+```
+
+## Nucleotide frequency at different n_called thresholds {.tabset}
+
+```{r motif-cutoffs, results='asis', fig.width=12, fig.height=9}
+for (cc in ncalled_cutoffs) {
+  site_idx <- which(global_sites$n_called >= cc$min_cls)
+  use_idx  <- intersect(site_idx, valid_indices)
+  seq_pos  <- match(use_idx, valid_indices)
+  sub_seqs <- seqs[seq_pos]
+  n_sub    <- length(sub_seqs)
+
+  cat(sprintf("\n\n### %s\n\n", cc$label))
+  cat(sprintf("**%s sites**\n\n", scales::comma(n_sub)))
+
+  if (n_sub < 10) { cat("Too few sites.\n\n"); next }
+
+  freq_mat <- matrix(0, nrow = 4, ncol = seq_width,
+                     dimnames = list(base_order, positions))
+  for (s in sub_seqs) {
+    bases <- strsplit(s, "")[[1]]
+    for (j in seq_along(bases)) {
+      b <- toupper(bases[j])
+      if (b %in% base_order) freq_mat[b, j] <- freq_mat[b, j] + 1
+    }
+  }
+  freq_pct <- sweep(freq_mat, 2, colSums(freq_mat), "/") * 100
+
+  plot_df <- melt(freq_pct)
+  colnames(plot_df) <- c("Base", "Position", "Frequency")
+  plot_df$Position  <- as.integer(as.character(plot_df$Position))
+  plot_df$Base      <- factor(plot_df$Base, levels = base_order)
+
+  print(
+    ggplot(plot_df, aes(x = Position, y = Base, fill = Frequency)) +
+      geom_tile(color = "white", linewidth = 0.3) +
+      geom_text(aes(label = sprintf("%.0f", Frequency)), size = 2.5) +
+      scale_fill_gradient2(low = "white", mid = "#ffffbf", high = "#d73027",
+                           midpoint = 25, name = "% frequency") +
+      scale_x_continuous(breaks = positions) +
+      geom_vline(xintercept = 0, color = "black", linewidth = 0.8, linetype = "dashed") +
+      labs(title = sprintf("Nucleotide frequency (%s, n = %s)", cc$label, scales::comma(n_sub)),
+           subtitle = sprintf("Position 0 = pU site (T→Ψ), ±%d bp flanking", flank),
+           x = "Position relative to pU site", y = NULL) +
+      theme_bw(base_size = 11) +
+      theme(panel.grid = element_blank())
+  )
+  cat("\n\n")
+
+  print(
+    ggplot(plot_df, aes(x = factor(Position, levels = positions), y = Frequency, fill = Base)) +
+      geom_col(position = "stack") +
+      scale_fill_manual(values = c("A" = "#4DAF4A", "C" = "#377EB8",
+                                    "G" = "#FF7F00", "T" = "#E41A1C")) +
+      geom_vline(xintercept = which(positions == 0), color = "black",
+                 linewidth = 0.8, linetype = "dashed") +
+      labs(title = sprintf("Nucleotide composition (%s, n = %s)", cc$label, scales::comma(n_sub)),
+           subtitle = sprintf("Position 0 = pU site (T→Ψ), ±%d bp flanking", flank),
+           x = "Position relative to pU site", y = "% frequency") +
+      theme_bw(base_size = 11) +
+      theme(axis.text.x = element_text(size = 7))
+  )
+  cat("\n\n")
+}
+```
+
+## PUS enzyme classification {.tabset}
+
+```{r motif-classify, results='asis', fig.width=10, fig.height=8}
+make_class_heatmap <- function(class_seqs, class_name) {
+  n <- length(class_seqs)
+  if (n == 0) return(NULL)
+  fm <- matrix(0, nrow = 4, ncol = seq_width,
+               dimnames = list(base_order, positions))
+  for (s in class_seqs) {
+    bases <- strsplit(s, "")[[1]]
+    for (j in seq_along(bases)) {
+      b <- toupper(bases[j])
+      if (b %in% base_order) fm[b, j] <- fm[b, j] + 1
+    }
+  }
+  fp <- sweep(fm, 2, colSums(fm), "/") * 100
+  pd <- melt(fp)
+  colnames(pd) <- c("Base", "Position", "Frequency")
+  pd$Position <- as.integer(as.character(pd$Position))
+  pd$Base     <- factor(pd$Base, levels = base_order)
+  ggplot(pd, aes(x = Position, y = Base, fill = Frequency)) +
+    geom_tile(color = "white", linewidth = 0.3) +
+    geom_text(aes(label = sprintf("%.0f", Frequency)), size = 2) +
+    scale_fill_gradient2(low = "white", mid = "#ffffbf", high = "#d73027",
+                         midpoint = 25, name = "% freq") +
+    scale_x_continuous(breaks = positions) +
+    geom_vline(xintercept = 0, color = "black", linewidth = 0.8, linetype = "dashed") +
+    labs(title = sprintf("%s sites (n = %d)", class_name, n),
+         x = "Position relative to pU site", y = NULL) +
+    theme_bw(base_size = 9) +
+    theme(panel.grid = element_blank())
+}
+
+for (cc in ncalled_cutoffs) {
+  site_idx    <- which(global_sites$n_called >= cc$min_cls)
+  use_idx     <- intersect(site_idx, valid_indices)
+  seq_pos     <- match(use_idx, valid_indices)
+  sub_seqs    <- seqs[seq_pos]
+  sub_9mer    <- motif_9mer_char[seq_pos]
+  sub_classes <- sapply(sub_9mer, classify_pus, USE.NAMES = FALSE)
+  n_sub       <- length(sub_seqs)
+
+  cat(sprintf("\n\n### %s\n\n", cc$label))
+  cat(sprintf("**%s sites**\n\n", scales::comma(n_sub)))
+
+  class_tab <- table(sub_classes)
+  class_df  <- data.frame(
+    Enzyme = names(class_tab),
+    Count  = as.integer(class_tab),
+    Pct    = round(as.integer(class_tab) / n_sub * 100, 1)
+  )
+  class_df <- class_df[order(-class_df$Count), ]
+
+  print(knitr::kable(class_df, row.names = FALSE,
+               col.names = c("Enzyme class", "# sites", "%"),
+               caption = sprintf("PUS classification (%s)", cc$label)))
+  cat("\n\n")
+
+  class_df$label <- sprintf("%s\n%d (%.0f%%)", class_df$Enzyme, class_df$Count, class_df$Pct)
+  print(
+    ggplot(class_df, aes(x = "", y = Count, fill = Enzyme)) +
+      geom_col(width = 1, color = "white") +
+      coord_polar(theta = "y") +
+      geom_text(aes(label = label),
+                position = position_stack(vjust = 0.5), size = 4) +
+      scale_fill_manual(values = c("TRUB1" = "#377EB8", "PUS7" = "#FF7F00",
+                                    "Other" = "#999999")) +
+      labs(title = sprintf("PUS classification (%s, n = %s)", cc$label, scales::comma(n_sub)),
+           fill = NULL) +
+      theme_void(base_size = 12)
+  )
+  cat("\n\n")
+
+  hm_plots <- Filter(Negate(is.null), list(
+    make_class_heatmap(sub_seqs[sub_classes == "TRUB1"], "TRUB1"),
+    make_class_heatmap(sub_seqs[sub_classes == "PUS7"],  "PUS7"),
+    make_class_heatmap(sub_seqs[sub_classes == "Other"], "Other")
+  ))
+  if (length(hm_plots) > 0) print(wrap_plots(hm_plots, ncol = 1))
+  cat("\n\n")
+}
+```
+
+## Motif enrichment vs %pU strength {.tabset}
+
+```{r motif-vs-strength, results='asis', fig.width=10, fig.height=6}
+for (cc in ncalled_cutoffs) {
+  site_idx    <- which(global_sites$n_called >= cc$min_cls)
+  use_idx     <- intersect(site_idx, valid_indices)
+  seq_pos     <- match(use_idx, valid_indices)
+  sub_9mer    <- motif_9mer_char[seq_pos]
+  sub_classes <- sapply(sub_9mer, classify_pus, USE.NAMES = FALSE)
+  n_sub       <- length(use_idx)
+
+  cat(sprintf("\n\n### %s\n\n", cc$label))
+  cat(sprintf("**%s sites**\n\n", scales::comma(n_sub)))
+
+  if (n_sub < 20) { cat("Too few sites.\n\n"); next }
+
+  sub_global  <- global_sites[use_idx, ]
+  strength_df <- data.frame(
+    ratio    = sub_global$ratio,
+    class    = sub_classes,
+    is_known = sub_classes %in% c("TRUB1", "PUS7")
+  )
+  strength_df$quartile <- cut(strength_df$ratio,
+                               breaks = quantile(strength_df$ratio, probs = c(0,.25,.5,.75,1)),
+                               include.lowest = TRUE,
+                               labels = c("Q1 (weakest)", "Q2", "Q3", "Q4 (strongest)"))
+
+  q_summary <- strength_df %>%
+    group_by(quartile, class) %>%
+    summarise(n = n(), .groups = "drop") %>%
+    group_by(quartile) %>%
+    mutate(pct = round(n / sum(n) * 100, 1))
+
+  print(
+    ggplot(q_summary, aes(x = quartile, y = pct, fill = class)) +
+      geom_col(position = "stack") +
+      geom_text(aes(label = sprintf("%.0f%%", pct)),
+                position = position_stack(vjust = 0.5), size = 3) +
+      scale_fill_manual(values = c("TRUB1" = "#377EB8", "PUS7" = "#FF7F00",
+                                    "Other" = "#999999")) +
+      labs(title = sprintf("PUS motif by %%pU quartile (%s)", cc$label),
+           x = "%pU quartile", y = "% of sites", fill = "Enzyme class") +
+      theme_bw(base_size = 12)
+  )
+  cat("\n\n")
+
+  q_known <- strength_df %>%
+    group_by(quartile) %>%
+    summarise(
+      n_sites   = n(),
+      n_TRUB1   = sum(class == "TRUB1"),
+      pct_TRUB1 = round(sum(class == "TRUB1") / n() * 100, 1),
+      n_PUS7    = sum(class == "PUS7"),
+      pct_PUS7  = round(sum(class == "PUS7")  / n() * 100, 1),
+      n_known   = sum(is_known),
+      pct_known = round(sum(is_known) / n() * 100, 1),
+      median_pU = round(median(ratio), 3),
+      .groups = "drop"
+    )
+
+  print(knitr::kable(q_known,
+               col.names = c("Quartile", "# sites", "# TRUB1", "% TRUB1",
+                             "# PUS7", "% PUS7", "# known motif", "% known motif",
+                             "Median %pU"),
+               caption = sprintf("PUS motif enrichment (%s)", cc$label)))
+  cat("\n\n")
+}
+```
+
+# Motif analysis of BACS published sites
+
+```{r bacs-motif-extract}
+bacs_bed <- bacs_mRNA %>%
+  mutate(chr_clean = sub("^chr", "", chr)) %>%
+  filter(chr_clean %in% names(genome))
+
+bacs_seqs  <- character(nrow(bacs_bed))
+bacs_valid <- logical(nrow(bacs_bed))
+
+for (i in seq_len(nrow(bacs_bed))) {
+  chr_name <- bacs_bed$chr_clean[i]
+  center   <- as.integer(bacs_bed$pos[i])
+  st       <- bacs_bed$strand[i]
+  chr_len  <- length(genome[[chr_name]])
+  left     <- center - flank
+  right    <- center + flank
+  if (left < 1 || right > chr_len) next
+  s <- subseq(genome[[chr_name]], start = left, end = right)
+  if (st == "-") s <- reverseComplement(s)
+  bacs_seqs[i]  <- as.character(s)
+  bacs_valid[i] <- TRUE
+}
+
+bacs_seqs    <- bacs_seqs[bacs_valid]
+cat("BACS valid sequences:", length(bacs_seqs), "out of", nrow(bacs_bed), "\n")
+
+bacs_dna     <- DNAStringSet(bacs_seqs)
+bacs_9mer    <- as.character(subseq(bacs_dna, start = center_idx - 2, end = center_idx + 6))
+bacs_classes <- sapply(bacs_9mer, classify_pus, USE.NAMES = FALSE)
+```
+
+## Nucleotide frequency heatmap (BACS)
+
+```{r bacs-motif-heatmap, fig.width=12, fig.height=4}
+bacs_freq_mat <- matrix(0, nrow = 4, ncol = seq_width,
+                        dimnames = list(base_order, positions))
+for (s in bacs_seqs) {
+  bases <- strsplit(s, "")[[1]]
+  for (j in seq_along(bases)) {
+    b <- toupper(bases[j])
+    if (b %in% base_order) bacs_freq_mat[b, j] <- bacs_freq_mat[b, j] + 1
+  }
+}
+bacs_freq_pct <- sweep(bacs_freq_mat, 2, colSums(bacs_freq_mat), "/") * 100
+
+bacs_plot_df <- melt(bacs_freq_pct)
+colnames(bacs_plot_df) <- c("Base", "Position", "Frequency")
+bacs_plot_df$Position  <- as.integer(as.character(bacs_plot_df$Position))
+bacs_plot_df$Base      <- factor(bacs_plot_df$Base, levels = base_order)
+
+ggplot(bacs_plot_df, aes(x = Position, y = Base, fill = Frequency)) +
+  geom_tile(color = "white", linewidth = 0.3) +
+  geom_text(aes(label = sprintf("%.0f", Frequency)), size = 2.5) +
+  scale_fill_gradient2(low = "white", mid = "#ffffbf", high = "#d73027",
+                       midpoint = 25, name = "% frequency") +
+  scale_x_continuous(breaks = positions) +
+  geom_vline(xintercept = 0, color = "black", linewidth = 0.8, linetype = "dashed") +
+  labs(title = sprintf("Nucleotide frequency — BACS sites (n = %d)", length(bacs_seqs)),
+       subtitle = sprintf("Position 0 = pU site (T→Ψ), ±%d bp flanking", flank),
+       x = "Position relative to pU site", y = NULL) +
+  theme_bw(base_size = 11) +
+  theme(panel.grid = element_blank())
+```
+
+## Stacked nucleotide composition (BACS)
+
+```{r bacs-motif-barplot, fig.width=12, fig.height=5}
+ggplot(bacs_plot_df, aes(x = factor(Position, levels = positions), y = Frequency, fill = Base)) +
+  geom_col(position = "stack") +
+  scale_fill_manual(values = c("A" = "#4DAF4A", "C" = "#377EB8",
+                                "G" = "#FF7F00", "T" = "#E41A1C")) +
+  geom_vline(xintercept = which(positions == 0), color = "black",
+             linewidth = 0.8, linetype = "dashed") +
+  labs(title = sprintf("Nucleotide composition — BACS sites (n = %d)", length(bacs_seqs)),
+       subtitle = sprintf("Position 0 = pU site (T→Ψ), ±%d bp flanking", flank),
+       x = "Position relative to pU site", y = "% frequency") +
+  theme_bw(base_size = 11) +
+  theme(axis.text.x = element_text(size = 7))
+```
+
+## PUS enzyme classification (BACS)
+
+```{r bacs-motif-classify}
+bacs_class_tab <- table(bacs_classes)
+bacs_class_df  <- data.frame(
+  Enzyme = names(bacs_class_tab),
+  Count  = as.integer(bacs_class_tab),
+  Pct    = round(as.integer(bacs_class_tab) / length(bacs_seqs) * 100, 1)
+)
+bacs_class_df <- bacs_class_df[order(-bacs_class_df$Count), ]
+knitr::kable(bacs_class_df, row.names = FALSE,
+             col.names = c("Enzyme class", "# sites", "%"),
+             caption = "PUS classification — BACS sites")
+```
+
+```{r bacs-motif-classify-pie, fig.width=7, fig.height=5}
+bacs_class_df$label <- sprintf("%s\n%d (%.0f%%)", bacs_class_df$Enzyme,
+                                bacs_class_df$Count, bacs_class_df$Pct)
+ggplot(bacs_class_df, aes(x = "", y = Count, fill = Enzyme)) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  geom_text(aes(label = label), position = position_stack(vjust = 0.5), size = 4) +
+  scale_fill_manual(values = c("TRUB1" = "#377EB8", "PUS7" = "#FF7F00",
+                                "Other" = "#999999")) +
+  labs(title = sprintf("PUS classification — BACS sites (n = %d)", length(bacs_seqs)),
+       fill = NULL) +
+  theme_void(base_size = 12)
+```
+
+## Motif heatmaps by enzyme class (BACS)
+
+```{r bacs-motif-by-class, fig.width=12, fig.height=12}
+bacs_hm_plots <- Filter(Negate(is.null), list(
+  make_class_heatmap(bacs_seqs[bacs_classes == "TRUB1"], "TRUB1 (BACS)"),
+  make_class_heatmap(bacs_seqs[bacs_classes == "PUS7"],  "PUS7 (BACS)"),
+  make_class_heatmap(bacs_seqs[bacs_classes == "Other"], "Other (BACS)")
+))
+if (length(bacs_hm_plots) > 0) wrap_plots(bacs_hm_plots, ncol = 1)
+```
+
+## Motif enrichment vs Ψ level (BACS)
+
+```{r bacs-motif-vs-strength, fig.width=10, fig.height=6}
+bacs_strength_df <- data.frame(
+  psi_level = bacs_mRNA$psi_level[bacs_valid],
+  class      = bacs_classes,
+  is_known   = bacs_classes %in% c("TRUB1", "PUS7")
+)
+bacs_strength_df$quartile <- cut(bacs_strength_df$psi_level,
+                                  breaks = quantile(bacs_strength_df$psi_level,
+                                                    probs = c(0,.25,.5,.75,1), na.rm = TRUE),
+                                  include.lowest = TRUE,
+                                  labels = c("Q1 (weakest)", "Q2", "Q3", "Q4 (strongest)"))
+
+bacs_q_summary <- bacs_strength_df %>%
+  filter(!is.na(quartile)) %>%
+  group_by(quartile, class) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(quartile) %>%
+  mutate(pct = round(n / sum(n) * 100, 1))
+
+ggplot(bacs_q_summary, aes(x = quartile, y = pct, fill = class)) +
+  geom_col(position = "stack") +
+  geom_text(aes(label = sprintf("%.0f%%", pct)),
+            position = position_stack(vjust = 0.5), size = 3) +
+  scale_fill_manual(values = c("TRUB1" = "#377EB8", "PUS7" = "#FF7F00",
+                                "Other" = "#999999")) +
+  labs(title = "PUS motif composition by Ψ level quartile (BACS)",
+       x = "Ψ level quartile", y = "% of sites", fill = "Enzyme class") +
+  theme_bw(base_size = 12)
+```
+
+```{r bacs-motif-vs-strength-table}
+bacs_q_known <- bacs_strength_df %>%
+  filter(!is.na(quartile)) %>%
+  group_by(quartile) %>%
+  summarise(
+    n_sites    = n(),
+    n_TRUB1    = sum(class == "TRUB1"),
+    pct_TRUB1  = round(sum(class == "TRUB1") / n() * 100, 1),
+    n_PUS7     = sum(class == "PUS7"),
+    pct_PUS7   = round(sum(class == "PUS7")  / n() * 100, 1),
+    n_known    = sum(is_known),
+    pct_known  = round(sum(is_known) / n() * 100, 1),
+    median_psi = round(median(psi_level, na.rm = TRUE), 3),
+    .groups = "drop"
+  )
+knitr::kable(bacs_q_known,
+             col.names = c("Quartile", "# sites", "# TRUB1", "% TRUB1",
+                           "# PUS7", "% PUS7", "# known motif", "% known motif",
+                           "Median Ψ level"),
+             caption = "PUS motif enrichment by Ψ level quartile (BACS)")
+```
+
+---
+
+# Genomic feature distribution
+
+We annotate each union pU site against the Ensembl v112 GTF with the following
+priority (highest wins): CDS > 3'UTR > 5'UTR > ncRNA exon > Intron >
+Intergenic. Pre-computed by `annotate_sites_feature.R`.
+
+```{r feature-load}
+anno_sites <- fread(
+  file.path(OUT_DIR, "union_mRNA.global_sites_annotated.txt.gz"),
+  header = TRUE, sep = "\t", colClasses = list(character = c("ref", "strand")))
+
+anno_bacs <- fread(
+  file.path(JOINT_OUT_DIR, "bacs_mrna_annotated.txt.gz"),
+  header = TRUE, sep = "\t")
+
+anno_sites$n_called <- global_sites$n_called[match(
+  paste(anno_sites$ref, anno_sites$pos, anno_sites$strand),
+  paste(global_sites$ref, global_sites$pos, global_sites$strand))]
+
+feat_levels <- c("5UTR", "CDS", "3UTR", "ncRNA", "Intron", "Intergenic")
+feat_colors <- c("5UTR"       = "#4DAF4A",
+                 "CDS"        = "#377EB8",
+                 "3UTR"       = "#FF7F00",
+                 "ncRNA"      = "#984EA3",
+                 "Intron"     = "#A65628",
+                 "Intergenic" = "#999999")
+```
+
+## Feature distribution at different n_called thresholds {.tabset}
+
+```{r feature-cutoffs, results='asis', fig.width=9, fig.height=5}
+bacs_feat_df <- data.frame(
+  feature = factor(anno_bacs$feature_anno, levels = feat_levels)
+) %>%
+  count(feature) %>%
+  mutate(pct = round(n / sum(n) * 100, 1), dataset = "BACS")
+
+for (cc in ncalled_cutoffs) {
+  idx   <- which(anno_sites$n_called >= cc$min_cls)
+  n_sub <- length(idx)
+
+  cat(sprintf("\n\n### %s\n\n", cc$label))
+  cat(sprintf("**%s sites**\n\n", scales::comma(n_sub)))
+
+  if (n_sub < 10) { cat("Too few sites.\n\n"); next }
+
+  our_feat_df <- data.frame(
+    feature = factor(anno_sites$feature[idx], levels = feat_levels)
+  ) %>%
+    count(feature) %>%
+    mutate(pct = round(n / sum(n) * 100, 1), dataset = cc$label)
+
+  plot_df <- bind_rows(our_feat_df, bacs_feat_df)
+  plot_df$dataset <- factor(plot_df$dataset, levels = c(cc$label, "BACS"))
+  plot_df$feature <- factor(plot_df$feature, levels = feat_levels)
+
+  print(
+    ggplot(plot_df, aes(x = dataset, y = pct, fill = feature)) +
+      geom_col(position = "stack", width = 0.6) +
+      geom_text(aes(label = sprintf("%.0f%%", pct)),
+                position = position_stack(vjust = 0.5), size = 3.5) +
+      scale_fill_manual(values = feat_colors, name = "Feature") +
+      labs(title = sprintf("Genomic feature distribution (%s)", cc$label),
+           x = NULL, y = "% of sites") +
+      theme_bw(base_size = 12) +
+      theme(legend.position = "right")
+  )
+  cat("\n\n")
+}
+```
+
+## BACS overlap restricted to UTR/CDS sites
+
+```{r utr-cds-bacs-overlap, fig.width=8, fig.height=5}
+bacs_keys <- anno_bacs %>% select(chr, pos, strand)
+
+utr_cds_table <- do.call(rbind, lapply(ncalled_cutoffs, function(cc) {
+  idx         <- which(anno_sites$n_called >= cc$min_cls)
+  sub_utr_cds <- anno_sites[idx, ][anno_sites[idx, ]$feature %in% c("5UTR", "CDS", "3UTR"), ]
+  ov          <- sub_utr_cds %>%
+    inner_join(bacs_keys, by = c("ref" = "chr", "pos", "strand"))
+  data.frame(
+    Threshold   = cc$label,
+    n_utr_cds   = nrow(sub_utr_cds),
+    n_overlap   = nrow(ov),
+    pct_overlap = round(nrow(ov) / nrow(sub_utr_cds) * 100, 1)
+  )
+}))
+
+knitr::kable(utr_cds_table,
+             col.names = c("n_called threshold", "# UTR/CDS sites",
+                           "# BACS overlap", "% overlap"),
+             caption = "% of UTR/CDS sites overlapping BACS, by n_called threshold")
+
+utr_cds_table$Threshold <- factor(utr_cds_table$Threshold,
+                                   levels = rev(utr_cds_table$Threshold))
+ggplot(utr_cds_table, aes(x = Threshold, y = pct_overlap)) +
+  geom_col(fill = "steelblue", width = 0.6) +
+  geom_text(aes(label = sprintf("%.1f%%", pct_overlap)), hjust = -0.1, size = 4) +
+  coord_flip(ylim = c(0, max(utr_cds_table$pct_overlap) * 1.15)) +
+  labs(title = "% of UTR/CDS sites overlapping BACS, by n_called threshold",
+       x = NULL, y = "% overlap with BACS") +
+  theme_bw(base_size = 12)
+```

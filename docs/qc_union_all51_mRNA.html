@@ -1,0 +1,2648 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-07-01" />
+
+<title>QC — Union cross-cell-line mRNA pU sites (51 cell lines)</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">QC — Union cross-cell-line mRNA pU sites
+(51 cell lines)</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-07-01</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-07-01
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreec9173bceefd080ec00204666b3a5356613b0babetargetblankc9173bca">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/c9173bceefd080ec00204666b3a5356613b0babe" target="_blank">c9173bc</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreec9173bceefd080ec00204666b3a5356613b0babetargetblankc9173bca"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/c9173bceefd080ec00204666b3a5356613b0babe" target="_blank">c9173bc</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    analysis/figure/
+    Ignored:    analysis/qc_rRNA_chisq_allcellline.html
+    Ignored:    analysis/site_libs/
+
+Untracked files:
+    Untracked:  analysis/qc_joint_all51_mRNA.Rmd
+    Untracked:  analysis/qc_union_all51_mRNA.Rmd
+
+Unstaged changes:
+    Modified:   analysis/qc_rRNA_chisq_allcellline.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>library(data.table)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(patchwork)
+library(corrplot)
+library(scales)
+
+knitr::opts_chunk$set(
+  echo = TRUE, warning = FALSE, message = FALSE,
+  fig.align = &quot;center&quot;, fig.width = 10, fig.height = 8
+)</code></pre>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Quality control of the <strong>union cross-cell-line mRNA pU site
+calling</strong> across all 51 cell lines (with problematic replicates
+dropped based on BACS r &lt; 0.3 in both reps).</p>
+<p>The union strategy calls pU sites independently per cell line (FDR
+&lt; 0.01, rate_diff &gt; 0.05, depth ≥ 20, n_samples ≥ 1 if ≤2
+replicates else ≥ 2), then takes the union across all 51 CLs. A site
+enters the global list if <strong>any</strong> cell line passes the
+per-CL threshold. The <code>called_in</code> field records which cell
+line(s) independently called each site. Cross-cell-line pooled stats are
+looked up from the existing joint all-51 run.</p>
+<p>The primary quality stratification for union sites is
+<strong>n_called</strong> — the number of independent cell lines that
+called the site. All analyses below are tabbed by n_called threshold
+(≥1, ≥2, ≥3, ≥5, ≥10 CLs).</p>
+<pre class="r"><code>OUT_DIR       &lt;- &quot;/project2/xinhe/xsun/pumseq/pumseq_results/union/all51_mRNA&quot;
+JOINT_OUT_DIR &lt;- &quot;/project2/xinhe/xsun/pumseq/pumseq_results/joint/all51_mRNA&quot;
+
+global_sites &lt;- fread(
+  file.path(OUT_DIR, &quot;union_mRNA.global_sites.txt.gz&quot;),
+  header = TRUE, sep = &quot;\t&quot;, colClasses = list(character = c(&quot;ref&quot;, &quot;strand&quot;)))
+
+ratio_mat &lt;- fread(
+  file.path(OUT_DIR, &quot;union_mRNA.global_sites.ratio_matrix.txt.gz&quot;),
+  header = TRUE, sep = &quot;\t&quot;, colClasses = list(character = c(&quot;ref&quot;, &quot;strand&quot;)))
+
+depth_mat &lt;- fread(
+  file.path(OUT_DIR, &quot;union_mRNA.global_sites.depth_matrix.txt.gz&quot;),
+  header = TRUE, sep = &quot;\t&quot;, colClasses = list(character = c(&quot;ref&quot;, &quot;strand&quot;)))
+
+CL_NAMES &lt;- setdiff(colnames(ratio_mat), c(&quot;ref&quot;, &quot;pos&quot;, &quot;strand&quot;))
+
+global_sites$n_called &lt;- sapply(strsplit(global_sites$called_in, &quot;,&quot;), length)
+
+n_sites &lt;- nrow(global_sites)
+n_cls   &lt;- length(CL_NAMES)
+
+cat(&quot;Union sites (total):&quot;, n_sites, &quot;\n&quot;)</code></pre>
+<pre><code>Union sites (total): 15555 </code></pre>
+<pre class="r"><code>cat(&quot;Cell lines:&quot;, n_cls, &quot;\n&quot;)</code></pre>
+<pre><code>Cell lines: 51 </code></pre>
+<pre class="r"><code>ncalled_cutoffs &lt;- list(
+  list(min_cls = 1,  label = &quot;&gt;=1 CL (all)&quot;),
+  list(min_cls = 2,  label = &quot;&gt;=2 CLs&quot;),
+  list(min_cls = 3,  label = &quot;&gt;=3 CLs&quot;),
+  list(min_cls = 5,  label = &quot;&gt;=5 CLs&quot;),
+  list(min_cls = 10, label = &quot;&gt;=10 CLs&quot;)
+)</code></pre>
+</div>
+<div id="number-of-cell-lines-calling-each-site" class="section level1">
+<h1>Number of cell lines calling each site</h1>
+<pre class="r"><code>called_df &lt;- as.data.frame(table(global_sites$n_called))
+colnames(called_df) &lt;- c(&quot;n_cls_called&quot;, &quot;n_sites&quot;)
+called_df$n_cls_called &lt;- as.integer(as.character(called_df$n_cls_called))
+called_df$pct &lt;- round(called_df$n_sites / n_sites * 100, 1)
+
+# Summary at each threshold
+thresh_df &lt;- do.call(rbind, lapply(ncalled_cutoffs, function(cc) {
+  n &lt;- sum(global_sites$n_called &gt;= cc$min_cls)
+  data.frame(Threshold = cc$label, n_sites = n,
+             pct = round(n / n_sites * 100, 1))
+}))
+knitr::kable(thresh_df,
+             col.names = c(&quot;n_called threshold&quot;, &quot;# sites&quot;, &quot;% of total&quot;),
+             caption = &quot;Union sites retained at each n_called threshold&quot;)</code></pre>
+<table>
+<caption>Union sites retained at each n_called threshold</caption>
+<thead>
+<tr class="header">
+<th align="left">n_called threshold</th>
+<th align="right"># sites</th>
+<th align="right">% of total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">&gt;=1 CL (all)</td>
+<td align="right">15555</td>
+<td align="right">100.0</td>
+</tr>
+<tr class="even">
+<td align="left">&gt;=2 CLs</td>
+<td align="right">5928</td>
+<td align="right">38.1</td>
+</tr>
+<tr class="odd">
+<td align="left">&gt;=3 CLs</td>
+<td align="right">3745</td>
+<td align="right">24.1</td>
+</tr>
+<tr class="even">
+<td align="left">&gt;=5 CLs</td>
+<td align="right">2109</td>
+<td align="right">13.6</td>
+</tr>
+<tr class="odd">
+<td align="left">&gt;=10 CLs</td>
+<td align="right">1083</td>
+<td align="right">7.0</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>ggplot(called_df, aes(x = factor(n_cls_called), y = n_sites)) +
+  geom_col(fill = &quot;steelblue&quot;, width = 0.8) +
+  scale_y_continuous(labels = scales::comma,
+                     expand = expansion(mult = c(0, 0.1))) +
+  scale_x_discrete(breaks = c(1, 5, 10, 20, 30, 40, 51)) +
+  labs(title = &quot;Union sites by number of cell lines calling the site&quot;,
+       x = &quot;# cell lines calling the site&quot;, y = &quot;# sites&quot;) +
+  theme_bw(base_size = 12)</code></pre>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/called-in-1.png" width="864" style="display: block; margin: auto;" /></p>
+</div>
+<div id="bacs-overlap-by-n_called-threshold" class="section level1">
+<h1>BACS overlap by n_called threshold</h1>
+<pre class="r"><code>path_BACS_early &lt;- &quot;/project2/xinhe/xsun/pumseq/data_others/pU_PMID39349603.xlsx&quot;
+bacs_early &lt;- readxl::read_excel(path_BACS_early, sheet = 6, skip = 2) %&gt;%
+  filter(feature != &quot;ncRNA&quot;) %&gt;%
+  mutate(chr_num   = sub(&quot;^chr&quot;, &quot;&quot;, chr),
+         pos_num   = as.integer(pos),
+         psi_level = as.numeric(`Ψ level`))
+n_bacs_early &lt;- nrow(bacs_early)
+
+rec_table &lt;- do.call(rbind, lapply(ncalled_cutoffs, function(cc) {
+  idx &lt;- which(global_sites$n_called &gt;= cc$min_cls)
+  sub &lt;- global_sites[idx, ]
+  ov  &lt;- sub %&gt;% mutate(chr_num = ref) %&gt;%
+    inner_join(bacs_early, by = c(&quot;chr_num&quot;, &quot;pos&quot; = &quot;pos_num&quot;, &quot;strand&quot;))
+  r_val &lt;- if (nrow(ov) &gt;= 3) round(cor(ov$ratio, ov$psi_level,
+                                         method = &quot;pearson&quot;, use = &quot;complete.obs&quot;), 3) else NA
+  data.frame(
+    Threshold        = cc$label,
+    Sites            = length(idx),
+    BACS_overlap     = nrow(ov),
+    pct_ours_in_BACS = round(nrow(ov) / length(idx)    * 100, 1),
+    pct_BACS_in_ours = round(nrow(ov) / n_bacs_early   * 100, 1),
+    Pearson_r        = r_val
+  )
+}))
+
+knitr::kable(rec_table,
+             col.names = c(&quot;n_called threshold&quot;, &quot;# sites&quot;, &quot;# BACS overlap&quot;,
+                           &quot;% ours in BACS&quot;, &quot;% BACS in ours&quot;, &quot;Pearson r&quot;),
+             caption = &quot;BACS overlap and %pU correlation by n_called threshold&quot;)</code></pre>
+<table style="width:100%;">
+<caption>BACS overlap and %pU correlation by n_called
+threshold</caption>
+<colgroup>
+<col width="23%" />
+<col width="9%" />
+<col width="18%" />
+<col width="18%" />
+<col width="18%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">n_called threshold</th>
+<th align="right"># sites</th>
+<th align="right"># BACS overlap</th>
+<th align="right">% ours in BACS</th>
+<th align="right">% BACS in ours</th>
+<th align="right">Pearson r</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">&gt;=1 CL (all)</td>
+<td align="right">15555</td>
+<td align="right">621</td>
+<td align="right">4.0</td>
+<td align="right">48.0</td>
+<td align="right">0.935</td>
+</tr>
+<tr class="even">
+<td align="left">&gt;=2 CLs</td>
+<td align="right">5928</td>
+<td align="right">510</td>
+<td align="right">8.6</td>
+<td align="right">39.4</td>
+<td align="right">0.936</td>
+</tr>
+<tr class="odd">
+<td align="left">&gt;=3 CLs</td>
+<td align="right">3745</td>
+<td align="right">450</td>
+<td align="right">12.0</td>
+<td align="right">34.8</td>
+<td align="right">0.937</td>
+</tr>
+<tr class="even">
+<td align="left">&gt;=5 CLs</td>
+<td align="right">2109</td>
+<td align="right">382</td>
+<td align="right">18.1</td>
+<td align="right">29.5</td>
+<td align="right">0.935</td>
+</tr>
+<tr class="odd">
+<td align="left">&gt;=10 CLs</td>
+<td align="right">1083</td>
+<td align="right">277</td>
+<td align="right">25.6</td>
+<td align="right">21.4</td>
+<td align="right">0.932</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="summary-statistics" class="section level1">
+<h1>Summary statistics</h1>
+<div id="site-counts-at-each-n_called-threshold" class="section level2">
+<h2>Site counts at each n_called threshold</h2>
+<pre class="r"><code>bar_df &lt;- data.frame(
+  label   = sapply(ncalled_cutoffs, `[[`, &quot;label&quot;),
+  n_sites = sapply(ncalled_cutoffs, function(cc) sum(global_sites$n_called &gt;= cc$min_cls))
+)
+bar_df$label &lt;- factor(bar_df$label, levels = rev(bar_df$label))
+
+ggplot(bar_df, aes(x = label, y = n_sites)) +
+  geom_col(fill = &quot;steelblue&quot;, width = 0.6) +
+  geom_text(aes(label = scales::comma(n_sites)), hjust = -0.1, size = 4) +
+  coord_flip(ylim = c(0, max(bar_df$n_sites) * 1.1)) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(title = &quot;Union sites at each n_called threshold&quot;,
+       x = NULL, y = &quot;# sites&quot;) +
+  theme_bw(base_size = 12)</code></pre>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/site-cutoff-bar-1.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="distribution-of-pooled-pu" class="section level2 tabset">
+<h2 class="tabset">Distribution of pooled %pU</h2>
+<p>Distribution of the mega-pooled conversion ratio C/(C+T) at each
+n_called threshold. Red dashed = median; orange dotted = mean.</p>
+<pre class="r"><code>for (cc in ncalled_cutoffs) {
+  idx   &lt;- which(global_sites$n_called &gt;= cc$min_cls)
+  n_sub &lt;- length(idx)
+
+  cat(sprintf(&quot;\n\n### %s\n\n&quot;, cc$label))
+  cat(sprintf(&quot;**%s sites**\n\n&quot;, scales::comma(n_sub)))
+
+  if (n_sub &lt; 10) { cat(&quot;Too few sites.\n\n&quot;); next }
+
+  sub      &lt;- global_sites[idx, ]
+  med_val  &lt;- median(sub$ratio)
+  mean_val &lt;- mean(sub$ratio)
+
+  print(
+    ggplot(sub, aes(x = ratio)) +
+      geom_histogram(aes(y = after_stat(density)), binwidth = 0.01,
+                     fill = &quot;steelblue&quot;, color = &quot;white&quot;, alpha = 0.7) +
+      geom_density(color = &quot;navy&quot;, linewidth = 0.7) +
+      geom_vline(xintercept = med_val,  color = &quot;red&quot;,       linetype = &quot;dashed&quot;) +
+      geom_vline(xintercept = mean_val, color = &quot;darkorange&quot;, linetype = &quot;dotted&quot;) +
+      annotate(&quot;text&quot;, x = Inf, y = Inf,
+               label = sprintf(&quot;n = %s\nmedian = %.3f\nmean = %.3f&quot;,
+                               scales::comma(n_sub), med_val, mean_val),
+               hjust = 1.05, vjust = 1.05, size = 4, family = &quot;mono&quot;) +
+      labs(title = sprintf(&quot;Pooled %%pU distribution (%s)&quot;, cc$label),
+           x = &quot;%pU (C/(C+T), mega-pooled)&quot;, y = &quot;Density&quot;) +
+      theme_bw(base_size = 12)
+  )
+  cat(&quot;\n\n&quot;)
+}</code></pre>
+<div id="cl-all" class="section level3">
+<h3>&gt;=1 CL (all)</h3>
+<p><strong>15,555 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/pooled-pU-dist-1.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls" class="section level3">
+<h3>&gt;=2 CLs</h3>
+<p><strong>5,928 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/pooled-pU-dist-2.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-1" class="section level3">
+<h3>&gt;=3 CLs</h3>
+<p><strong>3,745 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/pooled-pU-dist-3.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-2" class="section level3">
+<h3>&gt;=5 CLs</h3>
+<p><strong>2,109 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/pooled-pU-dist-4.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-3" class="section level3">
+<h3>&gt;=10 CLs</h3>
+<p><strong>1,083 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/pooled-pU-dist-5.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="per-cell-line-coverage-at-different-n_called-thresholds"
+class="section level2 tabset">
+<h2 class="tabset">Per-cell-line coverage at different n_called
+thresholds</h2>
+<pre class="r"><code>ratio_only &lt;- as.matrix(ratio_mat[, ..CL_NAMES])
+depth_only &lt;- as.matrix(depth_mat[, ..CL_NAMES])</code></pre>
+<pre class="r"><code>for (cc in ncalled_cutoffs) {
+  idx   &lt;- which(global_sites$n_called &gt;= cc$min_cls)
+  n_sub &lt;- length(idx)
+
+  cat(sprintf(&quot;\n\n### %s\n\n&quot;, cc$label))
+  cat(sprintf(&quot;**%s sites**\n\n&quot;, scales::comma(n_sub)))
+
+  if (n_sub == 0) { cat(&quot;No sites.\n\n&quot;); next }
+
+  sub_ratio &lt;- ratio_only[idx, , drop = FALSE]
+
+  cov_df &lt;- data.frame(
+    cell_line   = CL_NAMES,
+    pct_covered = round(colSums(!is.na(sub_ratio)) / n_sub * 100, 1)
+  )
+  cov_df$cell_line &lt;- factor(cov_df$cell_line, levels = CL_NAMES)
+  n_per &lt;- ceiling(nrow(cov_df) / 5)
+  cov_df$panel &lt;- rep(1:5, each = n_per, length.out = nrow(cov_df))
+
+  cov_plots &lt;- lapply(1:5, function(p) {
+    sub &lt;- cov_df[cov_df$panel == p, ]
+    ggplot(sub, aes(x = cell_line, y = pct_covered, fill = cell_line)) +
+      geom_col(width = 0.6, show.legend = FALSE) +
+      geom_text(aes(label = sprintf(&quot;%.0f%%&quot;, pct_covered)), vjust = -0.3, size = 2.5) +
+      scale_y_continuous(limits = c(0, 105)) +
+      labs(x = NULL, y = &quot;% covered&quot;) +
+      theme_bw(base_size = 9) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7))
+  })
+
+  print(
+    wrap_plots(cov_plots, ncol = 1) +
+      plot_annotation(title = sprintf(&quot;Coverage (%s)&quot;, cc$label),
+                      subtitle = sprintf(&quot;%s sites&quot;, scales::comma(n_sub)))
+  )
+  cat(&quot;\n\n&quot;)
+}</code></pre>
+<div id="cl-all-1" class="section level3">
+<h3>&gt;=1 CL (all)</h3>
+<p><strong>15,555 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/coverage-cutoffs-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-4" class="section level3">
+<h3>&gt;=2 CLs</h3>
+<p><strong>5,928 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/coverage-cutoffs-2.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-5" class="section level3">
+<h3>&gt;=3 CLs</h3>
+<p><strong>3,745 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/coverage-cutoffs-3.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-6" class="section level3">
+<h3>&gt;=5 CLs</h3>
+<p><strong>2,109 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/coverage-cutoffs-4.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-7" class="section level3">
+<h3>&gt;=10 CLs</h3>
+<p><strong>1,083 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/coverage-cutoffs-5.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+</div>
+<div id="correlation-of-pu-across-cell-lines"
+class="section level1 tabset">
+<h1 class="tabset">Correlation of %pU across cell lines</h1>
+<pre class="r"><code>for (cc in ncalled_cutoffs) {
+  idx   &lt;- which(global_sites$n_called &gt;= cc$min_cls)
+  n_sub &lt;- length(idx)
+
+  cat(sprintf(&quot;\n\n## %s\n\n&quot;, cc$label))
+  cat(sprintf(&quot;**%s sites**\n\n&quot;, scales::comma(n_sub)))
+
+  if (n_sub &lt; 10) { cat(&quot;Too few sites.\n\n&quot;); next }
+
+  sub_ratio &lt;- ratio_only[idx, , drop = FALSE]
+  cor_mat   &lt;- cor(sub_ratio, use = &quot;pairwise.complete.obs&quot;, method = &quot;pearson&quot;)
+
+  corrplot(cor_mat, method = &quot;color&quot;, type = &quot;lower&quot;,
+           tl.cex = 0.5, tl.col = &quot;black&quot;, cl.cex = 0.7,
+           title = sprintf(&quot;Pearson r (%s, n=%s)&quot;, cc$label, scales::comma(n_sub)),
+           mar = c(0, 0, 2, 0))
+
+  upper_tri &lt;- cor_mat[upper.tri(cor_mat)]
+
+  print(
+    ggplot(data.frame(r = upper_tri), aes(x = r)) +
+      geom_histogram(binwidth = 0.01, fill = &quot;steelblue&quot;, color = &quot;white&quot;, alpha = 0.8) +
+      geom_vline(xintercept = median(upper_tri, na.rm = TRUE),
+                 color = &quot;red&quot;, linetype = &quot;dashed&quot;) +
+      annotate(&quot;text&quot;, x = median(upper_tri, na.rm = TRUE), y = Inf,
+               label = sprintf(&quot;median = %.3f&quot;, median(upper_tri, na.rm = TRUE)),
+               hjust = -0.1, vjust = 1.5, size = 4) +
+      labs(title = sprintf(&quot;Pairwise r distribution (%s)&quot;, cc$label),
+           x = &quot;Pearson r&quot;, y = &quot;Count&quot;) +
+      theme_bw(base_size = 12)
+  )
+  cat(&quot;\n\n&quot;)
+}</code></pre>
+<div id="cl-all-2" class="section level2">
+<h2>&gt;=1 CL (all)</h2>
+<p><strong>15,555 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/cor-cutoffs-1.png" width="1152" style="display: block; margin: auto;" /><img src="figure/qc_union_all51_mRNA.Rmd/cor-cutoffs-2.png" width="1152" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-8" class="section level2">
+<h2>&gt;=2 CLs</h2>
+<p><strong>5,928 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/cor-cutoffs-3.png" width="1152" style="display: block; margin: auto;" /><img src="figure/qc_union_all51_mRNA.Rmd/cor-cutoffs-4.png" width="1152" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-9" class="section level2">
+<h2>&gt;=3 CLs</h2>
+<p><strong>3,745 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/cor-cutoffs-5.png" width="1152" style="display: block; margin: auto;" /><img src="figure/qc_union_all51_mRNA.Rmd/cor-cutoffs-6.png" width="1152" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-10" class="section level2">
+<h2>&gt;=5 CLs</h2>
+<p><strong>2,109 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/cor-cutoffs-7.png" width="1152" style="display: block; margin: auto;" /><img src="figure/qc_union_all51_mRNA.Rmd/cor-cutoffs-8.png" width="1152" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-11" class="section level2">
+<h2>&gt;=10 CLs</h2>
+<p><strong>1,083 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/cor-cutoffs-9.png" width="1152" style="display: block; margin: auto;" /><img src="figure/qc_union_all51_mRNA.Rmd/cor-cutoffs-10.png" width="1152" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="comparing-with-published-data-bacs"
+class="section level1 tabset">
+<h1 class="tabset">Comparing with published data (BACS)</h1>
+<pre class="r"><code>path_BACS &lt;- &quot;/project2/xinhe/xsun/pumseq/data_others/pU_PMID39349603.xlsx&quot;
+bacs_mRNA &lt;- readxl::read_excel(path_BACS, sheet = 6, skip = 2) %&gt;%
+  filter(feature != &quot;ncRNA&quot;) %&gt;%
+  mutate(chr_num   = sub(&quot;^chr&quot;, &quot;&quot;, chr),
+         pos_num   = as.integer(pos),
+         psi_level = as.numeric(`Ψ level`))
+n_bacs &lt;- nrow(bacs_mRNA)
+cat(&quot;BACS mRNA sites:&quot;, n_bacs, &quot;\n&quot;)</code></pre>
+<pre><code>BACS mRNA sites: 1294 </code></pre>
+<pre class="r"><code>for (cc in ncalled_cutoffs) {
+  idx   &lt;- which(global_sites$n_called &gt;= cc$min_cls)
+  n_sub &lt;- length(idx)
+
+  cat(sprintf(&quot;\n\n## %s\n\n&quot;, cc$label))
+
+  sub &lt;- global_sites[idx, ]
+  ov  &lt;- sub %&gt;% mutate(chr_num = ref) %&gt;%
+    inner_join(bacs_mRNA, by = c(&quot;chr_num&quot;, &quot;pos&quot; = &quot;pos_num&quot;, &quot;strand&quot;))
+
+  cat(sprintf(&quot;Our sites: **%s** | BACS sites: **%s** | Overlap: **%d** (%.1f%% of ours, %.1f%% of BACS)\n\n&quot;,
+      scales::comma(n_sub), scales::comma(n_bacs), nrow(ov),
+      nrow(ov)/n_sub*100, nrow(ov)/n_bacs*100))
+
+  if (nrow(ov) &gt;= 3) {
+    r_val &lt;- cor(ov$ratio, ov$psi_level, method = &quot;pearson&quot;, use = &quot;complete.obs&quot;)
+    print(
+      ggplot(ov, aes(x = ratio, y = psi_level)) +
+        geom_point(alpha = 0.4, size = 1.5, color = &quot;#2c7bb6&quot;) +
+        geom_smooth(method = &quot;lm&quot;, se = TRUE, color = &quot;grey40&quot;, linetype = &quot;dashed&quot;) +
+        annotate(&quot;text&quot;, x = -Inf, y = Inf,
+                 label = sprintf(&quot;r = %.3f\nn = %d&quot;, r_val, nrow(ov)),
+                 hjust = -0.1, vjust = 1.3, size = 4) +
+        labs(title = sprintf(&quot;vs BACS (%s)&quot;, cc$label),
+             x = &quot;Our %pU (mega-pooled)&quot;, y = &quot;BACS Ψ level&quot;) +
+        theme_bw(base_size = 12)
+    )
+  }
+  cat(&quot;\n\n&quot;)
+}</code></pre>
+<div id="cl-all-3" class="section level2">
+<h2>&gt;=1 CL (all)</h2>
+<p>Our sites: <strong>15,555</strong> | BACS sites:
+<strong>1,294</strong> | Overlap: <strong>621</strong> (4.0% of ours,
+48.0% of BACS)</p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/bacs-cutoffs-1.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-12" class="section level2">
+<h2>&gt;=2 CLs</h2>
+<p>Our sites: <strong>5,928</strong> | BACS sites:
+<strong>1,294</strong> | Overlap: <strong>510</strong> (8.6% of ours,
+39.4% of BACS)</p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/bacs-cutoffs-2.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-13" class="section level2">
+<h2>&gt;=3 CLs</h2>
+<p>Our sites: <strong>3,745</strong> | BACS sites:
+<strong>1,294</strong> | Overlap: <strong>450</strong> (12.0% of ours,
+34.8% of BACS)</p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/bacs-cutoffs-3.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-14" class="section level2">
+<h2>&gt;=5 CLs</h2>
+<p>Our sites: <strong>2,109</strong> | BACS sites:
+<strong>1,294</strong> | Overlap: <strong>382</strong> (18.1% of ours,
+29.5% of BACS)</p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/bacs-cutoffs-4.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-15" class="section level2">
+<h2>&gt;=10 CLs</h2>
+<p>Our sites: <strong>1,083</strong> | BACS sites:
+<strong>1,294</strong> | Overlap: <strong>277</strong> (25.6% of ours,
+21.4% of BACS)</p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/bacs-cutoffs-5.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="summary-table" class="section level2">
+<h2>Summary table</h2>
+<pre class="r"><code>bacs_summary &lt;- do.call(rbind, lapply(ncalled_cutoffs, function(cc) {
+  idx &lt;- which(global_sites$n_called &gt;= cc$min_cls)
+  sub &lt;- global_sites[idx, ]
+  ov  &lt;- sub %&gt;% mutate(chr_num = ref) %&gt;%
+    inner_join(bacs_mRNA, by = c(&quot;chr_num&quot;, &quot;pos&quot; = &quot;pos_num&quot;, &quot;strand&quot;))
+  r_val &lt;- if (nrow(ov) &gt;= 3) round(cor(ov$ratio, ov$psi_level,
+                                         method = &quot;pearson&quot;, use = &quot;complete.obs&quot;), 3) else NA
+  data.frame(
+    Threshold        = cc$label,
+    Sites            = length(idx),
+    BACS_overlap     = nrow(ov),
+    pct_ours_in_BACS = round(nrow(ov)/length(idx)*100, 1),
+    pct_BACS_in_ours = round(nrow(ov)/n_bacs*100, 1),
+    Pearson_r        = r_val
+  )
+}))
+
+knitr::kable(bacs_summary,
+             col.names = c(&quot;n_called threshold&quot;, &quot;# sites&quot;, &quot;# overlap&quot;,
+                           &quot;% ours in BACS&quot;, &quot;% BACS in ours&quot;, &quot;Pearson r&quot;),
+             caption = &quot;BACS overlap at each n_called threshold&quot;)</code></pre>
+<table>
+<caption>BACS overlap at each n_called threshold</caption>
+<colgroup>
+<col width="24%" />
+<col width="10%" />
+<col width="12%" />
+<col width="19%" />
+<col width="19%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">n_called threshold</th>
+<th align="right"># sites</th>
+<th align="right"># overlap</th>
+<th align="right">% ours in BACS</th>
+<th align="right">% BACS in ours</th>
+<th align="right">Pearson r</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">&gt;=1 CL (all)</td>
+<td align="right">15555</td>
+<td align="right">621</td>
+<td align="right">4.0</td>
+<td align="right">48.0</td>
+<td align="right">0.935</td>
+</tr>
+<tr class="even">
+<td align="left">&gt;=2 CLs</td>
+<td align="right">5928</td>
+<td align="right">510</td>
+<td align="right">8.6</td>
+<td align="right">39.4</td>
+<td align="right">0.936</td>
+</tr>
+<tr class="odd">
+<td align="left">&gt;=3 CLs</td>
+<td align="right">3745</td>
+<td align="right">450</td>
+<td align="right">12.0</td>
+<td align="right">34.8</td>
+<td align="right">0.937</td>
+</tr>
+<tr class="even">
+<td align="left">&gt;=5 CLs</td>
+<td align="right">2109</td>
+<td align="right">382</td>
+<td align="right">18.1</td>
+<td align="right">29.5</td>
+<td align="right">0.935</td>
+</tr>
+<tr class="odd">
+<td align="left">&gt;=10 CLs</td>
+<td align="right">1083</td>
+<td align="right">277</td>
+<td align="right">25.6</td>
+<td align="right">21.4</td>
+<td align="right">0.932</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="motif-analysis-around-pu-sites" class="section level1">
+<h1>Motif analysis around pU sites</h1>
+<p>We extract ±10 bp flanking sequences around each union pU site from
+the reference genome, then compute position-specific nucleotide
+frequencies.</p>
+<p>Known mRNA pseudouridine motifs:</p>
+<ul>
+<li><strong>TRUB1</strong>: GUΨCNANNC (genomic DNA: G at -2, T at -1, C
+at +1, A at +3, C at +6)</li>
+<li><strong>PUS7</strong>: UGΨAR (genomic DNA: T at -2, G at -1, A at
++1, A/G at +2)</li>
+</ul>
+<pre class="r"><code>library(Biostrings)
+library(reshape2)
+
+genome_fasta &lt;- &quot;/project/xinhe/xsun/data/genome_reference/Reference/Human/ensembl.v112/fasta/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa&quot;
+bed_file &lt;- file.path(OUT_DIR, &quot;union_mRNA.pseusite.bed&quot;)
+flank &lt;- 10
+
+genome &lt;- readDNAStringSet(genome_fasta)
+names(genome) &lt;- sub(&quot; .*&quot;, &quot;&quot;, names(genome))
+
+bed &lt;- fread(bed_file, header = FALSE, sep = &quot;\t&quot;,
+             col.names = c(&quot;chr&quot;, &quot;start&quot;, &quot;end&quot;, &quot;name&quot;, &quot;score&quot;, &quot;strand&quot;))</code></pre>
+<pre class="r"><code>seqs  &lt;- character(nrow(bed))
+valid &lt;- logical(nrow(bed))
+
+for (i in seq_len(nrow(bed))) {
+  chr    &lt;- bed$chr[i]
+  center &lt;- bed$end[i]
+  st     &lt;- bed$strand[i]
+  if (!chr %in% names(genome)) next
+  chr_len &lt;- length(genome[[chr]])
+  left    &lt;- center - flank
+  right   &lt;- center + flank
+  if (left &lt; 1 || right &gt; chr_len) next
+  s &lt;- subseq(genome[[chr]], start = left, end = right)
+  if (st == &quot;-&quot;) s &lt;- reverseComplement(s)
+  seqs[i]  &lt;- as.character(s)
+  valid[i] &lt;- TRUE
+}
+
+valid_indices &lt;- which(valid)
+seqs &lt;- seqs[valid]
+cat(&quot;Valid sequences:&quot;, length(seqs), &quot;out of&quot;, nrow(bed), &quot;\n&quot;)</code></pre>
+<pre><code>Valid sequences: 15555 out of 15555 </code></pre>
+<pre class="r"><code>seq_width  &lt;- 2 * flank + 1
+positions  &lt;- (-flank):flank
+base_order &lt;- c(&quot;A&quot;, &quot;C&quot;, &quot;G&quot;, &quot;T&quot;)
+
+dna_seqs        &lt;- DNAStringSet(seqs)
+center_idx      &lt;- flank + 1
+motif_9mer_char &lt;- as.character(subseq(dna_seqs, start = center_idx - 2, end = center_idx + 6))
+
+classify_pus &lt;- function(mer9) {
+  b &lt;- strsplit(mer9, &quot;&quot;)[[1]]
+  if (b[1] == &quot;T&quot; &amp;&amp; b[2] == &quot;G&quot; &amp;&amp; b[4] == &quot;A&quot; &amp;&amp; b[5] %in% c(&quot;A&quot;, &quot;G&quot;)) return(&quot;PUS7&quot;)
+  if (b[1] == &quot;G&quot; &amp;&amp; b[2] == &quot;T&quot; &amp;&amp; b[4] == &quot;C&quot; &amp;&amp; b[6] == &quot;A&quot; &amp;&amp; b[9] == &quot;C&quot;) return(&quot;TRUB1&quot;)
+  return(&quot;Other&quot;)
+}
+classes &lt;- sapply(motif_9mer_char, classify_pus, USE.NAMES = FALSE)</code></pre>
+<div id="nucleotide-frequency-at-different-n_called-thresholds"
+class="section level2 tabset">
+<h2 class="tabset">Nucleotide frequency at different n_called
+thresholds</h2>
+<pre class="r"><code>for (cc in ncalled_cutoffs) {
+  site_idx &lt;- which(global_sites$n_called &gt;= cc$min_cls)
+  use_idx  &lt;- intersect(site_idx, valid_indices)
+  seq_pos  &lt;- match(use_idx, valid_indices)
+  sub_seqs &lt;- seqs[seq_pos]
+  n_sub    &lt;- length(sub_seqs)
+
+  cat(sprintf(&quot;\n\n### %s\n\n&quot;, cc$label))
+  cat(sprintf(&quot;**%s sites**\n\n&quot;, scales::comma(n_sub)))
+
+  if (n_sub &lt; 10) { cat(&quot;Too few sites.\n\n&quot;); next }
+
+  freq_mat &lt;- matrix(0, nrow = 4, ncol = seq_width,
+                     dimnames = list(base_order, positions))
+  for (s in sub_seqs) {
+    bases &lt;- strsplit(s, &quot;&quot;)[[1]]
+    for (j in seq_along(bases)) {
+      b &lt;- toupper(bases[j])
+      if (b %in% base_order) freq_mat[b, j] &lt;- freq_mat[b, j] + 1
+    }
+  }
+  freq_pct &lt;- sweep(freq_mat, 2, colSums(freq_mat), &quot;/&quot;) * 100
+
+  plot_df &lt;- melt(freq_pct)
+  colnames(plot_df) &lt;- c(&quot;Base&quot;, &quot;Position&quot;, &quot;Frequency&quot;)
+  plot_df$Position  &lt;- as.integer(as.character(plot_df$Position))
+  plot_df$Base      &lt;- factor(plot_df$Base, levels = base_order)
+
+  print(
+    ggplot(plot_df, aes(x = Position, y = Base, fill = Frequency)) +
+      geom_tile(color = &quot;white&quot;, linewidth = 0.3) +
+      geom_text(aes(label = sprintf(&quot;%.0f&quot;, Frequency)), size = 2.5) +
+      scale_fill_gradient2(low = &quot;white&quot;, mid = &quot;#ffffbf&quot;, high = &quot;#d73027&quot;,
+                           midpoint = 25, name = &quot;% frequency&quot;) +
+      scale_x_continuous(breaks = positions) +
+      geom_vline(xintercept = 0, color = &quot;black&quot;, linewidth = 0.8, linetype = &quot;dashed&quot;) +
+      labs(title = sprintf(&quot;Nucleotide frequency (%s, n = %s)&quot;, cc$label, scales::comma(n_sub)),
+           subtitle = sprintf(&quot;Position 0 = pU site (T→Ψ), ±%d bp flanking&quot;, flank),
+           x = &quot;Position relative to pU site&quot;, y = NULL) +
+      theme_bw(base_size = 11) +
+      theme(panel.grid = element_blank())
+  )
+  cat(&quot;\n\n&quot;)
+
+  print(
+    ggplot(plot_df, aes(x = factor(Position, levels = positions), y = Frequency, fill = Base)) +
+      geom_col(position = &quot;stack&quot;) +
+      scale_fill_manual(values = c(&quot;A&quot; = &quot;#4DAF4A&quot;, &quot;C&quot; = &quot;#377EB8&quot;,
+                                    &quot;G&quot; = &quot;#FF7F00&quot;, &quot;T&quot; = &quot;#E41A1C&quot;)) +
+      geom_vline(xintercept = which(positions == 0), color = &quot;black&quot;,
+                 linewidth = 0.8, linetype = &quot;dashed&quot;) +
+      labs(title = sprintf(&quot;Nucleotide composition (%s, n = %s)&quot;, cc$label, scales::comma(n_sub)),
+           subtitle = sprintf(&quot;Position 0 = pU site (T→Ψ), ±%d bp flanking&quot;, flank),
+           x = &quot;Position relative to pU site&quot;, y = &quot;% frequency&quot;) +
+      theme_bw(base_size = 11) +
+      theme(axis.text.x = element_text(size = 7))
+  )
+  cat(&quot;\n\n&quot;)
+}</code></pre>
+<div id="cl-all-4" class="section level3">
+<h3>&gt;=1 CL (all)</h3>
+<p><strong>15,555 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-cutoffs-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-cutoffs-2.png" width="1152" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-16" class="section level3">
+<h3>&gt;=2 CLs</h3>
+<p><strong>5,928 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-cutoffs-3.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-cutoffs-4.png" width="1152" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-17" class="section level3">
+<h3>&gt;=3 CLs</h3>
+<p><strong>3,745 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-cutoffs-5.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-cutoffs-6.png" width="1152" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-18" class="section level3">
+<h3>&gt;=5 CLs</h3>
+<p><strong>2,109 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-cutoffs-7.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-cutoffs-8.png" width="1152" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-19" class="section level3">
+<h3>&gt;=10 CLs</h3>
+<p><strong>1,083 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-cutoffs-9.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-cutoffs-10.png" width="1152" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="pus-enzyme-classification" class="section level2 tabset">
+<h2 class="tabset">PUS enzyme classification</h2>
+<pre class="r"><code>make_class_heatmap &lt;- function(class_seqs, class_name) {
+  n &lt;- length(class_seqs)
+  if (n == 0) return(NULL)
+  fm &lt;- matrix(0, nrow = 4, ncol = seq_width,
+               dimnames = list(base_order, positions))
+  for (s in class_seqs) {
+    bases &lt;- strsplit(s, &quot;&quot;)[[1]]
+    for (j in seq_along(bases)) {
+      b &lt;- toupper(bases[j])
+      if (b %in% base_order) fm[b, j] &lt;- fm[b, j] + 1
+    }
+  }
+  fp &lt;- sweep(fm, 2, colSums(fm), &quot;/&quot;) * 100
+  pd &lt;- melt(fp)
+  colnames(pd) &lt;- c(&quot;Base&quot;, &quot;Position&quot;, &quot;Frequency&quot;)
+  pd$Position &lt;- as.integer(as.character(pd$Position))
+  pd$Base     &lt;- factor(pd$Base, levels = base_order)
+  ggplot(pd, aes(x = Position, y = Base, fill = Frequency)) +
+    geom_tile(color = &quot;white&quot;, linewidth = 0.3) +
+    geom_text(aes(label = sprintf(&quot;%.0f&quot;, Frequency)), size = 2) +
+    scale_fill_gradient2(low = &quot;white&quot;, mid = &quot;#ffffbf&quot;, high = &quot;#d73027&quot;,
+                         midpoint = 25, name = &quot;% freq&quot;) +
+    scale_x_continuous(breaks = positions) +
+    geom_vline(xintercept = 0, color = &quot;black&quot;, linewidth = 0.8, linetype = &quot;dashed&quot;) +
+    labs(title = sprintf(&quot;%s sites (n = %d)&quot;, class_name, n),
+         x = &quot;Position relative to pU site&quot;, y = NULL) +
+    theme_bw(base_size = 9) +
+    theme(panel.grid = element_blank())
+}
+
+for (cc in ncalled_cutoffs) {
+  site_idx    &lt;- which(global_sites$n_called &gt;= cc$min_cls)
+  use_idx     &lt;- intersect(site_idx, valid_indices)
+  seq_pos     &lt;- match(use_idx, valid_indices)
+  sub_seqs    &lt;- seqs[seq_pos]
+  sub_9mer    &lt;- motif_9mer_char[seq_pos]
+  sub_classes &lt;- sapply(sub_9mer, classify_pus, USE.NAMES = FALSE)
+  n_sub       &lt;- length(sub_seqs)
+
+  cat(sprintf(&quot;\n\n### %s\n\n&quot;, cc$label))
+  cat(sprintf(&quot;**%s sites**\n\n&quot;, scales::comma(n_sub)))
+
+  class_tab &lt;- table(sub_classes)
+  class_df  &lt;- data.frame(
+    Enzyme = names(class_tab),
+    Count  = as.integer(class_tab),
+    Pct    = round(as.integer(class_tab) / n_sub * 100, 1)
+  )
+  class_df &lt;- class_df[order(-class_df$Count), ]
+
+  print(knitr::kable(class_df, row.names = FALSE,
+               col.names = c(&quot;Enzyme class&quot;, &quot;# sites&quot;, &quot;%&quot;),
+               caption = sprintf(&quot;PUS classification (%s)&quot;, cc$label)))
+  cat(&quot;\n\n&quot;)
+
+  class_df$label &lt;- sprintf(&quot;%s\n%d (%.0f%%)&quot;, class_df$Enzyme, class_df$Count, class_df$Pct)
+  print(
+    ggplot(class_df, aes(x = &quot;&quot;, y = Count, fill = Enzyme)) +
+      geom_col(width = 1, color = &quot;white&quot;) +
+      coord_polar(theta = &quot;y&quot;) +
+      geom_text(aes(label = label),
+                position = position_stack(vjust = 0.5), size = 4) +
+      scale_fill_manual(values = c(&quot;TRUB1&quot; = &quot;#377EB8&quot;, &quot;PUS7&quot; = &quot;#FF7F00&quot;,
+                                    &quot;Other&quot; = &quot;#999999&quot;)) +
+      labs(title = sprintf(&quot;PUS classification (%s, n = %s)&quot;, cc$label, scales::comma(n_sub)),
+           fill = NULL) +
+      theme_void(base_size = 12)
+  )
+  cat(&quot;\n\n&quot;)
+
+  hm_plots &lt;- Filter(Negate(is.null), list(
+    make_class_heatmap(sub_seqs[sub_classes == &quot;TRUB1&quot;], &quot;TRUB1&quot;),
+    make_class_heatmap(sub_seqs[sub_classes == &quot;PUS7&quot;],  &quot;PUS7&quot;),
+    make_class_heatmap(sub_seqs[sub_classes == &quot;Other&quot;], &quot;Other&quot;)
+  ))
+  if (length(hm_plots) &gt; 0) print(wrap_plots(hm_plots, ncol = 1))
+  cat(&quot;\n\n&quot;)
+}</code></pre>
+<div id="cl-all-5" class="section level3">
+<h3>&gt;=1 CL (all)</h3>
+<p><strong>15,555 sites</strong></p>
+<table>
+<caption>PUS classification (&gt;=1 CL (all))</caption>
+<thead>
+<tr class="header">
+<th align="left">Enzyme class</th>
+<th align="right"># sites</th>
+<th align="right">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Other</td>
+<td align="right">15009</td>
+<td align="right">96.5</td>
+</tr>
+<tr class="even">
+<td align="left">PUS7</td>
+<td align="right">278</td>
+<td align="right">1.8</td>
+</tr>
+<tr class="odd">
+<td align="left">TRUB1</td>
+<td align="right">268</td>
+<td align="right">1.7</td>
+</tr>
+</tbody>
+</table>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-classify-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-classify-2.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-20" class="section level3">
+<h3>&gt;=2 CLs</h3>
+<p><strong>5,928 sites</strong></p>
+<table>
+<caption>PUS classification (&gt;=2 CLs)</caption>
+<thead>
+<tr class="header">
+<th align="left">Enzyme class</th>
+<th align="right"># sites</th>
+<th align="right">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Other</td>
+<td align="right">5575</td>
+<td align="right">94.0</td>
+</tr>
+<tr class="even">
+<td align="left">TRUB1</td>
+<td align="right">217</td>
+<td align="right">3.7</td>
+</tr>
+<tr class="odd">
+<td align="left">PUS7</td>
+<td align="right">136</td>
+<td align="right">2.3</td>
+</tr>
+</tbody>
+</table>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-classify-3.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-classify-4.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-21" class="section level3">
+<h3>&gt;=3 CLs</h3>
+<p><strong>3,745 sites</strong></p>
+<table>
+<caption>PUS classification (&gt;=3 CLs)</caption>
+<thead>
+<tr class="header">
+<th align="left">Enzyme class</th>
+<th align="right"># sites</th>
+<th align="right">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Other</td>
+<td align="right">3438</td>
+<td align="right">91.8</td>
+</tr>
+<tr class="even">
+<td align="left">TRUB1</td>
+<td align="right">198</td>
+<td align="right">5.3</td>
+</tr>
+<tr class="odd">
+<td align="left">PUS7</td>
+<td align="right">109</td>
+<td align="right">2.9</td>
+</tr>
+</tbody>
+</table>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-classify-5.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-classify-6.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-22" class="section level3">
+<h3>&gt;=5 CLs</h3>
+<p><strong>2,109 sites</strong></p>
+<table>
+<caption>PUS classification (&gt;=5 CLs)</caption>
+<thead>
+<tr class="header">
+<th align="left">Enzyme class</th>
+<th align="right"># sites</th>
+<th align="right">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Other</td>
+<td align="right">1864</td>
+<td align="right">88.4</td>
+</tr>
+<tr class="even">
+<td align="left">TRUB1</td>
+<td align="right">173</td>
+<td align="right">8.2</td>
+</tr>
+<tr class="odd">
+<td align="left">PUS7</td>
+<td align="right">72</td>
+<td align="right">3.4</td>
+</tr>
+</tbody>
+</table>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-classify-7.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-classify-8.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-23" class="section level3">
+<h3>&gt;=10 CLs</h3>
+<p><strong>1,083 sites</strong></p>
+<table>
+<caption>PUS classification (&gt;=10 CLs)</caption>
+<thead>
+<tr class="header">
+<th align="left">Enzyme class</th>
+<th align="right"># sites</th>
+<th align="right">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Other</td>
+<td align="right">893</td>
+<td align="right">82.5</td>
+</tr>
+<tr class="even">
+<td align="left">TRUB1</td>
+<td align="right">137</td>
+<td align="right">12.7</td>
+</tr>
+<tr class="odd">
+<td align="left">PUS7</td>
+<td align="right">53</td>
+<td align="right">4.9</td>
+</tr>
+</tbody>
+</table>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-classify-9.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-classify-10.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="motif-enrichment-vs-pu-strength" class="section level2 tabset">
+<h2 class="tabset">Motif enrichment vs %pU strength</h2>
+<pre class="r"><code>for (cc in ncalled_cutoffs) {
+  site_idx    &lt;- which(global_sites$n_called &gt;= cc$min_cls)
+  use_idx     &lt;- intersect(site_idx, valid_indices)
+  seq_pos     &lt;- match(use_idx, valid_indices)
+  sub_9mer    &lt;- motif_9mer_char[seq_pos]
+  sub_classes &lt;- sapply(sub_9mer, classify_pus, USE.NAMES = FALSE)
+  n_sub       &lt;- length(use_idx)
+
+  cat(sprintf(&quot;\n\n### %s\n\n&quot;, cc$label))
+  cat(sprintf(&quot;**%s sites**\n\n&quot;, scales::comma(n_sub)))
+
+  if (n_sub &lt; 20) { cat(&quot;Too few sites.\n\n&quot;); next }
+
+  sub_global  &lt;- global_sites[use_idx, ]
+  strength_df &lt;- data.frame(
+    ratio    = sub_global$ratio,
+    class    = sub_classes,
+    is_known = sub_classes %in% c(&quot;TRUB1&quot;, &quot;PUS7&quot;)
+  )
+  strength_df$quartile &lt;- cut(strength_df$ratio,
+                               breaks = quantile(strength_df$ratio, probs = c(0,.25,.5,.75,1)),
+                               include.lowest = TRUE,
+                               labels = c(&quot;Q1 (weakest)&quot;, &quot;Q2&quot;, &quot;Q3&quot;, &quot;Q4 (strongest)&quot;))
+
+  q_summary &lt;- strength_df %&gt;%
+    group_by(quartile, class) %&gt;%
+    summarise(n = n(), .groups = &quot;drop&quot;) %&gt;%
+    group_by(quartile) %&gt;%
+    mutate(pct = round(n / sum(n) * 100, 1))
+
+  print(
+    ggplot(q_summary, aes(x = quartile, y = pct, fill = class)) +
+      geom_col(position = &quot;stack&quot;) +
+      geom_text(aes(label = sprintf(&quot;%.0f%%&quot;, pct)),
+                position = position_stack(vjust = 0.5), size = 3) +
+      scale_fill_manual(values = c(&quot;TRUB1&quot; = &quot;#377EB8&quot;, &quot;PUS7&quot; = &quot;#FF7F00&quot;,
+                                    &quot;Other&quot; = &quot;#999999&quot;)) +
+      labs(title = sprintf(&quot;PUS motif by %%pU quartile (%s)&quot;, cc$label),
+           x = &quot;%pU quartile&quot;, y = &quot;% of sites&quot;, fill = &quot;Enzyme class&quot;) +
+      theme_bw(base_size = 12)
+  )
+  cat(&quot;\n\n&quot;)
+
+  q_known &lt;- strength_df %&gt;%
+    group_by(quartile) %&gt;%
+    summarise(
+      n_sites   = n(),
+      n_TRUB1   = sum(class == &quot;TRUB1&quot;),
+      pct_TRUB1 = round(sum(class == &quot;TRUB1&quot;) / n() * 100, 1),
+      n_PUS7    = sum(class == &quot;PUS7&quot;),
+      pct_PUS7  = round(sum(class == &quot;PUS7&quot;)  / n() * 100, 1),
+      n_known   = sum(is_known),
+      pct_known = round(sum(is_known) / n() * 100, 1),
+      median_pU = round(median(ratio), 3),
+      .groups = &quot;drop&quot;
+    )
+
+  print(knitr::kable(q_known,
+               col.names = c(&quot;Quartile&quot;, &quot;# sites&quot;, &quot;# TRUB1&quot;, &quot;% TRUB1&quot;,
+                             &quot;# PUS7&quot;, &quot;% PUS7&quot;, &quot;# known motif&quot;, &quot;% known motif&quot;,
+                             &quot;Median %pU&quot;),
+               caption = sprintf(&quot;PUS motif enrichment (%s)&quot;, cc$label)))
+  cat(&quot;\n\n&quot;)
+}</code></pre>
+<div id="cl-all-6" class="section level3">
+<h3>&gt;=1 CL (all)</h3>
+<p><strong>15,555 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-vs-strength-1.png" width="960" style="display: block; margin: auto;" /></p>
+<table>
+<caption>PUS motif enrichment (&gt;=1 CL (all))</caption>
+<colgroup>
+<col width="16%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="7%" />
+<col width="7%" />
+<col width="15%" />
+<col width="15%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Quartile</th>
+<th align="right"># sites</th>
+<th align="right"># TRUB1</th>
+<th align="right">% TRUB1</th>
+<th align="right"># PUS7</th>
+<th align="right">% PUS7</th>
+<th align="right"># known motif</th>
+<th align="right">% known motif</th>
+<th align="right">Median %pU</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Q1 (weakest)</td>
+<td align="right">3889</td>
+<td align="right">2</td>
+<td align="right">0.1</td>
+<td align="right">42</td>
+<td align="right">1.1</td>
+<td align="right">44</td>
+<td align="right">1.1</td>
+<td align="right">0.004</td>
+</tr>
+<tr class="even">
+<td align="left">Q2</td>
+<td align="right">3889</td>
+<td align="right">14</td>
+<td align="right">0.4</td>
+<td align="right">63</td>
+<td align="right">1.6</td>
+<td align="right">77</td>
+<td align="right">2.0</td>
+<td align="right">0.019</td>
+</tr>
+<tr class="odd">
+<td align="left">Q3</td>
+<td align="right">3888</td>
+<td align="right">56</td>
+<td align="right">1.4</td>
+<td align="right">109</td>
+<td align="right">2.8</td>
+<td align="right">165</td>
+<td align="right">4.2</td>
+<td align="right">0.040</td>
+</tr>
+<tr class="even">
+<td align="left">Q4 (strongest)</td>
+<td align="right">3889</td>
+<td align="right">196</td>
+<td align="right">5.0</td>
+<td align="right">64</td>
+<td align="right">1.6</td>
+<td align="right">260</td>
+<td align="right">6.7</td>
+<td align="right">0.365</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="cls-24" class="section level3">
+<h3>&gt;=2 CLs</h3>
+<p><strong>5,928 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-vs-strength-2.png" width="960" style="display: block; margin: auto;" /></p>
+<table>
+<caption>PUS motif enrichment (&gt;=2 CLs)</caption>
+<colgroup>
+<col width="16%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="7%" />
+<col width="7%" />
+<col width="15%" />
+<col width="15%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Quartile</th>
+<th align="right"># sites</th>
+<th align="right"># TRUB1</th>
+<th align="right">% TRUB1</th>
+<th align="right"># PUS7</th>
+<th align="right">% PUS7</th>
+<th align="right"># known motif</th>
+<th align="right">% known motif</th>
+<th align="right">Median %pU</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Q1 (weakest)</td>
+<td align="right">1482</td>
+<td align="right">7</td>
+<td align="right">0.5</td>
+<td align="right">21</td>
+<td align="right">1.4</td>
+<td align="right">28</td>
+<td align="right">1.9</td>
+<td align="right">0.023</td>
+</tr>
+<tr class="even">
+<td align="left">Q2</td>
+<td align="right">1482</td>
+<td align="right">15</td>
+<td align="right">1.0</td>
+<td align="right">40</td>
+<td align="right">2.7</td>
+<td align="right">55</td>
+<td align="right">3.7</td>
+<td align="right">0.037</td>
+</tr>
+<tr class="odd">
+<td align="left">Q3</td>
+<td align="right">1482</td>
+<td align="right">72</td>
+<td align="right">4.9</td>
+<td align="right">52</td>
+<td align="right">3.5</td>
+<td align="right">124</td>
+<td align="right">8.4</td>
+<td align="right">0.108</td>
+</tr>
+<tr class="even">
+<td align="left">Q4 (strongest)</td>
+<td align="right">1482</td>
+<td align="right">123</td>
+<td align="right">8.3</td>
+<td align="right">23</td>
+<td align="right">1.6</td>
+<td align="right">146</td>
+<td align="right">9.9</td>
+<td align="right">0.534</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="cls-25" class="section level3">
+<h3>&gt;=3 CLs</h3>
+<p><strong>3,745 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-vs-strength-3.png" width="960" style="display: block; margin: auto;" /></p>
+<table>
+<caption>PUS motif enrichment (&gt;=3 CLs)</caption>
+<colgroup>
+<col width="16%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="7%" />
+<col width="7%" />
+<col width="15%" />
+<col width="15%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Quartile</th>
+<th align="right"># sites</th>
+<th align="right"># TRUB1</th>
+<th align="right">% TRUB1</th>
+<th align="right"># PUS7</th>
+<th align="right">% PUS7</th>
+<th align="right"># known motif</th>
+<th align="right">% known motif</th>
+<th align="right">Median %pU</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Q1 (weakest)</td>
+<td align="right">937</td>
+<td align="right">7</td>
+<td align="right">0.7</td>
+<td align="right">21</td>
+<td align="right">2.2</td>
+<td align="right">28</td>
+<td align="right">3.0</td>
+<td align="right">0.028</td>
+</tr>
+<tr class="even">
+<td align="left">Q2</td>
+<td align="right">936</td>
+<td align="right">15</td>
+<td align="right">1.6</td>
+<td align="right">30</td>
+<td align="right">3.2</td>
+<td align="right">45</td>
+<td align="right">4.8</td>
+<td align="right">0.042</td>
+</tr>
+<tr class="odd">
+<td align="left">Q3</td>
+<td align="right">936</td>
+<td align="right">65</td>
+<td align="right">6.9</td>
+<td align="right">44</td>
+<td align="right">4.7</td>
+<td align="right">109</td>
+<td align="right">11.6</td>
+<td align="right">0.125</td>
+</tr>
+<tr class="even">
+<td align="left">Q4 (strongest)</td>
+<td align="right">936</td>
+<td align="right">111</td>
+<td align="right">11.9</td>
+<td align="right">14</td>
+<td align="right">1.5</td>
+<td align="right">125</td>
+<td align="right">13.4</td>
+<td align="right">0.544</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="cls-26" class="section level3">
+<h3>&gt;=5 CLs</h3>
+<p><strong>2,109 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-vs-strength-4.png" width="960" style="display: block; margin: auto;" /></p>
+<table>
+<caption>PUS motif enrichment (&gt;=5 CLs)</caption>
+<colgroup>
+<col width="16%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="7%" />
+<col width="7%" />
+<col width="15%" />
+<col width="15%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Quartile</th>
+<th align="right"># sites</th>
+<th align="right"># TRUB1</th>
+<th align="right">% TRUB1</th>
+<th align="right"># PUS7</th>
+<th align="right">% PUS7</th>
+<th align="right"># known motif</th>
+<th align="right">% known motif</th>
+<th align="right">Median %pU</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Q1 (weakest)</td>
+<td align="right">528</td>
+<td align="right">4</td>
+<td align="right">0.8</td>
+<td align="right">8</td>
+<td align="right">1.5</td>
+<td align="right">12</td>
+<td align="right">2.3</td>
+<td align="right">0.033</td>
+</tr>
+<tr class="even">
+<td align="left">Q2</td>
+<td align="right">527</td>
+<td align="right">14</td>
+<td align="right">2.7</td>
+<td align="right">23</td>
+<td align="right">4.4</td>
+<td align="right">37</td>
+<td align="right">7.0</td>
+<td align="right">0.048</td>
+</tr>
+<tr class="odd">
+<td align="left">Q3</td>
+<td align="right">527</td>
+<td align="right">57</td>
+<td align="right">10.8</td>
+<td align="right">30</td>
+<td align="right">5.7</td>
+<td align="right">87</td>
+<td align="right">16.5</td>
+<td align="right">0.124</td>
+</tr>
+<tr class="even">
+<td align="left">Q4 (strongest)</td>
+<td align="right">527</td>
+<td align="right">98</td>
+<td align="right">18.6</td>
+<td align="right">11</td>
+<td align="right">2.1</td>
+<td align="right">109</td>
+<td align="right">20.7</td>
+<td align="right">0.590</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="cls-27" class="section level3">
+<h3>&gt;=10 CLs</h3>
+<p><strong>1,083 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/motif-vs-strength-5.png" width="960" style="display: block; margin: auto;" /></p>
+<table>
+<caption>PUS motif enrichment (&gt;=10 CLs)</caption>
+<colgroup>
+<col width="16%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="7%" />
+<col width="7%" />
+<col width="15%" />
+<col width="15%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Quartile</th>
+<th align="right"># sites</th>
+<th align="right"># TRUB1</th>
+<th align="right">% TRUB1</th>
+<th align="right"># PUS7</th>
+<th align="right">% PUS7</th>
+<th align="right"># known motif</th>
+<th align="right">% known motif</th>
+<th align="right">Median %pU</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Q1 (weakest)</td>
+<td align="right">271</td>
+<td align="right">5</td>
+<td align="right">1.8</td>
+<td align="right">8</td>
+<td align="right">3.0</td>
+<td align="right">13</td>
+<td align="right">4.8</td>
+<td align="right">0.042</td>
+</tr>
+<tr class="even">
+<td align="left">Q2</td>
+<td align="right">271</td>
+<td align="right">20</td>
+<td align="right">7.4</td>
+<td align="right">19</td>
+<td align="right">7.0</td>
+<td align="right">39</td>
+<td align="right">14.4</td>
+<td align="right">0.072</td>
+</tr>
+<tr class="odd">
+<td align="left">Q3</td>
+<td align="right">270</td>
+<td align="right">49</td>
+<td align="right">18.1</td>
+<td align="right">19</td>
+<td align="right">7.0</td>
+<td align="right">68</td>
+<td align="right">25.2</td>
+<td align="right">0.188</td>
+</tr>
+<tr class="even">
+<td align="left">Q4 (strongest)</td>
+<td align="right">271</td>
+<td align="right">63</td>
+<td align="right">23.2</td>
+<td align="right">7</td>
+<td align="right">2.6</td>
+<td align="right">70</td>
+<td align="right">25.8</td>
+<td align="right">0.690</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="motif-analysis-of-bacs-published-sites" class="section level1">
+<h1>Motif analysis of BACS published sites</h1>
+<pre class="r"><code>bacs_bed &lt;- bacs_mRNA %&gt;%
+  mutate(chr_clean = sub(&quot;^chr&quot;, &quot;&quot;, chr)) %&gt;%
+  filter(chr_clean %in% names(genome))
+
+bacs_seqs  &lt;- character(nrow(bacs_bed))
+bacs_valid &lt;- logical(nrow(bacs_bed))
+
+for (i in seq_len(nrow(bacs_bed))) {
+  chr_name &lt;- bacs_bed$chr_clean[i]
+  center   &lt;- as.integer(bacs_bed$pos[i])
+  st       &lt;- bacs_bed$strand[i]
+  chr_len  &lt;- length(genome[[chr_name]])
+  left     &lt;- center - flank
+  right    &lt;- center + flank
+  if (left &lt; 1 || right &gt; chr_len) next
+  s &lt;- subseq(genome[[chr_name]], start = left, end = right)
+  if (st == &quot;-&quot;) s &lt;- reverseComplement(s)
+  bacs_seqs[i]  &lt;- as.character(s)
+  bacs_valid[i] &lt;- TRUE
+}
+
+bacs_seqs    &lt;- bacs_seqs[bacs_valid]
+cat(&quot;BACS valid sequences:&quot;, length(bacs_seqs), &quot;out of&quot;, nrow(bacs_bed), &quot;\n&quot;)</code></pre>
+<pre><code>BACS valid sequences: 1294 out of 1294 </code></pre>
+<pre class="r"><code>bacs_dna     &lt;- DNAStringSet(bacs_seqs)
+bacs_9mer    &lt;- as.character(subseq(bacs_dna, start = center_idx - 2, end = center_idx + 6))
+bacs_classes &lt;- sapply(bacs_9mer, classify_pus, USE.NAMES = FALSE)</code></pre>
+<div id="nucleotide-frequency-heatmap-bacs" class="section level2">
+<h2>Nucleotide frequency heatmap (BACS)</h2>
+<pre class="r"><code>bacs_freq_mat &lt;- matrix(0, nrow = 4, ncol = seq_width,
+                        dimnames = list(base_order, positions))
+for (s in bacs_seqs) {
+  bases &lt;- strsplit(s, &quot;&quot;)[[1]]
+  for (j in seq_along(bases)) {
+    b &lt;- toupper(bases[j])
+    if (b %in% base_order) bacs_freq_mat[b, j] &lt;- bacs_freq_mat[b, j] + 1
+  }
+}
+bacs_freq_pct &lt;- sweep(bacs_freq_mat, 2, colSums(bacs_freq_mat), &quot;/&quot;) * 100
+
+bacs_plot_df &lt;- melt(bacs_freq_pct)
+colnames(bacs_plot_df) &lt;- c(&quot;Base&quot;, &quot;Position&quot;, &quot;Frequency&quot;)
+bacs_plot_df$Position  &lt;- as.integer(as.character(bacs_plot_df$Position))
+bacs_plot_df$Base      &lt;- factor(bacs_plot_df$Base, levels = base_order)
+
+ggplot(bacs_plot_df, aes(x = Position, y = Base, fill = Frequency)) +
+  geom_tile(color = &quot;white&quot;, linewidth = 0.3) +
+  geom_text(aes(label = sprintf(&quot;%.0f&quot;, Frequency)), size = 2.5) +
+  scale_fill_gradient2(low = &quot;white&quot;, mid = &quot;#ffffbf&quot;, high = &quot;#d73027&quot;,
+                       midpoint = 25, name = &quot;% frequency&quot;) +
+  scale_x_continuous(breaks = positions) +
+  geom_vline(xintercept = 0, color = &quot;black&quot;, linewidth = 0.8, linetype = &quot;dashed&quot;) +
+  labs(title = sprintf(&quot;Nucleotide frequency — BACS sites (n = %d)&quot;, length(bacs_seqs)),
+       subtitle = sprintf(&quot;Position 0 = pU site (T→Ψ), ±%d bp flanking&quot;, flank),
+       x = &quot;Position relative to pU site&quot;, y = NULL) +
+  theme_bw(base_size = 11) +
+  theme(panel.grid = element_blank())</code></pre>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/bacs-motif-heatmap-1.png" width="1152" style="display: block; margin: auto;" /></p>
+</div>
+<div id="stacked-nucleotide-composition-bacs" class="section level2">
+<h2>Stacked nucleotide composition (BACS)</h2>
+<pre class="r"><code>ggplot(bacs_plot_df, aes(x = factor(Position, levels = positions), y = Frequency, fill = Base)) +
+  geom_col(position = &quot;stack&quot;) +
+  scale_fill_manual(values = c(&quot;A&quot; = &quot;#4DAF4A&quot;, &quot;C&quot; = &quot;#377EB8&quot;,
+                                &quot;G&quot; = &quot;#FF7F00&quot;, &quot;T&quot; = &quot;#E41A1C&quot;)) +
+  geom_vline(xintercept = which(positions == 0), color = &quot;black&quot;,
+             linewidth = 0.8, linetype = &quot;dashed&quot;) +
+  labs(title = sprintf(&quot;Nucleotide composition — BACS sites (n = %d)&quot;, length(bacs_seqs)),
+       subtitle = sprintf(&quot;Position 0 = pU site (T→Ψ), ±%d bp flanking&quot;, flank),
+       x = &quot;Position relative to pU site&quot;, y = &quot;% frequency&quot;) +
+  theme_bw(base_size = 11) +
+  theme(axis.text.x = element_text(size = 7))</code></pre>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/bacs-motif-barplot-1.png" width="1152" style="display: block; margin: auto;" /></p>
+</div>
+<div id="pus-enzyme-classification-bacs" class="section level2">
+<h2>PUS enzyme classification (BACS)</h2>
+<pre class="r"><code>bacs_class_tab &lt;- table(bacs_classes)
+bacs_class_df  &lt;- data.frame(
+  Enzyme = names(bacs_class_tab),
+  Count  = as.integer(bacs_class_tab),
+  Pct    = round(as.integer(bacs_class_tab) / length(bacs_seqs) * 100, 1)
+)
+bacs_class_df &lt;- bacs_class_df[order(-bacs_class_df$Count), ]
+knitr::kable(bacs_class_df, row.names = FALSE,
+             col.names = c(&quot;Enzyme class&quot;, &quot;# sites&quot;, &quot;%&quot;),
+             caption = &quot;PUS classification — BACS sites&quot;)</code></pre>
+<table>
+<caption>PUS classification &lt;U+2014&gt; BACS sites</caption>
+<thead>
+<tr class="header">
+<th align="left">Enzyme class</th>
+<th align="right"># sites</th>
+<th align="right">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Other</td>
+<td align="right">1104</td>
+<td align="right">85.3</td>
+</tr>
+<tr class="even">
+<td align="left">TRUB1</td>
+<td align="right">104</td>
+<td align="right">8.0</td>
+</tr>
+<tr class="odd">
+<td align="left">PUS7</td>
+<td align="right">86</td>
+<td align="right">6.6</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>bacs_class_df$label &lt;- sprintf(&quot;%s\n%d (%.0f%%)&quot;, bacs_class_df$Enzyme,
+                                bacs_class_df$Count, bacs_class_df$Pct)
+ggplot(bacs_class_df, aes(x = &quot;&quot;, y = Count, fill = Enzyme)) +
+  geom_col(width = 1, color = &quot;white&quot;) +
+  coord_polar(theta = &quot;y&quot;) +
+  geom_text(aes(label = label), position = position_stack(vjust = 0.5), size = 4) +
+  scale_fill_manual(values = c(&quot;TRUB1&quot; = &quot;#377EB8&quot;, &quot;PUS7&quot; = &quot;#FF7F00&quot;,
+                                &quot;Other&quot; = &quot;#999999&quot;)) +
+  labs(title = sprintf(&quot;PUS classification — BACS sites (n = %d)&quot;, length(bacs_seqs)),
+       fill = NULL) +
+  theme_void(base_size = 12)</code></pre>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/bacs-motif-classify-pie-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="motif-heatmaps-by-enzyme-class-bacs" class="section level2">
+<h2>Motif heatmaps by enzyme class (BACS)</h2>
+<pre class="r"><code>bacs_hm_plots &lt;- Filter(Negate(is.null), list(
+  make_class_heatmap(bacs_seqs[bacs_classes == &quot;TRUB1&quot;], &quot;TRUB1 (BACS)&quot;),
+  make_class_heatmap(bacs_seqs[bacs_classes == &quot;PUS7&quot;],  &quot;PUS7 (BACS)&quot;),
+  make_class_heatmap(bacs_seqs[bacs_classes == &quot;Other&quot;], &quot;Other (BACS)&quot;)
+))
+if (length(bacs_hm_plots) &gt; 0) wrap_plots(bacs_hm_plots, ncol = 1)</code></pre>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/bacs-motif-by-class-1.png" width="1152" style="display: block; margin: auto;" /></p>
+</div>
+<div id="motif-enrichment-vs-ψ-level-bacs" class="section level2">
+<h2>Motif enrichment vs Ψ level (BACS)</h2>
+<pre class="r"><code>bacs_strength_df &lt;- data.frame(
+  psi_level = bacs_mRNA$psi_level[bacs_valid],
+  class      = bacs_classes,
+  is_known   = bacs_classes %in% c(&quot;TRUB1&quot;, &quot;PUS7&quot;)
+)
+bacs_strength_df$quartile &lt;- cut(bacs_strength_df$psi_level,
+                                  breaks = quantile(bacs_strength_df$psi_level,
+                                                    probs = c(0,.25,.5,.75,1), na.rm = TRUE),
+                                  include.lowest = TRUE,
+                                  labels = c(&quot;Q1 (weakest)&quot;, &quot;Q2&quot;, &quot;Q3&quot;, &quot;Q4 (strongest)&quot;))
+
+bacs_q_summary &lt;- bacs_strength_df %&gt;%
+  filter(!is.na(quartile)) %&gt;%
+  group_by(quartile, class) %&gt;%
+  summarise(n = n(), .groups = &quot;drop&quot;) %&gt;%
+  group_by(quartile) %&gt;%
+  mutate(pct = round(n / sum(n) * 100, 1))
+
+ggplot(bacs_q_summary, aes(x = quartile, y = pct, fill = class)) +
+  geom_col(position = &quot;stack&quot;) +
+  geom_text(aes(label = sprintf(&quot;%.0f%%&quot;, pct)),
+            position = position_stack(vjust = 0.5), size = 3) +
+  scale_fill_manual(values = c(&quot;TRUB1&quot; = &quot;#377EB8&quot;, &quot;PUS7&quot; = &quot;#FF7F00&quot;,
+                                &quot;Other&quot; = &quot;#999999&quot;)) +
+  labs(title = &quot;PUS motif composition by Ψ level quartile (BACS)&quot;,
+       x = &quot;Ψ level quartile&quot;, y = &quot;% of sites&quot;, fill = &quot;Enzyme class&quot;) +
+  theme_bw(base_size = 12)</code></pre>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/bacs-motif-vs-strength-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>bacs_q_known &lt;- bacs_strength_df %&gt;%
+  filter(!is.na(quartile)) %&gt;%
+  group_by(quartile) %&gt;%
+  summarise(
+    n_sites    = n(),
+    n_TRUB1    = sum(class == &quot;TRUB1&quot;),
+    pct_TRUB1  = round(sum(class == &quot;TRUB1&quot;) / n() * 100, 1),
+    n_PUS7     = sum(class == &quot;PUS7&quot;),
+    pct_PUS7   = round(sum(class == &quot;PUS7&quot;)  / n() * 100, 1),
+    n_known    = sum(is_known),
+    pct_known  = round(sum(is_known) / n() * 100, 1),
+    median_psi = round(median(psi_level, na.rm = TRUE), 3),
+    .groups = &quot;drop&quot;
+  )
+knitr::kable(bacs_q_known,
+             col.names = c(&quot;Quartile&quot;, &quot;# sites&quot;, &quot;# TRUB1&quot;, &quot;% TRUB1&quot;,
+                           &quot;# PUS7&quot;, &quot;% PUS7&quot;, &quot;# known motif&quot;, &quot;% known motif&quot;,
+                           &quot;Median Ψ level&quot;),
+             caption = &quot;PUS motif enrichment by Ψ level quartile (BACS)&quot;)</code></pre>
+<table style="width:100%;">
+<caption>PUS motif enrichment by &lt;U+03A8&gt; level quartile
+(BACS)</caption>
+<colgroup>
+<col width="14%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="6%" />
+<col width="6%" />
+<col width="13%" />
+<col width="13%" />
+<col width="21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Quartile</th>
+<th align="right"># sites</th>
+<th align="right"># TRUB1</th>
+<th align="right">% TRUB1</th>
+<th align="right"># PUS7</th>
+<th align="right">% PUS7</th>
+<th align="right"># known motif</th>
+<th align="right">% known motif</th>
+<th align="right">Median &lt;U+03A8&gt; level</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Q1 (weakest)</td>
+<td align="right">324</td>
+<td align="right">5</td>
+<td align="right">1.5</td>
+<td align="right">24</td>
+<td align="right">7.4</td>
+<td align="right">29</td>
+<td align="right">9.0</td>
+<td align="right">0.058</td>
+</tr>
+<tr class="even">
+<td align="left">Q2</td>
+<td align="right">323</td>
+<td align="right">8</td>
+<td align="right">2.5</td>
+<td align="right">11</td>
+<td align="right">3.4</td>
+<td align="right">19</td>
+<td align="right">5.9</td>
+<td align="right">0.077</td>
+</tr>
+<tr class="odd">
+<td align="left">Q3</td>
+<td align="right">323</td>
+<td align="right">8</td>
+<td align="right">2.5</td>
+<td align="right">26</td>
+<td align="right">8.0</td>
+<td align="right">34</td>
+<td align="right">10.5</td>
+<td align="right">0.113</td>
+</tr>
+<tr class="even">
+<td align="left">Q4 (strongest)</td>
+<td align="right">324</td>
+<td align="right">83</td>
+<td align="right">25.6</td>
+<td align="right">25</td>
+<td align="right">7.7</td>
+<td align="right">108</td>
+<td align="right">33.3</td>
+<td align="right">0.269</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+</div>
+<div id="genomic-feature-distribution" class="section level1">
+<h1>Genomic feature distribution</h1>
+<p>We annotate each union pU site against the Ensembl v112 GTF with the
+following priority (highest wins): CDS &gt; 3’UTR &gt; 5’UTR &gt; ncRNA
+exon &gt; Intron &gt; Intergenic. Pre-computed by
+<code>annotate_sites_feature.R</code>.</p>
+<pre class="r"><code>anno_sites &lt;- fread(
+  file.path(OUT_DIR, &quot;union_mRNA.global_sites_annotated.txt.gz&quot;),
+  header = TRUE, sep = &quot;\t&quot;, colClasses = list(character = c(&quot;ref&quot;, &quot;strand&quot;)))
+
+anno_bacs &lt;- fread(
+  file.path(JOINT_OUT_DIR, &quot;bacs_mrna_annotated.txt.gz&quot;),
+  header = TRUE, sep = &quot;\t&quot;)
+
+anno_sites$n_called &lt;- global_sites$n_called[match(
+  paste(anno_sites$ref, anno_sites$pos, anno_sites$strand),
+  paste(global_sites$ref, global_sites$pos, global_sites$strand))]
+
+feat_levels &lt;- c(&quot;5UTR&quot;, &quot;CDS&quot;, &quot;3UTR&quot;, &quot;ncRNA&quot;, &quot;Intron&quot;, &quot;Intergenic&quot;)
+feat_colors &lt;- c(&quot;5UTR&quot;       = &quot;#4DAF4A&quot;,
+                 &quot;CDS&quot;        = &quot;#377EB8&quot;,
+                 &quot;3UTR&quot;       = &quot;#FF7F00&quot;,
+                 &quot;ncRNA&quot;      = &quot;#984EA3&quot;,
+                 &quot;Intron&quot;     = &quot;#A65628&quot;,
+                 &quot;Intergenic&quot; = &quot;#999999&quot;)</code></pre>
+<div id="feature-distribution-at-different-n_called-thresholds"
+class="section level2 tabset">
+<h2 class="tabset">Feature distribution at different n_called
+thresholds</h2>
+<pre class="r"><code>bacs_feat_df &lt;- data.frame(
+  feature = factor(anno_bacs$feature_anno, levels = feat_levels)
+) %&gt;%
+  count(feature) %&gt;%
+  mutate(pct = round(n / sum(n) * 100, 1), dataset = &quot;BACS&quot;)
+
+for (cc in ncalled_cutoffs) {
+  idx   &lt;- which(anno_sites$n_called &gt;= cc$min_cls)
+  n_sub &lt;- length(idx)
+
+  cat(sprintf(&quot;\n\n### %s\n\n&quot;, cc$label))
+  cat(sprintf(&quot;**%s sites**\n\n&quot;, scales::comma(n_sub)))
+
+  if (n_sub &lt; 10) { cat(&quot;Too few sites.\n\n&quot;); next }
+
+  our_feat_df &lt;- data.frame(
+    feature = factor(anno_sites$feature[idx], levels = feat_levels)
+  ) %&gt;%
+    count(feature) %&gt;%
+    mutate(pct = round(n / sum(n) * 100, 1), dataset = cc$label)
+
+  plot_df &lt;- bind_rows(our_feat_df, bacs_feat_df)
+  plot_df$dataset &lt;- factor(plot_df$dataset, levels = c(cc$label, &quot;BACS&quot;))
+  plot_df$feature &lt;- factor(plot_df$feature, levels = feat_levels)
+
+  print(
+    ggplot(plot_df, aes(x = dataset, y = pct, fill = feature)) +
+      geom_col(position = &quot;stack&quot;, width = 0.6) +
+      geom_text(aes(label = sprintf(&quot;%.0f%%&quot;, pct)),
+                position = position_stack(vjust = 0.5), size = 3.5) +
+      scale_fill_manual(values = feat_colors, name = &quot;Feature&quot;) +
+      labs(title = sprintf(&quot;Genomic feature distribution (%s)&quot;, cc$label),
+           x = NULL, y = &quot;% of sites&quot;) +
+      theme_bw(base_size = 12) +
+      theme(legend.position = &quot;right&quot;)
+  )
+  cat(&quot;\n\n&quot;)
+}</code></pre>
+<div id="cl-all-7" class="section level3">
+<h3>&gt;=1 CL (all)</h3>
+<p><strong>15,555 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/feature-cutoffs-1.png" width="864" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-28" class="section level3">
+<h3>&gt;=2 CLs</h3>
+<p><strong>5,928 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/feature-cutoffs-2.png" width="864" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-29" class="section level3">
+<h3>&gt;=3 CLs</h3>
+<p><strong>3,745 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/feature-cutoffs-3.png" width="864" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-30" class="section level3">
+<h3>&gt;=5 CLs</h3>
+<p><strong>2,109 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/feature-cutoffs-4.png" width="864" style="display: block; margin: auto;" /></p>
+</div>
+<div id="cls-31" class="section level3">
+<h3>&gt;=10 CLs</h3>
+<p><strong>1,083 sites</strong></p>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/feature-cutoffs-5.png" width="864" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="bacs-overlap-restricted-to-utrcds-sites"
+class="section level2">
+<h2>BACS overlap restricted to UTR/CDS sites</h2>
+<pre class="r"><code>bacs_keys &lt;- anno_bacs %&gt;% select(chr, pos, strand)
+
+utr_cds_table &lt;- do.call(rbind, lapply(ncalled_cutoffs, function(cc) {
+  idx         &lt;- which(anno_sites$n_called &gt;= cc$min_cls)
+  sub_utr_cds &lt;- anno_sites[idx, ][anno_sites[idx, ]$feature %in% c(&quot;5UTR&quot;, &quot;CDS&quot;, &quot;3UTR&quot;), ]
+  ov          &lt;- sub_utr_cds %&gt;%
+    inner_join(bacs_keys, by = c(&quot;ref&quot; = &quot;chr&quot;, &quot;pos&quot;, &quot;strand&quot;))
+  data.frame(
+    Threshold   = cc$label,
+    n_utr_cds   = nrow(sub_utr_cds),
+    n_overlap   = nrow(ov),
+    pct_overlap = round(nrow(ov) / nrow(sub_utr_cds) * 100, 1)
+  )
+}))
+
+knitr::kable(utr_cds_table,
+             col.names = c(&quot;n_called threshold&quot;, &quot;# UTR/CDS sites&quot;,
+                           &quot;# BACS overlap&quot;, &quot;% overlap&quot;),
+             caption = &quot;% of UTR/CDS sites overlapping BACS, by n_called threshold&quot;)</code></pre>
+<table>
+<caption>% of UTR/CDS sites overlapping BACS, by n_called
+threshold</caption>
+<thead>
+<tr class="header">
+<th align="left">n_called threshold</th>
+<th align="right"># UTR/CDS sites</th>
+<th align="right"># BACS overlap</th>
+<th align="right">% overlap</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">&gt;=1 CL (all)</td>
+<td align="right">13560</td>
+<td align="right">621</td>
+<td align="right">4.6</td>
+</tr>
+<tr class="even">
+<td align="left">&gt;=2 CLs</td>
+<td align="right">4994</td>
+<td align="right">510</td>
+<td align="right">10.2</td>
+</tr>
+<tr class="odd">
+<td align="left">&gt;=3 CLs</td>
+<td align="right">3069</td>
+<td align="right">450</td>
+<td align="right">14.7</td>
+</tr>
+<tr class="even">
+<td align="left">&gt;=5 CLs</td>
+<td align="right">1626</td>
+<td align="right">382</td>
+<td align="right">23.5</td>
+</tr>
+<tr class="odd">
+<td align="left">&gt;=10 CLs</td>
+<td align="right">767</td>
+<td align="right">277</td>
+<td align="right">36.1</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>utr_cds_table$Threshold &lt;- factor(utr_cds_table$Threshold,
+                                   levels = rev(utr_cds_table$Threshold))
+ggplot(utr_cds_table, aes(x = Threshold, y = pct_overlap)) +
+  geom_col(fill = &quot;steelblue&quot;, width = 0.6) +
+  geom_text(aes(label = sprintf(&quot;%.1f%%&quot;, pct_overlap)), hjust = -0.1, size = 4) +
+  coord_flip(ylim = c(0, max(utr_cds_table$pct_overlap) * 1.15)) +
+  labs(title = &quot;% of UTR/CDS sites overlapping BACS, by n_called threshold&quot;,
+       x = NULL, y = &quot;% overlap with BACS&quot;) +
+  theme_bw(base_size = 12)</code></pre>
+<p><img src="figure/qc_union_all51_mRNA.Rmd/utr-cds-bacs-overlap-1.png" width="768" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 7 (Core)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el7-x86_64/lib/libopenblas_haswellp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats4    stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] reshape2_1.4.4       Biostrings_2.64.0    GenomeInfoDb_1.39.9 
+ [4] XVector_0.36.0       IRanges_2.30.0       S4Vectors_0.34.0    
+ [7] BiocGenerics_0.42.0  scales_1.4.0         corrplot_0.92       
+[10] patchwork_1.3.2.9000 ggplot2_4.0.3        stringr_1.5.1       
+[13] dplyr_1.1.4          data.table_1.14.2   
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.12            lattice_0.20-45        rprojroot_2.0.3       
+ [4] digest_0.6.29          utf8_1.2.2             plyr_1.8.7            
+ [7] R6_2.5.1               cellranger_1.1.0       evaluate_0.15         
+[10] highr_0.9              pillar_1.9.0           zlibbioc_1.42.0       
+[13] rlang_1.1.2            readxl_1.4.0           rstudioapi_0.13       
+[16] jquerylib_0.1.4        R.utils_2.11.0         R.oo_1.24.0           
+[19] Matrix_1.5-3           rmarkdown_2.25         labeling_0.4.2        
+[22] splines_4.2.0          S7_0.2.0               RCurl_1.98-1.7        
+[25] compiler_4.2.0         httpuv_1.6.5           xfun_0.41             
+[28] pkgconfig_2.0.3        mgcv_1.8-40            htmltools_0.5.2       
+[31] tidyselect_1.2.0       GenomeInfoDbData_1.2.8 tibble_3.2.1          
+[34] workflowr_1.7.0        fansi_1.0.3            crayon_1.5.1          
+[37] withr_2.5.0            later_1.3.0            bitops_1.0-7          
+[40] R.methodsS3_1.8.1      grid_4.2.0             nlme_3.1-157          
+[43] jsonlite_1.8.0         gtable_0.3.6           lifecycle_1.0.4       
+[46] git2r_0.30.1           magrittr_2.0.3         cli_3.6.1             
+[49] stringi_1.7.6          farver_2.1.0           fs_1.5.2              
+[52] promises_1.2.0.1       bslib_0.3.1            generics_0.1.4        
+[55] vctrs_0.6.5            RColorBrewer_1.1-3     tools_4.2.0           
+[58] dichromat_2.0-0.1      glue_1.6.2             fastmap_1.1.0         
+[61] yaml_2.3.5             knitr_1.39             sass_0.4.1            </code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

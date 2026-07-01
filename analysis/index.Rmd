@@ -30,3 +30,5 @@ editor_options:
 
 * [Sites filtered by chisq fdr & ratio diff, determining the fdr & ratio diff cutoffs](qc_mRNA_chisq.html)
 * [Joint pooling vs union-of-per-cell-line site calling, 3 cell lines for testing](qc_joint_union.html)
+* [QC — Joint cross-cell-line mRNA pU sites (51 cell lines)](qc_joint_all51_mRNA.html)
+* [QC — Union cross-cell-line mRNA pU sites (51 cell lines)](qc_union_all51_mRNA.html)
