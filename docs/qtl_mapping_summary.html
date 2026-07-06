@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-07-06" />
+
+<title>QTL mapping status: treated - input pseudouridylation phenotype</title>
+
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">QTL mapping status: treated - input
+pseudouridylation phenotype</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-07-06</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-07-06
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 5
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 2
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongdetected">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>Cache:</strong> detected </a>
+</p>
+</div>
+<div id="strongCachestrongdetected" class="panel-collapse collapse">
+<div class="panel-body">
+The following chunks had caches available:
+<ul>
+<li>
+perm-load
+</li>
+</ul>
+<p>To ensure reproducibility of the results, delete the cache directory
+<code>qtl_mapping_summary_cache</code> and re-run the analysis. To have
+workflowr automatically delete the cache directory prior to building the
+file, set <code>delete_cache = TRUE</code> when running
+<code>wflow_build()</code> or <code>wflow_publish()</code>.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree679fd13bdd72e1a1498feba60b238581488be195targetblank679fd13a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/679fd13bdd72e1a1498feba60b238581488be195" target="_blank">679fd13</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree679fd13bdd72e1a1498feba60b238581488be195targetblank679fd13a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/679fd13bdd72e1a1498feba60b238581488be195" target="_blank">679fd13</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/figure/
+    Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/qtl_mapping_summary.Rmd
+    Untracked:  render_qtl_summary.sbatch
+    Untracked:  render_qtl_summary_51473911.out
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>library(data.table)
+library(dplyr)
+library(ggplot2)
+library(qvalue)
+library(arrow)
+library(patchwork)
+
+knitr::opts_chunk$set(
+  echo = TRUE, warning = FALSE, message = FALSE,
+  fig.align = &quot;center&quot;, fig.width = 10, fig.height = 6
+)
+
+PROJECT_DIR &lt;- &quot;/project/xinhe/xsun/pumseq&quot;</code></pre>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>This page summarizes where cis-QTL mapping for the <strong>treated −
+input</strong> pseudouridylation (%pU) phenotype currently stands: the
+data issue that motivated a change to the phenotype construction, how
+the phenotype is now built and normalized, how the QTL scan is set up,
+and what the results and calibration checks look like.</p>
+</div>
+<div id="the-data-treated---input-has-many-negative-values"
+class="section level1">
+<h1>1. The data: treated - input has many negative values</h1>
+<p>The phenotype of interest is the differential %pU signal — %pU in the
+treated sample minus %pU in the matched input (untreated) sample, at
+each pseudouridylation site, for each of the 50 genotyped cell lines.
+Under the <strong>union</strong> site-calling strategy, a site enters
+the analysis if it clears a significance threshold (FDR,
+rate-difference, depth) in <strong>at least one</strong> cell line;
+every other cell line’s raw %pU value at that site is then reported
+as-is, with no per-cell-line filter.</p>
+<p>Conceptually, <code>treated - input</code> should not be negative:
+input is the background/baseline rate, and treatment should only add
+signal on top of it. But because most cell lines don’t necessarily show
+real signal at a site that was only called significant in <em>some
+other</em> cell line, the raw per-cell-line, per-site difference is
+often small, noisy, and sometimes negative.</p>
+<pre class="r"><code>UNION_DIR &lt;- file.path(PROJECT_DIR, &quot;pumseq_processed/union/all51_mRNA&quot;)
+
+ratio_treated &lt;- fread(file.path(UNION_DIR, &quot;union_mRNA.global_sites.ratio_matrix.txt.gz&quot;),
+                        colClasses = list(character = c(&quot;ref&quot;, &quot;strand&quot;)))
+ratio_input   &lt;- fread(file.path(UNION_DIR, &quot;union_mRNA.global_sites.ratio_matrix_unt.txt.gz&quot;),
+                        colClasses = list(character = c(&quot;ref&quot;, &quot;strand&quot;)))
+
+id_cols &lt;- c(&quot;ref&quot;, &quot;pos&quot;, &quot;strand&quot;)
+cl_cols &lt;- setdiff(colnames(ratio_treated), id_cols)
+stopifnot(identical(cl_cols, setdiff(colnames(ratio_input), id_cols)))
+
+diff_mat &lt;- as.matrix(ratio_treated[, ..cl_cols]) - as.matrix(ratio_input[, ..cl_cols])
+diff_vec &lt;- diff_mat[!is.na(diff_mat)]
+
+diff_summary &lt;- data.table(
+  n_total       = length(diff_vec),
+  n_negative    = sum(diff_vec &lt; 0),
+  pct_negative  = round(100 * mean(diff_vec &lt; 0), 1),
+  pct_le_0      = round(100 * mean(diff_vec &lt;= 0), 1),
+  median        = round(median(diff_vec), 4),
+  min           = round(min(diff_vec), 3),
+  max           = round(max(diff_vec), 3)
+)
+knitr::kable(diff_summary, caption = &quot;Raw per-cell-line, per-site (treated - input) values across all union sites&quot;)</code></pre>
+<table>
+<caption>Raw per-cell-line, per-site (treated - input) values across all
+union sites</caption>
+<thead>
+<tr class="header">
+<th align="right">n_total</th>
+<th align="right">n_negative</th>
+<th align="right">pct_negative</th>
+<th align="right">pct_le_0</th>
+<th align="right">median</th>
+<th align="right">min</th>
+<th align="right">max</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">782316</td>
+<td align="right">89530</td>
+<td align="right">11.4</td>
+<td align="right">54.5</td>
+<td align="right">0</td>
+<td align="right">-1</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>ggplot(data.table(diff = diff_vec), aes(x = diff)) +
+  geom_histogram(bins = 100, fill = &quot;steelblue&quot;, color = NA) +
+  geom_vline(xintercept = 0, color = &quot;firebrick&quot;, linetype = &quot;dashed&quot;) +
+  labs(x = &quot;treated - input (%pU)&quot;, y = &quot;count&quot;,
+       title = &quot;Raw (treated - input) values across all sites x cell lines&quot;,
+       subtitle = sprintf(&quot;%.1f%% of %s values are negative; %.1f%% are ≤ 0&quot;,
+                           diff_summary$pct_negative, format(diff_summary$n_total, big.mark=&quot;,&quot;),
+                           diff_summary$pct_le_0)) +
+  theme_bw(base_size = 13)</code></pre>
+<p><img src="figure/qtl_mapping_summary.Rmd/raw-diff-hist-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>Over half of all (site, cell line) values sit at or below zero, and
+the median is exactly zero — there is no meaningful biological
+interpretation for a “negative” differential editing rate; it reflects
+sampling noise around an absence of signal in that cell line at that
+site, not real negative editing.</p>
+</div>
+<div id="flooring-negative-values-to-0" class="section level1">
+<h1>2. Flooring negative values to 0</h1>
+<p>Since a negative value isn’t biologically meaningful, it’s treated as
+noise around “no detectable signal” rather than discarded outright. Two
+more aggressive alternatives were considered and rejected first:
+requiring positivity in every cell line at a site keeps only ~700-800 of
+5,928 sites (far too aggressive), and a logit-style transform of the raw
+difference is undefined for negative values entirely. Instead, negative
+values are simply floored to 0, keeping every site:</p>
+<pre class="r"><code>diff_floored &lt;- pmax(diff_vec, 0)
+
+plot_dt &lt;- rbind(
+  data.table(value = diff_vec,     version = &quot;raw (before flooring)&quot;),
+  data.table(value = diff_floored, version = &quot;floored to 0&quot;)
+)
+plot_dt[, version := factor(version, levels = c(&quot;raw (before flooring)&quot;, &quot;floored to 0&quot;))]
+
+ggplot(plot_dt, aes(x = value)) +
+  geom_histogram(bins = 100, fill = &quot;steelblue&quot;, color = NA) +
+  geom_vline(xintercept = 0, color = &quot;firebrick&quot;, linetype = &quot;dashed&quot;) +
+  facet_wrap(~ version, ncol = 1, scales = &quot;free_y&quot;) +
+  labs(x = &quot;treated - input (%pU)&quot;, y = &quot;count&quot;,
+       title = &quot;Effect of flooring negative values to 0&quot;) +
+  theme_bw(base_size = 13)</code></pre>
+<p><img src="figure/qtl_mapping_summary.Rmd/floor-illustration-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>The floored value (<code>pmax(treated - input, 0)</code>) is what
+feeds every downstream step below.</p>
+</div>
+<div id="quantile-normalization" class="section level1">
+<h1>3. Quantile normalization</h1>
+<p>After flooring, sites are restricted to the union set called in ≥2
+cell lines and to autosomes (chr1-22), missing values are imputed with
+the site-level median, and the resulting matrix is quantile-normalized
+across cell lines — forcing every cell line to share the same marginal
+distribution, so that differences in overall signal level or spread
+between cell lines (technical, not biological) don’t drive spurious
+associations.</p>
+<pre class="r"><code>PHENO_DIR &lt;- file.path(PROJECT_DIR, &quot;pumseq_processed/psi_qtl/phenotype/union_ncalled2/treated_minus_input_floor0/quantile&quot;)
+
+sites_info &lt;- fread(file.path(PHENO_DIR, &quot;sites_info.txt.gz&quot;),
+                     colClasses = list(character = c(&quot;ref&quot;, &quot;strand&quot;)))
+genotype_map &lt;- fread(file.path(PROJECT_DIR, &quot;pumseq_processed/psi_qtl/genotype/sample_id_map.txt&quot;))
+cl_genotyped &lt;- intersect(cl_cols, genotype_map$CL_id)
+
+setkey(ratio_treated, ref, pos, strand)
+setkey(ratio_input, ref, pos, strand)
+before_treated &lt;- ratio_treated[sites_info[, .(ref, pos, strand)], on = c(&quot;ref&quot;, &quot;pos&quot;, &quot;strand&quot;)]
+before_input   &lt;- ratio_input[sites_info[, .(ref, pos, strand)], on = c(&quot;ref&quot;, &quot;pos&quot;, &quot;strand&quot;)]
+before_mat &lt;- pmax(as.matrix(before_treated[, ..cl_genotyped]) - as.matrix(before_input[, ..cl_genotyped]), 0)
+
+after_mat &lt;- as.matrix(fread(file.path(PHENO_DIR, &quot;phenotype_matrix.txt.gz&quot;))[, ..cl_genotyped])
+
+box_dt &lt;- rbind(
+  melt(as.data.table(before_mat), measure.vars = cl_genotyped)[, version := &quot;before quantile normalization&quot;],
+  melt(as.data.table(after_mat),  measure.vars = cl_genotyped)[, version := &quot;after quantile normalization&quot;]
+)
+box_dt[, version := factor(version, levels = c(&quot;before quantile normalization&quot;, &quot;after quantile normalization&quot;))]
+
+ggplot(box_dt[!is.na(value)], aes(x = variable, y = value)) +
+  geom_boxplot(outlier.size = 0.3, fill = &quot;steelblue&quot;, alpha = 0.6) +
+  facet_wrap(~ version, ncol = 1, scales = &quot;free_y&quot;) +
+  labs(x = &quot;cell line&quot;, y = &quot;phenotype value&quot;,
+       title = &quot;Per-cell-line distribution before vs. after quantile normalization&quot;) +
+  theme_bw(base_size = 12) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())</code></pre>
+<p><img src="figure/qtl_mapping_summary.Rmd/quantile-norm-illustration-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>After normalization, every cell line’s marginal distribution is
+identical by construction — the boxplots collapse to the same shape and
+spread, so any remaining site-to-site variation is what QTL mapping
+tests against genotype.</p>
+</div>
+<div id="qtl-mapping-approach" class="section level1">
+<h1>4. QTL mapping approach</h1>
+<p>cis-QTL mapping is done with <a
+href="https://github.com/broadinstitute/tensorqtl">tensorQTL</a>
+(FastQTL isn’t available on this cluster; tensorQTL reproduces the same
+beta-approximated permutation statistics, just faster). For each
+phenotype site, both modes are run: <code>cis_nominal</code> (nominal
+association p-value for every variant in the window) and
+<code>cis</code> (permutation pass, one best-hit p-value per site,
+corrected via a beta-distribution approximation for the number of
+variants tested).</p>
+<p>Two things are swept to characterize the result:</p>
+<ul>
+<li><strong>Number of covariate PCs</strong> (phenotype-derived PCA,
+used as covariates): 3, 5, 7, 10, 15, 20, 30.</li>
+<li><strong>cis-window size</strong> (distance from the phenotype site
+within which variants are tested): <strong>5kb, 20kb, 50kb,
+100kb</strong>.</li>
+</ul>
+<p>That’s a 7 x 4 grid, each cell a separate tensorQTL run, on the
+floored, quantile-normalized phenotype above.</p>
+</div>
+<div id="results-egenes-by-pc-count-and-window-size"
+class="section level1">
+<h1>5. Results: eGenes by PC count and window size</h1>
+<pre class="r"><code>RESULTS_ROOT &lt;- file.path(PROJECT_DIR, &quot;pumseq_processed/psi_qtl/qtl_results/union_ncalled2&quot;)
+STRATEGY    &lt;- &quot;treated_minus_input_floor0&quot;
+PC_COUNTS   &lt;- c(3, 5, 7, 10, 15, 20, 30)
+WINDOWS_BP  &lt;- c(5000, 20000, 50000, 100000)
+
+compute_qval &lt;- function(p) {
+  q &lt;- tryCatch(qvalue::qvalue(p)$qvalues, error = function(e) NULL)
+  if (is.null(q)) q &lt;- p.adjust(p, method = &quot;BH&quot;)
+  q
+}
+
+read_one &lt;- function(pc, window) {
+  window_dir &lt;- paste0(&quot;window&quot;, format(window, scientific = FALSE), &quot;bp/&quot;)
+  f &lt;- file.path(RESULTS_ROOT, STRATEGY, &quot;quantile&quot;, window_dir, paste0(&quot;pcs&quot;, pc),
+                 paste0(&quot;pumseq_&quot;, STRATEGY, &quot;.cis_qtl.txt.gz&quot;))
+  if (!file.exists(f)) return(NULL)
+  dt &lt;- fread(f, header = TRUE, sep = &quot;\t&quot;)
+  dt[, `:=`(n_pcs = pc, window_bp = window)]
+  dt
+}
+
+grid &lt;- CJ(pc = PC_COUNTS, window = WINDOWS_BP)
+loaded &lt;- mapply(read_one, grid$pc, grid$window, SIMPLIFY = FALSE)
+stopifnot(sum(sapply(loaded, is.null)) == 0)
+cis_qtl &lt;- rbindlist(loaded)
+cis_qtl[, qval := compute_qval(pval_beta), by = .(n_pcs, window_bp)]
+
+summary_tbl &lt;- cis_qtl[, .(eGenes_FDR05 = sum(qval &lt; 0.05, na.rm = TRUE)), by = .(window_bp, n_pcs)][order(window_bp, n_pcs)]
+summary_tbl[, window_lab := factor(paste0(window_bp / 1000, &quot;kb&quot;), levels = paste0(WINDOWS_BP / 1000, &quot;kb&quot;))]</code></pre>
+<pre class="r"><code>ggplot(summary_tbl, aes(x = n_pcs, y = eGenes_FDR05, color = window_lab)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(breaks = PC_COUNTS) +
+  labs(x = &quot;Number of covariate PCs&quot;, y = &quot;eGenes (FDR&lt;0.05)&quot;, color = &quot;cis-window&quot;,
+       title = &quot;eGenes vs. number of covariate PCs, by cis-window size&quot;) +
+  theme_bw(base_size = 13)</code></pre>
+<p><img src="figure/qtl_mapping_summary.Rmd/egene-vs-pc-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>eGene counts fall off steadily as more covariate PCs are added at
+every window size — with only 50 samples, higher PC counts spend degrees
+of freedom faster than they remove noise, so fewer PCs (3-10)
+consistently yield more eGenes across all four window sizes.</p>
+<pre class="r"><code>ggplot(summary_tbl, aes(x = factor(n_pcs, levels = PC_COUNTS), y = window_lab, fill = eGenes_FDR05)) +
+  geom_tile() +
+  geom_text(aes(label = eGenes_FDR05), size = 3.8) +
+  scale_fill_gradient(low = &quot;white&quot;, high = &quot;firebrick&quot;) +
+  labs(x = &quot;Number of covariate PCs&quot;, y = &quot;cis-window size&quot;, fill = &quot;eGenes\n(FDR&lt;0.05)&quot;,
+       title = &quot;eGenes (FDR&lt;0.05) by window size x PC count&quot;) +
+  theme_bw(base_size = 13)</code></pre>
+<p><img src="figure/qtl_mapping_summary.Rmd/egene-heatmap-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>Both window size and PC count matter: smaller windows and fewer PCs
+each independently yield more eGenes, with the largest counts in the
+top-left of the heatmap (5-20kb, 3-7 PCs).</p>
+</div>
+<div id="permutation-control-is-the-narrow-window-signal-real"
+class="section level1">
+<h1>6. Permutation control: is the narrow-window signal real?</h1>
+<p>Because eGene counts are highest at the narrowest windows, it’s
+important to check whether that’s real signal or an artifact of scanning
+fewer variants. The check: break the true genotype-phenotype
+relationship by permuting which individual’s phenotype and covariates
+get tested against which individual’s genotype (5 independent random
+permutations), then rerun the nominal association test on each permuted
+copy exactly as on the real data, at the recommended PC=5. If the real
+result’s calibration is genuine, the permuted nulls should track the
+null diagonal in a QQ plot regardless of window size; if the
+narrow-window eGene counts were merely an artifact of fewer variants
+being tested, the permuted nulls (which have exactly as few variants)
+would show it too.</p>
+<pre class="r"><code>N_PCS_PERM &lt;- 5
+CHRS &lt;- 1:22
+N_PERM &lt;- 5
+
+read_nominal &lt;- function(metric, prefix) {
+  dir &lt;- file.path(RESULTS_ROOT, metric, &quot;quantile&quot;, paste0(&quot;pcs&quot;, N_PCS_PERM))
+  rbindlist(lapply(CHRS, function(chr) {
+    f &lt;- file.path(dir, paste0(prefix, &quot;.cis_qtl_pairs.&quot;, chr, &quot;.parquet&quot;))
+    as.data.table(read_parquet(f, col_select = c(&quot;pval_nominal&quot;, &quot;start_distance&quot;)))
+  }))
+}
+
+real_dt &lt;- read_nominal(STRATEGY, paste0(&quot;pumseq_&quot;, STRATEGY))
+perm_dt &lt;- lapply(seq_len(N_PERM), function(s) {
+  metric &lt;- paste0(STRATEGY, &quot;_perm&quot;, s)
+  read_nominal(metric, paste0(&quot;pumseq_&quot;, metric))
+})
+
+compute_lambda &lt;- function(p) median(qchisq(1 - p, df = 1), na.rm = TRUE) / qchisq(0.5, df = 1)
+
+lambda_by_window &lt;- rbindlist(lapply(WINDOWS_BP, function(w) {
+  real_p &lt;- real_dt[abs(start_distance) &lt;= w, pval_nominal]
+  perm_p &lt;- lapply(perm_dt, function(dt) dt[abs(start_distance) &lt;= w, pval_nominal])
+  data.table(
+    window_kb = w / 1000,
+    dataset   = c(&quot;real&quot;, paste0(&quot;permuted seed &quot;, seq_len(N_PERM))),
+    lambda_gc = c(compute_lambda(real_p), sapply(perm_p, compute_lambda))
+  )
+}))
+
+knitr::kable(
+  dcast(lambda_by_window, dataset ~ window_kb, value.var = &quot;lambda_gc&quot;),
+  digits = 3, caption = &quot;Genomic control lambda by cis-window size (kb): real vs. 5 permuted nulls, PC=5&quot;
+)</code></pre>
+<table>
+<caption>Genomic control lambda by cis-window size (kb): real vs. 5
+permuted nulls, PC=5</caption>
+<thead>
+<tr class="header">
+<th align="left">dataset</th>
+<th align="right">5</th>
+<th align="right">20</th>
+<th align="right">50</th>
+<th align="right">100</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">permuted seed 1</td>
+<td align="right">1.012</td>
+<td align="right">1.023</td>
+<td align="right">1.021</td>
+<td align="right">1.013</td>
+</tr>
+<tr class="even">
+<td align="left">permuted seed 2</td>
+<td align="right">1.019</td>
+<td align="right">1.008</td>
+<td align="right">1.013</td>
+<td align="right">1.020</td>
+</tr>
+<tr class="odd">
+<td align="left">permuted seed 3</td>
+<td align="right">1.084</td>
+<td align="right">1.065</td>
+<td align="right">1.051</td>
+<td align="right">1.042</td>
+</tr>
+<tr class="even">
+<td align="left">permuted seed 4</td>
+<td align="right">1.058</td>
+<td align="right">1.053</td>
+<td align="right">1.042</td>
+<td align="right">1.047</td>
+</tr>
+<tr class="odd">
+<td align="left">permuted seed 5</td>
+<td align="right">1.005</td>
+<td align="right">1.018</td>
+<td align="right">1.028</td>
+<td align="right">1.038</td>
+</tr>
+<tr class="even">
+<td align="left">real</td>
+<td align="right">1.533</td>
+<td align="right">1.397</td>
+<td align="right">1.310</td>
+<td align="right">1.237</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>thin_qq &lt;- function(p, label, window_kb) {
+  p &lt;- sort(p)
+  n &lt;- length(p)
+  if (n &lt; 2) return(NULL)
+  idx &lt;- unique(as.integer(10^(seq(log10(1), log10(n), length.out = min(5000, n)))))
+  data.table(observed = -log10(p[idx]), expected = -log10(ppoints(n)[idx]),
+             dataset = label, window_kb = window_kb)
+}
+
+qq_dt &lt;- rbindlist(lapply(WINDOWS_BP, function(w) {
+  real_p &lt;- real_dt[abs(start_distance) &lt;= w, pval_nominal]
+  rbindlist(c(
+    list(thin_qq(real_p, &quot;real&quot;, w / 1000)),
+    lapply(seq_len(N_PERM), function(s) {
+      p &lt;- perm_dt[[s]][abs(start_distance) &lt;= w, pval_nominal]
+      thin_qq(p, paste0(&quot;permuted seed &quot;, s), w / 1000)
+    })
+  ))
+}))
+qq_dt[, is_real := dataset == &quot;real&quot;]
+qq_dt[, window_lab := factor(paste0(window_kb, &quot;kb&quot;), levels = paste0(WINDOWS_BP / 1000, &quot;kb&quot;))]
+
+ggplot(qq_dt, aes(x = expected, y = observed, color = is_real, group = dataset)) +
+  geom_point(size = 0.6, alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0, color = &quot;black&quot;, linetype = &quot;dashed&quot;) +
+  facet_wrap(~ window_lab, ncol = 2, scales = &quot;free&quot;) +
+  scale_color_manual(values = c(`TRUE` = &quot;firebrick&quot;, `FALSE` = &quot;grey60&quot;),
+                      labels = c(`TRUE` = &quot;real&quot;, `FALSE` = &quot;permuted null&quot;), name = NULL) +
+  labs(x = expression(-log[10](expected~p)), y = expression(-log[10](observed~p)),
+       title = &quot;Real vs. 5 permuted nulls, by cis-window size (treated_minus_input_floor0, PC=5)&quot;) +
+  theme_bw(base_size = 13)</code></pre>
+<p><img src="figure/qtl_mapping_summary.Rmd/perm-qq-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>The permuted nulls (grey) sit close to the diagonal at every window
+size, while the real result (red) pulls progressively further above it
+as the window narrows. Since the permuted nulls have exactly as few
+variants per window as the real data and show no such inflation, this
+rules out “too few variants” as the explanation — the effect is specific
+to the real genotype-phenotype pairing. The most likely explanation is a
+confound acting through local LD structure: nearby variants are
+correlated with each other, so any residual correlation between the
+phenotype and population structure/relatedness — which current
+covariates (phenotype-derived PCs only, no genotype PCs) don’t correct
+for — shows up more strongly in a narrow window’s tightly-linked variant
+set than when diluted across a wider one. This means eGene calls at the
+narrowest windows should be treated as provisional until that confound
+is addressed, even though the calibration check itself behaved as
+expected.</p>
+</div>
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<ul>
+<li>The union strategy’s <code>treated - input</code> phenotype has
+substantial negative mass (54.5% ≤ 0) with no biological meaning;
+negative values are floored to 0 rather than discarded or
+log-transformed.</li>
+<li>The floored phenotype is filtered (n_called ≥ 2, autosomes),
+imputed, and quantile-normalized across cell lines before QTL
+mapping.</li>
+<li>cis-QTL mapping (tensorQTL) was swept across 7 PC counts x 4 window
+sizes (5-100kb). Fewer PCs and narrower windows both increase eGene
+counts.</li>
+<li>A label-permutation control confirms this narrow-window effect is a
+real property of the genotype-phenotype relationship, not a statistical
+artifact — but also flags a likely uncorrected confound (population
+structure/relatedness via local LD) that should be resolved before
+treating narrow-window eGene calls as final.</li>
+</ul>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 8
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] patchwork_1.1.1   arrow_13.0.0.1    qvalue_2.32.0     ggplot2_3.4.2    
+[5] dplyr_1.1.2       data.table_1.14.4 workflowr_1.7.0  
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.2.0  xfun_0.38         bslib_0.3.1       purrr_1.0.1      
+ [5] reshape2_1.4.4    splines_4.2.0     colorspace_2.0-3  vctrs_0.6.1      
+ [9] generics_0.1.3    htmltools_0.5.7   yaml_2.3.5        utf8_1.2.2       
+[13] rlang_1.1.2       R.oo_1.24.0       jquerylib_0.1.4   later_1.3.0      
+[17] pillar_1.9.0      R.utils_2.11.0    glue_1.6.2        withr_2.5.0      
+[21] bit64_4.0.5       lifecycle_1.0.4   plyr_1.8.7        stringr_1.5.0    
+[25] munsell_0.5.0     gtable_0.3.0      R.methodsS3_1.8.1 evaluate_0.15    
+[29] labeling_0.4.2    knitr_1.42        callr_3.7.0       fastmap_1.1.0    
+[33] httpuv_1.6.5      ps_1.7.0          fansi_1.0.3       highr_0.9        
+[37] Rcpp_1.0.11       promises_1.2.0.1  scales_1.2.0      jsonlite_1.8.7   
+[41] farver_2.1.0      bit_4.0.4         fs_1.5.2          digest_0.6.29    
+[45] stringi_1.7.6     processx_3.5.3    getPass_0.2-2     rprojroot_2.0.3  
+[49] grid_4.2.0        cli_3.6.2         tools_4.2.0       magrittr_2.0.3   
+[53] sass_0.4.1        tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3  
+[57] assertthat_0.2.1  rmarkdown_2.21    httr_1.4.5        rstudioapi_0.14  
+[61] R6_2.5.1          git2r_0.30.1      compiler_4.2.0   </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
