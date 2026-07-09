@@ -1,5 +1,5 @@
 ---
-title: "QTL mapping status: treated - input pseudouridylation phenotype"
+title: "QTL mapping: treated - input, floor0 quantile normalization"
 author: "XSun"
 date: "`r Sys.Date()`"
 output:
@@ -27,8 +27,7 @@ PROJECT_DIR <- "/project/xinhe/xsun/pumseq"
 # Introduction
 
 This page summarizes where cis-QTL mapping for the **treated − input**
-pseudouridylation (%pU) phenotype currently stands: the data issue that
-motivated a change to the phenotype construction, how the phenotype is
+pseudouridylation (%pU) phenotype currently stands: the data issue, how the phenotype is
 now built and normalized, how the QTL scan is set up, and what the
 results and calibration checks look like.
 
@@ -38,7 +37,7 @@ The phenotype of interest is the differential %pU signal — %pU in the
 treated sample minus %pU in the matched input (untreated) sample, at
 each pseudouridylation site, for each of the 50 genotyped cell lines.
 Under the **union** site-calling strategy, a site enters the analysis
-if it clears a significance threshold (FDR, rate-difference, depth) in
+if it clears a significance threshold (FDR < 0.01, rate-difference > 0.05, depth>=20) in
 **at least one** cell line; every other cell line's raw %pU value at
 that site is then reported as-is, with no per-cell-line filter.
 
@@ -67,13 +66,13 @@ diff_vec <- diff_mat[!is.na(diff_mat)]
 diff_summary <- data.table(
   n_total       = length(diff_vec),
   n_negative    = sum(diff_vec < 0),
-  pct_negative  = round(100 * mean(diff_vec < 0), 1),
-  pct_le_0      = round(100 * mean(diff_vec <= 0), 1),
+  `pct_<_0`  = round(100 * mean(diff_vec < 0), 1),
+  `pct_<=_0`      = round(100 * mean(diff_vec <= 0), 1),
   median        = round(median(diff_vec), 4),
   min           = round(min(diff_vec), 3),
   max           = round(max(diff_vec), 3)
 )
-knitr::kable(diff_summary, caption = "Raw per-cell-line, per-site (treated - input) values across all union sites")
+knitr::kable(diff_summary, caption = "per-site (treated - input) values across all union sites")
 ```
 
 ```{r raw-diff-hist, fig.height=4.5}
@@ -82,26 +81,25 @@ ggplot(data.table(diff = diff_vec), aes(x = diff)) +
   geom_vline(xintercept = 0, color = "firebrick", linetype = "dashed") +
   labs(x = "treated - input (%pU)", y = "count",
        title = "Raw (treated - input) values across all sites x cell lines",
-       subtitle = sprintf("%.1f%% of %s values are negative; %.1f%% are ≤ 0",
+       subtitle = sprintf("%.1f%% of %s values are negative; %.1f%% are <= 0",
                            diff_summary$pct_negative, format(diff_summary$n_total, big.mark=","),
                            diff_summary$pct_le_0)) +
   theme_bw(base_size = 13)
 ```
 
-Over half of all (site, cell line) values sit at or below zero, and the
-median is exactly zero — there is no meaningful biological
-interpretation for a "negative" differential editing rate; it reflects
-sampling noise around an absence of signal in that cell line at that
-site, not real negative editing.
+<!-- Over half of all (site, cell line) values sit at or below zero, and the -->
+<!-- median is exactly zero — there is no meaningful biological -->
+<!-- interpretation for a "negative" differential editing rate; it reflects -->
+<!-- sampling noise around an absence of signal in that cell line at that -->
+<!-- site, not real negative editing. -->
 
 # 2. Flooring negative values to 0
 
 Since a negative value isn't biologically meaningful, it's treated as
 noise around "no detectable signal" rather than discarded outright.
-Two more aggressive alternatives were considered and rejected first:
-requiring positivity in every cell line at a site keeps only ~700-800
-of 5,928 sites (far too aggressive), and a logit-style transform of the
-raw difference is undefined for negative values entirely. Instead,
+
+If we require positivity in every cell line at a site, it keeps only ~700-800
+of 5,928 sites (far too aggressive). Instead,
 negative values are simply floored to 0, keeping every site:
 
 ```{r floor-illustration, fig.height=4.5}
@@ -127,8 +125,7 @@ downstream step below.
 
 # 3. Quantile normalization
 
-After flooring, sites are restricted to the union set called in
-&ge;2 cell lines and to autosomes (chr1-22), missing values are imputed
+After flooring, sites are restricted to the union set called in >= 2 cell lines and to autosomes (chr1-22), missing values are imputed
 with the site-level median, and the resulting matrix is
 quantile-normalized across cell lines — forcing every cell line to
 share the same marginal distribution, so that differences in overall
@@ -174,8 +171,7 @@ tests against genotype.
 # 4. QTL mapping approach
 
 cis-QTL mapping is done with [tensorQTL](https://github.com/broadinstitute/tensorqtl)
-(FastQTL isn't available on this cluster; tensorQTL reproduces the same
-beta-approximated permutation statistics, just faster). For each
+(tensorQTL reproduces the same beta-approximated permutation statistics, just faster). For each
 phenotype site, both modes are run: `cis_nominal` (nominal association
 p-value for every variant in the window) and `cis` (permutation pass,
 one best-hit p-value per site, corrected via a beta-distribution
@@ -236,9 +232,10 @@ ggplot(summary_tbl, aes(x = n_pcs, y = eGenes_FDR05, color = window_lab)) +
 ```
 
 eGene counts fall off steadily as more covariate PCs are added at every
-window size — with only 50 samples, higher PC counts spend degrees of
-freedom faster than they remove noise, so fewer PCs (3-10) consistently
-yield more eGenes across all four window sizes.
+window size 
+<!-- — with only 50 samples, higher PC counts spend degrees of -->
+<!-- freedom faster than they remove noise, so fewer PCs (3-10) consistently -->
+<!-- yield more eGenes across all four window sizes. -->
 
 ```{r egene-heatmap, fig.height=4.5}
 ggplot(summary_tbl, aes(x = factor(n_pcs, levels = PC_COUNTS), y = window_lab, fill = eGenes_FDR05)) +
@@ -254,19 +251,23 @@ Both window size and PC count matter: smaller windows and fewer PCs
 each independently yield more eGenes, with the largest counts in the
 top-left of the heatmap (5-20kb, 3-7 PCs).
 
-# 6. Permutation control: is the narrow-window signal real?
+# 6. Permutation control
 
-Because eGene counts are highest at the narrowest windows, it's
-important to check whether that's real signal or an artifact of
-scanning fewer variants. The check: break the true genotype-phenotype
+<!-- Because eGene counts are highest at the narrowest windows, it's -->
+<!-- important to check whether that's real signal or an artifact of -->
+<!-- scanning fewer variants.  -->
+
+The check: break the true genotype-phenotype
 relationship by permuting which individual's phenotype and covariates
 get tested against which individual's genotype (5 independent random
 permutations), then rerun the nominal association test on each permuted
-copy exactly as on the real data, at the recommended PC=5. If the real
+copy exactly as on the real data, at PC=5. If the real
 result's calibration is genuine, the permuted nulls should track the
-null diagonal in a QQ plot regardless of window size; if the narrow-window
-eGene counts were merely an artifact of fewer variants being tested, the
-permuted nulls (which have exactly as few variants) would show it too.
+null diagonal in a QQ plot regardless of window size
+
+<!-- ; if the narrow-window -->
+<!-- eGene counts were merely an artifact of fewer variants being tested, the -->
+<!-- permuted nulls (which have exactly as few variants) would show it too. -->
 
 ```{r perm-load}
 N_PCS_PERM <- 5
@@ -339,34 +340,34 @@ ggplot(qq_dt, aes(x = expected, y = observed, color = is_real, group = dataset))
   theme_bw(base_size = 13)
 ```
 
-The permuted nulls (grey) sit close to the diagonal at every window
-size, while the real result (red) pulls progressively further above it
-as the window narrows. Since the permuted nulls have exactly as few
-variants per window as the real data and show no such inflation, this
-rules out "too few variants" as the explanation — the effect is
-specific to the real genotype-phenotype pairing. The most likely
-explanation is a confound acting through local LD structure: nearby
-variants are correlated with each other, so any residual correlation
-between the phenotype and population structure/relatedness — which
-current covariates (phenotype-derived PCs only, no genotype PCs) don't
-correct for — shows up more strongly in a narrow window's tightly-linked
-variant set than when diluted across a wider one. This means eGene
-calls at the narrowest windows should be treated as provisional until
-that confound is addressed, even though the calibration check itself
-behaved as expected.
+<!-- The permuted nulls (grey) sit close to the diagonal at every window -->
+<!-- size, while the real result (red) pulls progressively further above it -->
+<!-- as the window narrows. Since the permuted nulls have exactly as few -->
+<!-- variants per window as the real data and show no such inflation, this -->
+<!-- rules out "too few variants" as the explanation — the effect is -->
+<!-- specific to the real genotype-phenotype pairing. The most likely -->
+<!-- explanation is a confound acting through local LD structure: nearby -->
+<!-- variants are correlated with each other, so any residual correlation -->
+<!-- between the phenotype and population structure/relatedness — which -->
+<!-- current covariates (phenotype-derived PCs only, no genotype PCs) don't -->
+<!-- correct for — shows up more strongly in a narrow window's tightly-linked -->
+<!-- variant set than when diluted across a wider one. This means eGene -->
+<!-- calls at the narrowest windows should be treated as provisional until -->
+<!-- that confound is addressed, even though the calibration check itself -->
+<!-- behaved as expected. -->
 
-# Summary
+<!-- # Summary -->
 
-- The union strategy's `treated - input` phenotype has substantial
-  negative mass (54.5% &le; 0) with no biological meaning; negative
-  values are floored to 0 rather than discarded or log-transformed.
-- The floored phenotype is filtered (n_called &ge; 2, autosomes),
-  imputed, and quantile-normalized across cell lines before QTL mapping.
-- cis-QTL mapping (tensorQTL) was swept across 7 PC counts x 4 window
-  sizes (5-100kb). Fewer PCs and narrower windows both increase eGene
-  counts.
-- A label-permutation control confirms this narrow-window effect is a
-  real property of the genotype-phenotype relationship, not a
-  statistical artifact — but also flags a likely uncorrected confound
-  (population structure/relatedness via local LD) that should be
-  resolved before treating narrow-window eGene calls as final.
+<!-- - The union strategy's `treated - input` phenotype has substantial -->
+<!--   negative mass (54.5% &le; 0) with no biological meaning; negative -->
+<!--   values are floored to 0 rather than discarded or log-transformed. -->
+<!-- - The floored phenotype is filtered (n_called &ge; 2, autosomes), -->
+<!--   imputed, and quantile-normalized across cell lines before QTL mapping. -->
+<!-- - cis-QTL mapping (tensorQTL) was swept across 7 PC counts x 4 window -->
+<!--   sizes (5-100kb). Fewer PCs and narrower windows both increase eGene -->
+<!--   counts. -->
+<!-- - A label-permutation control confirms this narrow-window effect is a -->
+<!--   real property of the genotype-phenotype relationship, not a -->
+<!--   statistical artifact — but also flags a likely uncorrected confound -->
+<!--   (population structure/relatedness via local LD) that should be -->
+<!--   resolved before treating narrow-window eGene calls as final. -->

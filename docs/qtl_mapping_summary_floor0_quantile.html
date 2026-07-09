@@ -11,9 +11,9 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-07-06" />
+<meta name="date" content="2026-07-09" />
 
-<title>QTL mapping status: treated - input pseudouridylation phenotype</title>
+<title>QTL mapping: treated - input, quantile normalization</title>
 
 <script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -371,10 +371,10 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">QTL mapping status: treated - input
-pseudouridylation phenotype</h1>
+<h1 class="title toc-ignore">QTL mapping: treated - input, quantile
+normalization</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-07-06</h4>
+<h4 class="date">2026-07-09</h4>
 
 </div>
 
@@ -403,13 +403,13 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-07-06
+<strong>Last updated:</strong> 2026-07-09
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 5
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> 2
+aria-hidden="true"></span> 1
 </p>
 <p>
 <strong>Knit directory:</strong> <code>pumseq/</code> <span
@@ -506,24 +506,16 @@ versions is critical for reproducibility.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongdetected">
-<span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> <strong>Cache:</strong> detected </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
 </p>
 </div>
-<div id="strongCachestrongdetected" class="panel-collapse collapse">
+<div id="strongCachestrongnone" class="panel-collapse collapse">
 <div class="panel-body">
-The following chunks had caches available:
-<ul>
-<li>
-perm-load
-</li>
-</ul>
-<p>To ensure reproducibility of the results, delete the cache directory
-<code>qtl_mapping_summary_cache</code> and re-run the analysis. To have
-workflowr automatically delete the cache directory prior to building the
-file, set <code>delete_cache = TRUE</code> when running
-<code>wflow_build()</code> or <code>wflow_publish()</code>.</p>
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
 </div>
 </div>
 </div>
@@ -545,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree679fd13bdd72e1a1498feba60b238581488be195targetblank679fd13a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee54b7a5e2fefaad684da3660761ac34522938951targetblanke54b7a5a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/679fd13bdd72e1a1498feba60b238581488be195" target="_blank">679fd13</a>
+<a href="https://github.com/xsun1229/pumseq/tree/e54b7a5e2fefaad684da3660761ac34522938951" target="_blank">e54b7a5</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree679fd13bdd72e1a1498feba60b238581488be195targetblank679fd13a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee54b7a5e2fefaad684da3660761ac34522938951targetblanke54b7a5a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -563,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/679fd13bdd72e1a1498feba60b238581488be195" target="_blank">679fd13</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/e54b7a5e2fefaad684da3660761ac34522938951" target="_blank">e54b7a5</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -578,13 +570,15 @@ were generated:
 </p>
 <pre><code>
 Ignored files:
-    Ignored:    analysis/figure/
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Untracked files:
-    Untracked:  analysis/qtl_mapping_summary.Rmd
-    Untracked:  render_qtl_summary.sbatch
-    Untracked:  render_qtl_summary_51473911.out
+    Untracked:  analysis/qtl_mapping_summary_floor0_quantile.Rmd
+    Untracked:  render_qtl_summary_51666527.out
+
+Unstaged changes:
+    Deleted:    analysis/qtl_mapping_summary.Rmd
+    Modified:   render_qtl_summary.sbatch
 
 </code></pre>
 <p>
@@ -624,9 +618,9 @@ PROJECT_DIR &lt;- &quot;/project/xinhe/xsun/pumseq&quot;</code></pre>
 <h1>Introduction</h1>
 <p>This page summarizes where cis-QTL mapping for the <strong>treated −
 input</strong> pseudouridylation (%pU) phenotype currently stands: the
-data issue that motivated a change to the phenotype construction, how
-the phenotype is now built and normalized, how the QTL scan is set up,
-and what the results and calibration checks look like.</p>
+data issue, how the phenotype is now built and normalized, how the QTL
+scan is set up, and what the results and calibration checks look
+like.</p>
 </div>
 <div id="the-data-treated---input-has-many-negative-values"
 class="section level1">
@@ -635,10 +629,10 @@ class="section level1">
 treated sample minus %pU in the matched input (untreated) sample, at
 each pseudouridylation site, for each of the 50 genotyped cell lines.
 Under the <strong>union</strong> site-calling strategy, a site enters
-the analysis if it clears a significance threshold (FDR,
-rate-difference, depth) in <strong>at least one</strong> cell line;
-every other cell line’s raw %pU value at that site is then reported
-as-is, with no per-cell-line filter.</p>
+the analysis if it clears a significance threshold (FDR &lt; 0.01,
+rate-difference &gt; 0.05, depth&gt;=20) in <strong>at least
+one</strong> cell line; every other cell line’s raw %pU value at that
+site is then reported as-is, with no per-cell-line filter.</p>
 <p>Conceptually, <code>treated - input</code> should not be negative:
 input is the background/baseline rate, and treatment should only add
 signal on top of it. But because most cell lines don’t necessarily show
@@ -662,22 +656,22 @@ diff_vec &lt;- diff_mat[!is.na(diff_mat)]
 diff_summary &lt;- data.table(
   n_total       = length(diff_vec),
   n_negative    = sum(diff_vec &lt; 0),
-  pct_negative  = round(100 * mean(diff_vec &lt; 0), 1),
-  pct_le_0      = round(100 * mean(diff_vec &lt;= 0), 1),
+  `pct_&lt;_0`  = round(100 * mean(diff_vec &lt; 0), 1),
+  `pct_&lt;=_0`      = round(100 * mean(diff_vec &lt;= 0), 1),
   median        = round(median(diff_vec), 4),
   min           = round(min(diff_vec), 3),
   max           = round(max(diff_vec), 3)
 )
-knitr::kable(diff_summary, caption = &quot;Raw per-cell-line, per-site (treated - input) values across all union sites&quot;)</code></pre>
+knitr::kable(diff_summary, caption = &quot;per-site (treated - input) values across all union sites&quot;)</code></pre>
 <table>
-<caption>Raw per-cell-line, per-site (treated - input) values across all
-union sites</caption>
+<caption>per-site (treated - input) values across all union
+sites</caption>
 <thead>
 <tr class="header">
 <th align="right">n_total</th>
 <th align="right">n_negative</th>
-<th align="right">pct_negative</th>
-<th align="right">pct_le_0</th>
+<th align="right">pct_&lt;_0</th>
+<th align="right">pct_&lt;=_0</th>
 <th align="right">median</th>
 <th align="right">min</th>
 <th align="right">max</th>
@@ -700,26 +694,24 @@ union sites</caption>
   geom_vline(xintercept = 0, color = &quot;firebrick&quot;, linetype = &quot;dashed&quot;) +
   labs(x = &quot;treated - input (%pU)&quot;, y = &quot;count&quot;,
        title = &quot;Raw (treated - input) values across all sites x cell lines&quot;,
-       subtitle = sprintf(&quot;%.1f%% of %s values are negative; %.1f%% are ≤ 0&quot;,
+       subtitle = sprintf(&quot;%.1f%% of %s values are negative; %.1f%% are &lt;= 0&quot;,
                            diff_summary$pct_negative, format(diff_summary$n_total, big.mark=&quot;,&quot;),
                            diff_summary$pct_le_0)) +
   theme_bw(base_size = 13)</code></pre>
-<p><img src="figure/qtl_mapping_summary.Rmd/raw-diff-hist-1.png" width="960" style="display: block; margin: auto;" /></p>
-<p>Over half of all (site, cell line) values sit at or below zero, and
-the median is exactly zero — there is no meaningful biological
-interpretation for a “negative” differential editing rate; it reflects
-sampling noise around an absence of signal in that cell line at that
-site, not real negative editing.</p>
+<p><img src="figure/qtl_mapping_summary_floor0_quantile.Rmd/raw-diff-hist-1.png" width="960" style="display: block; margin: auto;" /></p>
+<!-- Over half of all (site, cell line) values sit at or below zero, and the -->
+<!-- median is exactly zero — there is no meaningful biological -->
+<!-- interpretation for a "negative" differential editing rate; it reflects -->
+<!-- sampling noise around an absence of signal in that cell line at that -->
+<!-- site, not real negative editing. -->
 </div>
 <div id="flooring-negative-values-to-0" class="section level1">
 <h1>2. Flooring negative values to 0</h1>
 <p>Since a negative value isn’t biologically meaningful, it’s treated as
-noise around “no detectable signal” rather than discarded outright. Two
-more aggressive alternatives were considered and rejected first:
-requiring positivity in every cell line at a site keeps only ~700-800 of
-5,928 sites (far too aggressive), and a logit-style transform of the raw
-difference is undefined for negative values entirely. Instead, negative
-values are simply floored to 0, keeping every site:</p>
+noise around “no detectable signal” rather than discarded outright.</p>
+<p>If we require positivity in every cell line at a site, it keeps only
+~700-800 of 5,928 sites (far too aggressive). Instead, negative values
+are simply floored to 0, keeping every site:</p>
 <pre class="r"><code>diff_floored &lt;- pmax(diff_vec, 0)
 
 plot_dt &lt;- rbind(
@@ -735,14 +727,14 @@ ggplot(plot_dt, aes(x = value)) +
   labs(x = &quot;treated - input (%pU)&quot;, y = &quot;count&quot;,
        title = &quot;Effect of flooring negative values to 0&quot;) +
   theme_bw(base_size = 13)</code></pre>
-<p><img src="figure/qtl_mapping_summary.Rmd/floor-illustration-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_summary_floor0_quantile.Rmd/floor-illustration-1.png" width="960" style="display: block; margin: auto;" /></p>
 <p>The floored value (<code>pmax(treated - input, 0)</code>) is what
 feeds every downstream step below.</p>
 </div>
 <div id="quantile-normalization" class="section level1">
 <h1>3. Quantile normalization</h1>
-<p>After flooring, sites are restricted to the union set called in ≥2
-cell lines and to autosomes (chr1-22), missing values are imputed with
+<p>After flooring, sites are restricted to the union set called in &gt;=
+2 cell lines and to autosomes (chr1-22), missing values are imputed with
 the site-level median, and the resulting matrix is quantile-normalized
 across cell lines — forcing every cell line to share the same marginal
 distribution, so that differences in overall signal level or spread
@@ -776,7 +768,7 @@ ggplot(box_dt[!is.na(value)], aes(x = variable, y = value)) +
        title = &quot;Per-cell-line distribution before vs. after quantile normalization&quot;) +
   theme_bw(base_size = 12) +
   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())</code></pre>
-<p><img src="figure/qtl_mapping_summary.Rmd/quantile-norm-illustration-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_summary_floor0_quantile.Rmd/quantile-norm-illustration-1.png" width="960" style="display: block; margin: auto;" /></p>
 <p>After normalization, every cell line’s marginal distribution is
 identical by construction — the boxplots collapse to the same shape and
 spread, so any remaining site-to-site variation is what QTL mapping
@@ -786,13 +778,12 @@ tests against genotype.</p>
 <h1>4. QTL mapping approach</h1>
 <p>cis-QTL mapping is done with <a
 href="https://github.com/broadinstitute/tensorqtl">tensorQTL</a>
-(FastQTL isn’t available on this cluster; tensorQTL reproduces the same
-beta-approximated permutation statistics, just faster). For each
-phenotype site, both modes are run: <code>cis_nominal</code> (nominal
-association p-value for every variant in the window) and
-<code>cis</code> (permutation pass, one best-hit p-value per site,
-corrected via a beta-distribution approximation for the number of
-variants tested).</p>
+(tensorQTL reproduces the same beta-approximated permutation statistics,
+just faster). For each phenotype site, both modes are run:
+<code>cis_nominal</code> (nominal association p-value for every variant
+in the window) and <code>cis</code> (permutation pass, one best-hit
+p-value per site, corrected via a beta-distribution approximation for
+the number of variants tested).</p>
 <p>Two things are swept to characterize the result:</p>
 <ul>
 <li><strong>Number of covariate PCs</strong> (phenotype-derived PCA,
@@ -843,11 +834,12 @@ summary_tbl[, window_lab := factor(paste0(window_bp / 1000, &quot;kb&quot;), lev
   labs(x = &quot;Number of covariate PCs&quot;, y = &quot;eGenes (FDR&lt;0.05)&quot;, color = &quot;cis-window&quot;,
        title = &quot;eGenes vs. number of covariate PCs, by cis-window size&quot;) +
   theme_bw(base_size = 13)</code></pre>
-<p><img src="figure/qtl_mapping_summary.Rmd/egene-vs-pc-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_summary_floor0_quantile.Rmd/egene-vs-pc-1.png" width="960" style="display: block; margin: auto;" /></p>
 <p>eGene counts fall off steadily as more covariate PCs are added at
-every window size — with only 50 samples, higher PC counts spend degrees
-of freedom faster than they remove noise, so fewer PCs (3-10)
-consistently yield more eGenes across all four window sizes.</p>
+every window size
+<!-- — with only 50 samples, higher PC counts spend degrees of -->
+<!-- freedom faster than they remove noise, so fewer PCs (3-10) consistently -->
+<!-- yield more eGenes across all four window sizes. --></p>
 <pre class="r"><code>ggplot(summary_tbl, aes(x = factor(n_pcs, levels = PC_COUNTS), y = window_lab, fill = eGenes_FDR05)) +
   geom_tile() +
   geom_text(aes(label = eGenes_FDR05), size = 3.8) +
@@ -855,26 +847,26 @@ consistently yield more eGenes across all four window sizes.</p>
   labs(x = &quot;Number of covariate PCs&quot;, y = &quot;cis-window size&quot;, fill = &quot;eGenes\n(FDR&lt;0.05)&quot;,
        title = &quot;eGenes (FDR&lt;0.05) by window size x PC count&quot;) +
   theme_bw(base_size = 13)</code></pre>
-<p><img src="figure/qtl_mapping_summary.Rmd/egene-heatmap-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_summary_floor0_quantile.Rmd/egene-heatmap-1.png" width="960" style="display: block; margin: auto;" /></p>
 <p>Both window size and PC count matter: smaller windows and fewer PCs
 each independently yield more eGenes, with the largest counts in the
 top-left of the heatmap (5-20kb, 3-7 PCs).</p>
 </div>
-<div id="permutation-control-is-the-narrow-window-signal-real"
-class="section level1">
-<h1>6. Permutation control: is the narrow-window signal real?</h1>
-<p>Because eGene counts are highest at the narrowest windows, it’s
-important to check whether that’s real signal or an artifact of scanning
-fewer variants. The check: break the true genotype-phenotype
-relationship by permuting which individual’s phenotype and covariates
-get tested against which individual’s genotype (5 independent random
-permutations), then rerun the nominal association test on each permuted
-copy exactly as on the real data, at the recommended PC=5. If the real
-result’s calibration is genuine, the permuted nulls should track the
-null diagonal in a QQ plot regardless of window size; if the
-narrow-window eGene counts were merely an artifact of fewer variants
-being tested, the permuted nulls (which have exactly as few variants)
-would show it too.</p>
+<div id="permutation-control" class="section level1">
+<h1>6. Permutation control</h1>
+<!-- Because eGene counts are highest at the narrowest windows, it's -->
+<!-- important to check whether that's real signal or an artifact of -->
+<!-- scanning fewer variants.  -->
+<p>The check: break the true genotype-phenotype relationship by
+permuting which individual’s phenotype and covariates get tested against
+which individual’s genotype (5 independent random permutations), then
+rerun the nominal association test on each permuted copy exactly as on
+the real data, at PC=5. If the real result’s calibration is genuine, the
+permuted nulls should track the null diagonal in a QQ plot regardless of
+window size</p>
+<!-- ; if the narrow-window -->
+<!-- eGene counts were merely an artifact of fewer variants being tested, the -->
+<!-- permuted nulls (which have exactly as few variants) would show it too. -->
 <pre class="r"><code>N_PCS_PERM &lt;- 5
 CHRS &lt;- 1:22
 N_PERM &lt;- 5
@@ -997,42 +989,36 @@ ggplot(qq_dt, aes(x = expected, y = observed, color = is_real, group = dataset))
   labs(x = expression(-log[10](expected~p)), y = expression(-log[10](observed~p)),
        title = &quot;Real vs. 5 permuted nulls, by cis-window size (treated_minus_input_floor0, PC=5)&quot;) +
   theme_bw(base_size = 13)</code></pre>
-<p><img src="figure/qtl_mapping_summary.Rmd/perm-qq-1.png" width="960" style="display: block; margin: auto;" /></p>
-<p>The permuted nulls (grey) sit close to the diagonal at every window
-size, while the real result (red) pulls progressively further above it
-as the window narrows. Since the permuted nulls have exactly as few
-variants per window as the real data and show no such inflation, this
-rules out “too few variants” as the explanation — the effect is specific
-to the real genotype-phenotype pairing. The most likely explanation is a
-confound acting through local LD structure: nearby variants are
-correlated with each other, so any residual correlation between the
-phenotype and population structure/relatedness — which current
-covariates (phenotype-derived PCs only, no genotype PCs) don’t correct
-for — shows up more strongly in a narrow window’s tightly-linked variant
-set than when diluted across a wider one. This means eGene calls at the
-narrowest windows should be treated as provisional until that confound
-is addressed, even though the calibration check itself behaved as
-expected.</p>
-</div>
-<div id="summary" class="section level1">
-<h1>Summary</h1>
-<ul>
-<li>The union strategy’s <code>treated - input</code> phenotype has
-substantial negative mass (54.5% ≤ 0) with no biological meaning;
-negative values are floored to 0 rather than discarded or
-log-transformed.</li>
-<li>The floored phenotype is filtered (n_called ≥ 2, autosomes),
-imputed, and quantile-normalized across cell lines before QTL
-mapping.</li>
-<li>cis-QTL mapping (tensorQTL) was swept across 7 PC counts x 4 window
-sizes (5-100kb). Fewer PCs and narrower windows both increase eGene
-counts.</li>
-<li>A label-permutation control confirms this narrow-window effect is a
-real property of the genotype-phenotype relationship, not a statistical
-artifact — but also flags a likely uncorrected confound (population
-structure/relatedness via local LD) that should be resolved before
-treating narrow-window eGene calls as final.</li>
-</ul>
+<p><img src="figure/qtl_mapping_summary_floor0_quantile.Rmd/perm-qq-1.png" width="960" style="display: block; margin: auto;" /></p>
+<!-- The permuted nulls (grey) sit close to the diagonal at every window -->
+<!-- size, while the real result (red) pulls progressively further above it -->
+<!-- as the window narrows. Since the permuted nulls have exactly as few -->
+<!-- variants per window as the real data and show no such inflation, this -->
+<!-- rules out "too few variants" as the explanation — the effect is -->
+<!-- specific to the real genotype-phenotype pairing. The most likely -->
+<!-- explanation is a confound acting through local LD structure: nearby -->
+<!-- variants are correlated with each other, so any residual correlation -->
+<!-- between the phenotype and population structure/relatedness — which -->
+<!-- current covariates (phenotype-derived PCs only, no genotype PCs) don't -->
+<!-- correct for — shows up more strongly in a narrow window's tightly-linked -->
+<!-- variant set than when diluted across a wider one. This means eGene -->
+<!-- calls at the narrowest windows should be treated as provisional until -->
+<!-- that confound is addressed, even though the calibration check itself -->
+<!-- behaved as expected. -->
+<!-- # Summary -->
+<!-- - The union strategy's `treated - input` phenotype has substantial -->
+<!--   negative mass (54.5% &le; 0) with no biological meaning; negative -->
+<!--   values are floored to 0 rather than discarded or log-transformed. -->
+<!-- - The floored phenotype is filtered (n_called &ge; 2, autosomes), -->
+<!--   imputed, and quantile-normalized across cell lines before QTL mapping. -->
+<!-- - cis-QTL mapping (tensorQTL) was swept across 7 PC counts x 4 window -->
+<!--   sizes (5-100kb). Fewer PCs and narrower windows both increase eGene -->
+<!--   counts. -->
+<!-- - A label-permutation control confirms this narrow-window effect is a -->
+<!--   real property of the genotype-phenotype relationship, not a -->
+<!--   statistical artifact — but also flags a likely uncorrected confound -->
+<!--   (population structure/relatedness via local LD) that should be -->
+<!--   resolved before treating narrow-window eGene calls as final. -->
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
