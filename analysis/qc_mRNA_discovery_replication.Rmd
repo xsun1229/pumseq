@@ -1,0 +1,181 @@
+---
+title: "QC — Discovery/replication validation of joint-pooled pU site calling"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+library(data.table)
+library(ggplot2)
+library(patchwork)
+
+knitr::opts_chunk$set(
+  echo = TRUE, warning = FALSE, message = FALSE,
+  fig.align = "center", fig.width = 9, fig.height = 6
+)
+
+JOINT_DIR <- "/project/xinhe/xsun/pumseq/pumseq_processed/joint"
+N_SPLITS <- 3
+FDR_THRESH <- 0.01
+RATEDIFF_THRESH <- 0.05
+DEPTH_THRESH <- 20
+```
+
+# Introduction
+
+We split the cell lines into a small **discovery** subset and a larger **replication** subset,
+call sites by pooling reads within the discovery subset only (same
+"joint" pooling + chi-squared approach used throughout this project),
+then check — in the independent replication subset — (1) what fraction
+of discovery-called sites are also significant, and (2) how well %pU
+at those sites correlates between discovery and replication.
+
+<!-- This also addresses two concerns raised before running it: (1) union -->
+<!-- site calling has substantial per-cell-line noise in individual -->
+<!-- `treated - input` values (see the QTL phenotype work), which is -->
+<!-- informal evidence that not every "called" site cleanly replicates -->
+<!-- across samples; (2) with only ~20% of cell lines in the discovery pool, -->
+<!-- per-site read depth in that pool will be considerably lower than the -->
+<!-- full 51-cell-line joint pool (which itself already showed many -->
+<!-- low-depth sites) — so discovery-pool depth is reported explicitly -->
+<!-- alongside the replication numbers, to separate "site wasn't real" from -->
+<!-- "site wasn't callable with this few samples." -->
+
+**Design**: 51 cell lines split into discovery (~20%, 10 cell lines)
+and replication (~80%, 41 cell lines), independently for
+`r N_SPLITS` random splits (different cell lines in the discovery pool
+each time), to see how much the result depends on which specific cell
+lines end up in discovery. Site calling in both pools uses the same
+thresholds as the standard joint pipeline (FDR < `r FDR_THRESH`,
+rate_diff > `r RATEDIFF_THRESH`, depth >= `r DEPTH_THRESH`).
+
+```{r load-data}
+load_split <- function(i) {
+  disc_dir <- file.path(JOINT_DIR, paste0("discovery_split", i, "_mRNA"))
+  repl_dir <- file.path(JOINT_DIR, paste0("replication_split", i, "_mRNA"))
+
+  discovery_sites <- fread(file.path(disc_dir, "joint_mRNA.global_sites.txt.gz"))
+  discovery_sites <- discovery_sites[fdr < FDR_THRESH]   # apply FDR cutoff to discovery calls too
+  replication_full <- fread(file.path(repl_dir, "joint_mRNA.pseusite.txt.gz"))
+
+  matched <- merge(
+    discovery_sites, replication_full,
+    by = c("ref", "pos", "strand"), suffixes = c(".disc", ".repl")
+  )
+  matched[, split := i]
+  matched
+}
+
+all_splits <- rbindlist(lapply(seq_len(N_SPLITS), load_split))
+#cat("Total discovery-called sites (pooled across splits):", nrow(all_splits), "\n")
+```
+
+# Discovery-pool depth
+
+Read depth at discovery-called sites, using only the discovery pool's
+own reads (10 cell lines) 
+
+<!-- — the concern is that this may be -->
+<!-- considerably shallower than the full-cohort joint pool. -->
+
+```{r discovery-depth}
+depth_summary <- all_splits[, .(
+  n_sites = .N,
+  median_depth = as.double(median(depth.disc)),
+  q25_depth = as.double(quantile(depth.disc, 0.25)),
+  q75_depth = as.double(quantile(depth.disc, 0.75))
+), by = split]
+knitr::kable(depth_summary, digits = 1, caption = "Discovery-pool read depth at discovery-called sites, by split")
+```
+
+```{r depth-hist, fig.height=4.5}
+ggplot(all_splits, aes(x = depth.disc)) +
+  geom_histogram(bins = 60, fill = "steelblue") +
+  facet_wrap(~ split, ncol = 3, labeller = label_both) +
+  labs(x = "discovery-pool depth at called sites", y = "count",
+       title = "Discovery-pool depth distribution, by split") +
+  theme_bw(base_size = 12)
+```
+
+# Replication rate
+
+For each discovery-called site, checking whether it's *also* significant
+under the same thresholds (FDR < `r FDR_THRESH`, rate_diff >
+`r RATEDIFF_THRESH`, depth >= `r DEPTH_THRESH`) in the independent
+replication pool.
+
+```{r replication-rate}
+all_splits[, replicated := (fdr.repl < FDR_THRESH) & (rate_diff.repl > RATEDIFF_THRESH) & (depth.repl >= DEPTH_THRESH)]
+all_splits[, tested_in_repl := depth.repl >= DEPTH_THRESH]
+
+repl_summary <- all_splits[, .(
+  n_discovery_sites = .N,
+  n_testable_in_replication = sum(tested_in_repl),
+  n_replicated = sum(replicated, na.rm = TRUE),
+  replication_rate = round(sum(replicated, na.rm = TRUE) / .N, 3)
+), by = split]
+knitr::kable(repl_summary, caption = "Replication rate by split")
+```
+
+Column definitions:
+
+- `n_discovery_sites`: number of sites called in the discovery pool.
+- `n_testable_in_replication`: of those, the number that have adequate
+  depth (>= `r DEPTH_THRESH`) in the *replication* pool — i.e. sites
+  with enough replication-pool reads to actually be evaluated for
+  significance, whether or not they replicated.
+- `n_replicated`: of the discovery sites, the number that are also
+  significant in the replication pool (FDR < `r FDR_THRESH`, rate_diff >
+  `r RATEDIFF_THRESH`, depth >= `r DEPTH_THRESH`).
+- `replication_rate`: `n_replicated / n_discovery_sites`.
+
+```{r replication-rate-plot, fig.height=4.5}
+ggplot(repl_summary, aes(x = factor(split), y = replication_rate)) +
+  geom_col(fill = "steelblue", width = 0.5) +
+  geom_text(aes(label = scales::percent(replication_rate)), vjust = -0.5) +
+  scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+  labs(x = "split", y = "replication rate",
+       title = "Fraction of discovery-called sites significant in replication") +
+  theme_bw(base_size = 13)
+```
+
+# %pU correlation between discovery and replication
+
+Comparing `ratio` (treated %pU, from the chi-squared test's pooled
+treated counts) at discovery-called sites, discovery pool vs.
+replication pool.
+
+```{r correlation-plot, fig.height=5}
+cor_by_split <- all_splits[, .(
+  pearson_r = round(cor(ratio.disc, ratio.repl, use = "complete.obs"), 3),
+  n = .N
+), by = split]
+knitr::kable(cor_by_split, caption = "%pU correlation (discovery vs. replication), by split")
+
+ggplot(all_splits, aes(x = ratio.disc, y = ratio.repl)) +
+  geom_point(size = 0.6, alpha = 0.4) +
+  geom_abline(slope = 1, intercept = 0, color = "firebrick", linetype = "dashed") +
+  facet_wrap(~ split, ncol = 3, labeller = label_both) +
+  labs(x = "%pU, discovery pool", y = "%pU, replication pool",
+       title = "%pU at discovery-called sites: discovery vs. replication") +
+  theme_bw(base_size = 12)
+```
+
+# Notes
+
+- Discovery-pool depth (above) directly addresses the concern that
+  calling sites from only ~10 pooled cell lines may be depth-limited
+  compared to the full 51-cell-line joint pool.
+- Replication rate and %pU correlation are reported per split (not
+  just pooled) to show how much the result depends on which specific
+  cell lines happen to land in the discovery pool.
+- `n_testable_in_replication` turns out to be nearly identical to
+  `n_discovery_sites` (see the note under the replication-rate table):
+  the larger replication pool gives essentially every discovery site
+  adequate depth to be tested. So non-replication here reflects sites
+  that genuinely fail to reproduce as significant in independent
+  samples, not sites that were too shallow in replication to evaluate.

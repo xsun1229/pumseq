@@ -18,4 +18,4 @@ set -euo pipefail
 module load pandoc
 module load R/4.2.0
 cd /home/sxt1229/xsun.xin3/website/pumseq
-Rscript --vanilla -e '.libPaths(c("/software/R-4.2.0-el8-x86_64/lib64/R/library","/home/sxt1229/R/x86_64-pc-linux-gnu-library/4.2")); workflowr::wflow_build("analysis/qtl_mapping_summary_floor0_quantile.Rmd", view = FALSE)'
+Rscript --vanilla -e '.libPaths(c("/software/R-4.2.0-el8-x86_64/lib64/R/library","/home/sxt1229/R/x86_64-pc-linux-gnu-library/4.2")); workflowr::wflow_build("analysis/qc_mRNA_discovery_replication.Rmd", view = FALSE)'
