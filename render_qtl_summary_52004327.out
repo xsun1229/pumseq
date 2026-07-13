@@ -8,7 +8,7 @@ During startup - Warning messages:
 7: Setting LC_MEASUREMENT failed, using "C" 
 Current working directory: /project/xinhe/xsun/website/pumseq
 Building 1 file(s):
-Building analysis/qtl_mapping_summary_floor0_quantile.Rmd
+Building analysis/qc_mRNA_discovery_replication.Rmd
 Summary from wflow_build
 
 Settings:
@@ -16,6 +16,6 @@ Settings:
 
 The following were built externally each in their own fresh R session: 
 
-docs/qtl_mapping_summary_floor0_quantile.html
+docs/qc_mRNA_discovery_replication.html
 
-Log files saved in /scratch/local/jobs/51666527/Rtmp1an7mo/workflowr
+Log files saved in /scratch/local/jobs/52004327/RtmpKjyWGO/workflowr

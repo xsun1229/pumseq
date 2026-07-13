@@ -165,17 +165,17 @@ ggplot(all_splits, aes(x = ratio.disc, y = ratio.repl)) +
   theme_bw(base_size = 12)
 ```
 
-# Notes
+<!-- # Notes -->
 
-- Discovery-pool depth (above) directly addresses the concern that
-  calling sites from only ~10 pooled cell lines may be depth-limited
-  compared to the full 51-cell-line joint pool.
-- Replication rate and %pU correlation are reported per split (not
-  just pooled) to show how much the result depends on which specific
-  cell lines happen to land in the discovery pool.
-- `n_testable_in_replication` turns out to be nearly identical to
-  `n_discovery_sites` (see the note under the replication-rate table):
-  the larger replication pool gives essentially every discovery site
-  adequate depth to be tested. So non-replication here reflects sites
-  that genuinely fail to reproduce as significant in independent
-  samples, not sites that were too shallow in replication to evaluate.
+<!-- - Discovery-pool depth (above) directly addresses the concern that -->
+<!--   calling sites from only ~10 pooled cell lines may be depth-limited -->
+<!--   compared to the full 51-cell-line joint pool. -->
+<!-- - Replication rate and %pU correlation are reported per split (not -->
+<!--   just pooled) to show how much the result depends on which specific -->
+<!--   cell lines happen to land in the discovery pool. -->
+<!-- - `n_testable_in_replication` turns out to be nearly identical to -->
+<!--   `n_discovery_sites` (see the note under the replication-rate table): -->
+<!--   the larger replication pool gives essentially every discovery site -->
+<!--   adequate depth to be tested. So non-replication here reflects sites -->
+<!--   that genuinely fail to reproduce as significant in independent -->
+<!--   samples, not sites that were too shallow in replication to evaluate. -->

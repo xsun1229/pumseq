@@ -441,10 +441,10 @@ changes </a>
 <div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown is untracked by Git. To know which version of the R
-Markdown file created these results, you’ll want to first commit it to
-the Git repo. If you’re still working on the analysis, you can ignore
-this warning. When you’re finished, you can run
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
 <code>wflow_publish</code> to commit the R Markdown file and build the
 HTML.</p>
 </div>
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree69002b44e8d5c631e3598c6ef75f27472a2a84c8targetblank69002b4a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreea77e99bed1f70573f29ee068cdf2fdec243020cftargetblanka77e99ba">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/69002b44e8d5c631e3598c6ef75f27472a2a84c8" target="_blank">69002b4</a>
+<a href="https://github.com/xsun1229/pumseq/tree/a77e99bed1f70573f29ee068cdf2fdec243020cf" target="_blank">a77e99b</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree69002b44e8d5c631e3598c6ef75f27472a2a84c8targetblank69002b4a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreea77e99bed1f70573f29ee068cdf2fdec243020cftargetblanka77e99ba"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/69002b44e8d5c631e3598c6ef75f27472a2a84c8" target="_blank">69002b4</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/a77e99bed1f70573f29ee068cdf2fdec243020cf" target="_blank">a77e99b</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -573,11 +573,13 @@ Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Untracked files:
-    Untracked:  analysis/qc_mRNA_discovery_replication.Rmd
-    Untracked:  render_qtl_summary_52003564.out
+    Untracked:  render_qtl_summary_52004327.out
 
 Unstaged changes:
-    Modified:   render_qtl_summary.sbatch
+    Modified:   analysis/qc_mRNA_discovery_replication.Rmd
+    Deleted:    render_qtl_summary_51473911.out
+    Deleted:    render_qtl_summary_51666527.out
+    Deleted:    render_qtl_summary_52003564.out
 
 </code></pre>
 <p>
@@ -592,10 +594,75 @@ have uncommitted changes.
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
+
 <p>
-There are no past versions. Publish this analysis with
-<code>wflow_publish()</code> to start tracking its development.
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>analysis/qc_mRNA_discovery_replication.Rmd</code>) and HTML
+(<code>docs/qc_mRNA_discovery_replication.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
 </p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/a77e99bed1f70573f29ee068cdf2fdec243020cf/analysis/qc_mRNA_discovery_replication.Rmd" target="_blank">a77e99b</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-13
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/a77e99bed1f70573f29ee068cdf2fdec243020cf/docs/qc_mRNA_discovery_replication.html" target="_blank">a77e99b</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-13
+</td>
+<td>
+update
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <hr>
 </div>
 </div>
@@ -715,6 +782,43 @@ split</caption>
        title = &quot;Discovery-pool depth distribution, by split&quot;) +
   theme_bw(base_size = 12)</code></pre>
 <p><img src="figure/qc_mRNA_discovery_replication.Rmd/depth-hist-1.png" width="864" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-depth-hist-1">
+Past versions of depth-hist-1.png
+</button>
+</p>
+<div id="fig-depth-hist-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/a77e99bed1f70573f29ee068cdf2fdec243020cf/docs/figure/qc_mRNA_discovery_replication.Rmd/depth-hist-1.png" target="_blank">a77e99b</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="replication-rate" class="section level1">
 <h1>Replication rate</h1>
@@ -795,6 +899,43 @@ are also significant in the replication pool (FDR &lt; 0.01, rate_diff
        title = &quot;Fraction of discovery-called sites significant in replication&quot;) +
   theme_bw(base_size = 13)</code></pre>
 <p><img src="figure/qc_mRNA_discovery_replication.Rmd/replication-rate-plot-1.png" width="864" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-replication-rate-plot-1">
+Past versions of replication-rate-plot-1.png
+</button>
+</p>
+<div id="fig-replication-rate-plot-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/a77e99bed1f70573f29ee068cdf2fdec243020cf/docs/figure/qc_mRNA_discovery_replication.Rmd/replication-rate-plot-1.png" target="_blank">a77e99b</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="pu-correlation-between-discovery-and-replication"
 class="section level1">
@@ -842,24 +983,56 @@ knitr::kable(cor_by_split, caption = &quot;%pU correlation (discovery vs. replic
        title = &quot;%pU at discovery-called sites: discovery vs. replication&quot;) +
   theme_bw(base_size = 12)</code></pre>
 <p><img src="figure/qc_mRNA_discovery_replication.Rmd/correlation-plot-1.png" width="864" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-correlation-plot-1">
+Past versions of correlation-plot-1.png
+</button>
+</p>
+<div id="fig-correlation-plot-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/a77e99bed1f70573f29ee068cdf2fdec243020cf/docs/figure/qc_mRNA_discovery_replication.Rmd/correlation-plot-1.png" target="_blank">a77e99b</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-13
+</td>
+</tr>
+</tbody>
+</table>
 </div>
-<div id="notes" class="section level1">
-<h1>Notes</h1>
-<ul>
-<li>Discovery-pool depth (above) directly addresses the concern that
-calling sites from only ~10 pooled cell lines may be depth-limited
-compared to the full 51-cell-line joint pool.</li>
-<li>Replication rate and %pU correlation are reported per split (not
-just pooled) to show how much the result depends on which specific cell
-lines happen to land in the discovery pool.</li>
-<li><code>n_testable_in_replication</code> turns out to be nearly
-identical to <code>n_discovery_sites</code> (see the note under the
-replication-rate table): the larger replication pool gives essentially
-every discovery site adequate depth to be tested. So non-replication
-here reflects sites that genuinely fail to reproduce as significant in
-independent samples, not sites that were too shallow in replication to
-evaluate.</li>
-</ul>
+</div>
+<!-- # Notes -->
+<!-- - Discovery-pool depth (above) directly addresses the concern that -->
+<!--   calling sites from only ~10 pooled cell lines may be depth-limited -->
+<!--   compared to the full 51-cell-line joint pool. -->
+<!-- - Replication rate and %pU correlation are reported per split (not -->
+<!--   just pooled) to show how much the result depends on which specific -->
+<!--   cell lines happen to land in the discovery pool. -->
+<!-- - `n_testable_in_replication` turns out to be nearly identical to -->
+<!--   `n_discovery_sites` (see the note under the replication-rate table): -->
+<!--   the larger replication pool gives essentially every discovery site -->
+<!--   adequate depth to be tested. So non-replication here reflects sites -->
+<!--   that genuinely fail to reproduce as significant in independent -->
+<!--   samples, not sites that were too shallow in replication to evaluate. -->
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">

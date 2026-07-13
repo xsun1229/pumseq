@@ -14,7 +14,7 @@ editor_options:
 * [Project overview](overview.html)
 * [Pipeline](pipeline.html)
 
-# Quality Control
+# Quality Control -- site calling
 
 **rRNA**
 
@@ -32,7 +32,7 @@ editor_options:
 * [Joint pooling vs union-of-per-cell-line site calling, 3 cell lines for testing](qc_joint_union.html)
 * [QC — Joint cross-cell-line mRNA pU sites (51 cell lines)](qc_joint_all51_mRNA.html)
 * [QC — Union cross-cell-line mRNA pU sites (51 cell lines)](qc_union_all51_mRNA.html)
-
+* [QC — Discovery/replication validation of joint-pooled pU site calling](qc_mRNA_discovery_replication.html)
 
 # QTL mapping
 
