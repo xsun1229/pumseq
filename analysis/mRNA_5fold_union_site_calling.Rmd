@@ -71,11 +71,12 @@ thr <- rbindlist(lapply(1:N_FOLDS, function(k) {
     min_folds             = k,
     n_sites               = nrow(sub),
     pct_cds_utr           = round(100 * mean(sub$feature %in% c("CDS", "5UTR", "3UTR")), 1),
+    pct_ncrna             = round(100 * mean(sub$feature == "ncRNA"), 1),
     pct_intron_intergenic = round(100 * mean(sub$feature %in% c("Intron", "Intergenic")), 1),
     n_bacs                = sum(sub$in_bacs)
   )
 }))
-knitr::kable(thr, caption = "Sites called in >= k of 5 folds: count, CDS/UTR %, intron+intergenic %, BACS overlap")
+knitr::kable(thr, caption = "Sites called in >= k of 5 folds: count, CDS/UTR %, ncRNA %, intron+intergenic %, BACS overlap (the three feature percentages sum to 100)")
 ```
 
 # Feature composition by threshold
@@ -115,15 +116,26 @@ bcor <- rbindlist(lapply(1:N_FOLDS, function(k) {
 knitr::kable(bcor, caption = "%pU (ours) vs. BACS Ψ level: Pearson r, by >= k folds")
 ```
 
-```{r bacs-scatter, fig.height=5}
+One scatter per reproducibility level (sites called in exactly `k` folds),
+each with its own Pearson r:
+
+```{r bacs-scatter, fig.height=4.5, fig.width=5.5}
 sb <- sites[in_bacs & !is.na(mean_ratio)]
 r_all <- round(cor(sb$mean_ratio, sb$bacs_psi), 3)
-ggplot(sb, aes(x = bacs_psi, y = mean_ratio, color = factor(n_folds))) +
-  geom_point(size = 1, alpha = 0.6) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey40") +
-  labs(x = "BACS Ψ level", y = "our %pU (mean fold ratio)", color = "n_folds",
-       title = sprintf("Our %%pU vs. BACS Ψ level at overlapping sites (Pearson r = %.3f)", r_all)) +
-  theme_bw(base_size = 13)
+
+for (k in 1:N_FOLDS) {
+  sub <- sb[n_folds == k]
+  r_k <- round(cor(sub$mean_ratio, sub$bacs_psi), 3)
+  print(
+    ggplot(sub, aes(x = bacs_psi, y = mean_ratio)) +
+      geom_point(size = 1.2, alpha = 0.6, color = "steelblue") +
+      geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey40") +
+      labs(x = "BACS Ψ level", y = "our %pU (mean fold ratio)",
+           title = sprintf("Called in exactly %d fold(s): n = %d, Pearson r = %.3f",
+                           k, nrow(sub), r_k)) +
+      theme_bw(base_size = 12)
+  )
+}
 ```
 
 Our %pU correlates strongly with the BACS Ψ level (r ≈ `r r_all`), and the

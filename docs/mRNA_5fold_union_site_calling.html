@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree648523079f8c2e7f31ea7e4594fc8f29787283eftargetblank6485230a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree48e50b283ab206a9b2c4f288d3e160f5d6e5e3a1targetblank48e50b2a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/648523079f8c2e7f31ea7e4594fc8f29787283ef" target="_blank">6485230</a>
+<a href="https://github.com/xsun1229/pumseq/tree/48e50b283ab206a9b2c4f288d3e160f5d6e5e3a1" target="_blank">48e50b2</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree648523079f8c2e7f31ea7e4594fc8f29787283eftargetblank6485230a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree48e50b283ab206a9b2c4f288d3e160f5d6e5e3a1targetblank48e50b2a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/648523079f8c2e7f31ea7e4594fc8f29787283ef" target="_blank">6485230</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/48e50b283ab206a9b2c4f288d3e160f5d6e5e3a1" target="_blank">48e50b2</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -571,9 +571,6 @@ were generated:
 <pre><code>
 Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
-
-Untracked files:
-    Untracked:  render_qtl_summary_52179478.out
 
 Unstaged changes:
     Modified:   analysis/mRNA_5fold_union_site_calling.Rmd
@@ -623,6 +620,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/48e50b283ab206a9b2c4f288d3e160f5d6e5e3a1/analysis/mRNA_5fold_union_site_calling.Rmd" target="_blank">48e50b2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-15
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/48e50b283ab206a9b2c4f288d3e160f5d6e5e3a1/docs/mRNA_5fold_union_site_calling.html" target="_blank">48e50b2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-15
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -777,19 +808,30 @@ vs. <code>&gt;= k</code> folds</h1>
     min_folds             = k,
     n_sites               = nrow(sub),
     pct_cds_utr           = round(100 * mean(sub$feature %in% c(&quot;CDS&quot;, &quot;5UTR&quot;, &quot;3UTR&quot;)), 1),
+    pct_ncrna             = round(100 * mean(sub$feature == &quot;ncRNA&quot;), 1),
     pct_intron_intergenic = round(100 * mean(sub$feature %in% c(&quot;Intron&quot;, &quot;Intergenic&quot;)), 1),
     n_bacs                = sum(sub$in_bacs)
   )
 }))
-knitr::kable(thr, caption = &quot;Sites called in &gt;= k of 5 folds: count, CDS/UTR %, intron+intergenic %, BACS overlap&quot;)</code></pre>
+knitr::kable(thr, caption = &quot;Sites called in &gt;= k of 5 folds: count, CDS/UTR %, ncRNA %, intron+intergenic %, BACS overlap (the three feature percentages sum to 100)&quot;)</code></pre>
 <table>
-<caption>Sites called in &gt;= k of 5 folds: count, CDS/UTR %,
-intron+intergenic %, BACS overlap</caption>
+<caption>Sites called in &gt;= k of 5 folds: count, CDS/UTR %, ncRNA %,
+intron+intergenic %, BACS overlap (the three feature percentages sum to
+100)</caption>
+<colgroup>
+<col width="14%" />
+<col width="11%" />
+<col width="17%" />
+<col width="14%" />
+<col width="31%" />
+<col width="10%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="right">min_folds</th>
 <th align="right">n_sites</th>
 <th align="right">pct_cds_utr</th>
+<th align="right">pct_ncrna</th>
 <th align="right">pct_intron_intergenic</th>
 <th align="right">n_bacs</th>
 </tr>
@@ -799,6 +841,7 @@ intron+intergenic %, BACS overlap</caption>
 <td align="right">1</td>
 <td align="right">12662</td>
 <td align="right">63.3</td>
+<td align="right">9.9</td>
 <td align="right">26.8</td>
 <td align="right">467</td>
 </tr>
@@ -806,6 +849,7 @@ intron+intergenic %, BACS overlap</caption>
 <td align="right">2</td>
 <td align="right">4888</td>
 <td align="right">58.2</td>
+<td align="right">12.6</td>
 <td align="right">29.2</td>
 <td align="right">404</td>
 </tr>
@@ -813,6 +857,7 @@ intron+intergenic %, BACS overlap</caption>
 <td align="right">3</td>
 <td align="right">3265</td>
 <td align="right">54.9</td>
+<td align="right">14.4</td>
 <td align="right">30.8</td>
 <td align="right">370</td>
 </tr>
@@ -820,6 +865,7 @@ intron+intergenic %, BACS overlap</caption>
 <td align="right">4</td>
 <td align="right">2464</td>
 <td align="right">54.2</td>
+<td align="right">14.4</td>
 <td align="right">31.3</td>
 <td align="right">335</td>
 </tr>
@@ -827,6 +873,7 @@ intron+intergenic %, BACS overlap</caption>
 <td align="right">5</td>
 <td align="right">1876</td>
 <td align="right">54.3</td>
+<td align="right">14.9</td>
 <td align="right">30.8</td>
 <td align="right">303</td>
 </tr>
@@ -938,15 +985,63 @@ folds</caption>
 </tr>
 </tbody>
 </table>
+<p>One scatter per reproducibility level (sites called in exactly
+<code>k</code> folds), each with its own Pearson r:</p>
 <pre class="r"><code>sb &lt;- sites[in_bacs &amp; !is.na(mean_ratio)]
 r_all &lt;- round(cor(sb$mean_ratio, sb$bacs_psi), 3)
-ggplot(sb, aes(x = bacs_psi, y = mean_ratio, color = factor(n_folds))) +
-  geom_point(size = 1, alpha = 0.6) +
-  geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, color = &quot;grey40&quot;) +
-  labs(x = &quot;BACS Ψ level&quot;, y = &quot;our %pU (mean fold ratio)&quot;, color = &quot;n_folds&quot;,
-       title = sprintf(&quot;Our %%pU vs. BACS Ψ level at overlapping sites (Pearson r = %.3f)&quot;, r_all)) +
-  theme_bw(base_size = 13)</code></pre>
-<p><img src="figure/mRNA_5fold_union_site_calling.Rmd/bacs-scatter-1.png" width="864" style="display: block; margin: auto;" /></p>
+
+for (k in 1:N_FOLDS) {
+  sub &lt;- sb[n_folds == k]
+  r_k &lt;- round(cor(sub$mean_ratio, sub$bacs_psi), 3)
+  print(
+    ggplot(sub, aes(x = bacs_psi, y = mean_ratio)) +
+      geom_point(size = 1.2, alpha = 0.6, color = &quot;steelblue&quot;) +
+      geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, color = &quot;grey40&quot;) +
+      labs(x = &quot;BACS Ψ level&quot;, y = &quot;our %pU (mean fold ratio)&quot;,
+           title = sprintf(&quot;Called in exactly %d fold(s): n = %d, Pearson r = %.3f&quot;,
+                           k, nrow(sub), r_k)) +
+      theme_bw(base_size = 12)
+  )
+}</code></pre>
+<p><img src="figure/mRNA_5fold_union_site_calling.Rmd/bacs-scatter-1.png" width="528" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-bacs-scatter-1">
+Past versions of bacs-scatter-1.png
+</button>
+</p>
+<div id="fig-bacs-scatter-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/48e50b283ab206a9b2c4f288d3e160f5d6e5e3a1/docs/figure/mRNA_5fold_union_site_calling.Rmd/bacs-scatter-1.png" target="_blank">48e50b2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-15
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><img src="figure/mRNA_5fold_union_site_calling.Rmd/bacs-scatter-2.png" width="528" style="display: block; margin: auto;" /><img src="figure/mRNA_5fold_union_site_calling.Rmd/bacs-scatter-3.png" width="528" style="display: block; margin: auto;" /><img src="figure/mRNA_5fold_union_site_calling.Rmd/bacs-scatter-4.png" width="528" style="display: block; margin: auto;" /><img src="figure/mRNA_5fold_union_site_calling.Rmd/bacs-scatter-5.png" width="528" style="display: block; margin: auto;" /></p>
 <p>Our %pU correlates strongly with the BACS Ψ level (r ≈ 0.928), and
 the correlation is essentially flat across fold thresholds — the sites
 that overlap BACS are quantified accurately regardless of how many folds
@@ -965,7 +1060,7 @@ Session information
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.2.0 (2022-04-22)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Red Hat Enterprise Linux 8.4 (Ootpa)
+Running under: Red Hat Enterprise Linux 8.10 (Ootpa)
 
 Matrix products: default
 BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
