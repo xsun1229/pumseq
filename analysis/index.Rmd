@@ -33,7 +33,10 @@ editor_options:
 * [QC — Joint cross-cell-line mRNA pU sites (51 cell lines)](qc_joint_all51_mRNA.html)
 * [QC — Union cross-cell-line mRNA pU sites (51 cell lines)](qc_union_all51_mRNA.html)
 * [QC — Discovery/replication validation of joint-pooled pU site calling](qc_mRNA_discovery_replication.html)
+* [Site calling: 5-fold reproducibility filtering of joint-pooled pU site calling](mRNA_5fold_union_site_calling.html)
 
 # QTL mapping
 
-[Treated - input, floor0, quantile normalization](qtl_mapping_summary_floor0_quantile.html)
+[Treated - input, floor0, quantile normalization, linear regression](qtl_mapping_summary_floor0_quantile.html)
+
+

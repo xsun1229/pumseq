@@ -207,15 +207,49 @@ knitr::kable(rem_tab, caption = "Counts of the non-CDS/UTR ('remaining') sites, 
   sites), but they are *not* a majority of the remaining sites — ncRNA
   (~11–12%) and intergenic (~10–12%) are each substantial.
 - **Intergenic sites** number ~700–760 per discovery set (~10–12%).
-- **A meaningful fraction are from non-coding RNAs**: the ncRNA category
-  (~11–12%, sites in non-protein-coding-gene exons) captures lncRNA /
-  snoRNA / miRNA / pseudogene exons. So yes — some remaining sites are
-  genuinely ncRNA-derived.
-- **Repeats are not yet assessed** — the current annotation has no
-  RepeatMasker track (none present in the reference directory). Overlapping
-  these sites (especially the intronic/intergenic ones) with a RepeatMasker
-  track would test whether they are repeat-derived; this needs the track to
-  be added.
+
+## Repeat overlap (RepeatMasker)
+
+Overlap of discovery sites with the UCSC hg38 RepeatMasker track (any repeat
+class, strand-agnostic), to test whether the non-coding (intron/intergenic)
+sites are repeat-derived.
+
+```{r repeat-overlap}
+cx <- fread("/project/xinhe/xsun/pumseq/pumseq_processed/joint/discovery_splits_feature_repeat_crosstab.txt")
+
+# overall % of sites in a repeat, by split
+overall <- cx[, .(n_sites = sum(n), n_in_repeat = sum(n_rep),
+                  pct_in_repeat = round(100 * sum(n_rep) / sum(n), 1)), by = split]
+knitr::kable(overall, caption = "Discovery sites overlapping a repeat, by split")
+
+# % in repeat by feature x split
+frtab <- dcast(cx, feature ~ split, value.var = "pct_rep")[match(feat_levels, feature)]
+setnames(frtab, c("feature", "split 1 %", "split 2 %", "split 3 %"))
+knitr::kable(frtab, caption = "Percent of sites overlapping a repeat, by genomic feature and split")
+```
+
+```{r repeat-class, fig.height=5}
+rs <- fread("/project/xinhe/xsun/pumseq/pumseq_processed/joint/discovery_splits_repeat_summary.txt")
+rc <- rs[repeat_class != "None"]
+# order classes by total abundance
+ord <- rc[, .(tot = sum(n)), by = repeat_class][order(-tot), repeat_class]
+rc[, repeat_class := factor(repeat_class, levels = ord)]
+ggplot(rc, aes(x = repeat_class, y = n, fill = factor(split))) +
+  geom_col(position = "dodge") +
+  labs(x = "repeat class", y = "number of sites", fill = "split",
+       title = "Repeat-class composition of repeat-overlapping discovery sites") +
+  theme_bw(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+- **~20–23% of all discovery sites overlap a repeat**, and this is **strongly
+  feature-dependent**: CDS sites are essentially repeat-free (~2%), but
+  **intergenic sites are ~49–54% repeat-derived and intronic sites ~33–36%**.
+  A large share of the "remaining" (intron/intergenic) sites fall in
+  repeats, consistent with them being partly repeat-associated / less
+  trustworthy rather than genuine coding-transcript pU.
+- **Dominant repeat classes**: SINE (mostly Alu, the largest), then rRNA,
+  LINE, and LTR. 
 
 <!-- # Notes -->
 

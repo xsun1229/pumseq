@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeb722338c19256113eb46bd8953511133d0759bc9targetblankb722338a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree481b9699129b89683a69317d88005b5433ee39fctargetblank481b969a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/b722338c19256113eb46bd8953511133d0759bc9" target="_blank">b722338</a>
+<a href="https://github.com/xsun1229/pumseq/tree/481b9699129b89683a69317d88005b5433ee39fc" target="_blank">481b969</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeb722338c19256113eb46bd8953511133d0759bc9targetblankb722338a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree481b9699129b89683a69317d88005b5433ee39fctargetblank481b969a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/b722338c19256113eb46bd8953511133d0759bc9" target="_blank">b722338</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/481b9699129b89683a69317d88005b5433ee39fc" target="_blank">481b969</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -570,16 +570,15 @@ were generated:
 </p>
 <pre><code>
 Ignored files:
-    Ignored:    analysis/figure/
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Untracked files:
-    Untracked:  render_qtl_summary_52178117.out
+    Untracked:  render_qtl_summary_52179078.out
 
 Unstaged changes:
-    Modified:   analysis/mRNA_5fold_union_site_calling.Rmd
+    Modified:   analysis/index.Rmd
     Modified:   analysis/qc_mRNA_discovery_replication.Rmd
-    Deleted:    render_qtl_summary_52004327.out
+    Deleted:    render_qtl_summary_52178117.out
 
 </code></pre>
 <p>
@@ -626,6 +625,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/481b9699129b89683a69317d88005b5433ee39fc/analysis/qc_mRNA_discovery_replication.Rmd" target="_blank">481b969</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-15
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/481b9699129b89683a69317d88005b5433ee39fc/docs/qc_mRNA_discovery_replication.html" target="_blank">481b969</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-15
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1129,6 +1162,43 @@ knitr::kable(tab, caption = &quot;Feature distribution of discovery sites, 3 dis
        title = &quot;Feature composition of the 3 discovery sets&quot;) +
   theme_bw(base_size = 13)</code></pre>
 <p><img src="figure/qc_mRNA_discovery_replication.Rmd/feature-dist-1.png" width="864" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-feature-dist-1">
+Past versions of feature-dist-1.png
+</button>
+</p>
+<div id="fig-feature-dist-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/481b9699129b89683a69317d88005b5433ee39fc/docs/figure/qc_mRNA_discovery_replication.Rmd/feature-dist-1.png" target="_blank">481b969</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-15
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <div id="the-remaining-non-coding-sites-intron-vs.-intergenic-vs.-ncrna"
 class="section level2">
 <h2>The “remaining” (non-coding) sites: intron vs. intergenic
@@ -1183,11 +1253,130 @@ substantial.</li>
 ncRNA category (~11–12%, sites in non-protein-coding-gene exons)
 captures lncRNA / snoRNA / miRNA / pseudogene exons. So yes — some
 remaining sites are genuinely ncRNA-derived.</li>
-<li><strong>Repeats are not yet assessed</strong> — the current
-annotation has no RepeatMasker track (none present in the reference
-directory). Overlapping these sites (especially the intronic/intergenic
-ones) with a RepeatMasker track would test whether they are
-repeat-derived; this needs the track to be added.</li>
+<li><strong>A meaningful fraction of the remaining sites are
+repeat-derived</strong> — see the RepeatMasker overlap below.</li>
+</ul>
+</div>
+<div id="repeat-overlap-repeatmasker" class="section level2">
+<h2>Repeat overlap (RepeatMasker)</h2>
+<p>Overlap of discovery sites with the UCSC hg38 RepeatMasker track (any
+repeat class, strand-agnostic), to test whether the non-coding
+(intron/intergenic) sites are repeat-derived.</p>
+<pre class="r"><code>cx &lt;- fread(&quot;/project/xinhe/xsun/pumseq/pumseq_processed/joint/discovery_splits_feature_repeat_crosstab.txt&quot;)
+
+# overall % of sites in a repeat, by split
+overall &lt;- cx[, .(n_sites = sum(n), n_in_repeat = sum(n_rep),
+                  pct_in_repeat = round(100 * sum(n_rep) / sum(n), 1)), by = split]
+knitr::kable(overall, caption = &quot;Discovery sites overlapping a repeat, by split&quot;)</code></pre>
+<table>
+<caption>Discovery sites overlapping a repeat, by split</caption>
+<thead>
+<tr class="header">
+<th align="right">split</th>
+<th align="right">n_sites</th>
+<th align="right">n_in_repeat</th>
+<th align="right">pct_in_repeat</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">7493</td>
+<td align="right">1475</td>
+<td align="right">19.7</td>
+</tr>
+<tr class="even">
+<td align="right">2</td>
+<td align="right">6613</td>
+<td align="right">1514</td>
+<td align="right">22.9</td>
+</tr>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">5566</td>
+<td align="right">1289</td>
+<td align="right">23.2</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># % in repeat by feature x split
+frtab &lt;- dcast(cx, feature ~ split, value.var = &quot;pct_rep&quot;)[match(feat_levels, feature)]
+setnames(frtab, c(&quot;feature&quot;, &quot;split 1 %&quot;, &quot;split 2 %&quot;, &quot;split 3 %&quot;))
+knitr::kable(frtab, caption = &quot;Percent of sites overlapping a repeat, by genomic feature and split&quot;)</code></pre>
+<table>
+<caption>Percent of sites overlapping a repeat, by genomic feature and
+split</caption>
+<thead>
+<tr class="header">
+<th align="left">feature</th>
+<th align="right">split 1 %</th>
+<th align="right">split 2 %</th>
+<th align="right">split 3 %</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">5UTR</td>
+<td align="right">13.6</td>
+<td align="right">15.6</td>
+<td align="right">14.7</td>
+</tr>
+<tr class="even">
+<td align="left">CDS</td>
+<td align="right">1.7</td>
+<td align="right">2.3</td>
+<td align="right">1.8</td>
+</tr>
+<tr class="odd">
+<td align="left">3UTR</td>
+<td align="right">22.3</td>
+<td align="right">24.3</td>
+<td align="right">26.1</td>
+</tr>
+<tr class="even">
+<td align="left">ncRNA</td>
+<td align="right">17.9</td>
+<td align="right">21.1</td>
+<td align="right">18.5</td>
+</tr>
+<tr class="odd">
+<td align="left">Intron</td>
+<td align="right">32.6</td>
+<td align="right">34.0</td>
+<td align="right">36.3</td>
+</tr>
+<tr class="even">
+<td align="left">Intergenic</td>
+<td align="right">49.2</td>
+<td align="right">51.7</td>
+<td align="right">54.2</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>rs &lt;- fread(&quot;/project/xinhe/xsun/pumseq/pumseq_processed/joint/discovery_splits_repeat_summary.txt&quot;)
+rc &lt;- rs[repeat_class != &quot;None&quot;]
+# order classes by total abundance
+ord &lt;- rc[, .(tot = sum(n)), by = repeat_class][order(-tot), repeat_class]
+rc[, repeat_class := factor(repeat_class, levels = ord)]
+ggplot(rc, aes(x = repeat_class, y = n, fill = factor(split))) +
+  geom_col(position = &quot;dodge&quot;) +
+  labs(x = &quot;repeat class&quot;, y = &quot;number of sites&quot;, fill = &quot;split&quot;,
+       title = &quot;Repeat-class composition of repeat-overlapping discovery sites&quot;) +
+  theme_bw(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))</code></pre>
+<p><img src="figure/qc_mRNA_discovery_replication.Rmd/repeat-class-1.png" width="864" style="display: block; margin: auto;" /></p>
+<ul>
+<li><strong>~20–23% of all discovery sites overlap a repeat</strong>,
+and this is <strong>strongly feature-dependent</strong>: CDS sites are
+essentially repeat-free (~2%), but <strong>intergenic sites are ~49–54%
+repeat-derived and intronic sites ~33–36%</strong>. So yes — a large
+share of the “remaining” (intron/intergenic) sites fall in repeats,
+consistent with them being partly repeat-associated / less trustworthy
+rather than genuine coding-transcript pU.</li>
+<li><strong>Dominant repeat classes</strong>: SINE (mostly Alu, the
+largest), then rRNA, LINE, and LTR. The rRNA overlap is notable given
+pseudouridylation is abundant in rRNA — some of these may be
+rRNA-derived reads mapping to rDNA-like repeats.</li>
 </ul>
 <!-- # Notes -->
 <!-- - Discovery-pool depth (above) directly addresses the concern that -->
