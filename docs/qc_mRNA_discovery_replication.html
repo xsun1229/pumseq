@@ -382,7 +382,7 @@ joint-pooled pU site calling</h1>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
 <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+workflowr <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span>
 </button>
 </p>
@@ -393,8 +393,8 @@ aria-hidden="true"></span>
 </li>
 <li>
 <a data-toggle="tab" href="#checks"> Checks <span
-class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> </a>
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -407,9 +407,9 @@ aria-hidden="true"></span> </a>
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> 1
+aria-hidden="true"></span> 0
 </p>
 <p>
 <strong>Knit directory:</strong> <code>pumseq/</code> <span
@@ -432,21 +432,18 @@ versions</em> tab lists the development history.
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
-<span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
-changes </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguncommittedchanges"
+<div id="strongRMarkdownfilestronguptodate"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown file has unstaged changes. To know which version of
-the R Markdown file created these results, you’ll want to first commit
-it to the Git repo. If you’re still working on the analysis, you can
-ignore this warning. When you’re finished, you can run
-<code>wflow_publish</code> to commit the R Markdown file and build the
-HTML.</p>
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
 </div>
 </div>
 </div>
@@ -537,15 +534,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree481b9699129b89683a69317d88005b5433ee39fctargetblank481b969a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree648523079f8c2e7f31ea7e4594fc8f29787283eftargetblank6485230a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/481b9699129b89683a69317d88005b5433ee39fc" target="_blank">481b969</a>
+<a href="https://github.com/xsun1229/pumseq/tree/648523079f8c2e7f31ea7e4594fc8f29787283ef" target="_blank">6485230</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree481b9699129b89683a69317d88005b5433ee39fctargetblank481b969a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree648523079f8c2e7f31ea7e4594fc8f29787283eftargetblank6485230a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +552,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/481b9699129b89683a69317d88005b5433ee39fc" target="_blank">481b969</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/648523079f8c2e7f31ea7e4594fc8f29787283ef" target="_blank">6485230</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -573,12 +570,7 @@ Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Untracked files:
-    Untracked:  render_qtl_summary_52179078.out
-
-Unstaged changes:
-    Modified:   analysis/index.Rmd
-    Modified:   analysis/qc_mRNA_discovery_replication.Rmd
-    Deleted:    render_qtl_summary_52178117.out
+    Untracked:  render_qtl_summary_52179478.out
 
 </code></pre>
 <p>
@@ -625,6 +617,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/648523079f8c2e7f31ea7e4594fc8f29787283ef/analysis/qc_mRNA_discovery_replication.Rmd" target="_blank">6485230</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-15
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/648523079f8c2e7f31ea7e4594fc8f29787283ef/docs/qc_mRNA_discovery_replication.html" target="_blank">6485230</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-15
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1249,12 +1275,6 @@ remaining sites — ncRNA (~11–12%) and intergenic (~10–12%) are each
 substantial.</li>
 <li><strong>Intergenic sites</strong> number ~700–760 per discovery set
 (~10–12%).</li>
-<li><strong>A meaningful fraction are from non-coding RNAs</strong>: the
-ncRNA category (~11–12%, sites in non-protein-coding-gene exons)
-captures lncRNA / snoRNA / miRNA / pseudogene exons. So yes — some
-remaining sites are genuinely ncRNA-derived.</li>
-<li><strong>A meaningful fraction of the remaining sites are
-repeat-derived</strong> — see the RepeatMasker overlap below.</li>
 </ul>
 </div>
 <div id="repeat-overlap-repeatmasker" class="section level2">
@@ -1365,18 +1385,53 @@ ggplot(rc, aes(x = repeat_class, y = n, fill = factor(split))) +
   theme_bw(base_size = 12) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))</code></pre>
 <p><img src="figure/qc_mRNA_discovery_replication.Rmd/repeat-class-1.png" width="864" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-repeat-class-1">
+Past versions of repeat-class-1.png
+</button>
+</p>
+<div id="fig-repeat-class-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/648523079f8c2e7f31ea7e4594fc8f29787283ef/docs/figure/qc_mRNA_discovery_replication.Rmd/repeat-class-1.png" target="_blank">6485230</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-15
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <ul>
 <li><strong>~20–23% of all discovery sites overlap a repeat</strong>,
 and this is <strong>strongly feature-dependent</strong>: CDS sites are
 essentially repeat-free (~2%), but <strong>intergenic sites are ~49–54%
-repeat-derived and intronic sites ~33–36%</strong>. So yes — a large
-share of the “remaining” (intron/intergenic) sites fall in repeats,
-consistent with them being partly repeat-associated / less trustworthy
-rather than genuine coding-transcript pU.</li>
+repeat-derived and intronic sites ~33–36%</strong>. A large share of the
+“remaining” (intron/intergenic) sites fall in repeats, consistent with
+them being partly repeat-associated / less trustworthy rather than
+genuine coding-transcript pU.</li>
 <li><strong>Dominant repeat classes</strong>: SINE (mostly Alu, the
-largest), then rRNA, LINE, and LTR. The rRNA overlap is notable given
-pseudouridylation is abundant in rRNA — some of these may be
-rRNA-derived reads mapping to rDNA-like repeats.</li>
+largest), then rRNA, LINE, and LTR.</li>
 </ul>
 <!-- # Notes -->
 <!-- - Discovery-pool depth (above) directly addresses the concern that -->

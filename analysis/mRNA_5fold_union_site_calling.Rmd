@@ -97,37 +97,38 @@ ggplot(comp, aes(x = factor(min_folds), y = pct, fill = feature)) +
 
 
 
-<!-- # Findings -->
 
-<!-- - **Reproducibility strongly enriches for validated (BACS) sites.** BACS -->
-<!--   overlap rises from `r thr[min_folds==1, pct_bacs]`% (plain union) to -->
-<!--   `r thr[min_folds==5, pct_bacs]`% (all 5 folds) — a -->
-<!--   `r round(thr[min_folds==5, pct_bacs] / thr[min_folds==1, pct_bacs], 1)`× -->
-<!--   enrichment. The single-fold-only sites are nearly devoid of BACS overlap -->
-<!--   (`r thr[min_folds==1, n_bacs] - thr[min_folds==2, n_bacs]` BACS sites out -->
-<!--   of `r sites[n_folds==1, .N]` single-fold sites), i.e. they are mostly -->
-<!--   spurious — the fold filter removes them effectively. **A reproducibility -->
-<!--   filter is well justified.** -->
-<!-- - **It does NOT enrich for CDS/UTR — it slightly de-enriches.** CDS+UTR -->
-<!--   fraction *drops* (`r thr[min_folds==1, pct_cds_utr]`% → -->
-<!--   `r thr[min_folds==5, pct_cds_utr]`%) and intron+intergenic rises as more -->
-<!--   folds are required. So the genomic feature distribution is *not* a good -->
-<!--   "realness" discriminator here; BACS overlap is the trustworthy signal, and -->
-<!--   it says reproducibility works even though the feature mix does not shift as -->
-<!--   one might expect. -->
+# Agreement with BACS (%pU vs. BACS Ψ level)
 
-<!-- # Recommendation -->
+For the sites overlapping BACS, how well does our %pU (mean of the pooled
+`ratio` across the folds that called each site) agree with the orthogonal
+BACS Ψ level? A high Pearson correlation is a validation that our
+quantification is accurate. We also check whether agreement changes with
+the fold-reproducibility threshold.
 
-<!-- - **Avoid the plain union (`>= 1`)** — `r thr[min_folds==1, pct_bacs]`% BACS -->
-<!--   and dominated by non-reproducible single-fold sites. -->
-<!-- - **`>= 2` folds** is the natural minimum (analogous to the existing -->
-<!--   `n_called >= 2`): it roughly doubles BACS enrichment -->
-<!--   (`r thr[min_folds==2, pct_bacs]`%) while keeping -->
-<!--   `r format(thr[min_folds==2, n_sites], big.mark=",")` sites — the largest -->
-<!--   single jump in quality. -->
-<!-- - **`>= 5` folds** for maximum purity (`r thr[min_folds==5, pct_bacs]`% BACS) -->
-<!--   at the cost of dropping to `r format(thr[min_folds==5, n_sites], big.mark=",")` -->
-<!--   sites. -->
+```{r bacs-cor}
+bcor <- rbindlist(lapply(1:N_FOLDS, function(k) {
+  sub <- sites[n_folds >= k & in_bacs & !is.na(mean_ratio)]
+  data.table(min_folds = k, n_bacs = nrow(sub),
+             pearson_r = round(cor(sub$mean_ratio, sub$bacs_psi), 3))
+}))
+knitr::kable(bcor, caption = "%pU (ours) vs. BACS Ψ level: Pearson r, by >= k folds")
+```
 
-<!-- The `>= 2` to `>= 5` range is the precision-vs-sensitivity choice. Note this -->
-<!-- used the stricter FDR < 0.01 calling filter, so even `>= 2` is fairly clean. -->
+```{r bacs-scatter, fig.height=5}
+sb <- sites[in_bacs & !is.na(mean_ratio)]
+r_all <- round(cor(sb$mean_ratio, sb$bacs_psi), 3)
+ggplot(sb, aes(x = bacs_psi, y = mean_ratio, color = factor(n_folds))) +
+  geom_point(size = 1, alpha = 0.6) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey40") +
+  labs(x = "BACS Ψ level", y = "our %pU (mean fold ratio)", color = "n_folds",
+       title = sprintf("Our %%pU vs. BACS Ψ level at overlapping sites (Pearson r = %.3f)", r_all)) +
+  theme_bw(base_size = 13)
+```
+
+Our %pU correlates strongly with the BACS Ψ level (r ≈ `r r_all`), and the
+correlation is essentially flat across fold thresholds — the sites that
+overlap BACS are quantified accurately regardless of how many folds called
+them. So the fold filter enriches for *which* sites are real (BACS overlap
+fraction rises with `k`), while %pU *accuracy* at the real sites is already
+high at every threshold.
