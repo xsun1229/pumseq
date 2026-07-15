@@ -11,7 +11,7 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-07-13" />
+<meta name="date" content="2026-07-15" />
 
 <title>QC — Discovery/replication validation of joint-pooled pU site calling</title>
 
@@ -374,7 +374,7 @@ div.tocify {
 <h1 class="title toc-ignore">QC — Discovery/replication validation of
 joint-pooled pU site calling</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-07-13</h4>
+<h4 class="date">2026-07-15</h4>
 
 </div>
 
@@ -403,7 +403,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-07-13
+<strong>Last updated:</strong> 2026-07-15
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreea77e99bed1f70573f29ee068cdf2fdec243020cftargetblanka77e99ba">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeb722338c19256113eb46bd8953511133d0759bc9targetblankb722338a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/a77e99bed1f70573f29ee068cdf2fdec243020cf" target="_blank">a77e99b</a>
+<a href="https://github.com/xsun1229/pumseq/tree/b722338c19256113eb46bd8953511133d0759bc9" target="_blank">b722338</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreea77e99bed1f70573f29ee068cdf2fdec243020cftargetblanka77e99ba"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeb722338c19256113eb46bd8953511133d0759bc9targetblankb722338a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/a77e99bed1f70573f29ee068cdf2fdec243020cf" target="_blank">a77e99b</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/b722338c19256113eb46bd8953511133d0759bc9" target="_blank">b722338</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -570,16 +570,16 @@ were generated:
 </p>
 <pre><code>
 Ignored files:
+    Ignored:    analysis/figure/
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Untracked files:
-    Untracked:  render_qtl_summary_52004327.out
+    Untracked:  render_qtl_summary_52178117.out
 
 Unstaged changes:
+    Modified:   analysis/mRNA_5fold_union_site_calling.Rmd
     Modified:   analysis/qc_mRNA_discovery_replication.Rmd
-    Deleted:    render_qtl_summary_51473911.out
-    Deleted:    render_qtl_summary_51666527.out
-    Deleted:    render_qtl_summary_52003564.out
+    Deleted:    render_qtl_summary_52004327.out
 
 </code></pre>
 <p>
@@ -626,6 +626,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/2f584df83e87127c4f8dfd15575020dac0182038/analysis/qc_mRNA_discovery_replication.Rmd" target="_blank">2f584df</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-13
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/2f584df83e87127c4f8dfd15575020dac0182038/docs/qc_mRNA_discovery_replication.html" target="_blank">2f584df</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-13
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1020,6 +1054,141 @@ XSun
 </table>
 </div>
 </div>
+</div>
+<div id="genomic-feature-distribution-of-discovery-sites"
+class="section level1">
+<h1>Genomic feature distribution of discovery sites</h1>
+<p>Genomic feature of each discovery-called site (Ensembl v112 GTF,
+priority CDS &gt; 3′UTR &gt; 5′UTR &gt; ncRNA &gt; Intron &gt;
+Intergenic), for the 3 discovery sets. “ncRNA” = site in an exon of a
+non-protein-coding gene (lncRNA, snoRNA, miRNA, pseudogene, etc.);
+“Intron” = inside a protein-coding gene body but not in CDS/UTR;
+“Intergenic” = outside any annotated gene.</p>
+<pre class="r"><code>feat_levels &lt;- c(&quot;5UTR&quot;, &quot;CDS&quot;, &quot;3UTR&quot;, &quot;ncRNA&quot;, &quot;Intron&quot;, &quot;Intergenic&quot;)
+fs &lt;- fread(&quot;/project/xinhe/xsun/pumseq/pumseq_processed/joint/discovery_splits_feature_summary.txt&quot;)
+fs[, feature := factor(feature, levels = feat_levels)]
+
+# counts (feature x split) with a &quot;count (pct%)&quot; cell
+fs[, cell := sprintf(&quot;%d (%.1f%%)&quot;, n, pct)]
+tab &lt;- dcast(fs, feature ~ split, value.var = &quot;cell&quot;)[order(feature)]
+setnames(tab, c(&quot;feature&quot;, &quot;split 1&quot;, &quot;split 2&quot;, &quot;split 3&quot;))
+knitr::kable(tab, caption = &quot;Feature distribution of discovery sites, 3 discovery sets (count and %)&quot;)</code></pre>
+<table>
+<caption>Feature distribution of discovery sites, 3 discovery sets
+(count and %)</caption>
+<thead>
+<tr class="header">
+<th align="left">feature</th>
+<th align="left">split 1</th>
+<th align="left">split 2</th>
+<th align="left">split 3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">5UTR</td>
+<td align="left">317 (4.2%)</td>
+<td align="left">307 (4.6%)</td>
+<td align="left">238 (4.3%)</td>
+</tr>
+<tr class="even">
+<td align="left">CDS</td>
+<td align="left">2263 (30.2%)</td>
+<td align="left">1789 (27.1%)</td>
+<td align="left">1600 (28.7%)</td>
+</tr>
+<tr class="odd">
+<td align="left">3UTR</td>
+<td align="left">1984 (26.5%)</td>
+<td align="left">1513 (22.9%)</td>
+<td align="left">1265 (22.7%)</td>
+</tr>
+<tr class="even">
+<td align="left">ncRNA</td>
+<td align="left">822 (11.0%)</td>
+<td align="left">760 (11.5%)</td>
+<td align="left">660 (11.9%)</td>
+</tr>
+<tr class="odd">
+<td align="left">Intron</td>
+<td align="left">1394 (18.6%)</td>
+<td align="left">1487 (22.5%)</td>
+<td align="left">1141 (20.5%)</td>
+</tr>
+<tr class="even">
+<td align="left">Intergenic</td>
+<td align="left">713 (9.5%)</td>
+<td align="left">757 (11.4%)</td>
+<td align="left">662 (11.9%)</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>ggplot(fs, aes(x = factor(split), y = pct, fill = feature)) +
+  geom_col() +
+  labs(x = &quot;discovery split&quot;, y = &quot;percent of sites&quot;, fill = &quot;feature&quot;,
+       title = &quot;Feature composition of the 3 discovery sets&quot;) +
+  theme_bw(base_size = 13)</code></pre>
+<p><img src="figure/qc_mRNA_discovery_replication.Rmd/feature-dist-1.png" width="864" style="display: block; margin: auto;" /></p>
+<div id="the-remaining-non-coding-sites-intron-vs.-intergenic-vs.-ncrna"
+class="section level2">
+<h2>The “remaining” (non-coding) sites: intron vs. intergenic
+vs. ncRNA</h2>
+<p>Of the sites <em>not</em> in CDS/UTR, how they split across intron /
+intergenic / ncRNA (this is what remains after the ~55–61% coding/UTR
+fraction):</p>
+<pre class="r"><code>rem &lt;- fs[feature %in% c(&quot;ncRNA&quot;, &quot;Intron&quot;, &quot;Intergenic&quot;)]
+rem_tab &lt;- dcast(rem, feature ~ split, value.var = &quot;n&quot;)[match(c(&quot;Intron&quot;, &quot;ncRNA&quot;, &quot;Intergenic&quot;), feature)]
+setnames(rem_tab, c(&quot;feature&quot;, &quot;split 1&quot;, &quot;split 2&quot;, &quot;split 3&quot;))
+knitr::kable(rem_tab, caption = &quot;Counts of the non-CDS/UTR (&#39;remaining&#39;) sites, by category and split&quot;)</code></pre>
+<table>
+<caption>Counts of the non-CDS/UTR (‘remaining’) sites, by category and
+split</caption>
+<thead>
+<tr class="header">
+<th align="left">feature</th>
+<th align="right">split 1</th>
+<th align="right">split 2</th>
+<th align="right">split 3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Intron</td>
+<td align="right">1394</td>
+<td align="right">1487</td>
+<td align="right">1141</td>
+</tr>
+<tr class="even">
+<td align="left">ncRNA</td>
+<td align="right">822</td>
+<td align="right">760</td>
+<td align="right">660</td>
+</tr>
+<tr class="odd">
+<td align="left">Intergenic</td>
+<td align="right">713</td>
+<td align="right">757</td>
+<td align="right">662</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Introns are the largest single non-coding category</strong>
+(~19–22% of all sites), but they are <em>not</em> a majority of the
+remaining sites — ncRNA (~11–12%) and intergenic (~10–12%) are each
+substantial.</li>
+<li><strong>Intergenic sites</strong> number ~700–760 per discovery set
+(~10–12%).</li>
+<li><strong>A meaningful fraction are from non-coding RNAs</strong>: the
+ncRNA category (~11–12%, sites in non-protein-coding-gene exons)
+captures lncRNA / snoRNA / miRNA / pseudogene exons. So yes — some
+remaining sites are genuinely ncRNA-derived.</li>
+<li><strong>Repeats are not yet assessed</strong> — the current
+annotation has no RepeatMasker track (none present in the reference
+directory). Overlapping these sites (especially the intronic/intergenic
+ones) with a RepeatMasker track would test whether they are
+repeat-derived; this needs the track to be added.</li>
+</ul>
 <!-- # Notes -->
 <!-- - Discovery-pool depth (above) directly addresses the concern that -->
 <!--   calling sites from only ~10 pooled cell lines may be depth-limited -->
@@ -1074,6 +1243,7 @@ loaded via a namespace (and not attached):
 [49] tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3   rmarkdown_2.21   
 [53] httr_1.4.5        rstudioapi_0.14   R6_2.5.1          git2r_0.30.1     
 [57] compiler_4.2.0   </code></pre>
+</div>
 </div>
 </div>
 

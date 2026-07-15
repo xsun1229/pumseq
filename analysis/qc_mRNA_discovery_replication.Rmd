@@ -165,6 +165,58 @@ ggplot(all_splits, aes(x = ratio.disc, y = ratio.repl)) +
   theme_bw(base_size = 12)
 ```
 
+# Genomic feature distribution of discovery sites
+
+Genomic feature of each discovery-called site (Ensembl v112 GTF, priority
+CDS > 3′UTR > 5′UTR > ncRNA > Intron > Intergenic), for the 3 discovery
+sets. "ncRNA" = site in an exon of a non-protein-coding gene (lncRNA,
+snoRNA, miRNA, pseudogene, etc.); "Intron" = inside a protein-coding gene
+body but not in CDS/UTR; "Intergenic" = outside any annotated gene.
+
+```{r feature-dist}
+feat_levels <- c("5UTR", "CDS", "3UTR", "ncRNA", "Intron", "Intergenic")
+fs <- fread("/project/xinhe/xsun/pumseq/pumseq_processed/joint/discovery_splits_feature_summary.txt")
+fs[, feature := factor(feature, levels = feat_levels)]
+
+# counts (feature x split) with a "count (pct%)" cell
+fs[, cell := sprintf("%d (%.1f%%)", n, pct)]
+tab <- dcast(fs, feature ~ split, value.var = "cell")[order(feature)]
+setnames(tab, c("feature", "split 1", "split 2", "split 3"))
+knitr::kable(tab, caption = "Feature distribution of discovery sites, 3 discovery sets (count and %)")
+
+ggplot(fs, aes(x = factor(split), y = pct, fill = feature)) +
+  geom_col() +
+  labs(x = "discovery split", y = "percent of sites", fill = "feature",
+       title = "Feature composition of the 3 discovery sets") +
+  theme_bw(base_size = 13)
+```
+
+## The "remaining" (non-coding) sites: intron vs. intergenic vs. ncRNA
+
+Of the sites *not* in CDS/UTR, how they split across intron / intergenic /
+ncRNA (this is what remains after the ~55–61% coding/UTR fraction):
+
+```{r remaining-sites}
+rem <- fs[feature %in% c("ncRNA", "Intron", "Intergenic")]
+rem_tab <- dcast(rem, feature ~ split, value.var = "n")[match(c("Intron", "ncRNA", "Intergenic"), feature)]
+setnames(rem_tab, c("feature", "split 1", "split 2", "split 3"))
+knitr::kable(rem_tab, caption = "Counts of the non-CDS/UTR ('remaining') sites, by category and split")
+```
+
+- **Introns are the largest single non-coding category** (~19–22% of all
+  sites), but they are *not* a majority of the remaining sites — ncRNA
+  (~11–12%) and intergenic (~10–12%) are each substantial.
+- **Intergenic sites** number ~700–760 per discovery set (~10–12%).
+- **A meaningful fraction are from non-coding RNAs**: the ncRNA category
+  (~11–12%, sites in non-protein-coding-gene exons) captures lncRNA /
+  snoRNA / miRNA / pseudogene exons. So yes — some remaining sites are
+  genuinely ncRNA-derived.
+- **Repeats are not yet assessed** — the current annotation has no
+  RepeatMasker track (none present in the reference directory). Overlapping
+  these sites (especially the intronic/intergenic ones) with a RepeatMasker
+  track would test whether they are repeat-derived; this needs the track to
+  be added.
+
 <!-- # Notes -->
 
 <!-- - Discovery-pool depth (above) directly addresses the concern that -->

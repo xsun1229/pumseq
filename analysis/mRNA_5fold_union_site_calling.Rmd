@@ -25,18 +25,17 @@ N_FOLDS <- 5
 # Strategy
 
 Instead of calling pU sites once from all cell lines pooled, we partition
-the 51 cell lines into **5 disjoint folds** (~20% each; seed = 2026, so the
-partition is reproducible), **joint-call** sites within each fold (pool that
+the 51 cell lines into **5 disjoint folds** (~20% each; seed = 2026), 
+**joint-call** sites within each fold (pool that
 fold's ~10 cell lines' reads, one chi-squared test per site,
-**FDR < 0.01, rate_diff > 0.05, depth >= 20**), then combine across folds and
-count how many of the 5 folds each site was called in.
+**FDR < 0.01, rate_diff > 0.05, depth >= 20**), then combine across folds.
 
-This turns the number of folds into a **reproducibility filter**: keeping
-sites called in `>= k` of 5 folds. `k = 1` is the plain union (any fold);
-higher `k` requires a site to reproduce across independent 20% subsets. The
-motivation: the earlier discovery/replication analysis showed only ~40-60%
-of sites called from a single 20% pool replicate, so a plain union carries
-a lot of non-reproducible sites — requiring `>= k` folds should filter them.
+<!-- This turns the number of folds into a **reproducibility filter**: keeping -->
+<!-- sites called in `>= k` of 5 folds. `k = 1` is the plain union (any fold); -->
+<!-- higher `k` requires a site to reproduce across independent 20% subsets. The -->
+<!-- motivation: the earlier discovery/replication analysis showed only ~40-60% -->
+<!-- of sites called from a single 20% pool replicate, so a plain union carries -->
+<!-- a lot of non-reproducible sites — requiring `>= k` folds should filter them. -->
 
 ```{r load}
 sites <- fread(ANNO, colClasses = list(character = c("ref", "strand")))
@@ -48,8 +47,8 @@ cat("Total unique sites across the 5 folds:", nrow(sites), "\n")
 
 ```{r n-folds}
 nf <- sites[, .N, by = n_folds][order(n_folds)]
-knitr::kable(nf, col.names = c("n_folds", "n_sites"),
-             caption = "Number of sites called in exactly n folds")
+# knitr::kable(nf, col.names = c("n_folds", "n_sites"),
+#              caption = "Number of sites called in exactly n folds")
 
 ggplot(sites, aes(x = factor(n_folds))) +
   geom_bar(fill = "steelblue") +
@@ -59,9 +58,9 @@ ggplot(sites, aes(x = factor(n_folds))) +
   theme_bw(base_size = 13)
 ```
 
-A large share of the union is **single-fold** sites — called by only one
-20% subset. These are the sites a plain union would keep but that don't
-reproduce.
+<!-- A large share of the union is **single-fold** sites — called by only one -->
+<!-- 20% subset. These are the sites a plain union would keep but that don't -->
+<!-- reproduce. -->
 
 # Threshold curve: site count, feature mix, and BACS overlap vs. `>= k` folds
 
@@ -73,8 +72,7 @@ thr <- rbindlist(lapply(1:N_FOLDS, function(k) {
     n_sites               = nrow(sub),
     pct_cds_utr           = round(100 * mean(sub$feature %in% c("CDS", "5UTR", "3UTR")), 1),
     pct_intron_intergenic = round(100 * mean(sub$feature %in% c("Intron", "Intergenic")), 1),
-    n_bacs                = sum(sub$in_bacs),
-    pct_bacs              = round(100 * mean(sub$in_bacs), 1)
+    n_bacs                = sum(sub$in_bacs)
   )
 }))
 knitr::kable(thr, caption = "Sites called in >= k of 5 folds: count, CDS/UTR %, intron+intergenic %, BACS overlap")
@@ -97,54 +95,39 @@ ggplot(comp, aes(x = factor(min_folds), y = pct, fill = feature)) +
   theme_bw(base_size = 13)
 ```
 
-# Enrichment curves
 
-```{r enrichment, fig.height=5}
-enr <- melt(thr[, .(min_folds, `CDS+UTR %` = pct_cds_utr, `BACS overlap %` = pct_bacs)],
-            id.vars = "min_folds")
 
-ggplot(enr, aes(x = min_folds, y = value, color = variable)) +
-  geom_line() + geom_point(size = 2.5) +
-  geom_text(data = thr, aes(x = min_folds, y = -1, label = paste0("n=", n_sites)),
-            inherit.aes = FALSE, size = 3) +
-  scale_x_continuous(breaks = 1:N_FOLDS) +
-  labs(x = "site called in >= k of 5 folds", y = "percent", color = NULL,
-       title = "BACS overlap and CDS/UTR fraction vs. reproducibility threshold",
-       subtitle = "n_sites annotated below each point") +
-  theme_bw(base_size = 13)
-```
+<!-- # Findings -->
 
-# Findings
+<!-- - **Reproducibility strongly enriches for validated (BACS) sites.** BACS -->
+<!--   overlap rises from `r thr[min_folds==1, pct_bacs]`% (plain union) to -->
+<!--   `r thr[min_folds==5, pct_bacs]`% (all 5 folds) — a -->
+<!--   `r round(thr[min_folds==5, pct_bacs] / thr[min_folds==1, pct_bacs], 1)`× -->
+<!--   enrichment. The single-fold-only sites are nearly devoid of BACS overlap -->
+<!--   (`r thr[min_folds==1, n_bacs] - thr[min_folds==2, n_bacs]` BACS sites out -->
+<!--   of `r sites[n_folds==1, .N]` single-fold sites), i.e. they are mostly -->
+<!--   spurious — the fold filter removes them effectively. **A reproducibility -->
+<!--   filter is well justified.** -->
+<!-- - **It does NOT enrich for CDS/UTR — it slightly de-enriches.** CDS+UTR -->
+<!--   fraction *drops* (`r thr[min_folds==1, pct_cds_utr]`% → -->
+<!--   `r thr[min_folds==5, pct_cds_utr]`%) and intron+intergenic rises as more -->
+<!--   folds are required. So the genomic feature distribution is *not* a good -->
+<!--   "realness" discriminator here; BACS overlap is the trustworthy signal, and -->
+<!--   it says reproducibility works even though the feature mix does not shift as -->
+<!--   one might expect. -->
 
-- **Reproducibility strongly enriches for validated (BACS) sites.** BACS
-  overlap rises from `r thr[min_folds==1, pct_bacs]`% (plain union) to
-  `r thr[min_folds==5, pct_bacs]`% (all 5 folds) — a
-  `r round(thr[min_folds==5, pct_bacs] / thr[min_folds==1, pct_bacs], 1)`×
-  enrichment. The single-fold-only sites are nearly devoid of BACS overlap
-  (`r thr[min_folds==1, n_bacs] - thr[min_folds==2, n_bacs]` BACS sites out
-  of `r sites[n_folds==1, .N]` single-fold sites), i.e. they are mostly
-  spurious — the fold filter removes them effectively. **A reproducibility
-  filter is well justified.**
-- **It does NOT enrich for CDS/UTR — it slightly de-enriches.** CDS+UTR
-  fraction *drops* (`r thr[min_folds==1, pct_cds_utr]`% →
-  `r thr[min_folds==5, pct_cds_utr]`%) and intron+intergenic rises as more
-  folds are required. So the genomic feature distribution is *not* a good
-  "realness" discriminator here; BACS overlap is the trustworthy signal, and
-  it says reproducibility works even though the feature mix does not shift as
-  one might expect.
+<!-- # Recommendation -->
 
-# Recommendation
+<!-- - **Avoid the plain union (`>= 1`)** — `r thr[min_folds==1, pct_bacs]`% BACS -->
+<!--   and dominated by non-reproducible single-fold sites. -->
+<!-- - **`>= 2` folds** is the natural minimum (analogous to the existing -->
+<!--   `n_called >= 2`): it roughly doubles BACS enrichment -->
+<!--   (`r thr[min_folds==2, pct_bacs]`%) while keeping -->
+<!--   `r format(thr[min_folds==2, n_sites], big.mark=",")` sites — the largest -->
+<!--   single jump in quality. -->
+<!-- - **`>= 5` folds** for maximum purity (`r thr[min_folds==5, pct_bacs]`% BACS) -->
+<!--   at the cost of dropping to `r format(thr[min_folds==5, n_sites], big.mark=",")` -->
+<!--   sites. -->
 
-- **Avoid the plain union (`>= 1`)** — `r thr[min_folds==1, pct_bacs]`% BACS
-  and dominated by non-reproducible single-fold sites.
-- **`>= 2` folds** is the natural minimum (analogous to the existing
-  `n_called >= 2`): it roughly doubles BACS enrichment
-  (`r thr[min_folds==2, pct_bacs]`%) while keeping
-  `r format(thr[min_folds==2, n_sites], big.mark=",")` sites — the largest
-  single jump in quality.
-- **`>= 5` folds** for maximum purity (`r thr[min_folds==5, pct_bacs]`% BACS)
-  at the cost of dropping to `r format(thr[min_folds==5, n_sites], big.mark=",")`
-  sites.
-
-The `>= 2` to `>= 5` range is the precision-vs-sensitivity choice. Note this
-used the stricter FDR < 0.01 calling filter, so even `>= 2` is fairly clean.
+<!-- The `>= 2` to `>= 5` range is the precision-vs-sensitivity choice. Note this -->
+<!-- used the stricter FDR < 0.01 calling filter, so even `>= 2` is fairly clean. -->
