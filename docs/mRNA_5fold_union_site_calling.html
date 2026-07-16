@@ -11,7 +11,7 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-07-15" />
+<meta name="date" content="2026-07-16" />
 
 <title>5-fold reproducibility filtering of joint-pooled pU site calling</title>
 
@@ -374,7 +374,7 @@ div.tocify {
 <h1 class="title toc-ignore">5-fold reproducibility filtering of
 joint-pooled pU site calling</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-07-15</h4>
+<h4 class="date">2026-07-16</h4>
 
 </div>
 
@@ -403,7 +403,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-07-15
+<strong>Last updated:</strong> 2026-07-16
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree48e50b283ab206a9b2c4f288d3e160f5d6e5e3a1targetblank48e50b2a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree2a38991c286b6a0ab9330ef3b76b9449e33f87f6targetblank2a38991a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/48e50b283ab206a9b2c4f288d3e160f5d6e5e3a1" target="_blank">48e50b2</a>
+<a href="https://github.com/xsun1229/pumseq/tree/2a38991c286b6a0ab9330ef3b76b9449e33f87f6" target="_blank">2a38991</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree48e50b283ab206a9b2c4f288d3e160f5d6e5e3a1targetblank48e50b2a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree2a38991c286b6a0ab9330ef3b76b9449e33f87f6targetblank2a38991a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/48e50b283ab206a9b2c4f288d3e160f5d6e5e3a1" target="_blank">48e50b2</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/2a38991c286b6a0ab9330ef3b76b9449e33f87f6" target="_blank">2a38991</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -573,7 +573,9 @@ Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Unstaged changes:
+    Modified:   analysis/index.Rmd
     Modified:   analysis/mRNA_5fold_union_site_calling.Rmd
+    Modified:   analysis/qtl_mapping_binomial_model.Rmd
 
 </code></pre>
 <p>
@@ -620,6 +622,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/67f909526275e27eb5a3da08b70162d545b19588/analysis/mRNA_5fold_union_site_calling.Rmd" target="_blank">67f9095</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-15
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/67f909526275e27eb5a3da08b70162d545b19588/docs/mRNA_5fold_union_site_calling.html" target="_blank">67f9095</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-15
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -985,70 +1021,31 @@ folds</caption>
 </tr>
 </tbody>
 </table>
-<p>One scatter per reproducibility level (sites called in exactly
-<code>k</code> folds), each with its own Pearson r:</p>
-<pre class="r"><code>sb &lt;- sites[in_bacs &amp; !is.na(mean_ratio)]
-r_all &lt;- round(cor(sb$mean_ratio, sb$bacs_psi), 3)
-
-for (k in 1:N_FOLDS) {
-  sub &lt;- sb[n_folds == k]
-  r_k &lt;- round(cor(sub$mean_ratio, sub$bacs_psi), 3)
-  print(
-    ggplot(sub, aes(x = bacs_psi, y = mean_ratio)) +
-      geom_point(size = 1.2, alpha = 0.6, color = &quot;steelblue&quot;) +
-      geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, color = &quot;grey40&quot;) +
-      labs(x = &quot;BACS Ψ level&quot;, y = &quot;our %pU (mean fold ratio)&quot;,
-           title = sprintf(&quot;Called in exactly %d fold(s): n = %d, Pearson r = %.3f&quot;,
-                           k, nrow(sub), r_k)) +
-      theme_bw(base_size = 12)
-  )
-}</code></pre>
-<p><img src="figure/mRNA_5fold_union_site_calling.Rmd/bacs-scatter-1.png" width="528" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-bacs-scatter-1">
-Past versions of bacs-scatter-1.png
-</button>
-</p>
-<div id="fig-bacs-scatter-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/48e50b283ab206a9b2c4f288d3e160f5d6e5e3a1/docs/figure/mRNA_5fold_union_site_calling.Rmd/bacs-scatter-1.png" target="_blank">48e50b2</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-07-15
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/mRNA_5fold_union_site_calling.Rmd/bacs-scatter-2.png" width="528" style="display: block; margin: auto;" /><img src="figure/mRNA_5fold_union_site_calling.Rmd/bacs-scatter-3.png" width="528" style="display: block; margin: auto;" /><img src="figure/mRNA_5fold_union_site_calling.Rmd/bacs-scatter-4.png" width="528" style="display: block; margin: auto;" /><img src="figure/mRNA_5fold_union_site_calling.Rmd/bacs-scatter-5.png" width="528" style="display: block; margin: auto;" /></p>
-<p>Our %pU correlates strongly with the BACS Ψ level (r ≈ 0.928), and
-the correlation is essentially flat across fold thresholds — the sites
-that overlap BACS are quantified accurately regardless of how many folds
-called them. So the fold filter enriches for <em>which</em> sites are
-real (BACS overlap fraction rises with <code>k</code>), while %pU
-<em>accuracy</em> at the real sites is already high at every
-threshold.</p>
+<!-- One scatter per reproducibility level (sites called in exactly `k` folds), -->
+<!-- each with its own Pearson r: -->
+<!-- ```{r bacs-scatter, fig.height=4.5, fig.width=5.5} -->
+<!-- sb <- sites[in_bacs & !is.na(mean_ratio)] -->
+<!-- r_all <- round(cor(sb$mean_ratio, sb$bacs_psi), 3) -->
+<!-- for (k in 1:N_FOLDS) { -->
+<!--   sub <- sb[n_folds == k] -->
+<!--   r_k <- round(cor(sub$mean_ratio, sub$bacs_psi), 3) -->
+<!--   print( -->
+<!--     ggplot(sub, aes(x = bacs_psi, y = mean_ratio)) + -->
+<!--       geom_point(size = 1.2, alpha = 0.6, color = "steelblue") + -->
+<!--       geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey40") + -->
+<!--       labs(x = "BACS Ψ level", y = "our %pU (mean fold ratio)", -->
+<!--            title = sprintf("Called in exactly %d fold(s): n = %d, Pearson r = %.3f", -->
+<!--                            k, nrow(sub), r_k)) + -->
+<!--       theme_bw(base_size = 12) -->
+<!--   ) -->
+<!-- } -->
+<!-- ``` -->
+<!-- Our %pU correlates strongly with the BACS Ψ level (r ~ 0.93), and the -->
+<!-- correlation is essentially flat across fold thresholds — the sites that -->
+<!-- overlap BACS are quantified accurately regardless of how many folds called -->
+<!-- them. So the fold filter enriches for *which* sites are real (BACS overlap -->
+<!-- fraction rises with `k`), while %pU *accuracy* at the real sites is already -->
+<!-- high at every threshold. -->
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">

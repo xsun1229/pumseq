@@ -116,31 +116,31 @@ bcor <- rbindlist(lapply(1:N_FOLDS, function(k) {
 knitr::kable(bcor, caption = "%pU (ours) vs. BACS Ψ level: Pearson r, by >= k folds")
 ```
 
-One scatter per reproducibility level (sites called in exactly `k` folds),
-each with its own Pearson r:
+<!-- One scatter per reproducibility level (sites called in exactly `k` folds), -->
+<!-- each with its own Pearson r: -->
 
-```{r bacs-scatter, fig.height=4.5, fig.width=5.5}
-sb <- sites[in_bacs & !is.na(mean_ratio)]
-r_all <- round(cor(sb$mean_ratio, sb$bacs_psi), 3)
+<!-- ```{r bacs-scatter, fig.height=4.5, fig.width=5.5} -->
+<!-- sb <- sites[in_bacs & !is.na(mean_ratio)] -->
+<!-- r_all <- round(cor(sb$mean_ratio, sb$bacs_psi), 3) -->
 
-for (k in 1:N_FOLDS) {
-  sub <- sb[n_folds == k]
-  r_k <- round(cor(sub$mean_ratio, sub$bacs_psi), 3)
-  print(
-    ggplot(sub, aes(x = bacs_psi, y = mean_ratio)) +
-      geom_point(size = 1.2, alpha = 0.6, color = "steelblue") +
-      geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey40") +
-      labs(x = "BACS Ψ level", y = "our %pU (mean fold ratio)",
-           title = sprintf("Called in exactly %d fold(s): n = %d, Pearson r = %.3f",
-                           k, nrow(sub), r_k)) +
-      theme_bw(base_size = 12)
-  )
-}
-```
+<!-- for (k in 1:N_FOLDS) { -->
+<!--   sub <- sb[n_folds == k] -->
+<!--   r_k <- round(cor(sub$mean_ratio, sub$bacs_psi), 3) -->
+<!--   print( -->
+<!--     ggplot(sub, aes(x = bacs_psi, y = mean_ratio)) + -->
+<!--       geom_point(size = 1.2, alpha = 0.6, color = "steelblue") + -->
+<!--       geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey40") + -->
+<!--       labs(x = "BACS Ψ level", y = "our %pU (mean fold ratio)", -->
+<!--            title = sprintf("Called in exactly %d fold(s): n = %d, Pearson r = %.3f", -->
+<!--                            k, nrow(sub), r_k)) + -->
+<!--       theme_bw(base_size = 12) -->
+<!--   ) -->
+<!-- } -->
+<!-- ``` -->
 
-Our %pU correlates strongly with the BACS Ψ level (r ≈ `r r_all`), and the
-correlation is essentially flat across fold thresholds — the sites that
-overlap BACS are quantified accurately regardless of how many folds called
-them. So the fold filter enriches for *which* sites are real (BACS overlap
-fraction rises with `k`), while %pU *accuracy* at the real sites is already
-high at every threshold.
+<!-- Our %pU correlates strongly with the BACS Ψ level (r ~ 0.93), and the -->
+<!-- correlation is essentially flat across fold thresholds — the sites that -->
+<!-- overlap BACS are quantified accurately regardless of how many folds called -->
+<!-- them. So the fold filter enriches for *which* sites are real (BACS overlap -->
+<!-- fraction rises with `k`), while %pU *accuracy* at the real sites is already -->
+<!-- high at every threshold. -->

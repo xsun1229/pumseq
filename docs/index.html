@@ -289,7 +289,7 @@ $(document).ready(function () {
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
 <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-workflowr <span class="glyphicon glyphicon-ok text-success"
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
 aria-hidden="true"></span>
 </button>
 </p>
@@ -300,8 +300,8 @@ aria-hidden="true"></span>
 </li>
 <li>
 <a data-toggle="tab" href="#checks"> Checks <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-</a>
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -314,9 +314,9 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 1
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> 0
+aria-hidden="true"></span> 1
 </p>
 <p>
 <strong>Knit directory:</strong> <code>pumseq/</code> <span
@@ -339,33 +339,36 @@ versions</em> tab lists the development history.
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
-<span class="glyphicon glyphicon-ok text-success"
-aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
-</a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguptodate"
+<div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great! Since the R Markdown file has been committed to the Git
-repository, you know the exact version of the code that produced these
-results.</p>
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
 </div>
 </div>
 </div>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree30e361866def2f952de26f41b199daaa8224e89ftargetblank30e3618a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree2a38991c286b6a0ab9330ef3b76b9449e33f87f6targetblank2a38991a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/30e361866def2f952de26f41b199daaa8224e89f" target="_blank">30e3618</a>
+<a href="https://github.com/xsun1229/pumseq/tree/2a38991c286b6a0ab9330ef3b76b9449e33f87f6" target="_blank">2a38991</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree30e361866def2f952de26f41b199daaa8224e89ftargetblank30e3618a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree2a38991c286b6a0ab9330ef3b76b9449e33f87f6targetblank2a38991a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -375,7 +378,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/30e361866def2f952de26f41b199daaa8224e89f" target="_blank">30e3618</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/2a38991c286b6a0ab9330ef3b76b9449e33f87f6" target="_blank">2a38991</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -391,6 +394,9 @@ were generated:
 <pre><code>
 Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
 
 </code></pre>
 <p>
@@ -435,6 +441,23 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/2a38991c286b6a0ab9330ef3b76b9449e33f87f6/docs/index.html" target="_blank">2a38991</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-15
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1131,9 +1154,12 @@ reproducibility filtering of joint-pooled pU site calling</a></li>
 </div>
 <div id="qtl-mapping" class="section level1">
 <h1>QTL mapping</h1>
-<p><a href="qtl_mapping_summary_floor0_quantile.html">Treated - input,
-floor0, quantile normalization, linear regression</a> <a
-href="qtl_mapping_binomial_model.html">Binomial GLM model</a></p>
+<ul>
+<li><a href="qtl_mapping_summary_floor0_quantile.html">Treated - input,
+floor0, quantile normalization, linear regression</a></li>
+<li><a href="qtl_mapping_binomial_model.html">Binomial GLM
+model</a></li>
+</ul>
 </div>
 
 

@@ -17,13 +17,11 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
 
 # Overview
 
-We map genetic effects on pseudouridylation (%pU) with the **simplest**
+We map genetic effects on pseudouridylation (%pU) with the 
 count-based model as a starting point: model the raw converted-read counts
 as **binomial**, test the genotype effect on the log-odds of the
 modification rate, and assess significance with a **permutation LOD
-threshold**. This deliberately omits overdispersion (beta-binomial) and
-relatedness (mixed model) for now — those are natural extensions once the
-simple model is in place.
+threshold**. 
 
 Sites tested: the **5-fold union (called in ≥ 1 fold)** set,
 **`r format(12662, big.mark=",")` sites** (see the 5-fold site-calling
@@ -167,7 +165,55 @@ A genome-wide, multiple-testing-aware threshold (Churchill & Doerge 1994):
   of total depth $N$ (= $C+T$), from the pooled joint counts.
 - **Genotypes**: cis SNPs within a window of each site (e.g. ±5kb, 20kb, 50kb, 100kb), from
   the imputed genotypes of the 50 cell lines.
-- **Covariates $z$**: optional in this first pass (candidate: phenotype PCs).
+- **Covariates $z$**: phenotype PCs computed from **M-values** (see below).
+
+# Covariates: M-value phenotype PCs
+
+We follow the approach used in the IMAGE paper (https://pubmed.ncbi.nlm.nih.gov/31651351/), which adjusts for the top
+methylation principal components computed from **M-values**.
+
+**How they are computed.** For each site $s$ and cell line $i$, convert the
+counts to an M-value — the log-odds of the modification rate, with a
+pseudocount so that $y = 0$ or $y = n$ stay finite:
+
+https://link.springer.com/article/10.1186/1471-2105-11-587
+
+$$
+M_{si} \;=\; \log_2 \frac{y_{si} + 1}{\,n_{si} - y_{si} + 1\,}
+$$
+
+Then:
+
+1. **Standardize each site** across cell lines (centre and scale each row),
+   so that no individual site dominates the components.
+2. **PCA across individuals** on the standardized M-value matrix.
+3. Include the **top $k$ PC scores** (one value per cell line) as the
+   covariates $z_i$ in the binomial GLM.
+
+```r
+M  <- log2((C + 1) / (N - C + 1))     # sites x cell lines
+Ms <- t(scale(t(M)))                       # standardize each site
+Ms[!is.finite(Ms)] <- 0
+pc <- prcomp(t(Ms), center = TRUE, scale. = FALSE)
+z  <- pc$x[, 1:k, drop = FALSE]            # cell lines x k covariates
+```
+
+<!-- Note the M-value is simply the logit on a $\log_2$ scale -->
+<!-- ($M = \text{logit}(p)/\ln 2$), so this is the standard logit/M-value -->
+<!-- transform of the proportions; the constant cancels once each site is -->
+<!-- standardized. -->
+
+**How many PCs.** Not fixed in advance — we will **sweep $k \in \{3, 5, 7,
+10, 15, 20\}$** and choose based on the results, as was done for the
+earlier tensorQTL PC sweep.
+
+<!-- **A note on what these do and don't correct.** M-value phenotype PCs absorb -->
+<!-- *phenotype-side* variation (technical/batch effects), which mainly buys -->
+<!-- power. They do **not** correct genotype-side population structure or -->
+<!-- relatedness — in the IMAGE paper that was handled separately by the kinship -->
+<!-- random effect. Since this simple binomial GLM has no such random effect, -->
+<!-- adding a few **genotype PCs** alongside is worth considering, given the -->
+<!-- genotype substructure seen in this cohort. -->
 
 <!-- # Notes -->
 
