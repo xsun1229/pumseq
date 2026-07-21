@@ -163,27 +163,57 @@ four windows give nearly the same count). The most sites are called with the
 <!-- low k is what distinguishes these, and is the next step. Because discoveries -->
 <!-- keep rising toward k=3, k=0/1/2 should also be tested. -->
 
-# 5. Top QTL sites
+<!-- # 5. Top QTL sites -->
 
-```{r top-hits}
-best <- summary_tbl[which.max(qtl_FDR05)]
-top <- scans[window_kb == best$window_kb & n_pcs == best$n_pcs][order(perm_p)][1:15,
-        .(ref, pos, strand, n_cis, lead_snp, lead_maf, nominal_min_p, perm_p, fdr)]
-knitr::kable(top, digits = c(0,0,0,0,0,3,-1,-1,-1),
-             caption = sprintf("Top 15 QTL sites at the best config (window=%dkb, %d PCs)",
-                               best$window_kb, best$n_pcs))
+<!-- ```{r top-hits} -->
+<!-- best <- summary_tbl[which.max(qtl_FDR05)] -->
+<!-- top <- scans[window_kb == best$window_kb & n_pcs == best$n_pcs][order(perm_p)][1:15, -->
+<!--         .(ref, pos, strand, n_cis, lead_snp, lead_maf, nominal_min_p, perm_p, fdr)] -->
+<!-- knitr::kable(top, digits = c(0,0,0,0,0,3,-1,-1,-1), -->
+<!--              caption = sprintf("Top 15 QTL sites at the best config (window=%dkb, %d PCs)", -->
+<!--                                best$window_kb, best$n_pcs)) -->
+<!-- ``` -->
+
+# 6. Calibration check: the binomial is anti-conservative
+
+The count model assumes **no overdispersion**. To test whether its p-values are
+trustworthy, we permute the phenotype across the 50 cell lines (breaking the
+genotype link, keeping phenotype-covariate pairing), 5 seeds, and check whether
+the nominal p-values are Uniform(0,1) — via the genomic-inflation factor
+`lambda` (median chi-square / 0.455; should be ~1 under a calibrated null) and a
+QQ-plot. Same negative-control permutation as the [linear
+model](qtl_mapping_summary_floor0_quantile.html#Permutation_control). Run at the
+peak config (**5 kb, 3 PCs**).
+
+```{r calib-lambda}
+CAL <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/qtl_binomial/calibration")
+lam <- fread(file.path(CAL, "calib_w5kb_pc3_lambda.txt"))
+knitr::kable(lam, digits = 2,
+             caption = "Genomic-inflation lambda (5kb, 3 PCs): real vs. 5 permuted nulls")
 ```
 
-# 6. Calibration check (next step)
+```{r calib-qq, results='asis'}
+cat(sprintf('<img src="%s" style="max-width:70%%;">',
+            knitr::image_uri(file.path(CAL, "calib_w5kb_pc3_qq.png"))))
+```
 
-Because the count model assumes no overdispersion, and because more discoveries
-appear at fewer PCs, a **permutation calibration check** — permuting the
-phenotype and confirming the nominal p-values are Uniform(0,1) (QQ-plot +
-genomic-inflation lambda) — is run at the chosen PC count to confirm the calls
-are calibrated rather than inflated. This is the same negative-control
-permutation used for the [linear
-model](qtl_mapping_summary_floor0_quantile.html#Permutation_control), and is
-pending for the selected `k`. A separate **beta-binomial extension** (which
-models overdispersion directly) is being run in parallel for comparison — the
-data are overdispersed at ~22% of sites, where the binomial p-values are
-anti-conservative.
+**The permuted nulls have lambda ~3.4, not ~1** (real ~5.3). A calibrated null
+would sit on the diagonal; instead both real and permuted p-values pull far
+above it. So the binomial's nominal p-values are **anti-conservative even under
+the null** — this is the overdispersion (~22% of sites), not real signal: the
+score test divides by the *binomial* variance, but the true variance is inflated
+by `1 + (n-1)phi` at overdispersed sites, so the statistic is too large.
+
+Two consequences:
+
+- **More PCs will not fix this.** Overdispersion is a variance mis-specification,
+  not a mean confounder — so the monotonic decline in QTL counts with more PCs
+  (Section 4) reflects spent degrees of freedom, not improving calibration.
+- **The principled fix is the beta-binomial**, whose score test divides by
+  exactly `1 + (n-1)phi`. It is run in parallel; the key model-selection evidence
+  is whether it brings the null lambda back to ~1.
+
+(The per-site QTL *calls* in Section 4 use the permutation beta-approximation,
+not these nominal p-values — that per-site correction is self-calibrating, so
+the FDR counts are more robust than this nominal lambda suggests. But the nominal
+inflation is a clear signal that the binomial likelihood is misspecified here.)
