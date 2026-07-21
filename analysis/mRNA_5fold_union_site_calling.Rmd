@@ -25,10 +25,14 @@ N_FOLDS <- 5
 # Strategy
 
 Instead of calling pU sites once from all cell lines pooled, we partition
-the 51 cell lines into **5 disjoint folds** (~20% each; seed = 2026), 
+the **50 genotyped cell lines** into **5 disjoint folds** (10 each; seed = 2026),
 **joint-call** sites within each fold (pool that
-fold's ~10 cell lines' reads, one chi-squared test per site,
+fold's 10 cell lines' reads, one chi-squared test per site,
 **FDR < 0.01, rate_diff > 0.05, depth >= 20**), then combine across folds.
+
+We use **50** cell lines (not 51): CL19039 has no genotype in any source
+(YRI panel, 1000G high-coverage), so it can never enter QTL mapping and is
+excluded from site calling for consistency with the samples that will be tested.
 
 <!-- This turns the number of folds into a **reproducibility filter**: keeping -->
 <!-- sites called in `>= k` of 5 folds. `k = 1` is the plain union (any fold); -->

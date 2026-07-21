@@ -1,0 +1,189 @@
+---
+title: "QTL mapping: binomial GLM on the 5-fold union sites"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+library(data.table)
+library(ggplot2)
+library(qvalue)
+
+knitr::opts_chunk$set(
+  echo = TRUE, warning = FALSE, message = FALSE,
+  fig.align = "center", fig.width = 10, fig.height = 6
+)
+
+PROJECT_DIR <- "/project/xinhe/xsun/pumseq"
+RES <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/qtl_binomial/results")
+WINDOWS_KB <- c(5, 20, 50, 100)
+PC_COUNTS  <- c(3, 5, 7, 10, 15, 20)
+```
+
+# Introduction
+
+This page summarizes cis-QTL mapping for pseudouridylation (%pU) using the
+**binomial GLM** count model on the **5-fold union** sites (called in >= 1
+fold; **12,416 sites**), across the **50 genotyped cell lines**. Unlike the
+[linear tensorQTL approach](qtl_mapping_summary_floor0_quantile.html) — which
+builds a `treated - input` phenotype that is floored and quantile-normalized —
+the count model works directly on the raw converted-read counts, so no
+flooring or normalization is needed. The model and significance procedure are
+written up on the [model page](qtl_mapping_binomial_model.html).
+
+# 1. Phenotype: raw counts, modeled as binomial
+
+For each site and cell line the phenotype is the pair of counts
+`y = C` (converted reads = %pU signal) out of `n = C + T` (read depth),
+extracted per cell line at the union sites. These enter the model directly as
+
+$$
+y_i \mid p_i \sim \text{Binomial}(n_i, p_i), \qquad
+\text{logit}(p_i) = \beta_0 + \beta_g G_i + z_i^\top\gamma .
+$$
+
+Depth `n_i` is the binomial trial count, so low-coverage observations
+automatically carry less weight — there is no flooring, imputation, or
+quantile normalization step.
+
+```{r pheno-summary}
+COUNTS <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/phenotype/fold5_union/counts")
+C <- fread(file.path(COUNTS, "C_matrix.txt.gz"))
+N <- fread(file.path(COUNTS, "N_matrix.txt.gz"))
+cl <- setdiff(colnames(C), c("ref", "pos", "strand"))
+Cm <- as.matrix(C[, ..cl]); Nm <- as.matrix(N[, ..cl])
+pi_s <- rowSums(Cm) / rowSums(Nm)
+
+knitr::kable(data.table(
+  n_sites        = nrow(Cm),
+  n_cell_lines   = length(cl),
+  `median depth` = round(median(Nm), 1),
+  `frac (site,CL) covered` = round(mean(Nm > 0), 3),
+  `median site %pU` = round(median(pi_s, na.rm = TRUE), 3)
+), caption = "5-fold union phenotype: per-cell-line converted counts C and depth N")
+```
+
+The pooled per-site modification rate is low (median ~5%), as expected for
+pseudouridylation — which is why the covariate transform below uses a
+site-specific pseudocount rather than a fixed one.
+
+# 2. Covariates: M-value phenotype PCs
+
+Following the IMAGE approach, covariates `z_i` are the top principal components
+of the **M-values** (log-odds of the modification rate). To avoid shrinking
+every site toward 50% (a fixed 1:1 pseudocount would), we use a **site-specific
+pseudocount** `(pi_s, 1 - pi_s)`, so each site is shrunk toward its own mean
+rate:
+
+$$
+M_{si} = \log_2\frac{y_{si} + \pi_s}{\,n_{si} - y_{si} + (1-\pi_s)\,},
+\qquad \pi_s = \frac{\sum_i y_{si}}{\sum_i n_{si}} .
+$$
+
+Each site is standardized, PCA is taken across cell lines, and the top `k` PC
+scores are used as covariates. The number of PCs `k` is swept (below).
+
+# 3. QTL mapping approach
+
+For each (site, cis-SNP) pair the genotype effect `beta_g` is tested with a
+**Rao score test** in the binomial GLM: the covariates-only null is fit **once
+per site**, then every cis-SNP's statistic is a fast vectorized computation
+(asymptotically equivalent to the LRT). Significance follows the standard human
+cis-QTL procedure:
+
+1. **Per-SNP nominal p** from the score test.
+2. **Within-site correction** — the FastQTL/tensorQTL **permutation
+   beta-approximation**: permute the phenotype 1000x, fit a Beta distribution
+   to the null min-p, read off one adjusted p per site.
+3. **Across-site correction** — **BH-FDR** (and q-values) over the per-site p.
+
+Two things are swept:
+
+- **Covariate PCs**: 3, 5, 7, 10, 15, 20.
+- **cis-window**: 5 kb, 20 kb, 50 kb, 100 kb.
+
+That is a 6 x 4 grid, each cell a separate scan.
+
+# 4. Results: QTL sites by PC count and window size
+
+```{r load-results}
+read_scan <- function(w, k) {
+  f <- file.path(RES, sprintf("scan_w%dkb_pc%d.txt.gz", w, k))
+  if (!file.exists(f)) return(NULL)
+  d <- fread(f); d[, `:=`(window_kb = w, n_pcs = k)]; d
+}
+grid   <- CJ(w = WINDOWS_KB, k = PC_COUNTS)
+scans  <- rbindlist(mapply(read_scan, grid$w, grid$k, SIMPLIFY = FALSE),
+                    use.names = TRUE, fill = TRUE)
+
+summary_tbl <- scans[, .(
+  n_tested   = .N,
+  qtl_FDR05  = sum(fdr < 0.05, na.rm = TRUE),
+  qtl_FDR10  = sum(fdr < 0.10, na.rm = TRUE)
+), by = .(window_kb, n_pcs)][order(window_kb, n_pcs)]
+summary_tbl[, window_lab := factor(paste0(window_kb, "kb"),
+                                   levels = paste0(WINDOWS_KB, "kb"))]
+
+knitr::kable(dcast(summary_tbl, window_kb ~ n_pcs, value.var = "qtl_FDR05"),
+             caption = "QTL sites (FDR<0.05): rows = cis-window (kb), columns = number of PCs")
+```
+
+```{r qtl-vs-pc, fig.height=5}
+ggplot(summary_tbl, aes(x = n_pcs, y = qtl_FDR05, color = window_lab)) +
+  geom_line() + geom_point(size = 2) +
+  scale_x_continuous(breaks = PC_COUNTS) +
+  labs(x = "Number of covariate PCs", y = "QTL sites (FDR<0.05)", color = "cis-window",
+       title = "QTL sites vs. number of covariate PCs, by cis-window size") +
+  theme_bw(base_size = 13)
+```
+
+```{r qtl-heatmap, fig.height=4.5}
+ggplot(summary_tbl, aes(x = factor(n_pcs, levels = PC_COUNTS), y = window_lab, fill = qtl_FDR05)) +
+  geom_tile() +
+  geom_text(aes(label = qtl_FDR05), size = 3.8) +
+  scale_fill_gradient(low = "white", high = "firebrick") +
+  labs(x = "Number of covariate PCs", y = "cis-window size", fill = "QTL sites\n(FDR<0.05)",
+       title = "QTL sites (FDR<0.05) by window size x PC count") +
+  theme_bw(base_size = 13)
+```
+
+QTL counts **fall monotonically as more covariate PCs are added**, at every
+window size, and the **cis-window has little effect** (for a given PC count all
+four windows give nearly the same count). The most sites are called with the
+**fewest PCs** (k=3, the smallest tested).
+
+<!-- This is the opposite of the usual eQTL PC sweep, where a few PCs boost -->
+<!-- power. It points one of two ways: (a) the M-value PCs are absorbing real -->
+<!-- signal (so few/no PCs are best), or (b) low PC counts under-correct and the -->
+<!-- extra calls at low k are inflated. The calibration check (permutation) at -->
+<!-- low k is what distinguishes these, and is the next step. Because discoveries -->
+<!-- keep rising toward k=3, k=0/1/2 should also be tested. -->
+
+# 5. Top QTL sites
+
+```{r top-hits}
+best <- summary_tbl[which.max(qtl_FDR05)]
+top <- scans[window_kb == best$window_kb & n_pcs == best$n_pcs][order(perm_p)][1:15,
+        .(ref, pos, strand, n_cis, lead_snp, lead_maf, nominal_min_p, perm_p, fdr)]
+knitr::kable(top, digits = c(0,0,0,0,0,3,-1,-1,-1),
+             caption = sprintf("Top 15 QTL sites at the best config (window=%dkb, %d PCs)",
+                               best$window_kb, best$n_pcs))
+```
+
+# 6. Calibration check (next step)
+
+Because the count model assumes no overdispersion, and because more discoveries
+appear at fewer PCs, a **permutation calibration check** — permuting the
+phenotype and confirming the nominal p-values are Uniform(0,1) (QQ-plot +
+genomic-inflation lambda) — is run at the chosen PC count to confirm the calls
+are calibrated rather than inflated. This is the same negative-control
+permutation used for the [linear
+model](qtl_mapping_summary_floor0_quantile.html#Permutation_control), and is
+pending for the selected `k`. A separate **beta-binomial extension** (which
+models overdispersion directly) is being run in parallel for comparison — the
+data are overdispersed at ~22% of sites, where the binomial p-values are
+anti-conservative.
