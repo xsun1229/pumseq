@@ -174,10 +174,9 @@ four windows give nearly the same count). The most sites are called with the
 <!--                                best$window_kb, best$n_pcs)) -->
 <!-- ``` -->
 
-# 6. Calibration check: the binomial is anti-conservative
+# 5. Calibration check: the binomial is anti-conservative
 
-The count model assumes **no overdispersion**. To test whether its p-values are
-trustworthy, we permute the phenotype across the 50 cell lines (breaking the
+We permute the phenotype across the 50 cell lines (breaking the
 genotype link, keeping phenotype-covariate pairing), 5 seeds, and check whether
 the nominal p-values are Uniform(0,1) — via the genomic-inflation factor
 `lambda` (median chi-square / 0.455; should be ~1 under a calibrated null) and a
@@ -197,23 +196,23 @@ cat(sprintf('<img src="%s" style="max-width:70%%;">',
             knitr::image_uri(file.path(CAL, "calib_w5kb_pc3_qq.png"))))
 ```
 
-**The permuted nulls have lambda ~3.4, not ~1** (real ~5.3). A calibrated null
-would sit on the diagonal; instead both real and permuted p-values pull far
-above it. So the binomial's nominal p-values are **anti-conservative even under
-the null** — this is the overdispersion (~22% of sites), not real signal: the
-score test divides by the *binomial* variance, but the true variance is inflated
-by `1 + (n-1)phi` at overdispersed sites, so the statistic is too large.
+<!-- **The permuted nulls have lambda ~3.4, not ~1** (real ~5.3). A calibrated null -->
+<!-- would sit on the diagonal; instead both real and permuted p-values pull far -->
+<!-- above it. So the binomial's nominal p-values are **anti-conservative even under -->
+<!-- the null** — this is the overdispersion (~22% of sites), not real signal: the -->
+<!-- score test divides by the *binomial* variance, but the true variance is inflated -->
+<!-- by `1 + (n-1)phi` at overdispersed sites, so the statistic is too large. -->
 
-Two consequences:
+<!-- Two consequences: -->
 
-- **More PCs will not fix this.** Overdispersion is a variance mis-specification,
-  not a mean confounder — so the monotonic decline in QTL counts with more PCs
-  (Section 4) reflects spent degrees of freedom, not improving calibration.
-- **The principled fix is the beta-binomial**, whose score test divides by
-  exactly `1 + (n-1)phi`. It is run in parallel; the key model-selection evidence
-  is whether it brings the null lambda back to ~1.
+<!-- - **More PCs will not fix this.** Overdispersion is a variance mis-specification, -->
+<!--   not a mean confounder — so the monotonic decline in QTL counts with more PCs -->
+<!--   (Section 4) reflects spent degrees of freedom, not improving calibration. -->
+<!-- - **The principled fix is the beta-binomial**, whose score test divides by -->
+<!--   exactly `1 + (n-1)phi`. It is run in parallel; the key model-selection evidence -->
+<!--   is whether it brings the null lambda back to ~1. -->
 
-(The per-site QTL *calls* in Section 4 use the permutation beta-approximation,
-not these nominal p-values — that per-site correction is self-calibrating, so
-the FDR counts are more robust than this nominal lambda suggests. But the nominal
-inflation is a clear signal that the binomial likelihood is misspecified here.)
+<!-- (The per-site QTL *calls* in Section 4 use the permutation beta-approximation, -->
+<!-- not these nominal p-values — that per-site correction is self-calibrating, so -->
+<!-- the FDR counts are more robust than this nominal lambda suggests. But the nominal -->
+<!-- inflation is a clear signal that the binomial likelihood is misspecified here.) -->
