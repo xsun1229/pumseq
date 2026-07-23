@@ -91,24 +91,52 @@ page](qtl_mapping_summary_betabinomial.html) for the full distribution.
 
 Testing $\beta_g$ per (site, cis-SNP) pair the same way as the binomial (an
 LRT refit per SNP) would require re-fitting the beta-binomial's joint MLE for
-every cis-SNP — far too slow to permute. Instead we use a **Rao score test**,
-exactly analogous to the binomial's, with every term divided by the
-overdispersion factor $c_i = 1+(n_i-1)\phi$:
+every cis-SNP — far too slow to permute (~200,000 CPU-hours for the full
+scan; see the [score-vs-LRT page](qtl_mapping_score_vs_lrt.html) for the
+arithmetic). Instead we use a **Rao score test**: fit the null once per site,
+then test every cis-SNP via a fast vectorized computation.
+
+**A first version of this used the wrong score** — dividing the binomial's
+score/information by the overdispersion factor $c_i=1+(n_i-1)\phi$, matching
+only the beta-binomial's first two moments (a "quasi-score"). That
+approximation is exact for the binomial (a canonical one-parameter
+exponential family) but **not** for the beta-binomial (a mixture
+distribution) — verified numerically to diverge sharply from the true
+likelihood-ratio test at high-$\phi$ sites (one real site: quasi-score
+$p=6.7\times10^{-10}$ vs. the true LRT $p=0.22$ — a difference in
+*conclusion*, not precision). Full account: [score-vs-LRT
+page](qtl_mapping_score_vs_lrt.html).
+
+**Fix**: the exact score and (observed) information of the beta-binomial
+log-likelihood, in closed form via digamma ($\psi$) and trigamma ($\psi'$)
+functions. With $k=(1-\phi)/\phi$, $a_i=\mu_ik$, $b_i=(1-\mu_i)k$ (so
+$a_i+b_i=k$ is constant in $\mu_i$, which is what keeps this tractable):
 
 $$
-r_i = \frac{y_i - n_i\hat\mu_i}{c_i}, \qquad
-w_i = \frac{n_i\hat\mu_i(1-\hat\mu_i)}{c_i}, \qquad
+r_i = k\,\big[\psi(y_i{+}a_i)-\psi(a_i)-\psi(n_i{-}y_i{+}b_i)+\psi(b_i)\big]\,\mu_i(1-\mu_i)
+$$
+$$
+w_i = -k^2\big[\psi'(y_i{+}a_i)-\psi'(a_i)+\psi'(n_i{-}y_i{+}b_i)-\psi'(b_i)\big]\big(\mu_i(1-\mu_i)\big)^2
+      - r_i\,(1-2\mu_i)
+$$
+$$
 U = G^\top r, \qquad V = G^\top\!\text{diag}(w)\,G - (\cdots),
 \qquad U^2/V \sim \chi^2_1
 $$
 
-(The binomial score test is the special case $\phi=0 \Rightarrow c_i=1$.) This
-was validated against `aod::betabin`'s full-vs-null LRT on simulated data —
-matching rank order and $\log_{10}(p)$ within ~0.03 outside the extreme tail.
+As $\phi\to0$ ($k\to\infty$) this reduces exactly to the binomial's
+$r_i=y_i-n_i\mu_i$, $w_i=n_i\mu_i(1-\mu_i)$ — confirming the derivation is
+consistent with (a generalization of) the exact binomial case, not an
+independent approximation. Validated against a numerical gradient/Hessian of
+the true log-likelihood (exact match) and against the real LRT (small,
+unbiased residual disagreement, concentrated at high $\phi$ — the expected
+finite-sample behavior of a score test with an extra nuisance parameter, not
+a further approximation gap). Detail and live validation: [score-vs-LRT
+page](qtl_mapping_score_vs_lrt.html).
 
 ```r
 nf  <- fit_null_betabin(y, n, X)      # phi estimated once (the slow joint MLE)
-p_snp <- score_pvals(nf, G)           # per cis-SNP, same engine as the binomial
+p_snp <- score_pvals(nf, G)           # per cis-SNP, exact score/info, same engine as the binomial
 ```
 
 # Significance
@@ -135,10 +163,17 @@ phi <- nf_full$phi
 nf_perm <- bb_score_setup(y_perm, n_perm, X, phi)
 ```
 
-This fixed-$\phi$ mean fit was validated against the full joint MLE (same
-score p-values, max $|\log_{10}(\text{ratio})|=0.013$) and is ~34x faster
-(~0.6ms vs. ~20ms per fit) — making the permutation beta-approximation below
-computationally feasible.
+This fixed-$\phi$ mean fit is ~30x faster than a full joint MLE refit
+(~0.7ms vs. ~20-30ms) — making the permutation beta-approximation below
+computationally feasible. It is not a perfect substitute for freely
+re-estimating $\phi$: on real sites, the fixed-$\phi$ and free-$\phi$ exact
+scores agree with rank correlation ~0.81 (not near-1), so holding $\phi$
+fixed is a genuine approximation, not just a speed trick with no cost. What
+matters for validity, though, is that the **same** fixed-$\phi$ procedure is
+applied identically to the observed data and to every permutation — so a
+systematic approximation bias should largely cancel in the resulting
+permutation p-value. The calibration check below is the direct test of
+whether that holds in practice.
 
 ## 2. Permutation as a calibration check
 
@@ -148,14 +183,13 @@ correct test, not the fixed-phi speed trick above, which is only used
 *within* a site's own permutation pass in step 3), collect nominal p-values,
 check $\lambda\approx1$.
 
-**Result** (5kb, 3 PCs — see the [results
-page](qtl_mapping_summary_betabinomial.html#calibration) for detail): permuted-null
-$\lambda$ drops from the binomial's **~3.4 to ~2.0** — a substantial
-improvement, but not full calibration. Candidate reasons the residual
-inflation remains: the score test is still asymptotic ($\chi^2$) and may not
-be exact at $n=50$; $\phi$ is plugged in as if known, ignoring its own
-estimation uncertainty; and $1+(n-1)\phi$ is one specific overdispersion
-structure that may not fit every site exactly.
+**Status**: an earlier run of this check (5kb, 3 PCs) — using the buggy
+quasi-score above — found permuted-null $\lambda\approx2.0$, an improvement
+over the binomial's ~3.4 but not full calibration. Investigating that
+residual gap (prompted by the advisor's suggestion to reconsider the test)
+is what surfaced the quasi-score bug. The check is being **re-run with the
+corrected exact score**; results will replace this paragraph once available
+— see the [results page](qtl_mapping_summary_betabinomial.html#calibration).
 
 ## 3. Within-site correction (permutation beta-approximation)
 

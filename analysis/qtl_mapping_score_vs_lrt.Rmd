@@ -1,0 +1,290 @@
+---
+title: "Score test vs. LRT — validation, and a bug it caught"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+library(data.table)
+library(ggplot2)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = "center", fig.width = 7, fig.height = 5.5)
+```
+
+# Motivation
+
+The advisor's question: *"I am not familiar with the statistical test used
+here [the score test]. You can probably still use LRT, but then you'll need
+to include a 'nuisance' parameter — the extent of overdispersion."*
+
+Both the [binomial](qtl_mapping_binomial_model.html) and
+[beta-binomial](qtl_mapping_betabinomial_model.html) pU-QTL models test
+$H_0:\beta_g=0$ using a **Rao score test** rather than a **likelihood-ratio
+test (LRT)**, for computational reasons explained below. This page:
+
+1. explains the score test and how it relates to the LRT,
+2. validates the binomial score test against the LRT on real data (it is
+   **exact**, not an approximation),
+3. shows that the beta-binomial's *first* score-test implementation was
+   **not** exact — a real bug this validation exercise caught — and how it
+   was fixed.
+
+# Background: score test vs. LRT
+
+Both test the same null hypothesis; they differ in what they require:
+
+|  | **LRT** | **Score test** |
+|---|---|---|
+| fit the **full** model (with $\beta_g$) | yes | no |
+| fit the **null** model (without $\beta_g$) | yes | yes |
+| nuisance parameters (covariates; $\phi$ for BB) | re-estimated in *both* fits | estimated **once**, under the null |
+| statistic | $2(\ell_{\text{full}}-\ell_{\text{null}})$ | $U^2/V$ (score $U$, information $V$, from the null fit) |
+| asymptotic null | $\chi^2_1$ | $\chi^2_1$ |
+
+They are **asymptotically equivalent** — same hypothesis, same reference
+distribution. In both, $\phi$ (for the beta-binomial) or the covariates (for
+either model) are **nuisance parameters**; the score test just estimates them
+once rather than refitting them for every alternative.
+
+## Why a score test at all: the permutation cost
+
+The within-site cis-SNP correction (FastQTL/tensorQTL permutation
+beta-approximation) needs the nominal test statistic for **every cis-SNP**,
+recomputed for **~1000 phenotype permutations**, at **every one of 12,416
+sites**. An LRT needs a full-model refit per (site, SNP, permutation):
+
+$$
+12{,}416 \text{ sites} \times \sim\!40 \text{ cis-SNPs} \times 1000 \text{ perms}
+\times 2 \text{ fits} \times 25\text{ms} \;\approx\; 69{,}000 \text{ CPU-hours}
+$$
+
+A score test needs only **one** null fit per (site, permutation); every
+cis-SNP is then a fast vectorized matrix computation — no per-SNP refit.
+That is the entire reason for using it (the same reason large-scale genetic
+association methods like SAIGE/regenie use score tests genome-wide).
+
+```{r load-data}
+BASE <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl"
+source("/project/xinhe/xsun/pumseq/3.qtl_mapping_binomial/qtl_lib.R")
+source("/project/xinhe/xsun/pumseq/4.qtl_mapping_betabinomial/betabin_lib.R")
+
+C <- fread(file.path(BASE, "phenotype/fold5_union/counts/C_matrix.txt.gz"))
+N <- fread(file.path(BASE, "phenotype/fold5_union/counts/N_matrix.txt.gz"))
+go <- fread(file.path(BASE, "genotype/plink2/pumseq_genotype.hg38.chr1-22.psam"))[[2]]
+Cm <- as.matrix(C[, ..go]); Nm <- as.matrix(N[, ..go])
+sites <- C[, .(ref = as.character(ref), pos = as.integer(pos))]
+cov <- fread(file.path(BASE, "phenotype/fold5_union/mvalue_pcs.txt"))
+Xcov <- cbind(1, as.matrix(cov[, paste0("PC", 1:3), with = FALSE]))
+
+# chr1 slice of the common-SNP dosage matrix (matches the +/-5kb scan window)
+samp <- paste0(go, "_", go)
+traw <- fread(file.path(BASE, "genotype/qtl_binomial/genotype_common.traw"), nrows = 400000)
+Gall <- t(as.matrix(traw[, ..samp])); gpos <- traw$POS; gchr <- as.character(traw$CHR)
+rm(traw); gc()
+chr_idx <- split(seq_along(gpos), gchr)
+for (ch in names(chr_idx)) { o <- order(gpos[chr_idx[[ch]]]); chr_idx[[ch]] <- chr_idx[[ch]][o] }
+
+WINDOW <- 5000; MAF_MIN <- 0.05
+cis_window <- function(s) {
+  ch <- sites$ref[s]; if (is.null(chr_idx[[ch]])) return(NULL)
+  cols <- chr_idx[[ch]]; pos <- gpos[cols]
+  w <- cols[pos >= sites$pos[s] - WINDOW & pos <= sites$pos[s] + WINDOW]
+  if (length(w) == 0) return(NULL)
+  G <- mean_impute(Gall[, w, drop = FALSE]); keep <- maf_of(G) >= MAF_MIN
+  if (!any(keep)) return(NULL)
+  G[, keep, drop = FALSE]
+}
+set.seed(2026)
+cand <- sample(which(sites$ref == "1" & sites$pos < max(gpos)), 150)
+```
+
+# 1. Binomial: the score test is exact
+
+The binomial (logit link) is a **canonical one-parameter exponential
+family** — its score/information formulas are the *exact* derivatives of the
+likelihood, not an approximation:
+
+$$
+r_i = y_i - n_i\hat p_i, \qquad w_i = n_i\hat p_i(1-\hat p_i), \qquad U=G^\top r,\quad V = G^\top\text{diag}(w)G-(\cdots)
+$$
+
+```{r bin-validate}
+res_bin <- rbindlist(lapply(cand, function(s) {
+  y <- Cm[s, ]; n <- Nm[s, ]; if (sum(n >= 1) < 10) return(NULL)
+  G <- cis_window(s); if (is.null(G)) return(NULL)
+  nf <- fit_null(y, n, Xcov); if (!nf$converged) return(NULL)
+  p_score <- score_pvals(nf, G); if (all(is.na(p_score))) return(NULL)
+  lead <- which.min(p_score)
+  ll_null <- binom_loglik(y, n, Xcov)
+  ff <- suppressWarnings(glm.fit(cbind(Xcov, G[, lead]), cbind(y, n - y), family = binomial()))
+  ll_full <- sum(dbinom(y, n, ff$fitted.values, log = TRUE))
+  p_lrt <- pchisq(max(2 * (ll_full - ll_null), 0), 1, lower.tail = FALSE)
+  data.table(site = s, p_score = p_score[lead], p_lrt = p_lrt)
+}))
+cat(sprintf("n=%d sites | Spearman rank cor = %.4f\n",
+            nrow(res_bin), cor(res_bin$p_score, res_bin$p_lrt, method = "spearman")))
+```
+
+```{r bin-plot}
+ggplot(res_bin, aes(-log10(p_lrt), -log10(p_score))) +
+  geom_abline(slope = 1, linetype = "dashed", color = "grey50") +
+  geom_point(alpha = 0.6, color = "steelblue") +
+  labs(x = expression(-log[10]("LRT p")), y = expression(-log[10]("score p")),
+       title = "Binomial: score test vs. LRT (real sites, own lead SNP)",
+       subtitle = sprintf("rank cor = %.3f — tight agreement, as expected for an exact score test",
+                          cor(res_bin$p_score, res_bin$p_lrt, method = "spearman"))) +
+  theme_bw(base_size = 12)
+```
+
+Tight, unbiased agreement — this is the expected behavior of a mathematically
+exact score test, confirmed on real data.
+
+# 2. Beta-binomial: the naive extension was *not* exact — a bug
+
+## The quasi-score (wrong)
+
+A first implementation simply divided the binomial's score/information by
+the overdispersion factor $c_i=1+(n_i-1)\phi$ — matching the beta-binomial's
+first two *moments*, but not its actual likelihood (a mixture distribution,
+not an exponential family in $\mu$ given $\phi$):
+
+```{r quasi-score-def}
+# the WRONG formula (shown here only for comparison; removed from the codebase)
+quasi_bb_rw <- function(y, n, mu, phi) {
+  cc <- 1 + (n - 1) * phi
+  list(r = (y - n * mu) / cc, w = n * mu * (1 - mu) / cc)
+}
+```
+
+## The fix (exact)
+
+The true score and observed information of the beta-binomial log-likelihood,
+in closed form via digamma ($\psi$) / trigamma ($\psi'$) — see the [model
+page](qtl_mapping_betabinomial_model.html#QTL_mapping:_the_beta-binomial_score_test)
+for the derivation:
+
+```{r exact-score-def}
+exact_bb_rw   # already loaded from betabin_lib.R
+```
+
+## Side-by-side on real data
+
+For each site, fit the beta-binomial null once (`aod::betabin`, giving the
+exact joint MLE of $\beta_0,\gamma,\phi$), find the lead cis-SNP under the
+**exact** score, then compute: the exact score p, the quasi-score p at the
+*same* SNP, and the real LRT p (full model refit, $\phi$ freely
+re-estimated) as ground truth.
+
+```{r bb-validate}
+res_bb <- rbindlist(lapply(cand, function(s) {
+  y <- Cm[s, ]; n <- Nm[s, ]; if (sum(n >= 1) < 10) return(NULL)
+  G <- cis_window(s); if (is.null(G)) return(NULL)
+  nf <- fit_null_betabin(y, n, Xcov); if (is.null(nf)) return(NULL)
+  p_exact <- score_pvals(nf, G); if (all(is.na(p_exact))) return(NULL)
+  lead <- which.min(p_exact)
+
+  qrw <- quasi_bb_rw(y, n, nf$mu0, nf$phi)
+  WX <- qrw$w * Xcov; Ainv_q <- tryCatch(solve(crossprod(Xcov, WX)), error = function(e) NULL)
+  if (is.null(Ainv_q)) return(NULL)
+  g <- G[, lead]
+  Uq <- sum(g * qrw$r); GtWXq <- crossprod(g, WX)
+  Vq <- sum(g^2 * qrw$w) - as.numeric(GtWXq %*% Ainv_q %*% t(GtWXq))
+  p_quasi <- if (is.finite(Vq) && Vq > 0) pchisq(Uq^2 / Vq, 1, lower.tail = FALSE) else NA
+
+  nf_full <- fit_null_betabin(y, n, cbind(Xcov, g)); if (is.null(nf_full)) return(NULL)
+  p_lrt <- pchisq(max(2 * (nf_full$logLik_bb - nf$logLik_bb), 0), 1, lower.tail = FALSE)
+
+  data.table(site = s, phi = nf$phi, p_quasi = p_quasi, p_exact = p_exact[lead], p_lrt = p_lrt)
+}))
+cat(sprintf("n=%d sites\n", nrow(res_bb)))
+cat(sprintf("QUASI-score  vs LRT: rank cor = %.3f\n",
+            cor(res_bb$p_quasi, res_bb$p_lrt, method = "spearman", use = "complete.obs")))
+cat(sprintf("EXACT-score  vs LRT: rank cor = %.3f\n",
+            cor(res_bb$p_exact, res_bb$p_lrt, method = "spearman", use = "complete.obs")))
+```
+
+```{r bb-plot, fig.width=11, fig.height=5.5}
+pd <- rbind(
+  res_bb[, .(site, phi, p_test = p_quasi, p_lrt, method = "quasi-score (buggy)")],
+  res_bb[, .(site, phi, p_test = p_exact, p_lrt, method = "exact score (fixed)")]
+)
+pd[, method := factor(method, levels = c("quasi-score (buggy)", "exact score (fixed)"))]
+ggplot(pd, aes(-log10(p_lrt), -log10(p_test), color = phi)) +
+  geom_abline(slope = 1, linetype = "dashed", color = "grey50") +
+  geom_point(alpha = 0.7) +
+  scale_color_viridis_c(option = "C") +
+  facet_wrap(~method) +
+  labs(x = expression(-log[10]("LRT p")), y = expression(-log[10]("score p")),
+       color = expression(phi),
+       title = "Beta-binomial: quasi-score (before) vs. exact score (after), both vs. LRT",
+       subtitle = "left: scattered off the diagonal, worse at high phi (color) -- right: tracks the diagonal") +
+  theme_bw(base_size = 12)
+```
+
+**Left panel (quasi-score)**: scattered badly off the diagonal, worst at
+high $\phi$ (yellow points) — some sites the quasi-score called essentially
+certain ($-\log_{10}p > 10$) the LRT calls non-significant. **Right panel
+(exact score)**: tracks the diagonal; residual scatter concentrates at high
+$\phi$ points but is no longer one-sided.
+
+## One concrete example
+
+```{r worked-example}
+worst <- res_bb[order(-abs(log10(p_quasi / p_lrt)))][1]
+knitr::kable(worst[, .(site, phi = round(phi, 3),
+                       quasi_score_p = formatC(p_quasi, format = "e", digits = 2),
+                       exact_score_p = formatC(p_exact, format = "e", digits = 2),
+                       LRT_p = formatC(p_lrt, format = "e", digits = 2))],
+             caption = "The single largest quasi-score/LRT disagreement in this sample")
+```
+
+At this site the quasi-score and the LRT disagree on whether there is a QTL
+at all; the exact score agrees with the LRT's conclusion.
+
+## Is the residual exact-score/LRT gap a problem?
+
+```{r phi-cor}
+cat(sprintf("correlation(|log10(exact/lrt)|, phi) = %.3f\n",
+            cor(abs(log10(res_bb$p_exact / res_bb$p_lrt)), res_bb$phi, use = "complete.obs")))
+cat(sprintf("mean log10(exact/lrt) = %.3f (0 = unbiased)\n",
+            mean(log10(res_bb$p_exact / res_bb$p_lrt), na.rm = TRUE)))
+```
+
+The remaining disagreement grows with $\phi$ and is **not** systematically
+biased in one direction (mean log-ratio near 0) — consistent with the normal
+finite-sample gap between a score test and an LRT when there is an extra
+nuisance parameter ($\phi$) and effective sample size shrinks at high
+overdispersion. This is expected statistical behavior, not a further
+approximation error — unlike the quasi-score's one-sided divergence, which
+was a genuine bug.
+
+# 3. Details: the Rao score test
+
+For a null hypothesis $H_0:\beta_g=0$ with nuisance parameters $\theta$
+(covariates for the binomial; covariates + $\phi$ for the beta-binomial):
+
+1. Fit $\hat\theta$ under the null (no $\beta_g$) — **once**.
+2. **Score** $U(\beta_g)=\partial\ell/\partial\beta_g$, evaluated at
+   $(\beta_g{=}0,\hat\theta)$ — how much the likelihood "wants" to move away
+   from $\beta_g=0$.
+3. **Information** $V$ = the curvature of $\ell$ at that point, with the
+   nuisance parameters' own uncertainty partialled out (the
+   $G^\top WX\, (X^\top WX)^{-1}\,X^\top WG$ correction term in
+   `score_pvals()` — the standard nuisance-parameter adjustment for a score
+   test with multiple nuisance parameters).
+4. Statistic $U^2/V \sim \chi^2_1$ under $H_0$.
+
+The binomial's $U,V$ are the *exact* derivatives of its likelihood (steps
+2-3 have closed forms because the binomial is a canonical exponential
+family). The beta-binomial's are *also* now exact — via digamma/trigamma —
+after the fix above; the earlier quasi-score used a moment-matching
+substitute for step 2-3 that is only valid when $\phi$ is small.
+
+**Why this is fast**: because $\hat\theta$ is fit once, testing $M$ cis-SNPs
+is $M$ evaluations of a closed-form formula (matrix algebra), not $M$ model
+refits — this is what makes the 1000x-permutation cis-correction affordable
+around a GLM.
