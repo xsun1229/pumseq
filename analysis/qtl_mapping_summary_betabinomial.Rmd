@@ -1,0 +1,207 @@
+---
+title: "QTL mapping: beta-binomial model"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+library(data.table)
+library(ggplot2)
+
+knitr::opts_chunk$set(
+  echo = TRUE, warning = FALSE, message = FALSE,
+  fig.align = "center", fig.width = 10, fig.height = 6
+)
+
+PROJECT_DIR <- "/project/xinhe/xsun/pumseq"
+BB  <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/qtl_betabinomial")
+BBR <- file.path(BB, "results")
+BIN <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/qtl_binomial/results")
+WINDOWS_KB <- c(5, 20, 50, 100)
+PC_COUNTS  <- c(3, 5, 7, 10, 15, 20)
+```
+
+# Introduction
+
+This page tests the **beta-binomial**, which models that overdispersion directly:
+
+$$
+y_i \sim \text{BetaBinomial}(n_i, \mu_i, \phi), \qquad
+\text{Var}(y_i) = n_i \mu_i (1-\mu_i)\,[\,1 + (n_i - 1)\phi\,],
+$$
+
+with the same mean model `logit(mu_i) = beta_0 + beta_g G_i + z_i'gamma`, the
+same 5-fold union sites (12,416), the same 50 cell lines, and the same M-value
+PC covariates. `phi` is the intra-class-correlation dispersion (`phi = 0`
+recovers the binomial).
+
+<!-- # 1. Is the data overdispersed? -->
+
+<!-- For each site we fit the null model (no genotype) under both the binomial and -->
+<!-- the beta-binomial and record the dispersion `phi` and a boundary-corrected LRT -->
+<!-- for `H0: phi = 0`. -->
+
+<!-- ```{r overdisp} -->
+<!-- od <- fread(file.path(BB, "overdispersion_pc5.txt.gz")) -->
+<!-- knitr::kable(data.table( -->
+<!--   sites_fit          = nrow(od), -->
+<!--   `median phi`       = round(median(od$phi), 4), -->
+<!--   `mean phi`         = round(mean(od$phi), 3), -->
+<!--   `q90 phi`          = round(quantile(od$phi, 0.9), 3), -->
+<!--   `phi > 0.05 (%)`   = round(100 * mean(od$phi > 0.05), 1), -->
+<!--   `overdispersed FDR<0.05 (%)` = round(100 * mean(od$fdr < 0.05), 1) -->
+<!-- ), caption = "Per-site overdispersion (null model, 5 PCs)") -->
+<!-- ``` -->
+
+<!-- ```{r overdisp-fig, results='asis'} -->
+<!-- cat(sprintf('<img src="%s" style="max-width:70%%;">', -->
+<!--             knitr::image_uri(file.path(BB, "overdispersion_pc5.png")))) -->
+<!-- ``` -->
+
+<!-- The **median site has phi ~ 0** (binomial is fine for most), but the -->
+<!-- distribution has a heavy right tail: **~22% of sites are significantly -->
+<!-- overdispersed** (phi up to ~0.5). At exactly those sites the binomial p-values -->
+<!-- are anti-conservative — which is what the beta-binomial corrects. -->
+
+<!-- # 2. Model and significance -->
+
+<!-- The beta-binomial **score test** for `beta_g` is the binomial score engine with -->
+<!-- the residual and working weight each divided by `c_i = 1 + (n_i-1)phi` -->
+<!-- (validated against `aod::betabin`'s LRT). Significance uses the **same procedure -->
+<!-- as the binomial**: per-SNP score p, the FastQTL/tensorQTL **permutation -->
+<!-- beta-approximation** within each site, then BH-FDR across sites. To keep the -->
+<!-- permutation fast, `phi` is estimated once per site and held fixed across -->
+<!-- permutations (each permutation then refits only the mean — a weighted binomial -->
+<!-- GLM). Swept over the same 6 PC x 4 window grid. -->
+
+# 1. Results: QTL sites, and a caveat at high PC counts
+
+```{r load-bb}
+read_bb <- function(w, k) {
+  f <- file.path(BBR, sprintf("betabin_w%dkb_pc%d.txt.gz", w, k))
+  if (!file.exists(f)) return(NULL)
+  d <- fread(f); d[, `:=`(window_kb = w, n_pcs = k)]; d
+}
+grid <- CJ(w = WINDOWS_KB, k = PC_COUNTS)
+bb <- rbindlist(mapply(read_bb, grid$w, grid$k, SIMPLIFY = FALSE), use.names = TRUE, fill = TRUE)
+bb_sum <- bb[, .(n_tested = .N, qtl_FDR05 = sum(fdr < 0.05, na.rm = TRUE)),
+             by = .(window_kb, n_pcs)][order(window_kb, n_pcs)]
+bb_sum[, window_lab := factor(paste0(window_kb, "kb"), levels = paste0(WINDOWS_KB, "kb"))]
+
+knitr::kable(dcast(bb_sum, window_kb ~ n_pcs, value.var = "n_tested"),
+             caption = "Sites the beta-binomial could fit (rows=window kb, cols=PCs)")
+```
+
+The beta-binomial MLE jointly estimates `k + 2` parameters (PCs + intercept +
+dispersion) on only 50 samples, so it **stops converging for most sites once
+k >= 10** — the number of fittable sites collapses (thousands -> tens). The
+beta-binomial is therefore only usable at **low PC counts (3-7)**, which is
+where discoveries peak anyway.
+
+```{r bb-disc}
+knitr::kable(dcast(bb_sum, window_kb ~ n_pcs, value.var = "qtl_FDR05"),
+             caption = "Beta-binomial QTL sites (FDR<0.05); k>=10 unreliable (few sites fit)")
+```
+
+```{r bb-vs-pc, fig.height=5}
+ggplot(bb_sum[n_pcs <= 7], aes(x = n_pcs, y = qtl_FDR05, color = window_lab)) +
+  geom_line() + geom_point(size = 2) +
+  scale_x_continuous(breaks = c(3, 5, 7)) +
+  labs(x = "Number of covariate PCs", y = "QTL sites (FDR<0.05)", color = "cis-window",
+       title = "Beta-binomial QTL sites vs. PCs (usable range k=3-7)") +
+  theme_bw(base_size = 13)
+```
+
+# 2. Beta-binomial vs. binomial
+
+At **k = 3** (both models fit ~11,000 sites — a fair comparison), the
+beta-binomial finds **~3x more** QTL sites than the binomial:
+
+```{r head-to-head}
+read_bin <- function(w, k) fread(file.path(BIN, sprintf("scan_w%dkb_pc%d.txt.gz", w, k)))
+h2h <- rbindlist(lapply(WINDOWS_KB, function(w) {
+  db <- read_bb(w, 3); dn <- read_bin(w, 3)
+  data.table(window = paste0(w, "kb"),
+             binomial   = sum(dn$fdr < 0.05, na.rm = TRUE),
+             betabinom  = sum(db$fdr < 0.05, na.rm = TRUE))
+}))
+h2h[, `fold change` := round(betabinom / binomial, 1)]
+knitr::kable(h2h, caption = "QTL sites (FDR<0.05) at k=3: binomial vs. beta-binomial")
+```
+
+This is the **opposite** of removing false positives — the beta-binomial
+*recovers* signal. The likely reason: at the overdispersed sites the binomial's
+permutation null is itself inflated (both the observed and the permuted min-p
+are too small), so the binomial is effectively **conservative** there and buries
+real QTLs in overdispersion-driven noise. The beta-binomial divides that
+variance out, de-inflates the null, and recovers those associations.
+
+```{r phi-of-hits, fig.height=4.5}
+hits <- read_bb(5, 3)
+hits[, group := ifelse(fdr < 0.05, "QTL (FDR<0.05)", "not significant")]
+ggplot(hits, aes(x = phi, fill = group)) +
+  geom_histogram(bins = 50, position = "identity", alpha = 0.6) +
+  scale_fill_manual(values = c("QTL (FDR<0.05)" = "firebrick", "not significant" = "grey60")) +
+  labs(x = "site dispersion phi", y = "sites", fill = NULL,
+       title = "Dispersion of beta-binomial QTL sites vs. the rest (k=3, 5kb)") +
+  theme_bw(base_size = 12)
+```
+
+# 3. Calibration check: better, but not fully calibrated
+
+Whether the extra discoveries are real power recovery or an artifact of how
+`phi` is estimated hinges on the beta-binomial's own calibration. We ran the
+same permutation calibration check used for the binomial (5 seeds, same
+config: 5kb, 3 PCs) — with a full beta-binomial refit per site per
+permutation (`phi` re-estimated fresh each time, not held fixed), the correct
+test of whether the beta-binomial's own p-values are calibrated. Model
+details: [beta-binomial model page](qtl_mapping_betabinomial_model.html).
+
+```{r bb-calib-lambda}
+CAL <- file.path(BB, "calibration")
+lam <- fread(file.path(CAL, "calib_w5kb_pc3_lambda.txt"))
+knitr::kable(lam, digits = 2,
+             caption = "Genomic-inflation lambda (5kb, 3 PCs): real vs. 5 permuted nulls (beta-binomial)")
+```
+
+```{r bb-calib-qq, results='asis'}
+cat(sprintf('<img src="%s" style="max-width:70%%;">',
+            knitr::image_uri(file.path(CAL, "calib_w5kb_pc3_qq.png"))))
+```
+
+```{r bb-calib-compare}
+knitr::kable(data.table(
+  model = c("binomial", "beta-binomial"),
+  real_lambda = c(5.28, round(lam[dataset == "real"]$lambda, 2)),
+  permuted_null_lambda_range = c("3.12 - 3.62", sprintf("%.2f - %.2f",
+                                  min(lam[dataset != "real"]$lambda),
+                                  max(lam[dataset != "real"]$lambda)))
+), caption = "Nominal-p calibration: binomial vs. beta-binomial")
+```
+
+**The beta-binomial roughly halves the inflation** (permuted-null lambda ~3.4
+-> ~2.0) but does **not** bring it fully to the ~1 a calibrated null requires.
+So modeling overdispersion removes a substantial share of the binomial's
+miscalibration, consistent with the ~3x discovery increase reflecting real
+power recovery — but the remaining ~2x inflation means some of the
+beta-binomial's discoveries may still not be fully trustworthy either.
+
+Candidate reasons for the residual inflation (not yet distinguished):
+
+- the score test is still an **asymptotic** (chi-square) approximation, which
+  may not be exact at n=50 with the low counts typical here;
+- `phi` is estimated with real sampling uncertainty but the score test
+  **treats it as known**, which can leave residual anti-conservatism;
+- the `1+(n-1)phi` variance form is one specific overdispersion structure —
+  if the true noise doesn't follow it exactly at every site, some inflation
+  would remain.
+
+**Practical takeaway**: the beta-binomial is a clear improvement over the
+binomial and the better model to report, but neither model's nominal
+p-values are fully calibrated, and the per-site FDR discovery counts (which
+use the permutation beta-approximation, not these nominal p-values) should
+still be read with that caveat in mind.

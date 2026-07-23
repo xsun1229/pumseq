@@ -1,0 +1,193 @@
+---
+title: "pU-QTL mapping — beta-binomial model"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+library(data.table)
+library(ggplot2)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = "center", fig.width = 8, fig.height = 5)
+```
+
+# Overview
+
+The [binomial GLM](qtl_mapping_binomial_model.html) assumes no overdispersion —
+its permutation calibration check failed (permuted-null genomic inflation
+$\lambda \approx 3.4$, should be $\approx 1$). This page describes the
+**beta-binomial** extension, which models the extra cell-line-to-cell-line
+variance directly rather than assuming pure binomial sampling noise.
+
+Sites tested: the same **5-fold union (≥ 1 fold)** set,
+**`r format(12416, big.mark=",")` sites**. Samples: the same **50 genotyped
+cell lines**. Covariates: the same **M-value PCs** (below).
+
+# The model
+
+For a given pU site, let individual $i$ have $y_i$ converted reads out of
+$n_i$ total reads, but now allow the modification rate itself to vary around
+its mean $\mu_i$ (a Beta-distributed mixing probability):
+
+$$
+p_i \sim \text{Beta}(\alpha_i, \beta_i), \qquad y_i \mid p_i \sim \text{Binomial}(n_i, p_i)
+$$
+$$
+\text{logit}(\mu_i) = \beta_0 + \beta_g G_i + z_i^\top\gamma, \qquad
+\mu_i = \frac{\alpha_i}{\alpha_i+\beta_i}, \qquad
+\phi = \frac{1}{\alpha_i+\beta_i+1}
+$$
+
+Marginalizing over $p_i$ gives the **beta-binomial** distribution for $y_i$,
+with the same mean model as the binomial but a different variance:
+
+$$
+\text{Var}(y_i) = n_i\mu_i(1-\mu_i)\big[\,1+(n_i-1)\phi\,\big]
+$$
+
+- $\phi \in [0,1)$ — the **overdispersion / intra-class-correlation**
+  parameter: how much the $n_i$ reads at one cell line behave like correlated
+  (not independent) trials. $\phi=0$ recovers the binomial exactly.
+- The bracketed term $1+(n_i-1)\phi$ is a **variance inflation factor** — the
+  same form as the design effect in clustered/survey data. It grows with
+  depth $n_i$, so high-depth cell lines are *not* automatically down-weighted
+  as much as the binomial would assume, once $\phi>0$.
+- One $\phi$ per site (not per cell line, not per SNP) — a single dispersion
+  shared across the site's 50 observations.
+
+# Is the data overdispersed?
+
+For each site, fit the covariates-only **null** model (no genotype) under
+both the binomial and the beta-binomial, via maximum likelihood — a single
+joint fit of $(\beta_0,\gamma,\phi)$ gives both $\hat\phi$ and its
+log-likelihood $\text{logLik}_{BB}$ together; a separate binomial fit
+($\phi=0$) gives $\text{logLik}_{B}$. Then test $H_0:\phi=0$ with a
+**boundary-corrected LRT** — because $\phi\ge0$ is a boundary parameter, the
+usual $\chi^2_1$ reference is replaced by a 50:50 mixture of a point mass at
+0 and $\chi^2_1$ (Self & Liang 1987):
+
+$$
+\Lambda = 2(\text{logLik}_{BB} - \text{logLik}_B), \qquad
+p = \tfrac12\, P(\chi^2_1 > \Lambda)
+$$
+
+```r
+nf  <- fit_null_betabin(y, n, X)                 # joint MLE: beta0, gamma, phi
+stat <- max(2 * (nf$logLik_bb - binom_loglik(y, n, X)), 0)
+p <- 0.5 * pchisq(stat, df = 1, lower.tail = FALSE)
+```
+
+Across the union sites: the **median site has $\hat\phi \approx 0$**
+(binomial is adequate for most sites), but the distribution has a heavy right
+tail — **~22% of sites are significantly overdispersed** (FDR<0.05), with
+$\hat\phi$ up to ~1. See the [results
+page](qtl_mapping_summary_betabinomial.html) for the full distribution.
+
+# QTL mapping: the beta-binomial score test
+
+Testing $\beta_g$ per (site, cis-SNP) pair the same way as the binomial (an
+LRT refit per SNP) would require re-fitting the beta-binomial's joint MLE for
+every cis-SNP — far too slow to permute. Instead we use a **Rao score test**,
+exactly analogous to the binomial's, with every term divided by the
+overdispersion factor $c_i = 1+(n_i-1)\phi$:
+
+$$
+r_i = \frac{y_i - n_i\hat\mu_i}{c_i}, \qquad
+w_i = \frac{n_i\hat\mu_i(1-\hat\mu_i)}{c_i}, \qquad
+U = G^\top r, \qquad V = G^\top\!\text{diag}(w)\,G - (\cdots),
+\qquad U^2/V \sim \chi^2_1
+$$
+
+(The binomial score test is the special case $\phi=0 \Rightarrow c_i=1$.) This
+was validated against `aod::betabin`'s full-vs-null LRT on simulated data —
+matching rank order and $\log_{10}(p)$ within ~0.03 outside the extreme tail.
+
+```r
+nf  <- fit_null_betabin(y, n, X)      # phi estimated once (the slow joint MLE)
+p_snp <- score_pvals(nf, G)           # per cis-SNP, same engine as the binomial
+```
+
+# Significance
+
+Same three-step procedure as the binomial model, with one addition to keep
+the permutation feasible.
+
+## 1. Making the permutation affordable: hold $\phi$ fixed
+
+A full beta-binomial MLE refit is ~20-30x slower than the binomial's
+`glm.fit` (a joint numerical optimization over $\beta_0,\gamma,\phi$ vs. a
+single IRLS). Refitting it for every one of 1000 phenotype permutations per
+site would be far too slow. Since the score test treats $\phi$ as a fixed
+nuisance parameter, we **estimate $\phi$ once per site**, then hold it fixed
+across permutations — each permutation then only needs to refit the
+**mean**, which is a plain **weighted binomial GLM** on $y/n$ with prior
+weights $n_i/c_i$ (this solves the beta-binomial mean equation exactly for
+fixed $\phi$):
+
+```r
+nf_full <- fit_null_betabin(y, n, X)          # slow: estimate phi (once)
+phi <- nf_full$phi
+# fast: refit only the mean, phi fixed -- ~30x faster, reused every permutation
+nf_perm <- bb_score_setup(y_perm, n_perm, X, phi)
+```
+
+This fixed-$\phi$ mean fit was validated against the full joint MLE (same
+score p-values, max $|\log_{10}(\text{ratio})|=0.013$) and is ~34x faster
+(~0.6ms vs. ~20ms per fit) — making the permutation beta-approximation below
+computationally feasible.
+
+## 2. Permutation as a calibration check
+
+Same audit as the binomial: permute the phenotype across the 50 cell lines
+(5 seeds), refit **fresh** (phi re-estimated under each permutation — the
+correct test, not the fixed-phi speed trick above, which is only used
+*within* a site's own permutation pass in step 3), collect nominal p-values,
+check $\lambda\approx1$.
+
+**Result** (5kb, 3 PCs — see the [results
+page](qtl_mapping_summary_betabinomial.html#calibration) for detail): permuted-null
+$\lambda$ drops from the binomial's **~3.4 to ~2.0** — a substantial
+improvement, but not full calibration. Candidate reasons the residual
+inflation remains: the score test is still asymptotic ($\chi^2$) and may not
+be exact at $n=50$; $\phi$ is plugged in as if known, ignoring its own
+estimation uncertainty; and $1+(n-1)\phi$ is one specific overdispersion
+structure that may not fit every site exactly.
+
+## 3. Within-site correction (permutation beta-approximation)
+
+Identical procedure to the binomial: minimum nominal p across a site's
+cis-SNPs, permutation null of that minimum (**using the fast fixed-$\phi$
+refit**, 1000x), Beta(a,b) fit, adjusted per-site p from the Beta CDF.
+
+## 4. Across-site correction
+
+BH-FDR (and q-values) over the per-site adjusted p, same as the binomial.
+
+# A practical limitation: high PC counts
+
+The beta-binomial's joint MLE estimates $k+2$ parameters ($k$ PCs + intercept
++ $\phi$) on only 50 samples. Unlike the binomial's IRLS (which almost always
+returns *some* fit, even an overfit one), the beta-binomial's numerical
+optimizer frequently fails to converge once $k\gtrsim10$ — the number of
+sites it can fit collapses from ~11,000 (k=3) to ~40 (k=15). So the
+beta-binomial is only usable at **low PC counts (3-7)**, which is
+conveniently also where QTL discoveries peak for both models. See the
+[results page](qtl_mapping_summary_betabinomial.html) for the sites-fit table
+and a worked example of a site that fails to converge.
+
+# Data
+
+- **Sites**: 5-fold union, ≥ 1 fold — `r format(12416, big.mark=",")` pU sites.
+- **Phenotype**: per site, per cell line — converted reads $C$ ($=y$) out of
+  total depth $N$ ($=C+T$), identical to the binomial model (no
+  transformation).
+- **Genotypes**: cis SNPs within a window of each site (±5/20/50/100kb),
+  common variants (MAF≥0.05) from the 50 cell lines' genotypes.
+- **Covariates $z$**: M-value phenotype PCs — identical construction to the
+  [binomial model](qtl_mapping_binomial_model.html#Covariates:_M-value_phenotype_PCs)
+  (site-specific $(\pi_s, 1-\pi_s)$ pseudocount), swept over
+  $k \in \{3,5,7,10,15,20\}$ (though only $k\le7$ is reliably fittable, above).
