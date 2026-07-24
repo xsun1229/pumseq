@@ -128,11 +128,25 @@ As $\phi\to0$ ($k\to\infty$) this reduces exactly to the binomial's
 $r_i=y_i-n_i\mu_i$, $w_i=n_i\mu_i(1-\mu_i)$ — confirming the derivation is
 consistent with (a generalization of) the exact binomial case, not an
 independent approximation. Validated against a numerical gradient/Hessian of
-the true log-likelihood (exact match) and against the real LRT (small,
-unbiased residual disagreement, concentrated at high $\phi$ — the expected
-finite-sample behavior of a score test with an extra nuisance parameter, not
-a further approximation gap). Detail and live validation: [score-vs-LRT
+the true log-likelihood (exact match) and against the real LRT (rank
+correlation **0.955** on real sites, unbiased, comparable to the binomial's
+own exactness). Detail and live validation: [score-vs-LRT
 page](qtl_mapping_score_vs_lrt.html).
+
+**A second, independent bug surfaced while validating the fix**: the null
+model this score test is built on is itself fit by `aod::betabin`'s
+general-purpose numerical optimizer, which was found to sometimes fail to
+converge — at one real site its fitted genotype coefficient had the *wrong
+sign* (+0.085 vs. the correct -0.336). This is not a score-test-specific
+problem (an LRT would need this same optimizer to succeed twice, for both
+the null and full model, so is equally or more exposed) — it is a model
+**fitting** problem. Fixed by replacing `aod::betabin` with a direct
+`optim()` call seeded from the (reliably exact) binomial IRLS coefficients,
+plus guards against a related numerical pathology ($\phi$ collapsing to
+exactly 0, degenerating the likelihood). This fit is also faster
+(~13ms vs. ~30ms/site). Combined with the exact-score fix, real-site
+validation reaches rank correlation **0.955** against the LRT, matching the
+binomial's own exactness.
 
 ```r
 nf  <- fit_null_betabin(y, n, X)      # phi estimated once (the slow joint MLE)
@@ -163,17 +177,16 @@ phi <- nf_full$phi
 nf_perm <- bb_score_setup(y_perm, n_perm, X, phi)
 ```
 
-This fixed-$\phi$ mean fit is ~30x faster than a full joint MLE refit
-(~0.7ms vs. ~20-30ms) — making the permutation beta-approximation below
+This fixed-$\phi$ mean fit is faster than a full joint MLE refit
+(~1ms vs. ~13ms) — making the permutation beta-approximation below
 computationally feasible. It is not a perfect substitute for freely
 re-estimating $\phi$: on real sites, the fixed-$\phi$ and free-$\phi$ exact
-scores agree with rank correlation ~0.81 (not near-1), so holding $\phi$
-fixed is a genuine approximation, not just a speed trick with no cost. What
-matters for validity, though, is that the **same** fixed-$\phi$ procedure is
-applied identically to the observed data and to every permutation — so a
-systematic approximation bias should largely cancel in the resulting
-permutation p-value. The calibration check below is the direct test of
-whether that holds in practice.
+scores agree with rank correlation **0.978**, so holding $\phi$ fixed is a
+very good, though not perfect, approximation. What matters for validity is
+that the **same** fixed-$\phi$ procedure is applied identically to the
+observed data and to every permutation — so a systematic approximation bias
+should largely cancel in the resulting permutation p-value. The calibration
+check below confirms this holds well in practice.
 
 ## 2. Permutation as a calibration check
 
@@ -183,13 +196,13 @@ correct test, not the fixed-phi speed trick above, which is only used
 *within* a site's own permutation pass in step 3), collect nominal p-values,
 check $\lambda\approx1$.
 
-**Status**: an earlier run of this check (5kb, 3 PCs) — using the buggy
-quasi-score above — found permuted-null $\lambda\approx2.0$, an improvement
-over the binomial's ~3.4 but not full calibration. Investigating that
-residual gap (prompted by the advisor's suggestion to reconsider the test)
-is what surfaced the quasi-score bug. The check is being **re-run with the
-corrected exact score**; results will replace this paragraph once available
-— see the [results page](qtl_mapping_summary_betabinomial.html#calibration).
+**Result** (5kb, 3 PCs, after both fixes above): permuted-null
+$\lambda\approx$**1.13** (range 1.07-1.22 across 5 seeds) — close to the
+ideal 1, and a large improvement over both the binomial's ~3.4 and the two
+intermediate (partially-fixed) versions of this check (~2.0, then ~1.28).
+Real data $\lambda=2.37$. See the [results
+page](qtl_mapping_summary_betabinomial.html#calibration) for the table and
+QQ-plot.
 
 ## 3. Within-site correction (permutation beta-approximation)
 
@@ -201,17 +214,19 @@ refit**, 1000x), Beta(a,b) fit, adjusted per-site p from the Beta CDF.
 
 BH-FDR (and q-values) over the per-site adjusted p, same as the binomial.
 
-# A practical limitation: high PC counts
+# High PC counts: a resolved limitation
 
-The beta-binomial's joint MLE estimates $k+2$ parameters ($k$ PCs + intercept
-+ $\phi$) on only 50 samples. Unlike the binomial's IRLS (which almost always
-returns *some* fit, even an overfit one), the beta-binomial's numerical
-optimizer frequently fails to converge once $k\gtrsim10$ — the number of
-sites it can fit collapses from ~11,000 (k=3) to ~40 (k=15). So the
-beta-binomial is only usable at **low PC counts (3-7)**, which is
-conveniently also where QTL discoveries peak for both models. See the
-[results page](qtl_mapping_summary_betabinomial.html) for the sites-fit table
-and a worked example of a site that fails to converge.
+An earlier version of this pipeline (using `aod::betabin`'s optimizer)
+appeared to only be usable at low PC counts ($k\le7$): the number of sites it
+could fit collapsed from ~11,000 (k=3) to ~40 (k=15), apparently because the
+joint MLE over $k+2$ parameters ($k$ PCs + intercept + $\phi$) on only 50
+samples got harder as $k$ grew. Fixing the optimizer (above) mostly resolved
+this — with the seeded `optim()` fit, sites fittable at k=20 rose from ~40 to
+**~7,600** (vs. the binomial's ~7,900 at the same k). So the beta-binomial is
+now usable across the full swept range, $k\in\{3,...,20\}$; what looked like
+a fundamental modeling limitation was largely an artifact of the unreliable
+optimizer. See the [results page](qtl_mapping_summary_betabinomial.html) for
+the sites-fit table.
 
 # Data
 
@@ -224,4 +239,4 @@ and a worked example of a site that fails to converge.
 - **Covariates $z$**: M-value phenotype PCs — identical construction to the
   [binomial model](qtl_mapping_binomial_model.html#Covariates:_M-value_phenotype_PCs)
   (site-specific $(\pi_s, 1-\pi_s)$ pseudocount), swept over
-  $k \in \{3,5,7,10,15,20\}$ (though only $k\le7$ is reliably fittable, above).
+  $k \in \{3,5,7,10,15,20\}$ (reliably fittable across the full range).

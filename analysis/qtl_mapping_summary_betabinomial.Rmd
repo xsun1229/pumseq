@@ -78,7 +78,7 @@ recovers the binomial).
 <!-- permutations (each permutation then refits only the mean — a weighted binomial -->
 <!-- GLM). Swept over the same 6 PC x 4 window grid. -->
 
-# 1. Results: QTL sites, and a caveat at high PC counts
+# 1. Results: QTL sites across the full PC range
 
 ```{r load-bb}
 read_bb <- function(w, k) {
@@ -97,29 +97,33 @@ knitr::kable(dcast(bb_sum, window_kb ~ n_pcs, value.var = "n_tested"),
 ```
 
 The beta-binomial MLE jointly estimates `k + 2` parameters (PCs + intercept +
-dispersion) on only 50 samples, so it **stops converging for most sites once
-k >= 10** — the number of fittable sites collapses (thousands -> tens). The
-beta-binomial is therefore only usable at **low PC counts (3-7)**, which is
-where discoveries peak anyway.
+dispersion) on only 50 samples. An earlier version of this pipeline (relying
+on `aod::betabin`'s optimizer) appeared to stop converging for most sites
+once k >= 10 (fittable sites collapsing from thousands to tens). Replacing
+that optimizer with a properly-seeded fit (see the [model
+page](qtl_mapping_betabinomial_model.html)) resolved this — sites fittable at
+k=20 rose to ~7,600 (close to the binomial's ~7,900 at the same k). The
+beta-binomial is now reliably fittable across the **full swept range**,
+k=3-20.
 
 ```{r bb-disc}
 knitr::kable(dcast(bb_sum, window_kb ~ n_pcs, value.var = "qtl_FDR05"),
-             caption = "Beta-binomial QTL sites (FDR<0.05); k>=10 unreliable (few sites fit)")
+             caption = "Beta-binomial QTL sites (FDR<0.05)")
 ```
 
 ```{r bb-vs-pc, fig.height=5}
-ggplot(bb_sum[n_pcs <= 7], aes(x = n_pcs, y = qtl_FDR05, color = window_lab)) +
+ggplot(bb_sum, aes(x = n_pcs, y = qtl_FDR05, color = window_lab)) +
   geom_line() + geom_point(size = 2) +
-  scale_x_continuous(breaks = c(3, 5, 7)) +
+  scale_x_continuous(breaks = PC_COUNTS) +
   labs(x = "Number of covariate PCs", y = "QTL sites (FDR<0.05)", color = "cis-window",
-       title = "Beta-binomial QTL sites vs. PCs (usable range k=3-7)") +
+       title = "Beta-binomial QTL sites vs. PCs") +
   theme_bw(base_size = 13)
 ```
 
 # 2. Beta-binomial vs. binomial
 
 At **k = 3** (both models fit ~11,000 sites — a fair comparison), the
-beta-binomial finds **~3x more** QTL sites than the binomial:
+beta-binomial finds **~1.3-1.4x more** QTL sites than the binomial:
 
 ```{r head-to-head}
 read_bin <- function(w, k) fread(file.path(BIN, sprintf("scan_w%dkb_pc%d.txt.gz", w, k)))
@@ -151,7 +155,7 @@ ggplot(hits, aes(x = phi, fill = group)) +
   theme_bw(base_size = 12)
 ```
 
-# 3. Calibration check: better, but not fully calibrated
+# 3. Calibration check: close to calibrated
 
 Whether the extra discoveries are real power recovery or an artifact of how
 `phi` is estimated hinges on the beta-binomial's own calibration. We ran the
@@ -159,7 +163,9 @@ same permutation calibration check used for the binomial (5 seeds, same
 config: 5kb, 3 PCs) — with a full beta-binomial refit per site per
 permutation (`phi` re-estimated fresh each time, not held fixed), the correct
 test of whether the beta-binomial's own p-values are calibrated. Model
-details: [beta-binomial model page](qtl_mapping_betabinomial_model.html).
+details, including two bugs found and fixed during this validation (a
+quasi-score approximation, and an unreliable model-fitting optimizer): [model
+page](qtl_mapping_betabinomial_model.html).
 
 ```{r bb-calib-lambda}
 CAL <- file.path(BB, "calibration")
@@ -183,25 +189,18 @@ knitr::kable(data.table(
 ), caption = "Nominal-p calibration: binomial vs. beta-binomial")
 ```
 
-**The beta-binomial roughly halves the inflation** (permuted-null lambda ~3.4
--> ~2.0) but does **not** bring it fully to the ~1 a calibrated null requires.
-So modeling overdispersion removes a substantial share of the binomial's
-miscalibration, consistent with the ~3x discovery increase reflecting real
-power recovery — but the remaining ~2x inflation means some of the
-beta-binomial's discoveries may still not be fully trustworthy either.
+**The beta-binomial brings the permuted-null lambda down to ~1.13** (range
+1.07-1.22 across 5 seeds) — close to the ideal 1, and a large improvement
+over the binomial's ~3.4. This required fixing two bugs found during this
+validation exercise (see the [model page](qtl_mapping_betabinomial_model.html)):
+an earlier "quasi-score" approximation to the beta-binomial score test, and a
+model-fitting optimizer (`aod::betabin`) that sometimes failed to converge to
+the true MLE. With both fixed, the ~1.3-1.4x discovery increase over the
+binomial is well-supported as real power recovery — the binomial's
+overdispersion-driven miscalibration was burying signal at ~22% of sites
+(those significantly overdispersed), and the beta-binomial recovers it while
+also being much better calibrated.
 
-Candidate reasons for the residual inflation (not yet distinguished):
-
-- the score test is still an **asymptotic** (chi-square) approximation, which
-  may not be exact at n=50 with the low counts typical here;
-- `phi` is estimated with real sampling uncertainty but the score test
-  **treats it as known**, which can leave residual anti-conservatism;
-- the `1+(n-1)phi` variance form is one specific overdispersion structure —
-  if the true noise doesn't follow it exactly at every site, some inflation
-  would remain.
-
-**Practical takeaway**: the beta-binomial is a clear improvement over the
-binomial and the better model to report, but neither model's nominal
-p-values are fully calibrated, and the per-site FDR discovery counts (which
-use the permutation beta-approximation, not these nominal p-values) should
-still be read with that caveat in mind.
+**Practical takeaway**: the beta-binomial is the better model to report —
+substantially closer to calibrated than the binomial, with a modest and
+defensible increase in discoveries, not an inflated one.
