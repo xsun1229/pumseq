@@ -70,11 +70,37 @@ null <- glm(cbind(C, N - C) ~     Z, family = binomial)
 p_snp <- anova(null, full, test = "LRT")[["Pr(>Chi)"]][2] # p-value for beta_g
 ```
 
-<!-- We use the **LRT** rather than the Wald $z$-test — with ~50 cell lines it is -->
-<!-- the more accurate small-sample test. (This is the same statistic the LOD -->
-<!-- score merely rescales, $\text{LOD} = \Lambda / (2\ln 10)$; we keep it on the -->
-<!-- p-value scale that is standard in human genetics rather than the LOD scale -->
-<!-- from animal-QTL mapping.) -->
+**Why the LRT and not a faster score test.** A Rao score test (fit the null
+once per site, test every cis-SNP via a fast vectorized computation) was
+tried first, since it's asymptotically equivalent to the LRT and far cheaper
+to permute. It was found unreliable at exactly the sites that matter most:
+
+- It can be **spuriously overconfident**. When a cis-SNP's true full-model
+  fit sits near a separation boundary, the score test — which never actually
+  fits that full model, only extrapolates from the null model's local
+  curvature — can report absurd significance (e.g. one real site: score
+  $p=2.5\times10^{-222}$ vs. the LRT's $p=1.8\times10^{-11}$ for the same
+  SNP). This is the Hauck–Donner effect, a known structural property of
+  score/Wald tests near boundaries, not a fixable numerical bug.
+- It can also **correctly refuse to answer** exactly where the LRT finds its
+  strongest signals — its own numerical guards return `NA` for SNPs with a
+  genuinely clean genotype-outcome split (e.g. one real site: 42/50
+  individuals at one dosage showing ~0% modification), which the LRT can
+  still compute a valid statistic for.
+
+Confirmed on real data (5kb, 3 PCs, 11,063 matched sites): same lead SNP only
+**57.4%** of the time, rank correlation **0.875** (nominal p) / **0.770**
+(permutation-calibrated p) between the two tests. **The LRT is the trusted
+method for anything reported as a discovery** — the score test is not
+reliable at face value for individual sites, especially the most
+extreme-looking ones, which are exactly the sites most likely to be reported
+as top hits.
+
+The practical cost of this choice: an LRT needs a full-model refit per
+cis-SNP (not one null fit per site), so genome-wide permutation is only
+feasible split by chromosome (and, for a few unusually dense loci, further
+by chunk) across many parallel jobs — see the [results
+page](qtl_mapping_summary_binomial.html) for the actual grid runtime.
 
 # Significance
 
@@ -87,23 +113,25 @@ The plain binomial GLM assumes **no overdispersion**. If %pU is overdispersed
 across cell lines, the analytic LRT p-values are anti-conservative. So we use
 permutation to *audit* the p-values (not to set a threshold):
 
-1. **Permute the genotype vector** $G$ across the 50 cell lines (breaks the
-   genotype–phenotype link, preserves depth and phenotype structure); refit;
-   record the $\beta_g$ p-value. Repeat 5 times, pooled across sites.
+1. **Permute the phenotype and covariates together** across the 50 cell
+   lines (the M-value PC covariates are derived from phenotype, so they must
+   travel with whichever individual's phenotype they were computed from;
+   genotype stays fixed at its true per-individual values — this is what
+   severs the genotype-phenotype link without introducing a
+   phenotype/covariate mismatch); refit; record the $\beta_g$ p-value.
+   Repeat 5 times.
 2. Under the null these p-values should be **Uniform$(0,1)$** — check the
    QQ-plot and the genomic-inflation factor
    $\lambda = \text{median}(\chi^2_{\text{obs}}) / 0.455$; we want
    $\lambda \approx 1$.
-<!-- 3. If **calibrated**, use the analytic p-values below. If **inflated**, switch -->
-<!--    to a **quasi-binomial / beta-binomial** model (or use the permutation -->
-<!--    p-values directly) to restore calibration. -->
 
 ```r
-# null distribution of the GLM p-value under permuted genotype
+# null distribution of the LRT p-value under permuted phenotype+covariates
 perm_p <- replicate(n_perm, {
-  Gp <- G[sample(length(G))]
-  f  <- suppressWarnings(glm(cbind(C, N - C) ~ Gp + Z, family = binomial))
-  n0 <- suppressWarnings(glm(cbind(C, N - C) ~      Z, family = binomial))
+  o  <- sample(length(y))
+  yp <- y[o]; np <- n[o]; Zp <- Z[o, , drop = FALSE]   # G is NOT reindexed
+  f  <- suppressWarnings(glm(cbind(yp, np - yp) ~ G + Zp, family = binomial))
+  n0 <- suppressWarnings(glm(cbind(yp, np - yp) ~     Zp, family = binomial))
   anova(n0, f, test = "LRT")[["Pr(>Chi)"]][2]
 })
 # QQ-plot perm_p vs Uniform(0,1);  lambda = median(qchisq(1 - perm_p, 1)) / qchisq(0.5, 1)
@@ -131,81 +159,6 @@ Apply **Benjamini–Hochberg FDR** (or Storey q-values) to the per-site adjusted
 p-values. Sites passing e.g. **FDR < 0.05** are pU-QTL; report the lead SNP
 per significant site.
 
-<!-- # Illustrative example (simulated) -->
-
-<!-- A small self-contained simulation of one site's cis-scan, to show the -->
-<!-- mechanics concretely. 50 individuals, one site, 50 candidate cis-SNPs, where -->
-<!-- only SNP #1 has a true effect. -->
-
-<!-- ```{r sim-setup} -->
-<!-- set.seed(1) -->
-<!-- n   <- 50            # individuals -->
-<!-- M   <- 50            # candidate cis SNPs for this site -->
-<!-- depth <- rpois(n, 60) + 10                 # per-individual read depth n_i -->
-<!-- G   <- matrix(rbinom(n * M, 2, 0.30), nrow = n)   # genotypes (n x M), MAF ~ 0.3 -->
-
-<!-- # true phenotype: only SNP #1 affects %pU -->
-<!-- beta0 <- -1.5; beta_g <- 0.8 -->
-<!-- p  <- plogis(beta0 + beta_g * G[, 1]) -->
-<!-- y  <- rbinom(n, depth, p)                  # converted reads y_i -->
-<!-- cat(sprintf("n = %d individuals, %d candidate SNPs; mean depth = %.0f\n", n, M, mean(depth))) -->
-<!-- ``` -->
-
-<!-- ```{r lod-fn} -->
-<!-- # null log-lik (intercept only) is invariant to individual order -->
-<!-- ll_null <- as.numeric(logLik(glm(cbind(y, depth - y) ~ 1, family = binomial))) -->
-
-<!-- lod_snp <- function(g, y, depth, ll0) { -->
-<!--   f <- suppressWarnings(glm(cbind(y, depth - y) ~ g, family = binomial)) -->
-<!--   (as.numeric(logLik(f)) - ll0) / log(10) -->
-<!-- } -->
-
-<!-- obs_lod <- apply(G, 2, lod_snp, y = y, depth = depth, ll0 = ll_null) -->
-<!-- cat(sprintf("Observed LOD: SNP#1 (true) = %.2f ; max of the other %d = %.2f\n", -->
-<!--             obs_lod[1], M - 1, max(obs_lod[-1]))) -->
-<!-- ``` -->
-
-<!-- ```{r permutation} -->
-<!-- set.seed(2) -->
-<!-- n_perm <- 500                              # (1000 in the real analysis) -->
-<!-- perm_max <- replicate(n_perm, { -->
-<!--   idx <- sample(n)                         # permute phenotype vs genotype -->
-<!--   yp <- y[idx]; dp <- depth[idx] -->
-<!--   ll0p <- as.numeric(logLik(glm(cbind(yp, dp - yp) ~ 1, family = binomial))) -->
-<!--   max(apply(G, 2, lod_snp, y = yp, depth = dp, ll0 = ll0p))   # genome-wide max -->
-<!-- }) -->
-<!-- thr <- quantile(perm_max, 0.95) -->
-<!-- cat(sprintf("95%% permutation LOD threshold = %.2f\n", thr)) -->
-<!-- cat(sprintf("SNP#1 observed LOD (%.2f) exceeds threshold: %s\n", -->
-<!--             obs_lod[1], obs_lod[1] > thr)) -->
-<!-- ``` -->
-
-<!-- ```{r sim-plot, fig.height=4.5} -->
-<!-- dt <- data.table(snp = seq_len(M), lod = obs_lod, is_causal = c(TRUE, rep(FALSE, M - 1))) -->
-<!-- ggplot(dt, aes(x = snp, y = lod, color = is_causal)) + -->
-<!--   geom_point(size = 2) + -->
-<!--   geom_hline(yintercept = thr, linetype = "dashed", color = "firebrick") + -->
-<!--   annotate("text", x = M * 0.7, y = thr, vjust = -0.5, color = "firebrick", -->
-<!--            label = "95% permutation threshold") + -->
-<!--   scale_color_manual(values = c(`TRUE` = "firebrick", `FALSE` = "grey50"), -->
-<!--                      labels = c(`TRUE` = "true causal SNP", `FALSE` = "null SNP"), name = NULL) + -->
-<!--   labs(x = "candidate cis-SNP", y = "LOD", -->
-<!--        title = "Illustrative single-site cis-scan: LOD per SNP vs. permutation threshold") + -->
-<!--   theme_bw(base_size = 13) -->
-<!-- ``` -->
-
-<!-- ```{r perm-null, fig.height=4} -->
-<!-- ggplot(data.table(perm_max = perm_max), aes(x = perm_max)) + -->
-<!--   geom_histogram(bins = 30, fill = "steelblue") + -->
-<!--   geom_vline(xintercept = thr, linetype = "dashed", color = "firebrick") + -->
-<!--   labs(x = "per-permutation genome-wide max LOD", y = "count", -->
-<!--        title = "Permutation null of the (genome-wide max) LOD; dashed = 95th percentile") + -->
-<!--   theme_bw(base_size = 13) -->
-<!-- ``` -->
-
-<!-- The causal SNP's LOD sits well above the permutation threshold, while the -->
-<!-- null SNPs stay below it — the procedure recovers the true signal and -->
-<!-- controls the genome-wide error rate. -->
 
 # Data 
 

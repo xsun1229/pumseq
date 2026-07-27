@@ -17,9 +17,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
 
 # Overview
 
-The [binomial GLM](qtl_mapping_binomial_model.html) assumes no overdispersion —
-its permutation calibration check failed (permuted-null genomic inflation
-$\lambda \approx 3.4$, should be $\approx 1$). This page describes the
+This page describes the
 **beta-binomial** extension, which models the extra cell-line-to-cell-line
 variance directly rather than assuming pure binomial sampling noise.
 
@@ -59,33 +57,31 @@ $$
 - One $\phi$ per site (not per cell line, not per SNP) — a single dispersion
   shared across the site's 50 observations.
 
-# Is the data overdispersed?
+<!-- # Is the data overdispersed? -->
 
-For each site, fit the covariates-only **null** model (no genotype) under
-both the binomial and the beta-binomial, via maximum likelihood — a single
-joint fit of $(\beta_0,\gamma,\phi)$ gives both $\hat\phi$ and its
-log-likelihood $\text{logLik}_{BB}$ together; a separate binomial fit
-($\phi=0$) gives $\text{logLik}_{B}$. Then test $H_0:\phi=0$ with a
-**boundary-corrected LRT** — because $\phi\ge0$ is a boundary parameter, the
-usual $\chi^2_1$ reference is replaced by a 50:50 mixture of a point mass at
-0 and $\chi^2_1$ (Self & Liang 1987):
+<!-- For each site, fit the covariates-only **null** model (no genotype) under -->
+<!-- both the binomial and the beta-binomial, via maximum likelihood — a single -->
+<!-- joint fit of $(\beta_0,\gamma,\phi)$ gives both $\hat\phi$ and its -->
+<!-- log-likelihood $\text{logLik}_{BB}$ together; a separate binomial fit -->
+<!-- ($\phi=0$) gives $\text{logLik}_{B}$. Then test $H_0:\phi=0$ with a -->
+<!-- **boundary-corrected LRT** — because $\phi\ge0$ is a boundary parameter, the -->
+<!-- usual $\chi^2_1$ reference is replaced by a 50:50 mixture of a point mass at -->
+<!-- 0 and $\chi^2_1$ (Self & Liang 1987): -->
 
-$$
-\Lambda = 2(\text{logLik}_{BB} - \text{logLik}_B), \qquad
-p = \tfrac12\, P(\chi^2_1 > \Lambda)
-$$
+<!-- $$ -->
+<!-- \Lambda = 2(\text{logLik}_{BB} - \text{logLik}_B), \qquad -->
+<!-- p = \tfrac12\, P(\chi^2_1 > \Lambda) -->
+<!-- $$ -->
 
-```r
-nf  <- fit_null_betabin(y, n, X)                 # joint MLE: beta0, gamma, phi
-stat <- max(2 * (nf$logLik_bb - binom_loglik(y, n, X)), 0)
-p <- 0.5 * pchisq(stat, df = 1, lower.tail = FALSE)
-```
+<!-- (code) nf <- fit_null_betabin(y, n, X)   # joint MLE: beta0, gamma, phi -->
+<!-- (code) stat <- max(2 * (nf$logLik_bb - binom_loglik(y, n, X)), 0) -->
+<!-- (code) p <- 0.5 * pchisq(stat, df = 1, lower.tail = FALSE) -->
 
-Across the union sites: the **median site has $\hat\phi \approx 0$**
-(binomial is adequate for most sites), but the distribution has a heavy right
-tail — **~22% of sites are significantly overdispersed** (FDR<0.05), with
-$\hat\phi$ up to ~1. See the [results
-page](qtl_mapping_summary_betabinomial.html) for the full distribution.
+<!-- Across the union sites: the **median site has $\hat\phi \approx 0$** -->
+<!-- (binomial is adequate for most sites), but the distribution has a heavy right -->
+<!-- tail — **~22% of sites are significantly overdispersed** (FDR<0.05), with -->
+<!-- $\hat\phi$ up to ~1. See the [results -->
+<!-- page](qtl_mapping_summary_betabinomial.html) for the full distribution. -->
 
 # QTL mapping: the beta-binomial score test
 
@@ -96,21 +92,12 @@ scan; see the [score-vs-LRT page](qtl_mapping_score_vs_lrt.html) for the
 arithmetic). Instead we use a **Rao score test**: fit the null once per site,
 then test every cis-SNP via a fast vectorized computation.
 
-**A first version of this used the wrong score** — dividing the binomial's
-score/information by the overdispersion factor $c_i=1+(n_i-1)\phi$, matching
-only the beta-binomial's first two moments (a "quasi-score"). That
-approximation is exact for the binomial (a canonical one-parameter
-exponential family) but **not** for the beta-binomial (a mixture
-distribution) — verified numerically to diverge sharply from the true
-likelihood-ratio test at high-$\phi$ sites (one real site: quasi-score
-$p=6.7\times10^{-10}$ vs. the true LRT $p=0.22$ — a difference in
-*conclusion*, not precision). Full account: [score-vs-LRT
-page](qtl_mapping_score_vs_lrt.html).
-
-**Fix**: the exact score and (observed) information of the beta-binomial
-log-likelihood, in closed form via digamma ($\psi$) and trigamma ($\psi'$)
-functions. With $k=(1-\phi)/\phi$, $a_i=\mu_ik$, $b_i=(1-\mu_i)k$ (so
-$a_i+b_i=k$ is constant in $\mu_i$, which is what keeps this tractable):
+The null model is fit by maximum likelihood ($\beta_0,\gamma,\phi$ jointly).
+The score test then needs the **exact** score and (observed) information of
+the beta-binomial log-likelihood at that null fit — closed form via digamma
+($\psi$) and trigamma ($\psi'$) functions. With $k=(1-\phi)/\phi$,
+$a_i=\mu_ik$, $b_i=(1-\mu_i)k$ (so $a_i+b_i=k$ is constant in $\mu_i$, which
+is what keeps this tractable):
 
 $$
 r_i = k\,\big[\psi(y_i{+}a_i)-\psi(a_i)-\psi(n_i{-}y_i{+}b_i)+\psi(b_i)\big]\,\mu_i(1-\mu_i)
@@ -125,28 +112,12 @@ U = G^\top r, \qquad V = G^\top\!\text{diag}(w)\,G - (\cdots),
 $$
 
 As $\phi\to0$ ($k\to\infty$) this reduces exactly to the binomial's
-$r_i=y_i-n_i\mu_i$, $w_i=n_i\mu_i(1-\mu_i)$ — confirming the derivation is
-consistent with (a generalization of) the exact binomial case, not an
-independent approximation. Validated against a numerical gradient/Hessian of
-the true log-likelihood (exact match) and against the real LRT (rank
-correlation **0.955** on real sites, unbiased, comparable to the binomial's
-own exactness). Detail and live validation: [score-vs-LRT
-page](qtl_mapping_score_vs_lrt.html).
-
-**A second, independent bug surfaced while validating the fix**: the null
-model this score test is built on is itself fit by `aod::betabin`'s
-general-purpose numerical optimizer, which was found to sometimes fail to
-converge — at one real site its fitted genotype coefficient had the *wrong
-sign* (+0.085 vs. the correct -0.336). This is not a score-test-specific
-problem (an LRT would need this same optimizer to succeed twice, for both
-the null and full model, so is equally or more exposed) — it is a model
-**fitting** problem. Fixed by replacing `aod::betabin` with a direct
-`optim()` call seeded from the (reliably exact) binomial IRLS coefficients,
-plus guards against a related numerical pathology ($\phi$ collapsing to
-exactly 0, degenerating the likelihood). This fit is also faster
-(~13ms vs. ~30ms/site). Combined with the exact-score fix, real-site
-validation reaches rank correlation **0.955** against the LRT, matching the
-binomial's own exactness.
+$r_i=y_i-n_i\mu_i$, $w_i=n_i\mu_i(1-\mu_i)$ — the beta-binomial score is a
+generalization of the exact binomial case, not an independent approximation.
+Validated against a numerical gradient/Hessian of the true log-likelihood
+(exact match) and against the real LRT (rank correlation **0.955** on real
+sites, unbiased — matching the binomial's own exactness). Detail and live
+validation: [score-vs-LRT page](qtl_mapping_score_vs_lrt.html).
 
 ```r
 nf  <- fit_null_betabin(y, n, X)      # phi estimated once (the slow joint MLE)
@@ -155,78 +126,64 @@ p_snp <- score_pvals(nf, G)           # per cis-SNP, exact score/info, same engi
 
 # Significance
 
-Same three-step procedure as the binomial model, with one addition to keep
-the permutation feasible.
+Same three-step procedure as the binomial model.
 
-## 1. Making the permutation affordable: hold $\phi$ fixed
-
-A full beta-binomial MLE refit is ~20-30x slower than the binomial's
-`glm.fit` (a joint numerical optimization over $\beta_0,\gamma,\phi$ vs. a
-single IRLS). Refitting it for every one of 1000 phenotype permutations per
-site would be far too slow. Since the score test treats $\phi$ as a fixed
-nuisance parameter, we **estimate $\phi$ once per site**, then hold it fixed
-across permutations — each permutation then only needs to refit the
-**mean**, which is a plain **weighted binomial GLM** on $y/n$ with prior
-weights $n_i/c_i$ (this solves the beta-binomial mean equation exactly for
-fixed $\phi$):
-
-```r
-nf_full <- fit_null_betabin(y, n, X)          # slow: estimate phi (once)
-phi <- nf_full$phi
-# fast: refit only the mean, phi fixed -- ~30x faster, reused every permutation
-nf_perm <- bb_score_setup(y_perm, n_perm, X, phi)
-```
-
-This fixed-$\phi$ mean fit is faster than a full joint MLE refit
-(~1ms vs. ~13ms) — making the permutation beta-approximation below
-computationally feasible. It is not a perfect substitute for freely
-re-estimating $\phi$: on real sites, the fixed-$\phi$ and free-$\phi$ exact
-scores agree with rank correlation **0.978**, so holding $\phi$ fixed is a
-very good, though not perfect, approximation. What matters for validity is
-that the **same** fixed-$\phi$ procedure is applied identically to the
-observed data and to every permutation — so a systematic approximation bias
-should largely cancel in the resulting permutation p-value. The calibration
-check below confirms this holds well in practice.
-
-## 2. Permutation as a calibration check
+## 1. Permutation as a calibration check
 
 Same audit as the binomial: permute the phenotype across the 50 cell lines
-(5 seeds), refit **fresh** (phi re-estimated under each permutation — the
-correct test, not the fixed-phi speed trick above, which is only used
-*within* a site's own permutation pass in step 3), collect nominal p-values,
-check $\lambda\approx1$.
+(5 seeds), refit **fresh** (phi re-estimated under each permutation), collect
+nominal p-values, check $\lambda\approx1$.
 
-**Result** (5kb, 3 PCs, after both fixes above): permuted-null
-$\lambda\approx$**1.13** (range 1.07-1.22 across 5 seeds) — close to the
-ideal 1, and a large improvement over both the binomial's ~3.4 and the two
-intermediate (partially-fixed) versions of this check (~2.0, then ~1.28).
-Real data $\lambda=2.37$. See the [results
+**Result** (5kb, 3 PCs): permuted-null $\lambda\approx$**1.13** (range
+1.07-1.22 across 5 seeds) — close to the ideal 1, and well below the
+binomial's ~3.4. Real data $\lambda=2.37$. See the [results
 page](qtl_mapping_summary_betabinomial.html#calibration) for the table and
 QQ-plot.
 
-## 3. Within-site correction (permutation beta-approximation)
+## 2. Within-site correction (permutation beta-approximation)
 
-Identical procedure to the binomial: minimum nominal p across a site's
-cis-SNPs, permutation null of that minimum (**using the fast fixed-$\phi$
-refit**, 1000x), Beta(a,b) fit, adjusted per-site p from the Beta CDF.
+Same procedure as the binomial: minimum nominal p across a site's cis-SNPs,
+permutation null of that minimum (1000x), Beta(a,b) fit, adjusted per-site p
+from the Beta CDF.
 
-## 4. Across-site correction
+**Where $\phi$ is held fixed**: this step alone needs 1000 permutations *per
+site*, so refitting the full joint MLE ($\beta_0,\gamma,\phi$) for every one
+would be far too slow. Since the score test treats $\phi$ as a fixed nuisance
+parameter, $\phi$ is **estimated once per site** (the slow joint MLE above),
+then held fixed across all 1000 permutations — each permutation only refits
+the **mean**, a plain **weighted binomial GLM** on $y/n$ with prior weights
+$n_i/c_i$ (this solves the beta-binomial mean equation exactly for fixed
+$\phi$):
+
+```r
+nf_full <- fit_null_betabin(y, n, X)          # slow: estimate phi (once per site)
+phi <- nf_full$phi
+# fast: refit only the mean, phi fixed -- reused for all 1000 permutations
+nf_perm <- bb_score_setup(y_perm, n_perm, X, phi)
+```
+
+This is ~13x faster than a full refit (~1ms vs. ~13ms). It is not a perfect
+substitute for freely re-estimating $\phi$ (fixed-$\phi$ and free-$\phi$
+exact scores agree with rank correlation 0.978 on real sites, not 1.0), but
+what matters for validity is that the **same** fixed-$\phi$ procedure is
+applied identically to the observed data and to every permutation, so a
+systematic bias should largely cancel in the resulting permutation p-value —
+confirmed by the calibration check above ($\lambda\approx1.13$).
+
+**Note**: the calibration check in step 1 does *not* use this fixed-$\phi$
+shortcut — it re-estimates $\phi$ fresh for every permutation, since it is
+specifically auditing whether the fitting procedure itself is unbiased.
+
+## 3. Across-site correction
 
 BH-FDR (and q-values) over the per-site adjusted p, same as the binomial.
 
-# High PC counts: a resolved limitation
+# Model fit across PC counts
 
-An earlier version of this pipeline (using `aod::betabin`'s optimizer)
-appeared to only be usable at low PC counts ($k\le7$): the number of sites it
-could fit collapsed from ~11,000 (k=3) to ~40 (k=15), apparently because the
-joint MLE over $k+2$ parameters ($k$ PCs + intercept + $\phi$) on only 50
-samples got harder as $k$ grew. Fixing the optimizer (above) mostly resolved
-this — with the seeded `optim()` fit, sites fittable at k=20 rose from ~40 to
-**~7,600** (vs. the binomial's ~7,900 at the same k). So the beta-binomial is
-now usable across the full swept range, $k\in\{3,...,20\}$; what looked like
-a fundamental modeling limitation was largely an artifact of the unreliable
-optimizer. See the [results page](qtl_mapping_summary_betabinomial.html) for
-the sites-fit table.
+The joint MLE ($k$ PCs + intercept + $\phi$) is reliably fittable across the
+full swept range, $k\in\{3,...,20\}$: ~7,600 of 12,416 sites fit at k=20 (vs.
+the binomial's ~7,900 at the same k). See the [results
+page](qtl_mapping_summary_betabinomial.html) for the sites-fit table.
 
 # Data
 

@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 )
 
 PROJECT_DIR <- "/project/xinhe/xsun/pumseq"
-RES <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/qtl_binomial/results")
+RES <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/qtl_binomial/lrt_results_merged")
 WINDOWS_KB <- c(5, 20, 50, 100)
 PC_COUNTS  <- c(3, 5, 7, 10, 15, 20)
 ```
@@ -90,10 +90,20 @@ scores are used as covariates. The number of PCs `k` is swept (below).
 # 3. QTL mapping approach
 
 For each (site, cis-SNP) pair the genotype effect `beta_g` is tested with a
-**Rao score test** in the binomial GLM: the covariates-only null is fit **once
-per site**, then every cis-SNP's statistic is a fast vectorized computation
-(asymptotically equivalent to the LRT). Significance follows the standard human
-cis-QTL procedure:
+**likelihood-ratio test (LRT)**: fit the full model (with the cis-SNP) and the
+covariates-only null model, compare log-likelihoods. A faster Rao score test
+(null fit once per site, every cis-SNP a vectorized computation) was tried
+first but found unreliable at exactly the sites that matter most — it can be
+spuriously overconfident near separation boundaries (Hauck-Donner effect) or
+correctly refuse to answer (`NA`) exactly where the LRT finds its strongest
+signals. Confirmed on real data: only 57.4% same lead SNP, rank correlation
+0.875 (nominal p) between the two tests. See the [model
+page](qtl_mapping_binomial_model.html) for the full comparison. The LRT is
+more expensive (a full-model refit per cis-SNP, not one null fit per site),
+made feasible genome-wide by splitting the permutation scan across
+chromosomes (and, for a few unusually dense loci, further chunks) as
+parallel SLURM jobs. Significance follows the standard human cis-QTL
+procedure:
 
 1. **Per-SNP nominal p** from the score test.
 2. **Within-site correction** — the FastQTL/tensorQTL **permutation
@@ -112,7 +122,7 @@ That is a 6 x 4 grid, each cell a separate scan.
 
 ```{r load-results}
 read_scan <- function(w, k) {
-  f <- file.path(RES, sprintf("scan_w%dkb_pc%d.txt.gz", w, k))
+  f <- file.path(RES, sprintf("scan_lrt_w%dkb_pc%d.txt.gz", w, k))
   if (!file.exists(f)) return(NULL)
   d <- fread(f); d[, `:=`(window_kb = w, n_pcs = k)]; d
 }
@@ -174,45 +184,51 @@ four windows give nearly the same count). The most sites are called with the
 <!--                                best$window_kb, best$n_pcs)) -->
 <!-- ``` -->
 
-# 5. Calibration check: the binomial is anti-conservative
+# 5. Calibration check: the LRT is better calibrated than the score test, but still not perfect
 
-We permute the phenotype across the 50 cell lines (breaking the
-genotype link, keeping phenotype-covariate pairing), 5 seeds, and check whether
-the nominal p-values are Uniform(0,1) — via the genomic-inflation factor
-`lambda` (median chi-square / 0.455; should be ~1 under a calibrated null) and a
+We permute the phenotype and covariates together across the 50 cell lines
+(breaking the genotype link, keeping phenotype-covariate pairing; genotype
+stays fixed at its true per-individual values), 5 seeds, and check whether the
+nominal p-values are Uniform(0,1) — via the genomic-inflation factor `lambda`
+(median chi-square / 0.455; should be ~1 under a calibrated null) and a
 QQ-plot. Same negative-control permutation as the [linear
 model](qtl_mapping_summary_floor0_quantile.html#Permutation_control). Run at the
 peak config (**5 kb, 3 PCs**).
 
 ```{r calib-lambda}
-CAL <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/qtl_binomial/calibration")
-lam <- fread(file.path(CAL, "calib_w5kb_pc3_lambda.txt"))
-knitr::kable(lam, digits = 2,
-             caption = "Genomic-inflation lambda (5kb, 3 PCs): real vs. 5 permuted nulls")
+CAL_LRT <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/qtl_binomial/lrt_calibration")
+CAL_SCORE <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/qtl_binomial/calibration")
+lam_lrt <- fread(file.path(CAL_LRT, "calib_lrt_w5kb_pc3_lambda.txt"))[, method := "LRT"]
+lam_score <- fread(file.path(CAL_SCORE, "calib_w5kb_pc3_lambda.txt"))[, method := "score test"]
+knitr::kable(rbind(lam_lrt, lam_score), digits = 2,
+             caption = "Genomic-inflation lambda (5kb, 3 PCs): LRT vs. score test, real vs. 5 permuted nulls")
 ```
 
-```{r calib-qq, results='asis'}
+```{r calib-qq-lrt, results='asis'}
 cat(sprintf('<img src="%s" style="max-width:70%%;">',
-            knitr::image_uri(file.path(CAL, "calib_w5kb_pc3_qq.png"))))
+            knitr::image_uri(file.path(CAL_LRT, "calib_lrt_w5kb_pc3_qq.png"))))
 ```
 
-<!-- **The permuted nulls have lambda ~3.4, not ~1** (real ~5.3). A calibrated null -->
-<!-- would sit on the diagonal; instead both real and permuted p-values pull far -->
-<!-- above it. So the binomial's nominal p-values are **anti-conservative even under -->
-<!-- the null** — this is the overdispersion (~22% of sites), not real signal: the -->
-<!-- score test divides by the *binomial* variance, but the true variance is inflated -->
-<!-- by `1 + (n-1)phi` at overdispersed sites, so the statistic is too large. -->
+**The LRT is better calibrated than the score test, but neither reaches
+lambda~1.** LRT: real lambda=**5.55**, permuted-null lambda=**~3.28** (range
+2.93-3.44). Score test (for comparison): real lambda=7.54, permuted-null
+~3.8. Switching to the LRT fixed the *test-specific* numerical failure modes
+(catastrophic cancellation, the Hauck-Donner effect near separation — see the
+[model page](qtl_mapping_binomial_model.html)), but the permuted-null
+lambda staying well above 1 even for the LRT points to something the test
+itself cannot fix: **the plain binomial model doesn't account for real
+overdispersion** in the data. A separate LRT for $H_0:\phi=0$ finds ~22% of
+sites significantly overdispersed (FDR<0.05) — see the [beta-binomial
+page](qtl_mapping_betabinomial_model.html), whose score/LRT divide by the
+correct inflated variance and calibrates much closer to 1 (permuted-null
+~1.13-1.17).
 
-<!-- Two consequences: -->
-
-<!-- - **More PCs will not fix this.** Overdispersion is a variance mis-specification, -->
-<!--   not a mean confounder — so the monotonic decline in QTL counts with more PCs -->
-<!--   (Section 4) reflects spent degrees of freedom, not improving calibration. -->
-<!-- - **The principled fix is the beta-binomial**, whose score test divides by -->
-<!--   exactly `1 + (n-1)phi`. It is run in parallel; the key model-selection evidence -->
-<!--   is whether it brings the null lambda back to ~1. -->
-
-<!-- (The per-site QTL *calls* in Section 4 use the permutation beta-approximation, -->
-<!-- not these nominal p-values — that per-site correction is self-calibrating, so -->
-<!-- the FDR counts are more robust than this nominal lambda suggests. But the nominal -->
-<!-- inflation is a clear signal that the binomial likelihood is misspecified here.) -->
+Practical consequence: **more PCs will not fix this** (overdispersion is a
+variance mis-specification, not a mean confounder — the monotonic decline in
+QTL counts with more PCs in Section 4 reflects spent degrees of freedom, not
+improving calibration), and the per-site QTL *calls* above use the
+permutation beta-approximation (self-calibrating against this same
+inflation), so the FDR counts are more robust than the raw nominal lambda
+suggests — but the residual inflation here is the reason the beta-binomial
+model is worth treating as the more complete final model, not just the
+binomial with a better test.
