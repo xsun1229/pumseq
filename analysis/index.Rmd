@@ -40,3 +40,5 @@ editor_options:
 * [QTL mapping summary: Treated - input, floor0, quantile normalization, linear regression](qtl_mapping_summary_floor0_quantile.html)
 * [Binomial GLM model](qtl_mapping_binomial_model.html)
 * [QTL mapping summary: binomial GLM on the 5-fold union sites](qtl_mapping_summary_binomial.html)
+* [Beta Binomial GLM model](qtl_mapping_betabinomial_model.html)
+* [QTL mapping summary: beta binomial GLM on the 5-fold union sites](qtl_mapping_summary_betabinomial.html)

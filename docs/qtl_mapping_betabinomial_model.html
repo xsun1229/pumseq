@@ -11,7 +11,7 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-07-24" />
+<meta name="date" content="2026-07-27" />
 
 <title>pU-QTL mapping — beta-binomial model</title>
 
@@ -373,7 +373,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">pU-QTL mapping — beta-binomial model</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-07-24</h4>
+<h4 class="date">2026-07-27</h4>
 
 </div>
 
@@ -402,7 +402,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-07-24
+<strong>Last updated:</strong> 2026-07-27
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -536,15 +536,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree2d7d55b1b5231fba9ffd7390f83cca383c9d14adtargetblank2d7d55ba">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree9791cb2e1193b07fc19f4f57491a1928a6793708targetblank9791cb2a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/2d7d55b1b5231fba9ffd7390f83cca383c9d14ad" target="_blank">2d7d55b</a>
+<a href="https://github.com/xsun1229/pumseq/tree/9791cb2e1193b07fc19f4f57491a1928a6793708" target="_blank">9791cb2</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree2d7d55b1b5231fba9ffd7390f83cca383c9d14adtargetblank2d7d55ba"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree9791cb2e1193b07fc19f4f57491a1928a6793708targetblank9791cb2a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -554,7 +554,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/2d7d55b1b5231fba9ffd7390f83cca383c9d14ad" target="_blank">2d7d55b</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/9791cb2e1193b07fc19f4f57491a1928a6793708" target="_blank">9791cb2</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -569,10 +569,10 @@ were generated:
 </p>
 <pre><code>
 Ignored files:
-    Ignored:    analysis/figure/
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Unstaged changes:
+    Modified:   analysis/index.Rmd
     Modified:   analysis/qtl_mapping_betabinomial_model.Rmd
 
 </code></pre>
@@ -620,6 +620,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/84747dd7624a3da42ce2fbb0f8c8e21635975257/analysis/qtl_mapping_betabinomial_model.Rmd" target="_blank">84747dd</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-27
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/84747dd7624a3da42ce2fbb0f8c8e21635975257/docs/qtl_mapping_betabinomial_model.html" target="_blank">84747dd</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-27
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -807,111 +841,83 @@ observations.</li>
 <!-- $\hat\phi$ up to ~1. See the [results -->
 <!-- page](qtl_mapping_summary_betabinomial.html) for the full distribution. -->
 </div>
-<div id="qtl-mapping-the-beta-binomial-score-test"
-class="section level1">
-<h1>QTL mapping: the beta-binomial score test</h1>
-<p>Testing <span class="math inline">\(\beta_g\)</span> per (site,
-cis-SNP) pair the same way as the binomial (an LRT refit per SNP) would
-require re-fitting the beta-binomial’s joint MLE for every cis-SNP — far
-too slow to permute (~200,000 CPU-hours for the full scan; see the <a
-href="qtl_mapping_score_vs_lrt.html">score-vs-LRT page</a> for the
-arithmetic). Instead we use a <strong>Rao score test</strong>: fit the
-null once per site, then test every cis-SNP via a fast vectorized
-computation.</p>
-<p>The null model is fit by maximum likelihood (<span
-class="math inline">\(\beta_0,\gamma,\phi\)</span> jointly). The score
-test then needs the <strong>exact</strong> score and (observed)
-information of the beta-binomial log-likelihood at that null fit —
-closed form via digamma (<span class="math inline">\(\psi\)</span>) and
-trigamma (<span class="math inline">\(\psi&#39;\)</span>) functions.
-With <span class="math inline">\(k=(1-\phi)/\phi\)</span>, <span
-class="math inline">\(a_i=\mu_ik\)</span>, <span
-class="math inline">\(b_i=(1-\mu_i)k\)</span> (so <span
-class="math inline">\(a_i+b_i=k\)</span> is constant in <span
-class="math inline">\(\mu_i\)</span>, which is what keeps this
-tractable):</p>
+<div id="qtl-mapping-the-beta-binomial-lrt" class="section level1">
+<h1>QTL mapping: the beta-binomial LRT</h1>
+<p>Per (site, cis-SNP) pair, <span
+class="math inline">\(\beta_g\)</span> is tested with a
+<strong>likelihood-ratio test</strong>: fit the full model (with the
+cis-SNP) and the covariates-only null model by maximum likelihood (<span
+class="math inline">\(\beta_0,\gamma,\phi\)</span> jointly for each),
+compare log-likelihoods:</p>
 <p><span class="math display">\[
-r_i =
-k\,\big[\psi(y_i{+}a_i)-\psi(a_i)-\psi(n_i{-}y_i{+}b_i)+\psi(b_i)\big]\,\mu_i(1-\mu_i)
-\]</span> <span class="math display">\[
-w_i =
--k^2\big[\psi&#39;(y_i{+}a_i)-\psi&#39;(a_i)+\psi&#39;(n_i{-}y_i{+}b_i)-\psi&#39;(b_i)\big]\big(\mu_i(1-\mu_i)\big)^2
-      - r_i\,(1-2\mu_i)
-\]</span> <span class="math display">\[
-U = G^\top r, \qquad V = G^\top\!\text{diag}(w)\,G - (\cdots),
-\qquad U^2/V \sim \chi^2_1
+\Lambda = 2\big(\log\text{Lik}_{\text{full}} -
+\log\text{Lik}_{\text{null}}\big)
+\;\overset{H_0}{\sim}\; \chi^2_1, \qquad H_0:\ \beta_g = 0
 \]</span></p>
-<p>As <span class="math inline">\(\phi\to0\)</span> (<span
-class="math inline">\(k\to\infty\)</span>) this reduces exactly to the
-binomial’s <span class="math inline">\(r_i=y_i-n_i\mu_i\)</span>, <span
-class="math inline">\(w_i=n_i\mu_i(1-\mu_i)\)</span> — the beta-binomial
-score is a generalization of the exact binomial case, not an independent
-approximation. Validated against a numerical gradient/Hessian of the
-true log-likelihood (exact match) and against the real LRT (rank
-correlation <strong>0.955</strong> on real sites, unbiased — matching
-the binomial’s own exactness). Detail and live validation: <a
-href="qtl_mapping_score_vs_lrt.html">score-vs-LRT page</a>.</p>
-<pre class="r"><code>nf  &lt;- fit_null_betabin(y, n, X)      # phi estimated once (the slow joint MLE)
-p_snp &lt;- score_pvals(nf, G)           # per cis-SNP, exact score/info, same engine as the binomial</code></pre>
+<pre class="r"><code>nf_null &lt;- fit_bb_mle(y, n, X)         # joint MLE: beta0, gamma, phi
+nf_full &lt;- fit_bb_mle(y, n, cbind(X, g))
+stat &lt;- max(2 * (nf_full$loglik - nf_null$loglik), 0)
+p_snp &lt;- pchisq(stat, df = 1, lower.tail = FALSE)</code></pre>
+<p><strong>Why the LRT, matching the binomial model’s decision.</strong>
+A faster <strong>Rao score test</strong> (fit the null once per site,
+test every cis-SNP via a vectorized computation, using the exact
+digamma/trigamma score and information of the beta-binomial
+log-likelihood — closed form via <span
+class="math inline">\(k=(1-\phi)/\phi\)</span>, <span
+class="math inline">\(a_i=\mu_ik\)</span>, <span
+class="math inline">\(b_i=(1-\mu_i)k\)</span>) was built and validated
+first, since a full-model refit per cis-SNP is far more expensive than
+one null fit per site. It performs <em>better</em> here than the
+binomial’s score test did — validated against a numerical
+gradient/Hessian (exact match) and against the real LRT (rank
+correlation <strong>0.955</strong> on real sites, essentially unbiased)
+— but the underlying concern is the same structural one that motivated
+the binomial’s switch: the score test’s variance is a subtraction of two
+similarly-sized quantities (<span class="math inline">\(V =
+G^\top\text{diag}(w)G - (\cdots)\)</span>), which is exposed to
+cancellation and near-singularity failure modes that a directly-computed
+log-likelihood comparison isn’t. 0.955 is good, not perfect, and for
+consistency with the binomial’s LRT-based final results the same test is
+used here.</p>
+<p><strong>Making the LRT affordable.</strong> A full-model refit per
+cis-SNP per permutation was originally estimated at ~200,000+ CPU-hours
+for a full 24-config scan — infeasible. Two optimizations to
+<code>fit_bb_mle()</code> (2026-07-27) brought this down substantially:
+(1) dropping the constant <code>lchoose(n,y)</code> term from the
+per-iteration objective (it cancels exactly in the LRT statistic anyway)
+and (2) supplying the optimizer an <strong>analytic gradient</strong>
+(reusing the same digamma-based score derivation as the exact score test
+above) instead of finite-difference — together roughly a
+<strong>2.5-2.9x</strong> speedup, validated against the original
+implementation’s fitted values on real sites (matching to 1e-4) before
+being adopted. Combined with running a <strong>preliminary pass at 100
+permutations</strong> (not the full 1000) to rank PC/window configs and
+check calibration — verified via Monte Carlo to stay unbiased with about
+twice the noise of 500 permutations, adequate for this purpose — the
+full 24-config grid now costs <strong>~3,000 CPU-hours</strong> total.
+Permutations will be increased once the best config is chosen.</p>
+<p>Note the LRT’s permutation loop no longer needs the fixed-<span
+class="math inline">\(\phi\)</span> mean-only-refit shortcut described
+in the score-test era below — with the optimizer this fast, every
+permutation just refits the full joint MLE directly.</p>
 </div>
 <div id="significance" class="section level1">
 <h1>Significance</h1>
 <p>Same three-step procedure as the binomial model.</p>
 <div id="permutation-as-a-calibration-check" class="section level2">
 <h2>1. Permutation as a calibration check</h2>
-<p>Same audit as the binomial: permute the phenotype across the 50 cell
-lines (5 seeds), refit <strong>fresh</strong> (phi re-estimated under
-each permutation), collect nominal p-values, check <span
+<p>Same audit as the binomial: permute the phenotype and covariates
+together across the 50 cell lines (5 seeds; genotype stays fixed), refit
+<strong>fresh</strong> (phi re-estimated under each permutation),
+collect nominal LRT p-values, check <span
 class="math inline">\(\lambda\approx1\)</span>.</p>
-<p><strong>Result</strong> (5kb, 3 PCs): permuted-null <span
-class="math inline">\(\lambda\approx\)</span><strong>1.13</strong>
-(range 1.07-1.22 across 5 seeds) — close to the ideal 1, and well below
-the binomial’s ~3.4. Real data <span
-class="math inline">\(\lambda=2.37\)</span>. See the <a
-href="qtl_mapping_summary_betabinomial.html#calibration">results
-page</a> for the table and QQ-plot.</p>
 </div>
 <div id="within-site-correction-permutation-beta-approximation"
 class="section level2">
 <h2>2. Within-site correction (permutation beta-approximation)</h2>
 <p>Same procedure as the binomial: minimum nominal p across a site’s
-cis-SNPs, permutation null of that minimum (1000x), Beta(a,b) fit,
-adjusted per-site p from the Beta CDF.</p>
-<p><strong>Where <span class="math inline">\(\phi\)</span> is held
-fixed</strong>: this step alone needs 1000 permutations <em>per
-site</em>, so refitting the full joint MLE (<span
-class="math inline">\(\beta_0,\gamma,\phi\)</span>) for every one would
-be far too slow. Since the score test treats <span
-class="math inline">\(\phi\)</span> as a fixed nuisance parameter, <span
-class="math inline">\(\phi\)</span> is <strong>estimated once per
-site</strong> (the slow joint MLE above), then held fixed across all
-1000 permutations — each permutation only refits the
-<strong>mean</strong>, a plain <strong>weighted binomial GLM</strong> on
-<span class="math inline">\(y/n\)</span> with prior weights <span
-class="math inline">\(n_i/c_i\)</span> (this solves the beta-binomial
-mean equation exactly for fixed <span
-class="math inline">\(\phi\)</span>):</p>
-<pre class="r"><code>nf_full &lt;- fit_null_betabin(y, n, X)          # slow: estimate phi (once per site)
-phi &lt;- nf_full$phi
-# fast: refit only the mean, phi fixed -- reused for all 1000 permutations
-nf_perm &lt;- bb_score_setup(y_perm, n_perm, X, phi)</code></pre>
-<p>This is ~13x faster than a full refit (~1ms vs. ~13ms). It is not a
-perfect substitute for freely re-estimating <span
-class="math inline">\(\phi\)</span> (fixed-<span
-class="math inline">\(\phi\)</span> and free-<span
-class="math inline">\(\phi\)</span> exact scores agree with rank
-correlation 0.978 on real sites, not 1.0), but what matters for validity
-is that the <strong>same</strong> fixed-<span
-class="math inline">\(\phi\)</span> procedure is applied identically to
-the observed data and to every permutation, so a systematic bias should
-largely cancel in the resulting permutation p-value — confirmed by the
-calibration check above (<span
-class="math inline">\(\lambda\approx1.13\)</span>).</p>
-<p><strong>Note</strong>: the calibration check in step 1 does
-<em>not</em> use this fixed-<span class="math inline">\(\phi\)</span>
-shortcut — it re-estimates <span class="math inline">\(\phi\)</span>
-fresh for every permutation, since it is specifically auditing whether
-the fitting procedure itself is unbiased.</p>
+cis-SNPs, permutation null of that minimum, Beta(a,b) fit, adjusted
+per-site p from the Beta CDF.</p>
 </div>
 <div id="across-site-correction" class="section level2">
 <h2>3. Across-site correction</h2>
@@ -924,8 +930,8 @@ binomial.</p>
 <p>The joint MLE (<span class="math inline">\(k\)</span> PCs + intercept
 + <span class="math inline">\(\phi\)</span>) is reliably fittable across
 the full swept range, <span
-class="math inline">\(k\in\{3,...,20\}\)</span>: ~7,600 of 12,416 sites
-fit at k=20 (vs. the binomial’s ~7,900 at the same k). See the <a
+class="math inline">\(k\in\3,5,7,10,15,20\}\)</span>: ~7,600 of 12,416
+sites fit at k=20 (vs. the binomial’s ~7,900 at the same k). See the <a
 href="qtl_mapping_summary_betabinomial.html">results page</a> for the
 sites-fit table.</p>
 </div>

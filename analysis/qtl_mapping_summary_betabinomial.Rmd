@@ -19,8 +19,8 @@ knitr::opts_chunk$set(
 
 PROJECT_DIR <- "/project/xinhe/xsun/pumseq"
 BB  <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/qtl_betabinomial")
-BBR <- file.path(BB, "results")
-BIN <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/qtl_binomial/results")
+BBR <- file.path(BB, "lrt_results_merged")
+BIN <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/qtl_binomial/lrt_results_merged")
 WINDOWS_KB <- c(5, 20, 50, 100)
 PC_COUNTS  <- c(3, 5, 7, 10, 15, 20)
 ```
@@ -38,6 +38,20 @@ with the same mean model `logit(mu_i) = beta_0 + beta_g G_i + z_i'gamma`, the
 same 5-fold union sites (12,416), the same 50 cell lines, and the same M-value
 PC covariates. `phi` is the intra-class-correlation dispersion (`phi = 0`
 recovers the binomial).
+
+**The genotype effect `beta_g` is tested with a likelihood-ratio test (LRT)**,
+matching the binomial model's approach — see the [model
+page](qtl_mapping_betabinomial_model.html) for why (a faster score test was
+built and validated first, but the LRT is used for anything reported as a
+result, for the same structural reasons as the binomial). **The results below
+use `NPERM=100`** (not the full 1000) — a preliminary pass, made affordable by
+two 2026-07-27 optimizations to the beta-binomial fitter (dropping a constant
+term from the optimizer's objective + supplying an analytic gradient, ~2.5-2.9x
+speedup) plus running fewer permutations to first rank PC/window configs and
+check calibration (verified via Monte Carlo to stay unbiased with ~2x the
+noise of 500 permutations — adequate for this purpose, not for final
+per-site significance calls). Permutations will be increased once a final
+config is chosen.
 
 <!-- # 1. Is the data overdispersed? -->
 
@@ -82,7 +96,7 @@ recovers the binomial).
 
 ```{r load-bb}
 read_bb <- function(w, k) {
-  f <- file.path(BBR, sprintf("betabin_w%dkb_pc%d.txt.gz", w, k))
+  f <- file.path(BBR, sprintf("scan_lrt_w%dkb_pc%d.txt.gz", w, k))
   if (!file.exists(f)) return(NULL)
   d <- fread(f); d[, `:=`(window_kb = w, n_pcs = k)]; d
 }
@@ -122,11 +136,14 @@ ggplot(bb_sum, aes(x = n_pcs, y = qtl_FDR05, color = window_lab)) +
 
 # 2. Beta-binomial vs. binomial
 
-At **k = 3** (both models fit ~11,000 sites — a fair comparison), the
-beta-binomial finds **~1.3-1.4x more** QTL sites than the binomial:
+At **k = 3**, comparing both models' current LRT results:
 
 ```{r head-to-head}
-read_bin <- function(w, k) fread(file.path(BIN, sprintf("scan_w%dkb_pc%d.txt.gz", w, k)))
+read_bin <- function(w, k) {
+  f <- file.path(BIN, sprintf("scan_lrt_w%dkb_pc%d.txt.gz", w, k))
+  if (!file.exists(f)) return(NULL)
+  fread(f)
+}
 h2h <- rbindlist(lapply(WINDOWS_KB, function(w) {
   db <- read_bb(w, 3); dn <- read_bin(w, 3)
   data.table(window = paste0(w, "kb"),
@@ -134,73 +151,68 @@ h2h <- rbindlist(lapply(WINDOWS_KB, function(w) {
              betabinom  = sum(db$fdr < 0.05, na.rm = TRUE))
 }))
 h2h[, `fold change` := round(betabinom / binomial, 1)]
-knitr::kable(h2h, caption = "QTL sites (FDR<0.05) at k=3: binomial vs. beta-binomial")
+knitr::kable(h2h, caption = "QTL sites (FDR<0.05) at k=3: binomial LRT vs. beta-binomial LRT")
 ```
 
-This is the **opposite** of removing false positives — the beta-binomial
-*recovers* signal. The likely reason: at the overdispersed sites the binomial's
-permutation null is itself inflated (both the observed and the permuted min-p
-are too small), so the binomial is effectively **conservative** there and buries
-real QTLs in overdispersion-driven noise. The beta-binomial divides that
-variance out, de-inflates the null, and recovers those associations.
+The beta-binomial finds substantially more sites than the binomial at every
+window — a much larger gap than earlier (pre-LRT, score-test-based) estimates
+of this comparison ever showed (~1.3-1.4x). Plausible in principle: the
+beta-binomial's calibration is markedly better (lambda~2.47 vs. the
+binomial's ~5.55 — see Section 3), so it may genuinely recover real signal
+the binomial's model-misspecification noise was burying at overdispersed
+sites, similar to the mechanism established earlier in this project. **This
+specific magnitude has not yet been independently spot-checked** the way the
+score-vs-LRT comparison was for the binomial model — worth verifying a sample
+of beta-binomial-only hits before treating this fold-change as confirmed,
+rather than just plausible.
 
-```{r phi-of-hits, fig.height=4.5}
-hits <- read_bb(5, 3)
-hits[, group := ifelse(fdr < 0.05, "QTL (FDR<0.05)", "not significant")]
-ggplot(hits, aes(x = phi, fill = group)) +
-  geom_histogram(bins = 50, position = "identity", alpha = 0.6) +
-  scale_fill_manual(values = c("QTL (FDR<0.05)" = "firebrick", "not significant" = "grey60")) +
-  labs(x = "site dispersion phi", y = "sites", fill = NULL,
-       title = "Dispersion of beta-binomial QTL sites vs. the rest (k=3, 5kb)") +
-  theme_bw(base_size = 12)
-```
+Note: the current LRT scan output does not carry each site's fitted `phi`
+(unlike the earlier score-test-based scan), so the dispersion-of-hits
+breakdown from the previous version of this page isn't reproducible from the
+current results without adding that column back to the scan and re-running.
 
-# 3. Calibration check: close to calibrated
+# 3. Calibration check: the best-calibrated result in this project
 
-Whether the extra discoveries are real power recovery or an artifact of how
-`phi` is estimated hinges on the beta-binomial's own calibration. We ran the
-same permutation calibration check used for the binomial (5 seeds, same
-config: 5kb, 3 PCs) — with a full beta-binomial refit per site per
-permutation (`phi` re-estimated fresh each time, not held fixed), the correct
-test of whether the beta-binomial's own p-values are calibrated. Model
-details, including two bugs found and fixed during this validation (a
-quasi-score approximation, and an unreliable model-fitting optimizer): [model
-page](qtl_mapping_betabinomial_model.html).
+We ran the same permutation calibration check used for the binomial (5 seeds,
+same config: 5kb, 3 PCs), testing the LRT — a full beta-binomial refit per
+site per permutation (`phi` re-estimated fresh each time). Model details:
+[model page](qtl_mapping_betabinomial_model.html).
 
 ```{r bb-calib-lambda}
-CAL <- file.path(BB, "calibration")
-lam <- fread(file.path(CAL, "calib_w5kb_pc3_lambda.txt"))
+CAL <- file.path(BB, "lrt_calibration")
+lam <- fread(file.path(CAL, "calib_lrt_w5kb_pc3_lambda.txt"))
 knitr::kable(lam, digits = 2,
-             caption = "Genomic-inflation lambda (5kb, 3 PCs): real vs. 5 permuted nulls (beta-binomial)")
+             caption = "Genomic-inflation lambda (5kb, 3 PCs): real vs. 5 permuted nulls (beta-binomial LRT)")
 ```
 
 ```{r bb-calib-qq, results='asis'}
 cat(sprintf('<img src="%s" style="max-width:70%%;">',
-            knitr::image_uri(file.path(CAL, "calib_w5kb_pc3_qq.png"))))
+            knitr::image_uri(file.path(CAL, "calib_lrt_w5kb_pc3_qq.png"))))
 ```
 
 ```{r bb-calib-compare}
 knitr::kable(data.table(
-  model = c("binomial", "beta-binomial"),
-  real_lambda = c(5.28, round(lam[dataset == "real"]$lambda, 2)),
-  permuted_null_lambda_range = c("3.12 - 3.62", sprintf("%.2f - %.2f",
+  model = c("binomial LRT", "beta-binomial LRT"),
+  real_lambda = c(5.55, round(lam[dataset == "real"]$lambda, 2)),
+  permuted_null_lambda_range = c("2.93 - 3.44", sprintf("%.2f - %.2f",
                                   min(lam[dataset != "real"]$lambda),
                                   max(lam[dataset != "real"]$lambda)))
-), caption = "Nominal-p calibration: binomial vs. beta-binomial")
+), caption = "Nominal-p calibration: binomial LRT vs. beta-binomial LRT")
 ```
 
-**The beta-binomial brings the permuted-null lambda down to ~1.13** (range
-1.07-1.22 across 5 seeds) — close to the ideal 1, and a large improvement
-over the binomial's ~3.4. This required fixing two bugs found during this
-validation exercise (see the [model page](qtl_mapping_betabinomial_model.html)):
-an earlier "quasi-score" approximation to the beta-binomial score test, and a
-model-fitting optimizer (`aod::betabin`) that sometimes failed to converge to
-the true MLE. With both fixed, the ~1.3-1.4x discovery increase over the
-binomial is well-supported as real power recovery — the binomial's
-overdispersion-driven miscalibration was burying signal at ~22% of sites
-(those significantly overdispersed), and the beta-binomial recovers it while
-also being much better calibrated.
+**The beta-binomial LRT brings the permuted-null lambda down to ~1.08** (range
+0.96-1.19 across 5 seeds) — very close to the ideal 1, and the best-calibrated
+test/model combination found across this entire project (binomial LRT sits at
+~3.28; both score tests were worse still). The residual gap between the
+binomial's calibration and the beta-binomial's is consistent with real,
+uncorrected overdispersion in the binomial model (~22% of sites are
+significantly overdispersed by a separate test), not a fixable numerical
+issue in either test — see the [model
+page](qtl_mapping_betabinomial_model.html) for the full reasoning.
 
-**Practical takeaway**: the beta-binomial is the better model to report —
-substantially closer to calibrated than the binomial, with a modest and
-defensible increase in discoveries, not an inflated one.
+**Practical takeaway**: the beta-binomial LRT is the model/test combination to
+report — closest to calibrated of everything tried, though the current
+discovery numbers (Sections 1-2) are from a **preliminary NPERM=100 pass** and
+the binomial-vs-beta-binomial fold-change is not yet independently verified
+at this magnitude. Both should be revisited once permutations are increased
+at the final chosen config.
