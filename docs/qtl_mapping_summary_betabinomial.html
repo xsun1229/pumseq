@@ -15,7 +15,7 @@
 
 <title>QTL mapping: beta-binomial model</title>
 
-<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
@@ -31,15 +31,15 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
-<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
-<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
 
 <link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
 <!-- Add a small amount of space between sections. -->
@@ -536,15 +536,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree9791cb2e1193b07fc19f4f57491a1928a6793708targetblank9791cb2a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree286e600c7b3d47148e6fe97135fba8972d468386targetblank286e600a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/9791cb2e1193b07fc19f4f57491a1928a6793708" target="_blank">9791cb2</a>
+<a href="https://github.com/xsun1229/pumseq/tree/286e600c7b3d47148e6fe97135fba8972d468386" target="_blank">286e600</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree9791cb2e1193b07fc19f4f57491a1928a6793708targetblank9791cb2a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree286e600c7b3d47148e6fe97135fba8972d468386targetblank286e600a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -554,7 +554,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/9791cb2e1193b07fc19f4f57491a1928a6793708" target="_blank">9791cb2</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/286e600c7b3d47148e6fe97135fba8972d468386" target="_blank">286e600</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -572,8 +572,6 @@ Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Unstaged changes:
-    Modified:   analysis/index.Rmd
-    Modified:   analysis/qtl_mapping_betabinomial_model.Rmd
     Modified:   analysis/qtl_mapping_summary_betabinomial.Rmd
 
 </code></pre>
@@ -621,6 +619,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/286e600c7b3d47148e6fe97135fba8972d468386/analysis/qtl_mapping_summary_betabinomial.Rmd" target="_blank">286e600</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-29
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/286e600c7b3d47148e6fe97135fba8972d468386/docs/qtl_mapping_summary_betabinomial.html" target="_blank">286e600</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-29
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 html
@@ -743,50 +775,16 @@ dispersion (<code>phi = 0</code> recovers the binomial).</p>
 <p><strong>The genotype effect <code>beta_g</code> is tested with a
 likelihood-ratio test (LRT)</strong>, matching the binomial model’s
 approach — see the <a href="qtl_mapping_betabinomial_model.html">model
-page</a> for why (a faster score test was built and validated first, but
-the LRT is used for anything reported as a result, for the same
-structural reasons as the binomial). <strong>The results below use
-<code>NPERM=100</code></strong> (not the full 1000) — a preliminary
-pass, made affordable by two 2026-07-27 optimizations to the
-beta-binomial fitter (dropping a constant term from the optimizer’s
-objective + supplying an analytic gradient, ~2.5-2.9x speedup) plus
-running fewer permutations to first rank PC/window configs and check
-calibration (verified via Monte Carlo to stay unbiased with ~2x the
-noise of 500 permutations — adequate for this purpose, not for final
-per-site significance calls). Permutations will be increased once a
-final config is chosen.</p>
-<!-- # 1. Is the data overdispersed? -->
-<!-- For each site we fit the null model (no genotype) under both the binomial and -->
-<!-- the beta-binomial and record the dispersion `phi` and a boundary-corrected LRT -->
-<!-- for `H0: phi = 0`. -->
-<!-- ```{r overdisp} -->
-<!-- od <- fread(file.path(BB, "overdispersion_pc5.txt.gz")) -->
-<!-- knitr::kable(data.table( -->
-<!--   sites_fit          = nrow(od), -->
-<!--   `median phi`       = round(median(od$phi), 4), -->
-<!--   `mean phi`         = round(mean(od$phi), 3), -->
-<!--   `q90 phi`          = round(quantile(od$phi, 0.9), 3), -->
-<!--   `phi > 0.05 (%)`   = round(100 * mean(od$phi > 0.05), 1), -->
-<!--   `overdispersed FDR<0.05 (%)` = round(100 * mean(od$fdr < 0.05), 1) -->
-<!-- ), caption = "Per-site overdispersion (null model, 5 PCs)") -->
-<!-- ``` -->
-<!-- ```{r overdisp-fig, results='asis'} -->
-<!-- cat(sprintf('<img src="%s" style="max-width:70%%;">', -->
-<!--             knitr::image_uri(file.path(BB, "overdispersion_pc5.png")))) -->
-<!-- ``` -->
-<!-- The **median site has phi ~ 0** (binomial is fine for most), but the -->
-<!-- distribution has a heavy right tail: **~22% of sites are significantly -->
-<!-- overdispersed** (phi up to ~0.5). At exactly those sites the binomial p-values -->
-<!-- are anti-conservative — which is what the beta-binomial corrects. -->
-<!-- # 2. Model and significance -->
-<!-- The beta-binomial **score test** for `beta_g` is the binomial score engine with -->
-<!-- the residual and working weight each divided by `c_i = 1 + (n_i-1)phi` -->
-<!-- (validated against `aod::betabin`'s LRT). Significance uses the **same procedure -->
-<!-- as the binomial**: per-SNP score p, the FastQTL/tensorQTL **permutation -->
-<!-- beta-approximation** within each site, then BH-FDR across sites. To keep the -->
-<!-- permutation fast, `phi` is estimated once per site and held fixed across -->
-<!-- permutations (each permutation then refits only the mean — a weighted binomial -->
-<!-- GLM). Swept over the same 6 PC x 4 window grid. -->
+page</a>. <strong>The results below use <code>NPERM=100</code></strong>
+(not the full 1000) — a preliminary pass, made affordable by two
+optimizations to the beta-binomial fitter (dropping a constant term from
+the optimizer’s objective + supplying an analytic gradient, ~2.5-2.9x
+speedup) plus running fewer permutations to first rank PC/window configs
+and check calibration
+<!-- (verified via Monte Carlo to stay unbiased with ~2x the -->
+<!-- noise of 500 permutations — adequate for this purpose, not for final -->
+<!-- per-site significance calls).  --> Permutations will be increased
+once a final config is chosen.</p>
 </div>
 <div id="results-qtl-sites-across-the-full-pc-range"
 class="section level1">
@@ -857,16 +855,15 @@ cols=PCs)</caption>
 </tr>
 </tbody>
 </table>
-<p>The beta-binomial MLE jointly estimates <code>k + 2</code> parameters
-(PCs + intercept + dispersion) on only 50 samples. An earlier version of
-this pipeline (relying on <code>aod::betabin</code>’s optimizer)
-appeared to stop converging for most sites once k &gt;= 10 (fittable
-sites collapsing from thousands to tens). Replacing that optimizer with
-a properly-seeded fit (see the <a
-href="qtl_mapping_betabinomial_model.html">model page</a>) resolved this
-— sites fittable at k=20 rose to ~7,600 (close to the binomial’s ~7,900
-at the same k). The beta-binomial is now reliably fittable across the
-<strong>full swept range</strong>, k=3-20.</p>
+<!-- The beta-binomial MLE jointly estimates `k + 2` parameters (PCs + intercept + -->
+<!-- dispersion) on only 50 samples. An earlier version of this pipeline (relying -->
+<!-- on `aod::betabin`'s optimizer) appeared to stop converging for most sites -->
+<!-- once k >= 10 (fittable sites collapsing from thousands to tens). Replacing -->
+<!-- that optimizer with a properly-seeded fit (see the [model -->
+<!-- page](qtl_mapping_betabinomial_model.html)) resolved this — sites fittable at -->
+<!-- k=20 rose to ~7,600 (close to the binomial's ~7,900 at the same k). The -->
+<!-- beta-binomial is now reliably fittable across the **full swept range**, -->
+<!-- k=3-20. -->
 <pre class="r"><code>knitr::kable(dcast(bb_sum, window_kb ~ n_pcs, value.var = &quot;qtl_FDR05&quot;),
              caption = &quot;Beta-binomial QTL sites (FDR&lt;0.05)&quot;)</code></pre>
 <table>
@@ -952,6 +949,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/286e600c7b3d47148e6fe97135fba8972d468386/docs/figure/qtl_mapping_summary_betabinomial.Rmd/bb-vs-pc-1.png" target="_blank">286e600</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-29
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/a41e4e31e5115162d919766fbb077c8bc2daa646/docs/figure/qtl_mapping_summary_betabinomial.Rmd/bb-vs-pc-1.png" target="_blank">a41e4e3</a>
 </td>
 <td>
@@ -1021,23 +1029,21 @@ LRT</caption>
 </tr>
 </tbody>
 </table>
-<p>The beta-binomial finds substantially more sites than the binomial at
-every window — a much larger gap than earlier (pre-LRT,
-score-test-based) estimates of this comparison ever showed (~1.3-1.4x).
-Plausible in principle: the beta-binomial’s calibration is markedly
-better (lambda~2.47 vs. the binomial’s ~5.55 — see Section 3), so it may
-genuinely recover real signal the binomial’s model-misspecification
-noise was burying at overdispersed sites, similar to the mechanism
-established earlier in this project. <strong>This specific magnitude has
-not yet been independently spot-checked</strong> the way the
-score-vs-LRT comparison was for the binomial model — worth verifying a
-sample of beta-binomial-only hits before treating this fold-change as
-confirmed, rather than just plausible.</p>
-<p>Note: the current LRT scan output does not carry each site’s fitted
-<code>phi</code> (unlike the earlier score-test-based scan), so the
-dispersion-of-hits breakdown from the previous version of this page
-isn’t reproducible from the current results without adding that column
-back to the scan and re-running.</p>
+<!-- The beta-binomial finds substantially more sites than the binomial at every -->
+<!-- window — a much larger gap than earlier (pre-LRT, score-test-based) estimates -->
+<!-- of this comparison ever showed (~1.3-1.4x). Plausible in principle: the -->
+<!-- beta-binomial's calibration is markedly better (lambda~2.47 vs. the -->
+<!-- binomial's ~5.55 — see Section 3), so it may genuinely recover real signal -->
+<!-- the binomial's model-misspecification noise was burying at overdispersed -->
+<!-- sites, similar to the mechanism established earlier in this project. **This -->
+<!-- specific magnitude has not yet been independently spot-checked** the way the -->
+<!-- score-vs-LRT comparison was for the binomial model — worth verifying a sample -->
+<!-- of beta-binomial-only hits before treating this fold-change as confirmed, -->
+<!-- rather than just plausible. -->
+<!-- Note: the current LRT scan output does not carry each site's fitted `phi` -->
+<!-- (unlike the earlier score-test-based scan), so the dispersion-of-hits -->
+<!-- breakdown from the previous version of this page isn't reproducible from the -->
+<!-- current results without adding that column back to the scan and re-running. -->
 </div>
 <div id="calibration-check-the-best-calibrated-result-in-this-project"
 class="section level1">
@@ -1045,9 +1051,9 @@ class="section level1">
 project</h1>
 <p>We ran the same permutation calibration check used for the binomial
 (5 seeds, same config: 5kb, 3 PCs), testing the LRT — a full
-beta-binomial refit per site per permutation (<code>phi</code>
-re-estimated fresh each time). Model details: <a
-href="qtl_mapping_betabinomial_model.html">model page</a>.</p>
+beta-binomial refit per site per permutation
+<!-- (`phi` re-estimated fresh each time). Model details: -->
+<!-- [model page](qtl_mapping_betabinomial_model.html). --></p>
 <pre class="r"><code>CAL &lt;- file.path(BB, &quot;lrt_calibration&quot;)
 lam &lt;- fread(file.path(CAL, &quot;calib_lrt_w5kb_pc3_lambda.txt&quot;))
 knitr::kable(lam, digits = 2,
@@ -1121,23 +1127,21 @@ LRT</caption>
 </tr>
 </tbody>
 </table>
-<p><strong>The beta-binomial LRT brings the permuted-null lambda down to
-~1.08</strong> (range 0.96-1.19 across 5 seeds) — very close to the
-ideal 1, and the best-calibrated test/model combination found across
-this entire project (binomial LRT sits at ~3.28; both score tests were
-worse still). The residual gap between the binomial’s calibration and
-the beta-binomial’s is consistent with real, uncorrected overdispersion
-in the binomial model (~22% of sites are significantly overdispersed by
-a separate test), not a fixable numerical issue in either test — see the
-<a href="qtl_mapping_betabinomial_model.html">model page</a> for the
-full reasoning.</p>
-<p><strong>Practical takeaway</strong>: the beta-binomial LRT is the
-model/test combination to report — closest to calibrated of everything
-tried, though the current discovery numbers (Sections 1-2) are from a
-<strong>preliminary NPERM=100 pass</strong> and the
-binomial-vs-beta-binomial fold-change is not yet independently verified
-at this magnitude. Both should be revisited once permutations are
-increased at the final chosen config.</p>
+<!-- **The beta-binomial LRT brings the permuted-null lambda down to ~1.08** (range -->
+<!-- 0.96-1.19 across 5 seeds) — very close to the ideal 1, and the best-calibrated -->
+<!-- test/model combination found across this entire project (binomial LRT sits at -->
+<!-- ~3.28; both score tests were worse still). The residual gap between the -->
+<!-- binomial's calibration and the beta-binomial's is consistent with real, -->
+<!-- uncorrected overdispersion in the binomial model (~22% of sites are -->
+<!-- significantly overdispersed by a separate test), not a fixable numerical -->
+<!-- issue in either test — see the [model -->
+<!-- page](qtl_mapping_betabinomial_model.html) for the full reasoning. -->
+<!-- **Practical takeaway**: the beta-binomial LRT is the model/test combination to -->
+<!-- report — closest to calibrated of everything tried, though the current -->
+<!-- discovery numbers (Sections 1-2) are from a **preliminary NPERM=100 pass** and -->
+<!-- the binomial-vs-beta-binomial fold-change is not yet independently verified -->
+<!-- at this magnitude. Both should be revisited once permutations are increased -->
+<!-- at the final chosen config. -->
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -1149,39 +1153,35 @@ Session information
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.2.0 (2022-04-22)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Red Hat Enterprise Linux 8.4 (Ootpa)
+Running under: CentOS Linux 7 (Core)
 
 Matrix products: default
-BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
+BLAS/LAPACK: /software/openblas-0.3.13-el7-x86_64/lib/libopenblas_haswellp-r0.3.13.so
 
 locale:
- [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
- [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
- [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
-[10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+[1] C
 
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.0  
+[1] ggplot2_4.0.3     data.table_1.14.2
 
 loaded via a namespace (and not attached):
- [1] tidyselect_1.2.0  xfun_0.38         bslib_0.3.1       colorspace_2.0-3 
- [5] vctrs_0.6.1       generics_0.1.3    htmltools_0.5.7   yaml_2.3.5       
- [9] utf8_1.2.2        rlang_1.1.2       R.oo_1.24.0       jquerylib_0.1.4  
-[13] later_1.3.0       pillar_1.9.0      glue_1.6.2        withr_2.5.0      
-[17] R.utils_2.11.0    lifecycle_1.0.4   stringr_1.5.0     munsell_0.5.0    
-[21] gtable_0.3.0      R.methodsS3_1.8.1 evaluate_0.15     labeling_0.4.2   
-[25] knitr_1.42        callr_3.7.0       fastmap_1.1.0     httpuv_1.6.5     
-[29] ps_1.7.0          fansi_1.0.3       highr_0.9         Rcpp_1.0.11      
-[33] promises_1.2.0.1  scales_1.2.0      jsonlite_1.8.7    mime_0.12        
-[37] farver_2.1.0      fs_1.5.2          digest_0.6.29     stringi_1.7.6    
-[41] processx_3.5.3    dplyr_1.1.2       getPass_0.2-2     rprojroot_2.0.3  
-[45] grid_4.2.0        cli_3.6.2         tools_4.2.0       magrittr_2.0.3   
-[49] sass_0.4.1        tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3  
-[53] rmarkdown_2.21    httr_1.4.5        rstudioapi_0.14   R6_2.5.1         
-[57] git2r_0.30.1      compiler_4.2.0   </code></pre>
+ [1] Rcpp_1.0.12        highr_0.9          RColorBrewer_1.1-3 pillar_1.9.0      
+ [5] compiler_4.2.0     bslib_0.3.1        later_1.3.0        jquerylib_0.1.4   
+ [9] git2r_0.30.1       workflowr_1.7.0    R.methodsS3_1.8.1  R.utils_2.11.0    
+[13] tools_4.2.0        digest_0.6.29      gtable_0.3.6       jsonlite_1.8.0    
+[17] evaluate_0.15      lifecycle_1.0.4    tibble_3.2.1       pkgconfig_2.0.3   
+[21] rlang_1.1.2        cli_3.6.1          rstudioapi_0.13    yaml_2.3.5        
+[25] xfun_0.41          fastmap_1.1.0      withr_2.5.0        dplyr_1.1.4       
+[29] stringr_1.5.1      knitr_1.39         generics_0.1.4     fs_1.5.2          
+[33] vctrs_0.6.5        sass_0.4.1         tidyselect_1.2.0   grid_4.2.0        
+[37] rprojroot_2.0.3    glue_1.6.2         R6_2.5.1           fansi_1.0.3       
+[41] rmarkdown_2.25     farver_2.1.0       magrittr_2.0.3     whisker_0.4       
+[45] scales_1.4.0       promises_1.2.0.1   htmltools_0.5.2    dichromat_2.0-0.1 
+[49] mime_0.12          httpuv_1.6.5       labeling_0.4.2     S7_0.2.0          
+[53] utf8_1.2.2         stringi_1.7.6      R.oo_1.24.0       </code></pre>
 </div>
 </div>
 

@@ -41,56 +41,17 @@ recovers the binomial).
 
 **The genotype effect `beta_g` is tested with a likelihood-ratio test (LRT)**,
 matching the binomial model's approach — see the [model
-page](qtl_mapping_betabinomial_model.html) for why (a faster score test was
-built and validated first, but the LRT is used for anything reported as a
-result, for the same structural reasons as the binomial). **The results below
+page](qtl_mapping_betabinomial_model.html). **The results below
 use `NPERM=100`** (not the full 1000) — a preliminary pass, made affordable by
-two 2026-07-27 optimizations to the beta-binomial fitter (dropping a constant
+two optimizations to the beta-binomial fitter (dropping a constant
 term from the optimizer's objective + supplying an analytic gradient, ~2.5-2.9x
 speedup) plus running fewer permutations to first rank PC/window configs and
-check calibration (verified via Monte Carlo to stay unbiased with ~2x the
-noise of 500 permutations — adequate for this purpose, not for final
-per-site significance calls). Permutations will be increased once a final
+check calibration
+<!-- (verified via Monte Carlo to stay unbiased with ~2x the -->
+<!-- noise of 500 permutations — adequate for this purpose, not for final -->
+<!-- per-site significance calls).  -->
+Permutations will be increased once a final
 config is chosen.
-
-<!-- # 1. Is the data overdispersed? -->
-
-<!-- For each site we fit the null model (no genotype) under both the binomial and -->
-<!-- the beta-binomial and record the dispersion `phi` and a boundary-corrected LRT -->
-<!-- for `H0: phi = 0`. -->
-
-<!-- ```{r overdisp} -->
-<!-- od <- fread(file.path(BB, "overdispersion_pc5.txt.gz")) -->
-<!-- knitr::kable(data.table( -->
-<!--   sites_fit          = nrow(od), -->
-<!--   `median phi`       = round(median(od$phi), 4), -->
-<!--   `mean phi`         = round(mean(od$phi), 3), -->
-<!--   `q90 phi`          = round(quantile(od$phi, 0.9), 3), -->
-<!--   `phi > 0.05 (%)`   = round(100 * mean(od$phi > 0.05), 1), -->
-<!--   `overdispersed FDR<0.05 (%)` = round(100 * mean(od$fdr < 0.05), 1) -->
-<!-- ), caption = "Per-site overdispersion (null model, 5 PCs)") -->
-<!-- ``` -->
-
-<!-- ```{r overdisp-fig, results='asis'} -->
-<!-- cat(sprintf('<img src="%s" style="max-width:70%%;">', -->
-<!--             knitr::image_uri(file.path(BB, "overdispersion_pc5.png")))) -->
-<!-- ``` -->
-
-<!-- The **median site has phi ~ 0** (binomial is fine for most), but the -->
-<!-- distribution has a heavy right tail: **~22% of sites are significantly -->
-<!-- overdispersed** (phi up to ~0.5). At exactly those sites the binomial p-values -->
-<!-- are anti-conservative — which is what the beta-binomial corrects. -->
-
-<!-- # 2. Model and significance -->
-
-<!-- The beta-binomial **score test** for `beta_g` is the binomial score engine with -->
-<!-- the residual and working weight each divided by `c_i = 1 + (n_i-1)phi` -->
-<!-- (validated against `aod::betabin`'s LRT). Significance uses the **same procedure -->
-<!-- as the binomial**: per-SNP score p, the FastQTL/tensorQTL **permutation -->
-<!-- beta-approximation** within each site, then BH-FDR across sites. To keep the -->
-<!-- permutation fast, `phi` is estimated once per site and held fixed across -->
-<!-- permutations (each permutation then refits only the mean — a weighted binomial -->
-<!-- GLM). Swept over the same 6 PC x 4 window grid. -->
 
 # 1. Results: QTL sites across the full PC range
 
@@ -110,15 +71,15 @@ knitr::kable(dcast(bb_sum, window_kb ~ n_pcs, value.var = "n_tested"),
              caption = "Sites the beta-binomial could fit (rows=window kb, cols=PCs)")
 ```
 
-The beta-binomial MLE jointly estimates `k + 2` parameters (PCs + intercept +
-dispersion) on only 50 samples. An earlier version of this pipeline (relying
-on `aod::betabin`'s optimizer) appeared to stop converging for most sites
-once k >= 10 (fittable sites collapsing from thousands to tens). Replacing
-that optimizer with a properly-seeded fit (see the [model
-page](qtl_mapping_betabinomial_model.html)) resolved this — sites fittable at
-k=20 rose to ~7,600 (close to the binomial's ~7,900 at the same k). The
-beta-binomial is now reliably fittable across the **full swept range**,
-k=3-20.
+<!-- The beta-binomial MLE jointly estimates `k + 2` parameters (PCs + intercept + -->
+<!-- dispersion) on only 50 samples. An earlier version of this pipeline (relying -->
+<!-- on `aod::betabin`'s optimizer) appeared to stop converging for most sites -->
+<!-- once k >= 10 (fittable sites collapsing from thousands to tens). Replacing -->
+<!-- that optimizer with a properly-seeded fit (see the [model -->
+<!-- page](qtl_mapping_betabinomial_model.html)) resolved this — sites fittable at -->
+<!-- k=20 rose to ~7,600 (close to the binomial's ~7,900 at the same k). The -->
+<!-- beta-binomial is now reliably fittable across the **full swept range**, -->
+<!-- k=3-20. -->
 
 ```{r bb-disc}
 knitr::kable(dcast(bb_sum, window_kb ~ n_pcs, value.var = "qtl_FDR05"),
@@ -154,29 +115,30 @@ h2h[, `fold change` := round(betabinom / binomial, 1)]
 knitr::kable(h2h, caption = "QTL sites (FDR<0.05) at k=3: binomial LRT vs. beta-binomial LRT")
 ```
 
-The beta-binomial finds substantially more sites than the binomial at every
-window — a much larger gap than earlier (pre-LRT, score-test-based) estimates
-of this comparison ever showed (~1.3-1.4x). Plausible in principle: the
-beta-binomial's calibration is markedly better (lambda~2.47 vs. the
-binomial's ~5.55 — see Section 3), so it may genuinely recover real signal
-the binomial's model-misspecification noise was burying at overdispersed
-sites, similar to the mechanism established earlier in this project. **This
-specific magnitude has not yet been independently spot-checked** the way the
-score-vs-LRT comparison was for the binomial model — worth verifying a sample
-of beta-binomial-only hits before treating this fold-change as confirmed,
-rather than just plausible.
+<!-- The beta-binomial finds substantially more sites than the binomial at every -->
+<!-- window — a much larger gap than earlier (pre-LRT, score-test-based) estimates -->
+<!-- of this comparison ever showed (~1.3-1.4x). Plausible in principle: the -->
+<!-- beta-binomial's calibration is markedly better (lambda~2.47 vs. the -->
+<!-- binomial's ~5.55 — see Section 3), so it may genuinely recover real signal -->
+<!-- the binomial's model-misspecification noise was burying at overdispersed -->
+<!-- sites, similar to the mechanism established earlier in this project. **This -->
+<!-- specific magnitude has not yet been independently spot-checked** the way the -->
+<!-- score-vs-LRT comparison was for the binomial model — worth verifying a sample -->
+<!-- of beta-binomial-only hits before treating this fold-change as confirmed, -->
+<!-- rather than just plausible. -->
 
-Note: the current LRT scan output does not carry each site's fitted `phi`
-(unlike the earlier score-test-based scan), so the dispersion-of-hits
-breakdown from the previous version of this page isn't reproducible from the
-current results without adding that column back to the scan and re-running.
+<!-- Note: the current LRT scan output does not carry each site's fitted `phi` -->
+<!-- (unlike the earlier score-test-based scan), so the dispersion-of-hits -->
+<!-- breakdown from the previous version of this page isn't reproducible from the -->
+<!-- current results without adding that column back to the scan and re-running. -->
 
 # 3. Calibration check: the best-calibrated result in this project
 
 We ran the same permutation calibration check used for the binomial (5 seeds,
 same config: 5kb, 3 PCs), testing the LRT — a full beta-binomial refit per
-site per permutation (`phi` re-estimated fresh each time). Model details:
-[model page](qtl_mapping_betabinomial_model.html).
+site per permutation 
+<!-- (`phi` re-estimated fresh each time). Model details: -->
+<!-- [model page](qtl_mapping_betabinomial_model.html). -->
 
 ```{r bb-calib-lambda}
 CAL <- file.path(BB, "lrt_calibration")
@@ -200,19 +162,19 @@ knitr::kable(data.table(
 ), caption = "Nominal-p calibration: binomial LRT vs. beta-binomial LRT")
 ```
 
-**The beta-binomial LRT brings the permuted-null lambda down to ~1.08** (range
-0.96-1.19 across 5 seeds) — very close to the ideal 1, and the best-calibrated
-test/model combination found across this entire project (binomial LRT sits at
-~3.28; both score tests were worse still). The residual gap between the
-binomial's calibration and the beta-binomial's is consistent with real,
-uncorrected overdispersion in the binomial model (~22% of sites are
-significantly overdispersed by a separate test), not a fixable numerical
-issue in either test — see the [model
-page](qtl_mapping_betabinomial_model.html) for the full reasoning.
+<!-- **The beta-binomial LRT brings the permuted-null lambda down to ~1.08** (range -->
+<!-- 0.96-1.19 across 5 seeds) — very close to the ideal 1, and the best-calibrated -->
+<!-- test/model combination found across this entire project (binomial LRT sits at -->
+<!-- ~3.28; both score tests were worse still). The residual gap between the -->
+<!-- binomial's calibration and the beta-binomial's is consistent with real, -->
+<!-- uncorrected overdispersion in the binomial model (~22% of sites are -->
+<!-- significantly overdispersed by a separate test), not a fixable numerical -->
+<!-- issue in either test — see the [model -->
+<!-- page](qtl_mapping_betabinomial_model.html) for the full reasoning. -->
 
-**Practical takeaway**: the beta-binomial LRT is the model/test combination to
-report — closest to calibrated of everything tried, though the current
-discovery numbers (Sections 1-2) are from a **preliminary NPERM=100 pass** and
-the binomial-vs-beta-binomial fold-change is not yet independently verified
-at this magnitude. Both should be revisited once permutations are increased
-at the final chosen config.
+<!-- **Practical takeaway**: the beta-binomial LRT is the model/test combination to -->
+<!-- report — closest to calibrated of everything tried, though the current -->
+<!-- discovery numbers (Sections 1-2) are from a **preliminary NPERM=100 pass** and -->
+<!-- the binomial-vs-beta-binomial fold-change is not yet independently verified -->
+<!-- at this magnitude. Both should be revisited once permutations are increased -->
+<!-- at the final chosen config. -->
