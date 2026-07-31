@@ -1,0 +1,175 @@
+---
+title: "QTL mapping: beta-binomial top-hit diagnostic"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+
+knitr::opts_chunk$set(
+  echo = TRUE, warning = FALSE, message = FALSE,
+  fig.align = "center", fig.width = 12, fig.height = 14
+)
+
+PROJECT_DIR <- "/project/xinhe/xsun/pumseq"
+BASE   <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl")
+BBR    <- file.path(BASE, "qtl_betabinomial/lrt_results_merged")
+COUNTS <- file.path(BASE, "phenotype/fold5_union/counts")
+PSAM   <- file.path(BASE, "genotype/plink2/pumseq_genotype.hg38.chr1-22.psam")
+TRAW   <- file.path(BASE, "genotype/qtl_binomial/genotype_common.traw")
+
+WINDOW_KB <- 5
+NPCS      <- 3
+N_TOP     <- 20
+MIN_GRP   <- 5   # flag threshold for "small genotype group" in the pattern summary below
+```
+
+# Motivation
+
+My advisor flagged that a number of sites reach implausibly small p-values
+(`-log10(p) > 100`) given the small sample size (50 cell lines) and generally
+modest expected QTL effect sizes, and suggested picking a few top hits and
+plotting %pU by genotype directly to build intuition for what's driving them.
+This page does that for the **beta-binomial LRT model at its best-performing
+config (`r WINDOW_KB`kb window, `r NPCS` PCs)** — the top `r N_TOP` sites by
+nominal (pre-permutation-correction) LRT p-value.
+
+Two candidate artifacts motivated this check:
+
+1. **Small genotype-group separation** — a genotype class with very few cell
+   lines can, by chance, produce a near-perfect fit and an inflated LRT
+   statistic, independent of any real effect.
+2. **SNP-at-site overlap** — if the tested cis-SNP sits at (or right next to)
+   the modification site's own genomic position, an individual's true
+   genotype there can directly bias which base gets called at that position,
+   masquerading as a huge modification-QTL effect. This is the same
+   phenomenon as the well-known SNP-at-CpG confound in bisulfite-based mQTL
+   studies.
+
+# 1. SNP-at-site rate among significant hits
+
+For each site, `lead_pos` is the position of the most associated cis-SNP.
+When `lead_pos == pos` (the site's own genomic position), the "QTL" SNP is
+sitting exactly on top of the profiled base.
+
+```{r snp-at-site}
+d <- fread(file.path(BBR, sprintf("scan_lrt_w%dkb_pc%d.txt.gz", WINDOW_KB, NPCS)))
+d[, snp_at_site := lead_pos == pos]
+
+sig <- d[fdr < 0.05]
+tbl <- data.table(
+  group = c("All tested sites", "Significant (FDR<0.05)"),
+  n              = c(nrow(d), nrow(sig)),
+  n_snp_at_site  = c(sum(d$snp_at_site, na.rm = TRUE), sum(sig$snp_at_site, na.rm = TRUE))
+)
+tbl[, pct_snp_at_site := round(100 * n_snp_at_site / n, 1)]
+knitr::kable(tbl, caption = sprintf(
+  "SNP-at-site rate: baseline vs. significant hits (beta-binomial, %dkb, %d PCs)",
+  WINDOW_KB, NPCS))
+```
+
+The SNP-at-site rate is **`r tbl$pct_snp_at_site[2]`%** among significant hits vs.
+a **`r tbl$pct_snp_at_site[1]`%** baseline among all tested sites — an
+**`r round(tbl$pct_snp_at_site[2] / tbl$pct_snp_at_site[1], 1)`x enrichment**.
+This alone means a large share of current significant calls at this config are
+sites where the tested variant overlaps the profiled base itself, not a
+genuine cis-regulatory effect.
+
+# 2. Top `r N_TOP` QTLs: %pU by genotype at the lead cis-SNP
+
+```{r load-pheno-geno}
+C <- fread(file.path(COUNTS, "C_matrix.txt.gz")); N <- fread(file.path(COUNTS, "N_matrix.txt.gz"))
+psam <- fread(PSAM); go <- psam[[2]]
+Cm <- as.matrix(C[, ..go]); Nm <- as.matrix(N[, ..go])
+sites <- C[, .(ref = as.character(ref), pos = as.integer(pos))]
+
+traw <- fread(TRAW); samp <- paste0(go, "_", go)
+Gall <- t(as.matrix(traw[, ..samp])); gid <- traw$SNP
+```
+
+```{r top20-select}
+top20 <- d[order(nominal_min_p)][1:N_TOP]
+top20[, rank := .I]
+
+rows <- rbindlist(lapply(seq_len(nrow(top20)), function(i) {
+  s <- top20[i]
+  si <- which(sites$ref == as.character(s$ref) & sites$pos == s$pos)
+  gi <- which(gid == s$lead_snp)
+  y <- Cm[si, ]; n <- Nm[si, ]; g <- Gall[, gi]
+  pi_v <- y / n
+  grp_tab <- table(g)
+  min_grp <- min(grp_tab)
+  data.table(
+    rank = s$rank,
+    site_lab = sprintf("#%d chr%s:%.0f\n-log10(p)=%.0f%s",
+                        s$rank, s$ref, s$pos, -log10(max(s$nominal_min_p, 1e-300)),
+                        if (s$lead_pos == s$pos) "\n[SNP-at-site]" else ""),
+    g = factor(g, levels = 0:2), pi = pi_v, n = n,
+    snp_at_site = s$lead_pos == s$pos, min_grp = min_grp
+  )
+}))
+rows[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
+
+blue3 <- c(`0` = "#86b6ef", `1` = "#2a78d6", `2` = "#104281")
+
+ggplot(rows, aes(x = g, y = pi, color = g)) +
+  geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.4, color = "grey60", fill = NA) +
+  geom_jitter(aes(size = n), width = 0.12, alpha = 0.75) +
+  scale_color_manual(values = blue3, name = "genotype\n(alt-allele copies)") +
+  scale_size_continuous(name = "depth (n)", range = c(0.6, 3.5)) +
+  facet_wrap(~ site_lab, scales = "free_x", ncol = 4) +
+  labs(x = "genotype (copies of alt allele) at the lead cis-SNP", y = "%pU (y/n per cell line)",
+       title = sprintf("Top %d beta-binomial QTLs by nominal LRT p-value (%dkb, %d PCs)",
+                       N_TOP, WINDOW_KB, NPCS),
+       subtitle = "Ranked by nominal (pre-permutation) p-value, most extreme first. '[SNP-at-site]' = lead SNP sits exactly at the profiled base.") +
+  theme_bw(base_size = 11) +
+  theme(legend.position = "bottom", strip.text = element_text(size = 7.5))
+```
+
+# 3. Pattern summary across these 20 sites
+
+```{r pattern-summary}
+summ <- unique(rows[, .(rank, snp_at_site, min_grp)])
+summ[, category := fifelse(snp_at_site, "SNP at/on the modification site",
+                     fifelse(min_grp < MIN_GRP, sprintf("Small genotype group (min class n<%d)", MIN_GRP),
+                             "Neither flag (plausible)"))]
+knitr::kable(summ[order(rank)], caption = "Per-site flags among the top 20")
+
+cat_tbl <- summ[, .N, by = category][order(-N)]
+knitr::kable(cat_tbl, caption = "Category counts among the top 20")
+```
+
+Of the top `r N_TOP` beta-binomial hits by nominal p-value,
+**`r cat_tbl[category == "SNP at/on the modification site"]$N`** have their
+lead SNP sitting exactly at the modification site itself, and
+**`r sum(summ$min_grp < MIN_GRP & !summ$snp_at_site)`** more have a genotype
+class with fewer than `r MIN_GRP` cell lines (and no SNP-at-site overlap) —
+together accounting for
+**`r sum(summ$snp_at_site | summ$min_grp < MIN_GRP)`/`r N_TOP`** of the most
+extreme "hits" in this model. Visually, nearly every panel above shows the
+same suspiciously clean pattern: genotype 0 near %pU=1, genotype 1 near
+%pU=0.5, genotype 2 near %pU=0, with almost no within-group scatter — not the
+noisier, more modest dose-response shape expected of a real cis-regulatory
+effect at this sample size.
+
+**The remaining `r cat_tbl[category == "Neither flag (plausible)"]$N` sites
+are not a clean "these are fine" bucket.** Most of them (#1, #4, #6, #12 —
+none of these are on chr6) show the *exact same* suspiciously clean staircase
+despite having normal-sized genotype groups and no SNP-at-site overlap,
+meaning the two mechanisms characterized here do not explain everything —
+something else (e.g. a nearby-but-not-exact-position variant still perturbing
+the assay's base-calling, or another unmodeled technical effect) is likely
+producing the same signature. Only two sites (#14 `chr3:37277733`, #18
+`chr2:88886147`) look qualitatively different: noisy, near-uniform scatter
+across all three genotype groups with no clean separation, or driven by a
+single outlier cell line — closer to what a null or borderline result should
+look like, and a useful visual contrast against the rest of this page. So the
+two flagged mechanisms are a partial, not complete, explanation, and the
+planned fixes (excluding cis-SNPs that overlap the profiled base, requiring a
+minimum sample count per genotype class) should be treated as a first pass,
+re-checked against a fresh top-20 plot after re-running.
