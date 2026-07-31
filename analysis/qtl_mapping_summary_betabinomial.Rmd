@@ -22,7 +22,7 @@ BB  <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/qtl_betabinomial")
 BBR <- file.path(BB, "lrt_results_merged")
 BIN <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/qtl_binomial/lrt_results_merged")
 WINDOWS_KB <- c(5, 20, 50, 100)
-PC_COUNTS  <- c(3, 5, 7, 10, 15, 20)
+PC_COUNTS  <- c(0, 3, 5, 7, 10, 15, 20)
 ```
 
 # Introduction
@@ -94,6 +94,17 @@ ggplot(bb_sum, aes(x = n_pcs, y = qtl_FDR05, color = window_lab)) +
        title = "Beta-binomial QTL sites vs. PCs") +
   theme_bw(base_size = 13)
 ```
+
+Unlike the [binomial model](qtl_mapping_summary_binomial.html#4_Results:_QTL_sites_by_PC_count_and_window_size)
+— where discovery counts rise monotonically as PCs are removed, peaking at
+k=0 (intercept-only) — the beta-binomial's counts **peak at k=3** (1,360 at
+5kb) and k=0 is slightly *lower* (1,323). k=0 also has noticeably fewer
+fittable sites (9,885 vs. 11,112 at k=3, 5kb) — some sites' beta-binomial null
+fit doesn't converge without any PC covariates. Both observations point the
+same way: the beta-binomial's dispersion term is already absorbing whatever
+confounding the binomial's inflation at k=0 was catching, so a few PCs still
+help here even though they don't for the binomial. Calibration has only been
+checked at k=3 (Section 3), not at k=0.
 
 # 2. Beta-binomial vs. binomial
 
