@@ -11,7 +11,7 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-07-27" />
+<meta name="date" content="2026-07-31" />
 
 <title>QTL mapping: binomial GLM on the 5-fold union sites</title>
 
@@ -374,7 +374,7 @@ div.tocify {
 <h1 class="title toc-ignore">QTL mapping: binomial GLM on the 5-fold
 union sites</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-07-27</h4>
+<h4 class="date">2026-07-31</h4>
 
 </div>
 
@@ -403,7 +403,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-07-27
+<strong>Last updated:</strong> 2026-07-31
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree84747dd7624a3da42ce2fbb0f8c8e21635975257targetblank84747dda">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree08ba4ea47116d7143c4f3de8ca017a9b15c8fa9ctargetblank08ba4eaa">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/84747dd7624a3da42ce2fbb0f8c8e21635975257" target="_blank">84747dd</a>
+<a href="https://github.com/xsun1229/pumseq/tree/08ba4ea47116d7143c4f3de8ca017a9b15c8fa9c" target="_blank">08ba4ea</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree84747dd7624a3da42ce2fbb0f8c8e21635975257targetblank84747dda"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree08ba4ea47116d7143c4f3de8ca017a9b15c8fa9ctargetblank08ba4eaa"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/84747dd7624a3da42ce2fbb0f8c8e21635975257" target="_blank">84747dd</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/08ba4ea47116d7143c4f3de8ca017a9b15c8fa9c" target="_blank">08ba4ea</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -570,6 +570,7 @@ were generated:
 </p>
 <pre><code>
 Ignored files:
+    Ignored:    analysis/figure/
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Unstaged changes:
@@ -620,6 +621,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/9791cb2e1193b07fc19f4f57491a1928a6793708/analysis/qtl_mapping_summary_binomial.Rmd" target="_blank">9791cb2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-27
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/9791cb2e1193b07fc19f4f57491a1928a6793708/docs/qtl_mapping_summary_binomial.html" target="_blank">9791cb2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-27
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -792,7 +827,7 @@ knitr::opts_chunk$set(
 PROJECT_DIR &lt;- &quot;/project/xinhe/xsun/pumseq&quot;
 RES &lt;- file.path(PROJECT_DIR, &quot;pumseq_processed/psi_qtl/qtl_binomial/lrt_results_merged&quot;)
 WINDOWS_KB &lt;- c(5, 20, 50, 100)
-PC_COUNTS  &lt;- c(3, 5, 7, 10, 15, 20)</code></pre>
+PC_COUNTS  &lt;- c(0, 3, 5, 7, 10, 15, 20)</code></pre>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
 <p>This page summarizes cis-QTL mapping for pseudouridylation (%pU)
@@ -907,10 +942,11 @@ p per site.</li>
 </ol>
 <p>Two things are swept:</p>
 <ul>
-<li><strong>Covariate PCs</strong>: 3, 5, 7, 10, 15, 20.</li>
+<li><strong>Covariate PCs</strong>: 0 (intercept-only, no phenotype-PC
+covariates), 3, 5, 7, 10, 15, 20.</li>
 <li><strong>cis-window</strong>: 5 kb, 20 kb, 50 kb, 100 kb.</li>
 </ul>
-<p>That is a 6 x 4 grid, each cell a separate scan.</p>
+<p>That is a 7 x 4 grid, each cell a separate scan.</p>
 </div>
 <div id="results-qtl-sites-by-pc-count-and-window-size"
 class="section level1">
@@ -940,6 +976,7 @@ number of PCs</caption>
 <thead>
 <tr class="header">
 <th align="right">window_kb</th>
+<th align="right">0</th>
 <th align="right">3</th>
 <th align="right">5</th>
 <th align="right">7</th>
@@ -951,6 +988,7 @@ number of PCs</caption>
 <tbody>
 <tr class="odd">
 <td align="right">5</td>
+<td align="right">462</td>
 <td align="right">383</td>
 <td align="right">349</td>
 <td align="right">316</td>
@@ -960,6 +998,7 @@ number of PCs</caption>
 </tr>
 <tr class="even">
 <td align="right">20</td>
+<td align="right">369</td>
 <td align="right">308</td>
 <td align="right">279</td>
 <td align="right">260</td>
@@ -969,6 +1008,7 @@ number of PCs</caption>
 </tr>
 <tr class="odd">
 <td align="right">50</td>
+<td align="right">322</td>
 <td align="right">285</td>
 <td align="right">262</td>
 <td align="right">246</td>
@@ -978,6 +1018,7 @@ number of PCs</caption>
 </tr>
 <tr class="even">
 <td align="right">100</td>
+<td align="right">297</td>
 <td align="right">263</td>
 <td align="right">246</td>
 <td align="right">223</td>
@@ -1016,6 +1057,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/9791cb2e1193b07fc19f4f57491a1928a6793708/docs/figure/qtl_mapping_summary_binomial.Rmd/qtl-vs-pc-1.png" target="_blank">9791cb2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-27
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/84747dd7624a3da42ce2fbb0f8c8e21635975257/docs/figure/qtl_mapping_summary_binomial.Rmd/qtl-vs-pc-1.png" target="_blank">84747dd</a>
@@ -1074,6 +1126,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/9791cb2e1193b07fc19f4f57491a1928a6793708/docs/figure/qtl_mapping_summary_binomial.Rmd/qtl-heatmap-1.png" target="_blank">9791cb2</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-07-27
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/84747dd7624a3da42ce2fbb0f8c8e21635975257/docs/figure/qtl_mapping_summary_binomial.Rmd/qtl-heatmap-1.png" target="_blank">84747dd</a>
 </td>
 <td>
@@ -1101,14 +1164,16 @@ XSun
 <p>QTL counts <strong>fall monotonically as more covariate PCs are
 added</strong>, at every window size, and the <strong>cis-window has
 little effect</strong> (for a given PC count all four windows give
-nearly the same count). The most sites are called with the
-<strong>fewest PCs</strong> (k=3, the smallest tested).</p>
+nearly the same count). The most sites are called with <strong>no PC
+covariates at all</strong> (k=0, intercept-only) — 462 sites at
+FDR&lt;0.05, 5kb — and counts decline steadily from there through k=3
+(383) up to k=20 (113).</p>
 <!-- This is the opposite of the usual eQTL PC sweep, where a few PCs boost -->
 <!-- power. It points one of two ways: (a) the M-value PCs are absorbing real -->
 <!-- signal (so few/no PCs are best), or (b) low PC counts under-correct and the -->
-<!-- extra calls at low k are inflated. The calibration check (permutation) at -->
-<!-- low k is what distinguishes these, and is the next step. Because discoveries -->
-<!-- keep rising toward k=3, k=0/1/2 should also be tested. -->
+<!-- extra calls at low k are inflated. The calibration check (permutation) -->
+<!-- below was only run at 5kb/3PC, not at k=0 -- so whether k=0's higher count -->
+<!-- reflects (a) or (b) is still open. -->
 <!-- # 5. Top QTL sites -->
 <!-- ```{r top-hits} -->
 <!-- best <- summary_tbl[which.max(qtl_FDR05)] -->
@@ -1132,7 +1197,9 @@ genomic-inflation factor <code>lambda</code> (median chi-square / 0.455;
 should be ~1 under a calibrated null) and a QQ-plot. Same
 negative-control permutation as the <a
 href="qtl_mapping_summary_floor0_quantile.html#Permutation_control">linear
-model</a>. Run at the peak config (<strong>5 kb, 3 PCs</strong>).</p>
+model</a>. Run at <strong>5 kb, 3 PCs</strong> (the smallest PC count
+calibration was checked at; k=0 has not been calibration-tested, so its
+higher raw discovery count above should be read with that caveat).</p>
 <pre class="r"><code>CAL_LRT &lt;- file.path(PROJECT_DIR, &quot;pumseq_processed/psi_qtl/qtl_binomial/lrt_calibration&quot;)
 lam_lrt &lt;- fread(file.path(CAL_LRT, &quot;calib_lrt_w5kb_pc3_lambda.txt&quot;))
 knitr::kable(lam_lrt, digits = 2,
@@ -1209,7 +1276,7 @@ Session information
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.2.0 (2022-04-22)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Red Hat Enterprise Linux 8.10 (Ootpa)
+Running under: Red Hat Enterprise Linux 8.4 (Ootpa)
 
 Matrix products: default
 BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so

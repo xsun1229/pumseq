@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 PROJECT_DIR <- "/project/xinhe/xsun/pumseq"
 RES <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/qtl_binomial/lrt_results_merged")
 WINDOWS_KB <- c(5, 20, 50, 100)
-PC_COUNTS  <- c(3, 5, 7, 10, 15, 20)
+PC_COUNTS  <- c(0, 3, 5, 7, 10, 15, 20)
 ```
 
 # Introduction
@@ -107,10 +107,10 @@ procedure:
 
 Two things are swept:
 
-- **Covariate PCs**: 3, 5, 7, 10, 15, 20.
+- **Covariate PCs**: 0 (intercept-only, no phenotype-PC covariates), 3, 5, 7, 10, 15, 20.
 - **cis-window**: 5 kb, 20 kb, 50 kb, 100 kb.
 
-That is a 6 x 4 grid, each cell a separate scan.
+That is a 7 x 4 grid, each cell a separate scan.
 
 # 4. Results: QTL sites by PC count and window size
 
@@ -157,15 +157,17 @@ ggplot(summary_tbl, aes(x = factor(n_pcs, levels = PC_COUNTS), y = window_lab, f
 
 QTL counts **fall monotonically as more covariate PCs are added**, at every
 window size, and the **cis-window has little effect** (for a given PC count all
-four windows give nearly the same count). The most sites are called with the
-**fewest PCs** (k=3, the smallest tested).
+four windows give nearly the same count). The most sites are called with
+**no PC covariates at all** (k=0, intercept-only) — 462 sites at FDR<0.05,
+5kb — and counts decline steadily from there through k=3 (383) up to k=20
+(113).
 
 <!-- This is the opposite of the usual eQTL PC sweep, where a few PCs boost -->
 <!-- power. It points one of two ways: (a) the M-value PCs are absorbing real -->
 <!-- signal (so few/no PCs are best), or (b) low PC counts under-correct and the -->
-<!-- extra calls at low k are inflated. The calibration check (permutation) at -->
-<!-- low k is what distinguishes these, and is the next step. Because discoveries -->
-<!-- keep rising toward k=3, k=0/1/2 should also be tested. -->
+<!-- extra calls at low k are inflated. The calibration check (permutation) -->
+<!-- below was only run at 5kb/3PC, not at k=0 -- so whether k=0's higher count -->
+<!-- reflects (a) or (b) is still open. -->
 
 <!-- # 5. Top QTL sites -->
 
@@ -186,8 +188,10 @@ stays fixed at its true per-individual values), 5 seeds, and check whether the
 nominal p-values are Uniform(0,1) — via the genomic-inflation factor `lambda`
 (median chi-square / 0.455; should be ~1 under a calibrated null) and a
 QQ-plot. Same negative-control permutation as the [linear
-model](qtl_mapping_summary_floor0_quantile.html#Permutation_control). Run at the
-peak config (**5 kb, 3 PCs**).
+model](qtl_mapping_summary_floor0_quantile.html#Permutation_control). Run at
+**5 kb, 3 PCs** (the smallest PC count calibration was checked at; k=0 has not
+been calibration-tested, so its higher raw discovery count above should be
+read with that caveat).
 
 ```{r calib-lambda}
 CAL_LRT <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl/qtl_binomial/lrt_calibration")
