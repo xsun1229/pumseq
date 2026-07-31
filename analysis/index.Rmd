@@ -42,4 +42,6 @@ editor_options:
 * [QTL mapping summary: binomial GLM on the 5-fold union sites](qtl_mapping_summary_binomial.html)
 * [Beta Binomial GLM model](qtl_mapping_betabinomial_model.html)
 * [QTL mapping summary: beta binomial GLM on the 5-fold union sites](qtl_mapping_summary_betabinomial.html)
-* [Beta-binomial top-hit diagnostic: genotype vs. %pU for the top 20 QTLs](qtl_mapping_betabinomial_diagnostic.html)
+
+
+<!-- * [Beta-binomial top-hit diagnostic: genotype vs. %pU for the top 20 QTLs](qtl_mapping_betabinomial_diagnostic.html) -->
