@@ -19,6 +19,7 @@ knitr::opts_chunk$set(
 PROJECT_DIR <- "/project/xinhe/xsun/pumseq"
 BASE   <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl")
 BBR    <- file.path(BASE, "qtl_betabinomial/lrt_results_merged")
+CALIB  <- file.path(BASE, "qtl_betabinomial/lrt_calibration")
 COUNTS <- file.path(BASE, "phenotype/fold5_union/counts")
 PSAM   <- file.path(BASE, "genotype/plink2/pumseq_genotype.hg38.chr1-22.psam")
 TRAW   <- file.path(BASE, "genotype/qtl_binomial/genotype_common.traw")
@@ -176,3 +177,88 @@ same pattern: genotype 0 near %pU=1, genotype 1 near
 <!-- planned fixes (excluding cis-SNPs that overlap the profiled base, requiring a -->
 <!-- minimum sample count per genotype class) should be treated as a first pass, -->
 <!-- re-checked against a fresh top-20 plot after re-running. -->
+
+# 4. Sanity check: are these hits real, or driven by phenotype shape alone?
+
+The %pU phenotype at many sites is not smoothly distributed — it's often
+**bimodal** (a cell line reads close to 0 or close to 1, with little in
+between), which a single Beta-distributed mean per genotype group may not
+represent well. To test whether that alone (independent of any genotype
+effect, real or not) can produce these extreme statistics, we took ONE fixed
+permutation of the phenotype/covariates across the 50 cell lines (same
+permutation used as "perm1" in the LRT calibration check, genotype held
+fixed at each individual's true value) and re-ran the same per-site nominal
+LRT scan, tracking site identity and lead SNP — something the calibration
+check itself doesn't do, since it only pools p-values genome-wide for lambda
+and discards per-site/per-SNP identity.
+
+```{r perm1-load}
+p1 <- fread(file.path(CALIB, sprintf("perm1_scan_w%dkb_pc%d.txt.gz", WINDOW_KB, NPCS)))
+p1_top20 <- p1[order(nominal_min_p)][1:N_TOP]
+p1_top20[, rank := .I]
+
+real_top20_sites <- d[order(nominal_min_p)][1:N_TOP, .(ref, pos)]
+overlap_n <- sum(paste(p1_top20$ref, p1_top20$pos) %in% paste(real_top20_sites$ref, real_top20_sites$pos))
+```
+
+**`r overlap_n`/`r N_TOP`** of the top sites under this random permutation are
+the *same sites* as the real top `r N_TOP` — with comparably extreme nominal
+p-values (`~1e-285` at the top) — despite the genotype-phenotype pairing
+being completely scrambled.
+
+```{r perm1-plot}
+m <- length(go)
+set.seed(1001); ord <- sample.int(m)   # identical seed to 5.calibration_check_lrt.R's perm1
+
+rows_p1 <- rbindlist(lapply(seq_len(nrow(p1_top20)), function(i) {
+  s <- p1_top20[i]
+  si <- which(sites$ref == as.character(s$ref) & sites$pos == s$pos)
+  gi <- which(gid == s$lead_snp)
+  y <- Cm[si, ord]; n <- Nm[si, ord]; g <- Gall[, gi]   # phenotype permuted, genotype fixed -- same pairing as the calibration check
+  pi_v <- y / n
+  grp_tab <- table(g)
+  min_grp <- min(grp_tab)
+  flags <- paste0(
+    if (s$lead_pos == s$pos) "\n[SNP-at-site]" else "",
+    if (min_grp < MIN_GRP) sprintf("\n[small group n=%d]", min_grp) else ""
+  )
+  data.table(
+    rank = s$rank,
+    site_lab = sprintf("#%d chr%s:%.0f\n-log10(p)=%.0f%s",
+                        s$rank, s$ref, s$pos, -log10(max(s$nominal_min_p, 1e-300)), flags),
+    g = factor(g, levels = 0:2), pi = pi_v, n = n
+  )
+}))
+rows_p1[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
+
+ggplot(rows_p1, aes(x = g, y = pi, color = g)) +
+  geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.4, color = "grey60", fill = NA) +
+  geom_jitter(aes(size = n), width = 0.12, alpha = 0.75) +
+  scale_color_manual(values = blue3, name = "genotype\n(alt-allele copies)") +
+  scale_size_continuous(name = "depth (n)", range = c(0.6, 3.5)) +
+  facet_wrap(~ site_lab, scales = "free_x", ncol = 4) +
+  labs(x = "genotype (fixed) vs. PERMUTED phenotype at the lead cis-SNP",
+       y = "%pU (y/n per cell line, permuted individual order)",
+       title = sprintf("Top %d sites under permutation-1 (genotype-phenotype pairing randomized)", N_TOP),
+       subtitle = "Same seed as the LRT calibration check's perm1 (set.seed(1001)).") +
+  theme_bw(base_size = 11) +
+  theme(legend.position = "bottom", strip.text = element_text(size = 7.5))
+```
+
+Unlike the real top-`r N_TOP` plot above, these panels show **no clean
+separation between genotype groups** — heavily overlapping, noisy scatter
+within each group. Yet the p-values are just as extreme. That rules out "the
+permutation got lucky and happened to look like a real effect" — instead, it
+means these specific sites produce enormous LRT statistics almost regardless
+of which grouping variable is tested, genotype or a completely unrelated
+random shuffle. These sites also have very high median read depth (hundreds
+to thousands of reads per cell line) alongside the bimodal %pU pattern —
+at that depth, even a small amount of between-individual variance that the
+beta-binomial's single dispersion parameter (`phi`) doesn't capture can make
+almost any partition of the 50 cell lines look highly "significant." This
+points to a phenotype-shape/model-misspecification problem at these
+particular sites, on top of (not replaced by) the SNP-at-site and
+small-genotype-group mechanisms found above — excluding SNP-at-site SNPs or
+requiring larger genotype groups is not expected to fix these specific
+sites, since the effect survives complete randomization of genotype-phenotype
+pairing.
