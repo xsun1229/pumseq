@@ -29,12 +29,12 @@ N_TOP     <- 20
 MIN_GRP   <- 5   # flag threshold for "small genotype group" in the pattern summary below
 ```
 
-# Motivation
 
-My advisor flagged that a number of sites reach implausibly small p-values
-(`-log10(p) > 100`) given the small sample size (50 cell lines) and generally
-modest expected QTL effect sizes, and suggested picking a few top hits and
-plotting %pU by genotype directly to build intuition for what's driving them.
+A number of sites reach implausibly small p-values
+(`-log10(p) > 100`) given the small sample size (50 cell lines). 
+
+We pick a few top hits and plot %pU by genotype directly to build intuition for what's driving them.
+
 This page does that for the **beta-binomial LRT model at its best-performing
 config (`r WINDOW_KB`kb window, `r NPCS` PCs)** — the top `r N_TOP` sites by
 nominal (pre-permutation-correction) LRT p-value.
@@ -104,11 +104,14 @@ rows <- rbindlist(lapply(seq_len(nrow(top20)), function(i) {
   pi_v <- y / n
   grp_tab <- table(g)
   min_grp <- min(grp_tab)
+  flags <- paste0(
+    if (s$lead_pos == s$pos) "\n[SNP-at-site]" else "",
+    if (min_grp < MIN_GRP) sprintf("\n[small group n=%d]", min_grp) else ""
+  )
   data.table(
     rank = s$rank,
     site_lab = sprintf("#%d chr%s:%.0f\n-log10(p)=%.0f%s",
-                        s$rank, s$ref, s$pos, -log10(max(s$nominal_min_p, 1e-300)),
-                        if (s$lead_pos == s$pos) "\n[SNP-at-site]" else ""),
+                        s$rank, s$ref, s$pos, -log10(max(s$nominal_min_p, 1e-300)), flags),
     g = factor(g, levels = 0:2), pi = pi_v, n = n,
     snp_at_site = s$lead_pos == s$pos, min_grp = min_grp
   )
@@ -126,7 +129,7 @@ ggplot(rows, aes(x = g, y = pi, color = g)) +
   labs(x = "genotype (copies of alt allele) at the lead cis-SNP", y = "%pU (y/n per cell line)",
        title = sprintf("Top %d beta-binomial QTLs by nominal LRT p-value (%dkb, %d PCs)",
                        N_TOP, WINDOW_KB, NPCS),
-       subtitle = "Ranked by nominal (pre-permutation) p-value, most extreme first. '[SNP-at-site]' = lead SNP sits exactly at the profiled base.") +
+       subtitle = "Ranked by nominal (pre-permutation) p-value, most extreme first. '[SNP-at-site]' = lead SNP sits exactly at the profiled base; '[small group n=X]' = smallest genotype class has X < 5 cell lines.") +
   theme_bw(base_size = 11) +
   theme(legend.position = "bottom", strip.text = element_text(size = 7.5))
 ```
@@ -151,25 +154,25 @@ lead SNP sitting exactly at the modification site itself, and
 class with fewer than `r MIN_GRP` cell lines (and no SNP-at-site overlap) —
 together accounting for
 **`r sum(summ$snp_at_site | summ$min_grp < MIN_GRP)`/`r N_TOP`** of the most
-extreme "hits" in this model. Visually, nearly every panel above shows the
-same suspiciously clean pattern: genotype 0 near %pU=1, genotype 1 near
-%pU=0.5, genotype 2 near %pU=0, with almost no within-group scatter — not the
-noisier, more modest dose-response shape expected of a real cis-regulatory
-effect at this sample size.
+extreme "hits" in this model. 
 
-**The remaining `r cat_tbl[category == "Neither flag (plausible)"]$N` sites
-are not a clean "these are fine" bucket.** Most of them (#1, #4, #6, #12 —
-none of these are on chr6) show the *exact same* suspiciously clean staircase
-despite having normal-sized genotype groups and no SNP-at-site overlap,
-meaning the two mechanisms characterized here do not explain everything —
-something else (e.g. a nearby-but-not-exact-position variant still perturbing
-the assay's base-calling, or another unmodeled technical effect) is likely
-producing the same signature. Only two sites (#14 `chr3:37277733`, #18
-`chr2:88886147`) look qualitatively different: noisy, near-uniform scatter
-across all three genotype groups with no clean separation, or driven by a
-single outlier cell line — closer to what a null or borderline result should
-look like, and a useful visual contrast against the rest of this page. So the
-two flagged mechanisms are a partial, not complete, explanation, and the
-planned fixes (excluding cis-SNPs that overlap the profiled base, requiring a
-minimum sample count per genotype class) should be treated as a first pass,
-re-checked against a fresh top-20 plot after re-running.
+Visually, nearly every panel above shows the
+same pattern: genotype 0 near %pU=1, genotype 1 near
+%pU=0.5, genotype 2 near %pU=0.
+
+<!-- **The remaining `r cat_tbl[category == "Neither flag (plausible)"]$N` sites -->
+<!-- are not a clean "these are fine" bucket.** Most of them (#1, #4, #6, #12 — -->
+<!-- none of these are on chr6) show the same staircase -->
+<!-- despite having normal-sized genotype groups and no SNP-at-site overlap, -->
+<!-- meaning the two mechanisms characterized here do not explain everything — -->
+<!-- something else (e.g. a nearby-but-not-exact-position variant still perturbing -->
+<!-- the assay's base-calling, or another unmodeled technical effect) is likely -->
+<!-- producing the same signature. Only two sites (#14 `chr3:37277733`, #18 -->
+<!-- `chr2:88886147`) look qualitatively different: noisy, near-uniform scatter -->
+<!-- across all three genotype groups with no clean separation, or driven by a -->
+<!-- single outlier cell line — closer to what a null or borderline result should -->
+<!-- look like, and a useful visual contrast against the rest of this page. So the -->
+<!-- two flagged mechanisms are a partial, not complete, explanation, and the -->
+<!-- planned fixes (excluding cis-SNPs that overlap the profiled base, requiring a -->
+<!-- minimum sample count per genotype class) should be treated as a first pass, -->
+<!-- re-checked against a fresh top-20 plot after re-running. -->
