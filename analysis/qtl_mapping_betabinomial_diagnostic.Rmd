@@ -350,6 +350,31 @@ cmp <- cmp[match(c("real", paste0("perm", 1:5)), dataset)]
 knitr::kable(cmp, digits = 3, caption = "Genomic-inflation lambda: original vs. SNP-at-site-excluded (5kb, 3 PCs)")
 ```
 
+```{r calib-excl-qq, fig.width=7, fig.height=6.5}
+qq_orig <- fread(file.path(CALIB, "calib_lrt_w5kb_pc3_qqdata.txt.gz"))[dataset == "real"]
+qq_excl <- fread(file.path(CALIB, "calib_lrt_w5kb_pc3_excl_sitesnp_qqdata.txt.gz"))[dataset == "real"]
+qq_cmp <- rbind(qq_orig[, .(expected, observed, version = "original")],
+                qq_excl[, .(expected, observed, version = "excl_sitesnp")])
+
+ggplot(qq_cmp, aes(expected, observed, color = version)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey50") +
+  geom_point(size = 0.7, alpha = 0.5) +
+  scale_color_manual(values = c(original = "#2a78d6", excl_sitesnp = "#eb6834"), name = NULL) +
+  guides(color = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
+  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
+       title = "Real-data QQ: original vs. SNP-at-site-excluded (5kb, 3 PCs)",
+       subtitle = sprintf("lambda: %.2f (original) vs. %.2f (excl_sitesnp)",
+                          CAL_ORIG[dataset == "real"]$lambda, CAL_EXCL[dataset == "real"]$lambda)) +
+  theme_bw(base_size = 12)
+```
+
+The two series are visually indistinguishable across almost the entire
+range, only separating at the very extreme tail (the top handful of
+`-log10(p)`, where the excluded version's most extreme points pull back
+slightly, consistent with removing several hundred SNP-at-site-driven
+outliers) — confirming the lambda table above: this fix cleans up specific
+top hits without touching the bulk of the distribution.
+
 **Essentially no change**, in either the real or any of the 5 permuted-null
 lambdas — the largest shift is real data's lambda dropping from
 `r round(CAL_ORIG[dataset=="real"]$lambda, 3)` to

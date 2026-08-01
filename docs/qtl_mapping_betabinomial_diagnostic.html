@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree1867d978b3e8314cf4256d0810b2f7ad546ae39ftargetblank1867d97a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeabaae4e19ae964b0e99c2e556c5124cb9ec1c376targetblankabaae4ea">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/1867d978b3e8314cf4256d0810b2f7ad546ae39f" target="_blank">1867d97</a>
+<a href="https://github.com/xsun1229/pumseq/tree/abaae4e19ae964b0e99c2e556c5124cb9ec1c376" target="_blank">abaae4e</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree1867d978b3e8314cf4256d0810b2f7ad546ae39ftargetblank1867d97a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeabaae4e19ae964b0e99c2e556c5124cb9ec1c376targetblankabaae4ea"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/1867d978b3e8314cf4256d0810b2f7ad546ae39f" target="_blank">1867d97</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/abaae4e19ae964b0e99c2e556c5124cb9ec1c376" target="_blank">abaae4e</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -570,7 +570,6 @@ were generated:
 </p>
 <pre><code>
 Ignored files:
-    Ignored:    analysis/figure/
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Unstaged changes:
@@ -621,6 +620,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/abaae4e19ae964b0e99c2e556c5124cb9ec1c376/analysis/qtl_mapping_betabinomial_diagnostic.Rmd" target="_blank">abaae4e</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-01
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/abaae4e19ae964b0e99c2e556c5124cb9ec1c376/docs/qtl_mapping_betabinomial_diagnostic.html" target="_blank">abaae4e</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-01
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1496,6 +1529,29 @@ knitr::kable(cmp, digits = 3, caption = &quot;Genomic-inflation lambda: original
 </tr>
 </tbody>
 </table>
+<pre class="r"><code>qq_orig &lt;- fread(file.path(CALIB, &quot;calib_lrt_w5kb_pc3_qqdata.txt.gz&quot;))[dataset == &quot;real&quot;]
+qq_excl &lt;- fread(file.path(CALIB, &quot;calib_lrt_w5kb_pc3_excl_sitesnp_qqdata.txt.gz&quot;))[dataset == &quot;real&quot;]
+qq_cmp &lt;- rbind(qq_orig[, .(expected, observed, version = &quot;original&quot;)],
+                qq_excl[, .(expected, observed, version = &quot;excl_sitesnp&quot;)])
+
+ggplot(qq_cmp, aes(expected, observed, color = version)) +
+  geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, color = &quot;grey50&quot;) +
+  geom_point(size = 0.7, alpha = 0.5) +
+  scale_color_manual(values = c(original = &quot;#2a78d6&quot;, excl_sitesnp = &quot;#eb6834&quot;), name = NULL) +
+  guides(color = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
+  labs(x = expression(-log[10](&quot;expected p&quot;)), y = expression(-log[10](&quot;observed p&quot;)),
+       title = &quot;Real-data QQ: original vs. SNP-at-site-excluded (5kb, 3 PCs)&quot;,
+       subtitle = sprintf(&quot;lambda: %.2f (original) vs. %.2f (excl_sitesnp)&quot;,
+                          CAL_ORIG[dataset == &quot;real&quot;]$lambda, CAL_EXCL[dataset == &quot;real&quot;]$lambda)) +
+  theme_bw(base_size = 12)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_diagnostic.Rmd/calib-excl-qq-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The two series are visually indistinguishable across almost the
+entire range, only separating at the very extreme tail (the top handful
+of <code>-log10(p)</code>, where the excluded version’s most extreme
+points pull back slightly, consistent with removing several hundred
+SNP-at-site-driven outliers) — confirming the lambda table above: this
+fix cleans up specific top hits without touching the bulk of the
+distribution.</p>
 <p><strong>Essentially no change</strong>, in either the real or any of
 the 5 permuted-null lambdas — the largest shift is real data’s lambda
 dropping from 2.473 to 2.457, and every permuted-null lambda matches to
