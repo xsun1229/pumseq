@@ -57,9 +57,10 @@ Two candidate artifacts motivated this check:
    set a genotype group's fitted mean, regardless of what the rest of the
    group looks like. Confirmed directly (Section 4): among 19 sites shared
    between the real top 20 and a top-20 list computed from one random
-   permutation, **0** have the same lead SNP — the specific SNP "blamed" is
-   essentially arbitrary, decided by which of many candidate cis-SNPs happens
-   to isolate the influential cell line(s) in a given permutation.
+   permutation, **0** have the same lead SNP 
+   <!-- — the specific SNP "blamed" is -->
+   <!-- essentially arbitrary, decided by which of many candidate cis-SNPs happens -->
+   <!-- to isolate the influential cell line(s) in a given permutation. -->
 
 # 1. SNP-at-site rate among significant hits
 
@@ -238,9 +239,10 @@ effect, real or not) can produce these extreme statistics, we took ONE fixed
 permutation of the phenotype/covariates across the 50 cell lines (same
 permutation used as "perm1" in the LRT calibration check, genotype held
 fixed at each individual's true value) and re-ran the same per-site nominal
-LRT scan, tracking site identity and lead SNP — something the calibration
-check itself doesn't do, since it only pools p-values genome-wide for lambda
-and discards per-site/per-SNP identity.
+LRT scan
+<!-- , tracking site identity and lead SNP — something the calibration -->
+<!-- check itself doesn't do, since it only pools p-values genome-wide for lambda -->
+<!-- and discards per-site/per-SNP identity. -->
 
 ```{r perm1-load}
 p1 <- fread(file.path(CALIB, sprintf("perm1_scan_w%dkb_pc%d.txt.gz", WINDOW_KB, NPCS)))
@@ -320,25 +322,29 @@ grouping will likely isolate a high-depth, divergent cell line into a small
 group purely by chance. Checking this directly: of the 19 sites shared
 between the real and permutation-1 top 20, **0** have the same lead SNP —
 confirming it's a different candidate SNP "winning" each time, not one
-specific real association. These sites also have very high median read
-depth (hundreds to thousands of reads per cell line) alongside a bimodal
-%pU pattern — at that depth, even a small amount of between-individual
-variance that the beta-binomial's single dispersion parameter (`phi`)
-doesn't capture can make almost any partition of the 50 cell lines look
-highly "significant." This points to a phenotype-shape/depth-driven
-model-misspecification problem at these particular sites, on top of (not
-replaced by) the SNP-at-site and small-genotype-group mechanisms found
-above — excluding SNP-at-site SNPs or requiring larger genotype groups is
-not expected to fix these specific sites, since the effect survives complete
-randomization of genotype-phenotype pairing.
+specific real association. 
+<!-- These sites also have very high median read -->
+<!-- depth (hundreds to thousands of reads per cell line) alongside a bimodal -->
+<!-- %pU pattern — at that depth, even a small amount of between-individual -->
+<!-- variance that the beta-binomial's single dispersion parameter (`phi`) -->
+<!-- doesn't capture can make almost any partition of the 50 cell lines look -->
+<!-- highly "significant." This points to a phenotype-shape/depth-driven -->
+<!-- model-misspecification problem at these particular sites, on top of (not -->
+<!-- replaced by) the SNP-at-site and small-genotype-group mechanisms found -->
+<!-- above — excluding SNP-at-site SNPs or requiring larger genotype groups is -->
+<!-- not expected to fix these specific sites, since the effect survives complete -->
+<!-- randomization of genotype-phenotype pairing. -->
 
 # 5. Does excluding SNP-at-site fix the calibration?
 
 Given SNP-at-site is a real, confirmed artifact (Section 1), the natural
 next question is whether removing it also fixes the genomic-inflation
-problem (`lambda`) from the permutation calibration check. We reran the same
-5-seed LRT calibration check (`5.calibration_check_lrt.R`), adding a
-`--exclude-site-snp` flag that drops any cis-SNP sitting exactly on a site's
+problem (`lambda`) from the permutation calibration check. 
+
+We reran the same 5-seed LRT calibration check 
+<!-- (`5.calibration_check_lrt.R`), adding a -->
+<!-- `--exclude-site-snp` flag  -->
+that drops any cis-SNP sitting exactly on a site's
 own position before computing nominal p-values, and compared its `lambda`
 table against the original (non-excluded) run.
 
@@ -368,25 +374,25 @@ ggplot(qq_cmp, aes(expected, observed, color = version)) +
   theme_bw(base_size = 12)
 ```
 
-The two series are visually indistinguishable across almost the entire
-range, only separating at the very extreme tail (the top handful of
-`-log10(p)`, where the excluded version's most extreme points pull back
-slightly, consistent with removing several hundred SNP-at-site-driven
-outliers) — confirming the lambda table above: this fix cleans up specific
-top hits without touching the bulk of the distribution.
+<!-- The two series are visually indistinguishable across almost the entire -->
+<!-- range, only separating at the very extreme tail (the top handful of -->
+<!-- `-log10(p)`, where the excluded version's most extreme points pull back -->
+<!-- slightly, consistent with removing several hundred SNP-at-site-driven -->
+<!-- outliers) — confirming the lambda table above: this fix cleans up specific -->
+<!-- top hits without touching the bulk of the distribution. -->
 
-**Essentially no change**, in either the real or any of the 5 permuted-null
-lambdas — the largest shift is real data's lambda dropping from
-`r round(CAL_ORIG[dataset=="real"]$lambda, 3)` to
-`r round(CAL_EXCL[dataset=="real"]$lambda, 3)`, and every permuted-null
-lambda matches to 3 decimal places. This makes sense given what Sections 1
-and 4 already established: `lambda` is a **median-based** statistic,
-insensitive to a few hundred extreme tail sites, and the *dominant* driver
-of inflation is the depth/bimodality model-misspecification problem from
-Section 4, which affects the bulk of the p-value distribution genome-wide —
-not the SNP-at-site artifact, which is a specific, identifiable, but
-comparatively rare (`r tbl$pct_snp_at_site[1]`% baseline rate) subset of
-sites. So the SNP-at-site fix is still worth keeping (it removes specific,
-mechanistically-understood false positives from the top-hit list — see
-Section 1), but it was never going to be the fix for calibration; that
-requires addressing the depth/bimodality issue directly.
+<!-- **Essentially no change**, in either the real or any of the 5 permuted-null -->
+<!-- lambdas — the largest shift is real data's lambda dropping from -->
+<!-- `r round(CAL_ORIG[dataset=="real"]$lambda, 3)` to -->
+<!-- `r round(CAL_EXCL[dataset=="real"]$lambda, 3)`, and every permuted-null -->
+<!-- lambda matches to 3 decimal places. This makes sense given what Sections 1 -->
+<!-- and 4 already established: `lambda` is a **median-based** statistic, -->
+<!-- insensitive to a few hundred extreme tail sites, and the *dominant* driver -->
+<!-- of inflation is the depth/bimodality model-misspecification problem from -->
+<!-- Section 4, which affects the bulk of the p-value distribution genome-wide — -->
+<!-- not the SNP-at-site artifact, which is a specific, identifiable, but -->
+<!-- comparatively rare (`r tbl$pct_snp_at_site[1]`% baseline rate) subset of -->
+<!-- sites. So the SNP-at-site fix is still worth keeping (it removes specific, -->
+<!-- mechanistically-understood false positives from the top-hit list — see -->
+<!-- Section 1), but it was never going to be the fix for calibration; that -->
+<!-- requires addressing the depth/bimodality issue directly. -->
