@@ -92,11 +92,27 @@ genuine cis-regulatory effect.
 
 # 2. Top `r N_TOP` QTLs: %pU by genotype at the lead cis-SNP
 
+Each panel below marks a black diamond per genotype group: the group's
+depth-weighted average of the **actual beta-binomial model's fitted mean**
+(same design as the real scan — intercept + `r NPCS` M-value PCs + genotype
+dosage — refit here with `fit_bb_mle()`), not just a visual summary of the
+raw scatter. An earlier version of this page used a simpler proxy
+(`sum(y)/sum(n)` per group, ignoring the PC covariates and dispersion
+correction); checking that proxy against this true fit directly showed
+agreement at low-dispersion sites but a gap of up to ~0.13 in probability at
+higher-`phi` sites, so the actual model fit is shown here instead.
+
 ```{r load-pheno-geno}
+source(file.path(PROJECT_DIR, "4.qtl_mapping_betabinomial/betabin_lib.R"))
+COVAR <- file.path(BASE, "phenotype/fold5_union/mvalue_pcs.txt")
+
 C <- fread(file.path(COUNTS, "C_matrix.txt.gz")); N <- fread(file.path(COUNTS, "N_matrix.txt.gz"))
 psam <- fread(PSAM); go <- psam[[2]]
 Cm <- as.matrix(C[, ..go]); Nm <- as.matrix(N[, ..go])
 sites <- C[, .(ref = as.character(ref), pos = as.integer(pos))]
+
+cov <- fread(COVAR); stopifnot(identical(cov$sample, go))
+Xcov <- cbind(Intercept = 1, as.matrix(cov[, paste0("PC", seq_len(NPCS)), with = FALSE]))   # same design the actual scan uses
 
 traw <- fread(TRAW); samp <- paste0(go, "_", go)
 Gall <- t(as.matrix(traw[, ..samp])); gid <- traw$SNP
@@ -125,20 +141,27 @@ rows <- rbindlist(lapply(seq_len(nrow(top20)), function(i) {
     if (min_grp < MIN_GRP) sprintf("\n[small group n=%d]", min_grp) else "",
     if (max_depth_share > DEPTH_SHARE_THRESH) sprintf("\n[depth-dominated %.0f%%]", 100 * max_depth_share) else ""
   )
+  # true full-model fitted mean per individual (intercept + NPCS M-value PCs +
+  # genotype dosage -- the EXACT design the LRT scan itself uses), not a naive
+  # binomial-only proxy: checked directly (see prose below) that a simpler
+  # sum(y)/sum(n) per-group proxy can be off by up to ~0.13 in probability at
+  # higher-phi sites, since it ignores both the PC covariates and the
+  # dispersion correction that this fit applies
+  fit <- tryCatch(fit_bb_mle(y, n, cbind(Xcov, g = g)), error = function(e) NULL)
+  mu_fit <- if (!is.null(fit)) fit$mu0 else rep(NA_real_, length(y))
   data.table(
     rank = s$rank,
     site_lab = sprintf("#%d chr%s:%.0f\n-log10(p)=%.0f%s",
                         s$rank, s$ref, s$pos, -log10(max(s$nominal_min_p, 1e-300)), flags),
-    g = factor(g, levels = 0:2), pi = pi_v, n = n, y = y,
+    g = factor(g, levels = 0:2), pi = pi_v, n = n, y = y, mu_fit = mu_fit,
     snp_at_site = s$lead_pos == s$pos, min_grp = min_grp, max_depth_share = max_depth_share
   )
 }))
 rows[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
 
-# depth-weighted mean per (site, genotype group) -- sum(y)/sum(n), the exact
-# quantity a binomial/beta-binomial GLM fits as that group's mean (verified
-# directly against glm() fitted values in the conversation behind this page)
-dw_means <- rows[, .(dw_mean = sum(y) / sum(n)), by = .(site_lab, g)]
+# per-group depth-weighted average of the TRUE model-fitted mean (not the
+# raw observed y/n) -- this is what actually enters the LRT's log-likelihood
+dw_means <- rows[!is.na(mu_fit), .(dw_mean = sum(mu_fit * n) / sum(n)), by = .(site_lab, g)]
 
 blue3 <- c(`0` = "#86b6ef", `1` = "#2a78d6", `2` = "#104281")
 
@@ -153,7 +176,7 @@ ggplot(rows, aes(x = g, y = pi, color = g)) +
   labs(x = "genotype (copies of alt allele) at the lead cis-SNP", y = "%pU (y/n per cell line)",
        title = sprintf("Top %d beta-binomial QTLs by nominal LRT p-value (%dkb, %d PCs)",
                        N_TOP, WINDOW_KB, NPCS),
-       subtitle = "Black diamonds = depth-weighted group mean (sum(y)/sum(n), what the GLM actually fits). '[SNP-at-site]' = lead SNP at the profiled base; '[small group]' = smallest genotype class <5 cell lines; '[depth-dominated]' = one cell line >50% of its group's total depth.") +
+       subtitle = "Black diamonds = the actual beta-binomial model's fitted mean per genotype group (intercept+3 PCs+dosage, depth-weighted). '[SNP-at-site]' = lead SNP at the profiled base; '[small group]' = smallest genotype class <5 cell lines; '[depth-dominated]' = one cell line >50% of its group's total depth.") +
   theme_bw(base_size = 11) +
   theme(legend.position = "bottom", strip.text = element_text(size = 7.5))
 ```
@@ -242,6 +265,7 @@ rows_p1 <- rbindlist(lapply(seq_len(nrow(p1_top20)), function(i) {
   si <- which(sites$ref == as.character(s$ref) & sites$pos == s$pos)
   gi <- which(gid == s$lead_snp)
   y <- Cm[si, ord]; n <- Nm[si, ord]; g <- Gall[, gi]   # phenotype permuted, genotype fixed -- same pairing as the calibration check
+  Xp <- Xcov[ord, , drop = FALSE]   # covariates travel WITH the permuted phenotype, same rule as the calibration check
   pi_v <- y / n
   grp_tab <- table(g)
   min_grp <- min(grp_tab)
@@ -252,16 +276,18 @@ rows_p1 <- rbindlist(lapply(seq_len(nrow(p1_top20)), function(i) {
     if (min_grp < MIN_GRP) sprintf("\n[small group n=%d]", min_grp) else "",
     if (max_depth_share > DEPTH_SHARE_THRESH) sprintf("\n[depth-dominated %.0f%%]", 100 * max_depth_share) else ""
   )
+  fit <- tryCatch(fit_bb_mle(y, n, cbind(Xp, g = g)), error = function(e) NULL)
+  mu_fit <- if (!is.null(fit)) fit$mu0 else rep(NA_real_, length(y))
   data.table(
     rank = s$rank,
     site_lab = sprintf("#%d chr%s:%.0f\n-log10(p)=%.0f%s",
                         s$rank, s$ref, s$pos, -log10(max(s$nominal_min_p, 1e-300)), flags),
-    g = factor(g, levels = 0:2), pi = pi_v, n = n, y = y
+    g = factor(g, levels = 0:2), pi = pi_v, n = n, y = y, mu_fit = mu_fit
   )
 }))
 rows_p1[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
 
-dw_means_p1 <- rows_p1[, .(dw_mean = sum(y) / sum(n)), by = .(site_lab, g)]
+dw_means_p1 <- rows_p1[!is.na(mu_fit), .(dw_mean = sum(mu_fit * n) / sum(n)), by = .(site_lab, g)]
 
 ggplot(rows_p1, aes(x = g, y = pi, color = g)) +
   geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.4, color = "grey60", fill = NA) +
@@ -274,7 +300,7 @@ ggplot(rows_p1, aes(x = g, y = pi, color = g)) +
   labs(x = "genotype (fixed) vs. PERMUTED phenotype at the lead cis-SNP",
        y = "%pU (y/n per cell line, permuted individual order)",
        title = sprintf("Top %d sites under permutation-1 (genotype-phenotype pairing randomized)", N_TOP),
-       subtitle = "Black diamonds = depth-weighted group mean (sum(y)/sum(n), what the GLM actually fits). Same seed as the LRT calibration check's perm1 (set.seed(1001)).") +
+       subtitle = "Black diamonds = the actual beta-binomial model's fitted mean per genotype group (intercept+3 PCs+dosage, depth-weighted; covariates permuted with phenotype, genotype fixed). Same seed as the LRT calibration check's perm1 (set.seed(1001)).") +
   theme_bw(base_size = 11) +
   theme(legend.position = "bottom", strip.text = element_text(size = 7.5))
 ```

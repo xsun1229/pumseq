@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreec836d6a7345ec3c6d478219bf5874f297473312ftargetblankc836d6aa">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree1ba19a8f317db5d2ade58457bcd54c3838b92545targetblank1ba19a8a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/c836d6a7345ec3c6d478219bf5874f297473312f" target="_blank">c836d6a</a>
+<a href="https://github.com/xsun1229/pumseq/tree/1ba19a8f317db5d2ade58457bcd54c3838b92545" target="_blank">1ba19a8</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreec836d6a7345ec3c6d478219bf5874f297473312ftargetblankc836d6aa"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree1ba19a8f317db5d2ade58457bcd54c3838b92545targetblank1ba19a8a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/c836d6a7345ec3c6d478219bf5874f297473312f" target="_blank">c836d6a</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/1ba19a8f317db5d2ade58457bcd54c3838b92545" target="_blank">1ba19a8</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -573,9 +573,7 @@ Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Unstaged changes:
-    Modified:   analysis/index.Rmd
     Modified:   analysis/qtl_mapping_betabinomial_diagnostic.Rmd
-    Deleted:    analysis/qtl_mapping_betabinomial_diagnostic.knit.md
 
 </code></pre>
 <p>
@@ -622,6 +620,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/1ba19a8f317db5d2ade58457bcd54c3838b92545/analysis/qtl_mapping_betabinomial_diagnostic.Rmd" target="_blank">1ba19a8</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-01
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/1ba19a8f317db5d2ade58457bcd54c3838b92545/docs/qtl_mapping_betabinomial_diagnostic.html" target="_blank">1ba19a8</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-01
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -836,10 +868,27 @@ effect.</p>
 <div id="top-20-qtls-pu-by-genotype-at-the-lead-cis-snp"
 class="section level1">
 <h1>2. Top 20 QTLs: %pU by genotype at the lead cis-SNP</h1>
-<pre class="r"><code>C &lt;- fread(file.path(COUNTS, &quot;C_matrix.txt.gz&quot;)); N &lt;- fread(file.path(COUNTS, &quot;N_matrix.txt.gz&quot;))
+<p>Each panel below marks a black diamond per genotype group: the
+group’s depth-weighted average of the <strong>actual beta-binomial
+model’s fitted mean</strong> (same design as the real scan — intercept +
+3 M-value PCs + genotype dosage — refit here with
+<code>fit_bb_mle()</code>), not just a visual summary of the raw
+scatter. An earlier version of this page used a simpler proxy
+(<code>sum(y)/sum(n)</code> per group, ignoring the PC covariates and
+dispersion correction); checking that proxy against this true fit
+directly showed agreement at low-dispersion sites but a gap of up to
+~0.13 in probability at higher-<code>phi</code> sites, so the actual
+model fit is shown here instead.</p>
+<pre class="r"><code>source(file.path(PROJECT_DIR, &quot;4.qtl_mapping_betabinomial/betabin_lib.R&quot;))
+COVAR &lt;- file.path(BASE, &quot;phenotype/fold5_union/mvalue_pcs.txt&quot;)
+
+C &lt;- fread(file.path(COUNTS, &quot;C_matrix.txt.gz&quot;)); N &lt;- fread(file.path(COUNTS, &quot;N_matrix.txt.gz&quot;))
 psam &lt;- fread(PSAM); go &lt;- psam[[2]]
 Cm &lt;- as.matrix(C[, ..go]); Nm &lt;- as.matrix(N[, ..go])
 sites &lt;- C[, .(ref = as.character(ref), pos = as.integer(pos))]
+
+cov &lt;- fread(COVAR); stopifnot(identical(cov$sample, go))
+Xcov &lt;- cbind(Intercept = 1, as.matrix(cov[, paste0(&quot;PC&quot;, seq_len(NPCS)), with = FALSE]))   # same design the actual scan uses
 
 traw &lt;- fread(TRAW); samp &lt;- paste0(go, &quot;_&quot;, go)
 Gall &lt;- t(as.matrix(traw[, ..samp])); gid &lt;- traw$SNP</code></pre>
@@ -865,20 +914,27 @@ rows &lt;- rbindlist(lapply(seq_len(nrow(top20)), function(i) {
     if (min_grp &lt; MIN_GRP) sprintf(&quot;\n[small group n=%d]&quot;, min_grp) else &quot;&quot;,
     if (max_depth_share &gt; DEPTH_SHARE_THRESH) sprintf(&quot;\n[depth-dominated %.0f%%]&quot;, 100 * max_depth_share) else &quot;&quot;
   )
+  # true full-model fitted mean per individual (intercept + NPCS M-value PCs +
+  # genotype dosage -- the EXACT design the LRT scan itself uses), not a naive
+  # binomial-only proxy: checked directly (see prose below) that a simpler
+  # sum(y)/sum(n) per-group proxy can be off by up to ~0.13 in probability at
+  # higher-phi sites, since it ignores both the PC covariates and the
+  # dispersion correction that this fit applies
+  fit &lt;- tryCatch(fit_bb_mle(y, n, cbind(Xcov, g = g)), error = function(e) NULL)
+  mu_fit &lt;- if (!is.null(fit)) fit$mu0 else rep(NA_real_, length(y))
   data.table(
     rank = s$rank,
     site_lab = sprintf(&quot;#%d chr%s:%.0f\n-log10(p)=%.0f%s&quot;,
                         s$rank, s$ref, s$pos, -log10(max(s$nominal_min_p, 1e-300)), flags),
-    g = factor(g, levels = 0:2), pi = pi_v, n = n, y = y,
+    g = factor(g, levels = 0:2), pi = pi_v, n = n, y = y, mu_fit = mu_fit,
     snp_at_site = s$lead_pos == s$pos, min_grp = min_grp, max_depth_share = max_depth_share
   )
 }))
 rows[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
 
-# depth-weighted mean per (site, genotype group) -- sum(y)/sum(n), the exact
-# quantity a binomial/beta-binomial GLM fits as that group&#39;s mean (verified
-# directly against glm() fitted values in the conversation behind this page)
-dw_means &lt;- rows[, .(dw_mean = sum(y) / sum(n)), by = .(site_lab, g)]
+# per-group depth-weighted average of the TRUE model-fitted mean (not the
+# raw observed y/n) -- this is what actually enters the LRT&#39;s log-likelihood
+dw_means &lt;- rows[!is.na(mu_fit), .(dw_mean = sum(mu_fit * n) / sum(n)), by = .(site_lab, g)]
 
 blue3 &lt;- c(`0` = &quot;#86b6ef&quot;, `1` = &quot;#2a78d6&quot;, `2` = &quot;#104281&quot;)
 
@@ -893,7 +949,7 @@ ggplot(rows, aes(x = g, y = pi, color = g)) +
   labs(x = &quot;genotype (copies of alt allele) at the lead cis-SNP&quot;, y = &quot;%pU (y/n per cell line)&quot;,
        title = sprintf(&quot;Top %d beta-binomial QTLs by nominal LRT p-value (%dkb, %d PCs)&quot;,
                        N_TOP, WINDOW_KB, NPCS),
-       subtitle = &quot;Black diamonds = depth-weighted group mean (sum(y)/sum(n), what the GLM actually fits). &#39;[SNP-at-site]&#39; = lead SNP at the profiled base; &#39;[small group]&#39; = smallest genotype class &lt;5 cell lines; &#39;[depth-dominated]&#39; = one cell line &gt;50% of its group&#39;s total depth.&quot;) +
+       subtitle = &quot;Black diamonds = the actual beta-binomial model&#39;s fitted mean per genotype group (intercept+3 PCs+dosage, depth-weighted). &#39;[SNP-at-site]&#39; = lead SNP at the profiled base; &#39;[small group]&#39; = smallest genotype class &lt;5 cell lines; &#39;[depth-dominated]&#39; = one cell line &gt;50% of its group&#39;s total depth.&quot;) +
   theme_bw(base_size = 11) +
   theme(legend.position = &quot;bottom&quot;, strip.text = element_text(size = 7.5))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_diagnostic.Rmd/top20-select-1.png" width="1152" style="display: block; margin: auto;" /></p>
@@ -919,6 +975,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/1ba19a8f317db5d2ade58457bcd54c3838b92545/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/top20-select-1.png" target="_blank">1ba19a8</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-01
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/4fa878a14a65f49627dd80cd86e3539fbfee3cff/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/top20-select-1.png" target="_blank">4fa878a</a>
@@ -1208,6 +1275,7 @@ rows_p1 &lt;- rbindlist(lapply(seq_len(nrow(p1_top20)), function(i) {
   si &lt;- which(sites$ref == as.character(s$ref) &amp; sites$pos == s$pos)
   gi &lt;- which(gid == s$lead_snp)
   y &lt;- Cm[si, ord]; n &lt;- Nm[si, ord]; g &lt;- Gall[, gi]   # phenotype permuted, genotype fixed -- same pairing as the calibration check
+  Xp &lt;- Xcov[ord, , drop = FALSE]   # covariates travel WITH the permuted phenotype, same rule as the calibration check
   pi_v &lt;- y / n
   grp_tab &lt;- table(g)
   min_grp &lt;- min(grp_tab)
@@ -1218,16 +1286,18 @@ rows_p1 &lt;- rbindlist(lapply(seq_len(nrow(p1_top20)), function(i) {
     if (min_grp &lt; MIN_GRP) sprintf(&quot;\n[small group n=%d]&quot;, min_grp) else &quot;&quot;,
     if (max_depth_share &gt; DEPTH_SHARE_THRESH) sprintf(&quot;\n[depth-dominated %.0f%%]&quot;, 100 * max_depth_share) else &quot;&quot;
   )
+  fit &lt;- tryCatch(fit_bb_mle(y, n, cbind(Xp, g = g)), error = function(e) NULL)
+  mu_fit &lt;- if (!is.null(fit)) fit$mu0 else rep(NA_real_, length(y))
   data.table(
     rank = s$rank,
     site_lab = sprintf(&quot;#%d chr%s:%.0f\n-log10(p)=%.0f%s&quot;,
                         s$rank, s$ref, s$pos, -log10(max(s$nominal_min_p, 1e-300)), flags),
-    g = factor(g, levels = 0:2), pi = pi_v, n = n, y = y
+    g = factor(g, levels = 0:2), pi = pi_v, n = n, y = y, mu_fit = mu_fit
   )
 }))
 rows_p1[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
 
-dw_means_p1 &lt;- rows_p1[, .(dw_mean = sum(y) / sum(n)), by = .(site_lab, g)]
+dw_means_p1 &lt;- rows_p1[!is.na(mu_fit), .(dw_mean = sum(mu_fit * n) / sum(n)), by = .(site_lab, g)]
 
 ggplot(rows_p1, aes(x = g, y = pi, color = g)) +
   geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.4, color = &quot;grey60&quot;, fill = NA) +
@@ -1240,10 +1310,47 @@ ggplot(rows_p1, aes(x = g, y = pi, color = g)) +
   labs(x = &quot;genotype (fixed) vs. PERMUTED phenotype at the lead cis-SNP&quot;,
        y = &quot;%pU (y/n per cell line, permuted individual order)&quot;,
        title = sprintf(&quot;Top %d sites under permutation-1 (genotype-phenotype pairing randomized)&quot;, N_TOP),
-       subtitle = &quot;Black diamonds = depth-weighted group mean (sum(y)/sum(n), what the GLM actually fits). Same seed as the LRT calibration check&#39;s perm1 (set.seed(1001)).&quot;) +
+       subtitle = &quot;Black diamonds = the actual beta-binomial model&#39;s fitted mean per genotype group (intercept+3 PCs+dosage, depth-weighted; covariates permuted with phenotype, genotype fixed). Same seed as the LRT calibration check&#39;s perm1 (set.seed(1001)).&quot;) +
   theme_bw(base_size = 11) +
   theme(legend.position = &quot;bottom&quot;, strip.text = element_text(size = 7.5))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm1-plot-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-perm1-plot-1">
+Past versions of perm1-plot-1.png
+</button>
+</p>
+<div id="fig-perm1-plot-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/1ba19a8f317db5d2ade58457bcd54c3838b92545/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm1-plot-1.png" target="_blank">1ba19a8</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Unlike the real top-20 plot above, these panels show <strong>no clean
 separation between genotype groups</strong> — heavily overlapping, noisy
 scatter within each group. Yet the p-values are just as extreme, and the
