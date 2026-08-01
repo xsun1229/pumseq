@@ -57,10 +57,27 @@ Two candidate artifacts motivated this check:
    set a genotype group's fitted mean, regardless of what the rest of the
    group looks like. Confirmed directly (Section 4): among 19 sites shared
    between the real top 20 and a top-20 list computed from one random
-   permutation, **0** have the same lead SNP 
+   permutation, **0** have the same lead SNP
    <!-- — the specific SNP "blamed" is -->
    <!-- essentially arbitrary, decided by which of many candidate cis-SNPs happens -->
    <!-- to isolate the influential cell line(s) in a given permutation. -->
+
+Why depth drives this: the beta-binomial's variance for cell line $i$ is
+
+$$
+y_i \sim \text{BetaBinomial}(n_i, \mu_i, \phi), \qquad
+\text{Var}(y_i) = n_i\,\mu_i(1-\mu_i)\left[1 + (n_i - 1)\phi\right],
+$$
+
+so its effective weight in the fit (inverse-variance) is approximately
+
+$$
+w_i \;\propto\; \frac{n_i}{1 + (n_i - 1)\phi} \;\xrightarrow[n_i \to \infty]{}\; \frac{1}{\phi}.
+$$
+
+Weight grows with depth $n_i$ but saturates at $1/\phi$ — with a small $\phi$
+(as at these sites), that ceiling is high, so one high-depth cell line can
+still outweigh dozens of low-depth ones.
 
 # 1. SNP-at-site rate among significant hits
 
