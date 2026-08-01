@@ -27,7 +27,8 @@ TRAW   <- file.path(BASE, "genotype/qtl_binomial/genotype_common.traw")
 WINDOW_KB <- 5
 NPCS      <- 3
 N_TOP     <- 20
-MIN_GRP   <- 5   # flag threshold for "small genotype group" in the pattern summary below
+MIN_GRP   <- 5     # flag threshold for "small genotype group" in the pattern summary below
+DEPTH_SHARE_THRESH <- 0.5   # flag threshold: one cell line contributing > this share of its genotype group's total depth
 ```
 
 
@@ -51,6 +52,14 @@ Two candidate artifacts motivated this check:
    masquerading as a huge modification-QTL effect. This is the same
    phenomenon as the well-known SNP-at-CpG confound in bisulfite-based mQTL
    studies.
+3. **Depth-dominated genotype groups** — the model weights each cell line by
+   its read depth, so a single high-depth, divergent cell line can single-handedly
+   set a genotype group's fitted mean, regardless of what the rest of the
+   group looks like. Confirmed directly (Section 4): among 19 sites shared
+   between the real top 20 and a top-20 list computed from one random
+   permutation, **0** have the same lead SNP — the specific SNP "blamed" is
+   essentially arbitrary, decided by which of many candidate cis-SNPs happens
+   to isolate the influential cell line(s) in a given permutation.
 
 # 1. SNP-at-site rate among significant hits
 
@@ -105,32 +114,46 @@ rows <- rbindlist(lapply(seq_len(nrow(top20)), function(i) {
   pi_v <- y / n
   grp_tab <- table(g)
   min_grp <- min(grp_tab)
+  # depth concentration: share of a genotype group's total read depth coming
+  # from its single highest-depth cell line -- this is the quantity that
+  # determines how much one cell line can dominate that group's fitted mean
+  # (sum(y)/sum(n), the MLE the GLM actually fits; see Section 3 discussion)
+  depth_share <- sapply(sort(unique(g)), function(gg) { ns <- n[g == gg]; max(ns) / sum(ns) })
+  max_depth_share <- max(depth_share)
   flags <- paste0(
     if (s$lead_pos == s$pos) "\n[SNP-at-site]" else "",
-    if (min_grp < MIN_GRP) sprintf("\n[small group n=%d]", min_grp) else ""
+    if (min_grp < MIN_GRP) sprintf("\n[small group n=%d]", min_grp) else "",
+    if (max_depth_share > DEPTH_SHARE_THRESH) sprintf("\n[depth-dominated %.0f%%]", 100 * max_depth_share) else ""
   )
   data.table(
     rank = s$rank,
     site_lab = sprintf("#%d chr%s:%.0f\n-log10(p)=%.0f%s",
                         s$rank, s$ref, s$pos, -log10(max(s$nominal_min_p, 1e-300)), flags),
-    g = factor(g, levels = 0:2), pi = pi_v, n = n,
-    snp_at_site = s$lead_pos == s$pos, min_grp = min_grp
+    g = factor(g, levels = 0:2), pi = pi_v, n = n, y = y,
+    snp_at_site = s$lead_pos == s$pos, min_grp = min_grp, max_depth_share = max_depth_share
   )
 }))
 rows[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
+
+# depth-weighted mean per (site, genotype group) -- sum(y)/sum(n), the exact
+# quantity a binomial/beta-binomial GLM fits as that group's mean (verified
+# directly against glm() fitted values in the conversation behind this page)
+dw_means <- rows[, .(dw_mean = sum(y) / sum(n)), by = .(site_lab, g)]
 
 blue3 <- c(`0` = "#86b6ef", `1` = "#2a78d6", `2` = "#104281")
 
 ggplot(rows, aes(x = g, y = pi, color = g)) +
   geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.4, color = "grey60", fill = NA) +
   geom_jitter(aes(size = n), width = 0.12, alpha = 0.75) +
+  geom_point(data = dw_means, aes(x = g, y = dw_mean), inherit.aes = FALSE,
+             shape = 23, fill = "black", color = "white", size = 2.6, stroke = 0.4) +
   scale_color_manual(values = blue3, name = "genotype\n(alt-allele copies)") +
   scale_size_continuous(name = "depth (n)", range = c(0.6, 3.5)) +
   facet_wrap(~ site_lab, scales = "free_x", ncol = 4) +
   labs(x = "genotype (copies of alt allele) at the lead cis-SNP", y = "%pU (y/n per cell line)",
        title = sprintf("Top %d beta-binomial QTLs by nominal LRT p-value (%dkb, %d PCs)",
                        N_TOP, WINDOW_KB, NPCS),
-       subtitle = "Ranked by nominal (pre-permutation) p-value, most extreme first. '[SNP-at-site]' = lead SNP sits exactly at the profiled base; '[small group n=X]' = smallest genotype class has X < 5 cell lines.") +
+       subtitle = "Black diamonds = depth-weighted group mean (sum(y)/sum(n), what the GLM actually fits). '[SNP-at-site]' = lead SNP at the profiled base; '[small group]' = smallest genotype class <5 cell lines; '[depth-dominated]' = one cell line >50% of its group's total depth.") +
   theme_bw(base_size = 11) +
   theme(legend.position = "bottom", strip.text = element_text(size = 7.5))
 ```
@@ -138,11 +161,12 @@ ggplot(rows, aes(x = g, y = pi, color = g)) +
 # 3. Pattern summary across these 20 sites
 
 ```{r pattern-summary}
-summ <- unique(rows[, .(rank, snp_at_site, min_grp)])
+summ <- unique(rows[, .(rank, snp_at_site, min_grp, max_depth_share)])
 summ[, category := fifelse(snp_at_site, "SNP at/on the modification site",
                      fifelse(min_grp < MIN_GRP, sprintf("Small genotype group (min class n<%d)", MIN_GRP),
-                             "Neither flag (plausible)"))]
-knitr::kable(summ[order(rank)], caption = "Per-site flags among the top 20")
+                     fifelse(max_depth_share > DEPTH_SHARE_THRESH, "Depth-dominated (one cell line >50% of group depth)",
+                             "Neither flag (plausible)")))]
+knitr::kable(summ[order(rank)], caption = "Per-site flags among the top 20", digits = 2)
 
 cat_tbl <- summ[, .N, by = category][order(-N)]
 knitr::kable(cat_tbl, caption = "Category counts among the top 20")
@@ -150,12 +174,15 @@ knitr::kable(cat_tbl, caption = "Category counts among the top 20")
 
 Of the top `r N_TOP` beta-binomial hits by nominal p-value,
 **`r cat_tbl[category == "SNP at/on the modification site"]$N`** have their
-lead SNP sitting exactly at the modification site itself, and
+lead SNP sitting exactly at the modification site itself,
 **`r sum(summ$min_grp < MIN_GRP & !summ$snp_at_site)`** more have a genotype
-class with fewer than `r MIN_GRP` cell lines (and no SNP-at-site overlap) —
-together accounting for
-**`r sum(summ$snp_at_site | summ$min_grp < MIN_GRP)`/`r N_TOP`** of the most
-extreme "hits" in this model. 
+class with fewer than `r MIN_GRP` cell lines (and no SNP-at-site overlap), and
+**`r sum(summ$max_depth_share > DEPTH_SHARE_THRESH & !summ$snp_at_site & summ$min_grp >= MIN_GRP)`**
+more have a single cell line contributing over half of its genotype group's
+total read depth (and neither of the other two flags) — together accounting
+for
+**`r sum(summ$snp_at_site | summ$min_grp < MIN_GRP | summ$max_depth_share > DEPTH_SHARE_THRESH)`/`r N_TOP`**
+of the most extreme "hits" in this model.
 
 Visually, nearly every panel above shows the
 same pattern: genotype 0 near %pU=1, genotype 1 near
@@ -218,47 +245,63 @@ rows_p1 <- rbindlist(lapply(seq_len(nrow(p1_top20)), function(i) {
   pi_v <- y / n
   grp_tab <- table(g)
   min_grp <- min(grp_tab)
+  depth_share <- sapply(sort(unique(g)), function(gg) { ns <- n[g == gg]; max(ns) / sum(ns) })
+  max_depth_share <- max(depth_share)
   flags <- paste0(
     if (s$lead_pos == s$pos) "\n[SNP-at-site]" else "",
-    if (min_grp < MIN_GRP) sprintf("\n[small group n=%d]", min_grp) else ""
+    if (min_grp < MIN_GRP) sprintf("\n[small group n=%d]", min_grp) else "",
+    if (max_depth_share > DEPTH_SHARE_THRESH) sprintf("\n[depth-dominated %.0f%%]", 100 * max_depth_share) else ""
   )
   data.table(
     rank = s$rank,
     site_lab = sprintf("#%d chr%s:%.0f\n-log10(p)=%.0f%s",
                         s$rank, s$ref, s$pos, -log10(max(s$nominal_min_p, 1e-300)), flags),
-    g = factor(g, levels = 0:2), pi = pi_v, n = n
+    g = factor(g, levels = 0:2), pi = pi_v, n = n, y = y
   )
 }))
 rows_p1[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
 
+dw_means_p1 <- rows_p1[, .(dw_mean = sum(y) / sum(n)), by = .(site_lab, g)]
+
 ggplot(rows_p1, aes(x = g, y = pi, color = g)) +
   geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.4, color = "grey60", fill = NA) +
   geom_jitter(aes(size = n), width = 0.12, alpha = 0.75) +
+  geom_point(data = dw_means_p1, aes(x = g, y = dw_mean), inherit.aes = FALSE,
+             shape = 23, fill = "black", color = "white", size = 2.6, stroke = 0.4) +
   scale_color_manual(values = blue3, name = "genotype\n(alt-allele copies)") +
   scale_size_continuous(name = "depth (n)", range = c(0.6, 3.5)) +
   facet_wrap(~ site_lab, scales = "free_x", ncol = 4) +
   labs(x = "genotype (fixed) vs. PERMUTED phenotype at the lead cis-SNP",
        y = "%pU (y/n per cell line, permuted individual order)",
        title = sprintf("Top %d sites under permutation-1 (genotype-phenotype pairing randomized)", N_TOP),
-       subtitle = "Same seed as the LRT calibration check's perm1 (set.seed(1001)).") +
+       subtitle = "Black diamonds = depth-weighted group mean (sum(y)/sum(n), what the GLM actually fits). Same seed as the LRT calibration check's perm1 (set.seed(1001)).") +
   theme_bw(base_size = 11) +
   theme(legend.position = "bottom", strip.text = element_text(size = 7.5))
 ```
 
 Unlike the real top-`r N_TOP` plot above, these panels show **no clean
 separation between genotype groups** — heavily overlapping, noisy scatter
-within each group. Yet the p-values are just as extreme. That rules out "the
-permutation got lucky and happened to look like a real effect" — instead, it
-means these specific sites produce enormous LRT statistics almost regardless
-of which grouping variable is tested, genotype or a completely unrelated
-random shuffle. These sites also have very high median read depth (hundreds
-to thousands of reads per cell line) alongside the bimodal %pU pattern —
-at that depth, even a small amount of between-individual variance that the
-beta-binomial's single dispersion parameter (`phi`) doesn't capture can make
-almost any partition of the 50 cell lines look highly "significant." This
-points to a phenotype-shape/model-misspecification problem at these
-particular sites, on top of (not replaced by) the SNP-at-site and
-small-genotype-group mechanisms found above — excluding SNP-at-site SNPs or
-requiring larger genotype groups is not expected to fix these specific
-sites, since the effect survives complete randomization of genotype-phenotype
-pairing.
+within each group. Yet the p-values are just as extreme, and the black
+diamonds (depth-weighted group means — the actual quantity the GLM fits, not
+just the raw scatter) often differ sharply between groups even when the
+scatter looks flat, because one high-depth cell line can single-handedly set
+a group's mean. That rules out "the permutation got lucky and happened to
+look like a real effect" — instead, it means these specific sites produce
+enormous LRT statistics almost regardless of which grouping variable is
+tested, genotype or a completely unrelated random shuffle: with anywhere
+from a dozen to 900+ candidate cis-SNPs per site, some SNP's genotype
+grouping will likely isolate a high-depth, divergent cell line into a small
+group purely by chance. Checking this directly: of the 19 sites shared
+between the real and permutation-1 top 20, **0** have the same lead SNP —
+confirming it's a different candidate SNP "winning" each time, not one
+specific real association. These sites also have very high median read
+depth (hundreds to thousands of reads per cell line) alongside a bimodal
+%pU pattern — at that depth, even a small amount of between-individual
+variance that the beta-binomial's single dispersion parameter (`phi`)
+doesn't capture can make almost any partition of the 50 cell lines look
+highly "significant." This points to a phenotype-shape/depth-driven
+model-misspecification problem at these particular sites, on top of (not
+replaced by) the SNP-at-site and small-genotype-group mechanisms found
+above — excluding SNP-at-site SNPs or requiring larger genotype groups is
+not expected to fix these specific sites, since the effect survives complete
+randomization of genotype-phenotype pairing.
