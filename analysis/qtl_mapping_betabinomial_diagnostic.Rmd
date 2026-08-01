@@ -331,3 +331,37 @@ replaced by) the SNP-at-site and small-genotype-group mechanisms found
 above — excluding SNP-at-site SNPs or requiring larger genotype groups is
 not expected to fix these specific sites, since the effect survives complete
 randomization of genotype-phenotype pairing.
+
+# 5. Does excluding SNP-at-site fix the calibration?
+
+Given SNP-at-site is a real, confirmed artifact (Section 1), the natural
+next question is whether removing it also fixes the genomic-inflation
+problem (`lambda`) from the permutation calibration check. We reran the same
+5-seed LRT calibration check (`5.calibration_check_lrt.R`), adding a
+`--exclude-site-snp` flag that drops any cis-SNP sitting exactly on a site's
+own position before computing nominal p-values, and compared its `lambda`
+table against the original (non-excluded) run.
+
+```{r calib-excl-compare}
+CAL_ORIG <- fread(file.path(CALIB, "calib_lrt_w5kb_pc3_lambda.txt"))
+CAL_EXCL <- fread(file.path(CALIB, "calib_lrt_w5kb_pc3_excl_sitesnp_lambda.txt"))
+cmp <- merge(CAL_ORIG, CAL_EXCL, by = "dataset", suffixes = c("_original", "_excl_sitesnp"))
+cmp <- cmp[match(c("real", paste0("perm", 1:5)), dataset)]
+knitr::kable(cmp, digits = 3, caption = "Genomic-inflation lambda: original vs. SNP-at-site-excluded (5kb, 3 PCs)")
+```
+
+**Essentially no change**, in either the real or any of the 5 permuted-null
+lambdas — the largest shift is real data's lambda dropping from
+`r round(CAL_ORIG[dataset=="real"]$lambda, 3)` to
+`r round(CAL_EXCL[dataset=="real"]$lambda, 3)`, and every permuted-null
+lambda matches to 3 decimal places. This makes sense given what Sections 1
+and 4 already established: `lambda` is a **median-based** statistic,
+insensitive to a few hundred extreme tail sites, and the *dominant* driver
+of inflation is the depth/bimodality model-misspecification problem from
+Section 4, which affects the bulk of the p-value distribution genome-wide —
+not the SNP-at-site artifact, which is a specific, identifiable, but
+comparatively rare (`r tbl$pct_snp_at_site[1]`% baseline rate) subset of
+sites. So the SNP-at-site fix is still worth keeping (it removes specific,
+mechanistically-understood false positives from the top-hit list — see
+Section 1), but it was never going to be the fix for calibration; that
+requires addressing the depth/bimodality issue directly.

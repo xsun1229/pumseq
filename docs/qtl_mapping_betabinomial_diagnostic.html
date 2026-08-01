@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree1ba19a8f317db5d2ade58457bcd54c3838b92545targetblank1ba19a8a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree1867d978b3e8314cf4256d0810b2f7ad546ae39ftargetblank1867d97a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/1ba19a8f317db5d2ade58457bcd54c3838b92545" target="_blank">1ba19a8</a>
+<a href="https://github.com/xsun1229/pumseq/tree/1867d978b3e8314cf4256d0810b2f7ad546ae39f" target="_blank">1867d97</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree1ba19a8f317db5d2ade58457bcd54c3838b92545targetblank1ba19a8a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree1867d978b3e8314cf4256d0810b2f7ad546ae39ftargetblank1867d97a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/1ba19a8f317db5d2ade58457bcd54c3838b92545" target="_blank">1ba19a8</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/1867d978b3e8314cf4256d0810b2f7ad546ae39f" target="_blank">1867d97</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -570,6 +570,7 @@ were generated:
 </p>
 <pre><code>
 Ignored files:
+    Ignored:    analysis/figure/
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Unstaged changes:
@@ -620,6 +621,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/1867d978b3e8314cf4256d0810b2f7ad546ae39f/analysis/qtl_mapping_betabinomial_diagnostic.Rmd" target="_blank">1867d97</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-01
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/1867d978b3e8314cf4256d0810b2f7ad546ae39f/docs/qtl_mapping_betabinomial_diagnostic.html" target="_blank">1867d97</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-01
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -975,6 +1010,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/1867d978b3e8314cf4256d0810b2f7ad546ae39f/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/top20-select-1.png" target="_blank">1867d97</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-01
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/1ba19a8f317db5d2ade58457bcd54c3838b92545/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/top20-select-1.png" target="_blank">1ba19a8</a>
@@ -1338,6 +1384,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/1867d978b3e8314cf4256d0810b2f7ad546ae39f/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm1-plot-1.png" target="_blank">1867d97</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-01
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/1ba19a8f317db5d2ade58457bcd54c3838b92545/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm1-plot-1.png" target="_blank">1ba19a8</a>
 </td>
 <td>
@@ -1378,6 +1435,82 @@ replaced by) the SNP-at-site and small-genotype-group mechanisms found
 above — excluding SNP-at-site SNPs or requiring larger genotype groups
 is not expected to fix these specific sites, since the effect survives
 complete randomization of genotype-phenotype pairing.</p>
+</div>
+<div id="does-excluding-snp-at-site-fix-the-calibration"
+class="section level1">
+<h1>5. Does excluding SNP-at-site fix the calibration?</h1>
+<p>Given SNP-at-site is a real, confirmed artifact (Section 1), the
+natural next question is whether removing it also fixes the
+genomic-inflation problem (<code>lambda</code>) from the permutation
+calibration check. We reran the same 5-seed LRT calibration check
+(<code>5.calibration_check_lrt.R</code>), adding a
+<code>--exclude-site-snp</code> flag that drops any cis-SNP sitting
+exactly on a site’s own position before computing nominal p-values, and
+compared its <code>lambda</code> table against the original
+(non-excluded) run.</p>
+<pre class="r"><code>CAL_ORIG &lt;- fread(file.path(CALIB, &quot;calib_lrt_w5kb_pc3_lambda.txt&quot;))
+CAL_EXCL &lt;- fread(file.path(CALIB, &quot;calib_lrt_w5kb_pc3_excl_sitesnp_lambda.txt&quot;))
+cmp &lt;- merge(CAL_ORIG, CAL_EXCL, by = &quot;dataset&quot;, suffixes = c(&quot;_original&quot;, &quot;_excl_sitesnp&quot;))
+cmp &lt;- cmp[match(c(&quot;real&quot;, paste0(&quot;perm&quot;, 1:5)), dataset)]
+knitr::kable(cmp, digits = 3, caption = &quot;Genomic-inflation lambda: original vs. SNP-at-site-excluded (5kb, 3 PCs)&quot;)</code></pre>
+<table>
+<caption>Genomic-inflation lambda: original vs. SNP-at-site-excluded
+(5kb, 3 PCs)</caption>
+<thead>
+<tr class="header">
+<th align="left">dataset</th>
+<th align="right">lambda_original</th>
+<th align="right">lambda_excl_sitesnp</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">real</td>
+<td align="right">2.473</td>
+<td align="right">2.457</td>
+</tr>
+<tr class="even">
+<td align="left">perm1</td>
+<td align="right">1.195</td>
+<td align="right">1.195</td>
+</tr>
+<tr class="odd">
+<td align="left">perm2</td>
+<td align="right">0.961</td>
+<td align="right">0.961</td>
+</tr>
+<tr class="even">
+<td align="left">perm3</td>
+<td align="right">1.102</td>
+<td align="right">1.102</td>
+</tr>
+<tr class="odd">
+<td align="left">perm4</td>
+<td align="right">1.087</td>
+<td align="right">1.086</td>
+</tr>
+<tr class="even">
+<td align="left">perm5</td>
+<td align="right">1.034</td>
+<td align="right">1.034</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Essentially no change</strong>, in either the real or any of
+the 5 permuted-null lambdas — the largest shift is real data’s lambda
+dropping from 2.473 to 2.457, and every permuted-null lambda matches to
+3 decimal places. This makes sense given what Sections 1 and 4 already
+established: <code>lambda</code> is a <strong>median-based</strong>
+statistic, insensitive to a few hundred extreme tail sites, and the
+<em>dominant</em> driver of inflation is the depth/bimodality
+model-misspecification problem from Section 4, which affects the bulk of
+the p-value distribution genome-wide — not the SNP-at-site artifact,
+which is a specific, identifiable, but comparatively rare (4.8% baseline
+rate) subset of sites. So the SNP-at-site fix is still worth keeping (it
+removes specific, mechanistically-understood false positives from the
+top-hit list — see Section 1), but it was never going to be the fix for
+calibration; that requires addressing the depth/bimodality issue
+directly.</p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
