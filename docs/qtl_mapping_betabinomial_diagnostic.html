@@ -11,7 +11,7 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-08-01" />
+<meta name="date" content="2026-08-02" />
 
 <title>QTL mapping: beta-binomial top-hit diagnostic</title>
 
@@ -374,7 +374,7 @@ div.tocify {
 <h1 class="title toc-ignore">QTL mapping: beta-binomial top-hit
 diagnostic</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-08-01</h4>
+<h4 class="date">2026-08-02</h4>
 
 </div>
 
@@ -403,7 +403,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-08-01
+<strong>Last updated:</strong> 2026-08-02
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreedadc1db60175be1101129c23dc5d9a4a7fdd3faftargetblankdadc1dba">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreec82adb96d5c4e68ce94ec16faf7acc2dab4f2b16targetblankc82adb9a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/dadc1db60175be1101129c23dc5d9a4a7fdd3faf" target="_blank">dadc1db</a>
+<a href="https://github.com/xsun1229/pumseq/tree/c82adb96d5c4e68ce94ec16faf7acc2dab4f2b16" target="_blank">c82adb9</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreedadc1db60175be1101129c23dc5d9a4a7fdd3faftargetblankdadc1dba"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreec82adb96d5c4e68ce94ec16faf7acc2dab4f2b16targetblankc82adb9a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/dadc1db60175be1101129c23dc5d9a4a7fdd3faf" target="_blank">dadc1db</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/c82adb96d5c4e68ce94ec16faf7acc2dab4f2b16" target="_blank">c82adb9</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -620,6 +620,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/c82adb96d5c4e68ce94ec16faf7acc2dab4f2b16/analysis/qtl_mapping_betabinomial_diagnostic.Rmd" target="_blank">c82adb9</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-01
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/c82adb96d5c4e68ce94ec16faf7acc2dab4f2b16/docs/qtl_mapping_betabinomial_diagnostic.html" target="_blank">c82adb9</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-01
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -818,7 +852,7 @@ html
 XSun
 </td>
 <td>
-2026-07-31
+2026-08-01
 </td>
 <td>
 update
@@ -835,7 +869,7 @@ Rmd
 XSun
 </td>
 <td>
-2026-07-31
+2026-08-01
 </td>
 <td>
 update
@@ -852,7 +886,7 @@ html
 XSun
 </td>
 <td>
-2026-07-31
+2026-08-01
 </td>
 <td>
 update
@@ -948,23 +982,6 @@ lead SNP <!-- — the specific SNP "blamed" is -->
 <!-- essentially arbitrary, decided by which of many candidate cis-SNPs happens -->
 <!-- to isolate the influential cell line(s) in a given permutation. --></li>
 </ol>
-<p>Why depth drives this: the beta-binomial’s variance for cell line
-<span class="math inline">\(i\)</span> is</p>
-<p><span class="math display">\[
-y_i \sim \text{BetaBinomial}(n_i, \mu_i, \phi), \qquad
-\text{Var}(y_i) = n_i\,\mu_i(1-\mu_i)\left[1 + (n_i - 1)\phi\right],
-\]</span></p>
-<p>so its effective weight in the fit (inverse-variance) is
-approximately</p>
-<p><span class="math display">\[
-w_i \;\propto\; \frac{n_i}{1 + (n_i - 1)\phi} \;\xrightarrow[n_i \to
-\infty]{}\; \frac{1}{\phi}.
-\]</span></p>
-<p>Weight grows with depth <span class="math inline">\(n_i\)</span> but
-saturates at <span class="math inline">\(1/\phi\)</span> — with a small
-<span class="math inline">\(\phi\)</span> (as at these sites), that
-ceiling is high, so one high-depth cell line can still outweigh dozens
-of low-depth ones.</p>
 <div id="snp-at-site-rate-among-significant-hits"
 class="section level1">
 <h1>1. SNP-at-site rate among significant hits</h1>
@@ -1026,12 +1043,32 @@ group’s depth-weighted average of the <strong>actual beta-binomial
 model’s fitted mean</strong> (same design as the real scan — intercept +
 3 M-value PCs + genotype dosage — refit here with
 <code>fit_bb_mle()</code>), not just a visual summary of the raw
-scatter. An earlier version of this page used a simpler proxy
-(<code>sum(y)/sum(n)</code> per group, ignoring the PC covariates and
-dispersion correction); checking that proxy against this true fit
-directly showed agreement at low-dispersion sites but a gap of up to
-~0.13 in probability at higher-<code>phi</code> sites, so the actual
-model fit is shown here instead.</p>
+scatter.</p>
+<p><span class="math display">\[
+\text{diamond}_g = \frac{\sum_{i \in g} n_i \hat\mu_i}{\sum_{i \in g}
+n_i}
+\]</span></p>
+<p>Each cell line’s contribution to that average is proportional to its
+depth <span class="math inline">\(n_i\)</span> — a cell line with 10x
+the reads counts 10x as much.</p>
+<ul>
+<li><strong>Raw %pU per cell line</strong>: what the data actually looks
+like for that group — unweighted, no model assumptions, just
+points.</li>
+<li><strong>The diamond</strong>: what the fitted beta-binomial model
+claims is the group’s central tendency, after depth-weighting and after
+PCs/dosage have done their adjusting.</li>
+</ul>
+<p>The <code>[depth-dominated X%]</code> flag on a panel is the largest
+single-cell-line share of a genotype group’s total depth, maximized over
+the 3 groups:</p>
+<p><span class="math display">\[
+\text{depth\_share}_g = \frac{\max_{i \in g} n_i}{\sum_{i \in g} n_i},
+\qquad
+\text{flag} = \max_g \left(\text{depth\_share}_g\right) &gt; 50\%
+\]</span></p>
+<p>e.g. if one cell line has 6,323 of a group’s 9,548 total reads, that
+group’s share is 6,323/9,548 = 66%.</p>
 <pre class="r"><code>source(file.path(PROJECT_DIR, &quot;4.qtl_mapping_betabinomial/betabin_lib.R&quot;))
 COVAR &lt;- file.path(BASE, &quot;phenotype/fold5_union/mvalue_pcs.txt&quot;)
 
@@ -1130,6 +1167,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/c82adb96d5c4e68ce94ec16faf7acc2dab4f2b16/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/top20-select-1.png" target="_blank">c82adb9</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-01
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/dadc1db60175be1101129c23dc5d9a4a7fdd3faf/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/top20-select-1.png" target="_blank">dadc1db</a>
 </td>
 <td>
@@ -1169,7 +1217,7 @@ XSun
 XSun
 </td>
 <td>
-2026-07-31
+2026-08-01
 </td>
 </tr>
 <tr>
@@ -1513,6 +1561,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/c82adb96d5c4e68ce94ec16faf7acc2dab4f2b16/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm1-plot-1.png" target="_blank">c82adb9</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-01
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/dadc1db60175be1101129c23dc5d9a4a7fdd3faf/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm1-plot-1.png" target="_blank">dadc1db</a>
 </td>
 <td>
@@ -1552,19 +1611,20 @@ XSun
 separation between genotype groups</strong> — heavily overlapping, noisy
 scatter within each group. Yet the p-values are just as extreme, and the
 black diamonds (depth-weighted group means — the actual quantity the GLM
-fits, not just the raw scatter) often differ sharply between groups even
-when the scatter looks flat, because one high-depth cell line can
-single-handedly set a group’s mean. That rules out “the permutation got
-lucky and happened to look like a real effect” — instead, it means these
-specific sites produce enormous LRT statistics almost regardless of
-which grouping variable is tested, genotype or a completely unrelated
-random shuffle: with anywhere from a dozen to 900+ candidate cis-SNPs
-per site, some SNP’s genotype grouping will likely isolate a high-depth,
-divergent cell line into a small group purely by chance. Checking this
-directly: of the 19 sites shared between the real and permutation-1 top
-20, <strong>0</strong> have the same lead SNP — confirming it’s a
-different candidate SNP “winning” each time, not one specific real
-association. <!-- These sites also have very high median read -->
+fits, not just the raw scatter) often differ between groups even when
+the scatter looks flat
+<!-- , because one high-depth cell line can single-handedly set -->
+<!-- a group's mean. That rules out "the permutation got lucky and happened to -->
+<!-- look like a real effect" — instead, it means these specific sites produce -->
+<!-- enormous LRT statistics almost regardless of which grouping variable is -->
+<!-- tested, genotype or a completely unrelated random shuffle: with anywhere -->
+<!-- from a dozen to 900+ candidate cis-SNPs per site, some SNP's genotype -->
+<!-- grouping will likely isolate a high-depth, divergent cell line into a small -->
+<!-- group purely by chance. Checking this directly: of the 19 sites shared -->
+<!-- between the real and permutation-1 top 20, **0** have the same lead SNP — -->
+<!-- confirming it's a different candidate SNP "winning" each time, not one -->
+<!-- specific real association.  -->
+<!-- These sites also have very high median read -->
 <!-- depth (hundreds to thousands of reads per cell line) alongside a bimodal -->
 <!-- %pU pattern — at that depth, even a small amount of between-individual -->
 <!-- variance that the beta-binomial's single dispersion parameter (`phi`) -->
@@ -1575,6 +1635,64 @@ association. <!-- These sites also have very high median read -->
 <!-- above — excluding SNP-at-site SNPs or requiring larger genotype groups is -->
 <!-- not expected to fix these specific sites, since the effect survives complete -->
 <!-- randomization of genotype-phenotype pairing. --></p>
+<p><strong>Replicate: permutation-2</strong>
+(<code>set.seed(1002)</code>), same check.</p>
+<pre class="r"><code>p2 &lt;- fread(file.path(CALIB, sprintf(&quot;perm2_scan_w%dkb_pc%d.txt.gz&quot;, WINDOW_KB, NPCS)))
+p2_top20 &lt;- p2[order(nominal_min_p)][1:N_TOP]
+p2_top20[, rank := .I]
+
+overlap_n2 &lt;- sum(paste(p2_top20$ref, p2_top20$pos) %in% paste(real_top20_sites$ref, real_top20_sites$pos))
+m2_real &lt;- merge(p2_top20[, .(ref, pos, lead_snp_p2 = lead_snp)], d[, .(ref, pos, lead_snp_real = lead_snp)], by = c(&quot;ref&quot;, &quot;pos&quot;))
+same_snp_n2 &lt;- sum(m2_real$lead_snp_p2 == m2_real$lead_snp_real)</code></pre>
+<p><strong>19/20</strong> overlap with the real top 20;
+<strong>0/20</strong> shared sites have the same lead SNP — same pattern
+as perm1.</p>
+<pre class="r"><code>set.seed(1002); ord2 &lt;- sample.int(m)   # matches --seed-idx 2 in 7.permutation_scan_one_seed.R
+
+rows_p2 &lt;- rbindlist(lapply(seq_len(nrow(p2_top20)), function(i) {
+  s &lt;- p2_top20[i]
+  si &lt;- which(sites$ref == as.character(s$ref) &amp; sites$pos == s$pos)
+  gi &lt;- which(gid == s$lead_snp)
+  y &lt;- Cm[si, ord2]; n &lt;- Nm[si, ord2]; g &lt;- Gall[, gi]
+  Xp &lt;- Xcov[ord2, , drop = FALSE]
+  pi_v &lt;- y / n
+  grp_tab &lt;- table(g)
+  min_grp &lt;- min(grp_tab)
+  depth_share &lt;- sapply(sort(unique(g)), function(gg) { ns &lt;- n[g == gg]; max(ns) / sum(ns) })
+  max_depth_share &lt;- max(depth_share)
+  flags &lt;- paste0(
+    if (s$lead_pos == s$pos) &quot;\n[SNP-at-site]&quot; else &quot;&quot;,
+    if (min_grp &lt; MIN_GRP) sprintf(&quot;\n[small group n=%d]&quot;, min_grp) else &quot;&quot;,
+    if (max_depth_share &gt; DEPTH_SHARE_THRESH) sprintf(&quot;\n[depth-dominated %.0f%%]&quot;, 100 * max_depth_share) else &quot;&quot;
+  )
+  fit &lt;- tryCatch(fit_bb_mle(y, n, cbind(Xp, g = g)), error = function(e) NULL)
+  mu_fit &lt;- if (!is.null(fit)) fit$mu0 else rep(NA_real_, length(y))
+  data.table(
+    rank = s$rank,
+    site_lab = sprintf(&quot;#%d chr%s:%.0f\n-log10(p)=%.0f%s&quot;,
+                        s$rank, s$ref, s$pos, -log10(max(s$nominal_min_p, 1e-300)), flags),
+    g = factor(g, levels = 0:2), pi = pi_v, n = n, y = y, mu_fit = mu_fit
+  )
+}))
+rows_p2[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
+
+dw_means_p2 &lt;- rows_p2[!is.na(mu_fit), .(dw_mean = sum(mu_fit * n) / sum(n)), by = .(site_lab, g)]
+
+ggplot(rows_p2, aes(x = g, y = pi, color = g)) +
+  geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.4, color = &quot;grey60&quot;, fill = NA) +
+  geom_jitter(aes(size = n), width = 0.12, alpha = 0.75) +
+  geom_point(data = dw_means_p2, aes(x = g, y = dw_mean), inherit.aes = FALSE,
+             shape = 23, fill = &quot;black&quot;, color = &quot;white&quot;, size = 2.6, stroke = 0.4) +
+  scale_color_manual(values = blue3, name = &quot;genotype\n(alt-allele copies)&quot;) +
+  scale_size_continuous(name = &quot;depth (n)&quot;, range = c(0.6, 3.5)) +
+  facet_wrap(~ site_lab, scales = &quot;free_x&quot;, ncol = 4) +
+  labs(x = &quot;genotype (fixed) vs. PERMUTED phenotype at the lead cis-SNP&quot;,
+       y = &quot;%pU (y/n per cell line, permuted individual order)&quot;,
+       title = sprintf(&quot;Top %d sites under permutation-2 (genotype-phenotype pairing randomized)&quot;, N_TOP),
+       subtitle = &quot;Black diamonds = the actual beta-binomial model&#39;s fitted mean per genotype group. Same seed as the LRT calibration check&#39;s perm2 (set.seed(1002)).&quot;) +
+  theme_bw(base_size = 11) +
+  theme(legend.position = &quot;bottom&quot;, strip.text = element_text(size = 7.5))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm2-plot-1.png" width="1152" style="display: block; margin: auto;" /></p>
 </div>
 <div id="does-excluding-snp-at-site-fix-the-calibration"
 class="section level1">
@@ -1677,6 +1795,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/c82adb96d5c4e68ce94ec16faf7acc2dab4f2b16/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/calib-excl-qq-1.png" target="_blank">c82adb9</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-01
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/dadc1db60175be1101129c23dc5d9a4a7fdd3faf/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/calib-excl-qq-1.png" target="_blank">dadc1db</a>
 </td>
 <td>
@@ -1733,16 +1862,13 @@ Session information
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.2.0 (2022-04-22)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Red Hat Enterprise Linux 8.10 (Ootpa)
+Running under: CentOS Linux 8
 
 Matrix products: default
 BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
 
 locale:
- [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
- [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
- [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
-[10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+[1] C
 
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     

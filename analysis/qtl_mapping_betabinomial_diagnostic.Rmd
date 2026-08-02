@@ -62,22 +62,6 @@ Two candidate artifacts motivated this check:
    <!-- essentially arbitrary, decided by which of many candidate cis-SNPs happens -->
    <!-- to isolate the influential cell line(s) in a given permutation. -->
 
-Why depth drives this: the beta-binomial's variance for cell line $i$ is
-
-$$
-y_i \sim \text{BetaBinomial}(n_i, \mu_i, \phi), \qquad
-\text{Var}(y_i) = n_i\,\mu_i(1-\mu_i)\left[1 + (n_i - 1)\phi\right],
-$$
-
-so its effective weight in the fit (inverse-variance) is approximately
-
-$$
-w_i \;\propto\; \frac{n_i}{1 + (n_i - 1)\phi} \;\xrightarrow[n_i \to \infty]{}\; \frac{1}{\phi}.
-$$
-
-Weight grows with depth $n_i$ but saturates at $1/\phi$ — with a small $\phi$
-(as at these sites), that ceiling is high, so one high-depth cell line can
-still outweigh dozens of low-depth ones.
 
 # 1. SNP-at-site rate among significant hits
 
@@ -114,11 +98,31 @@ Each panel below marks a black diamond per genotype group: the group's
 depth-weighted average of the **actual beta-binomial model's fitted mean**
 (same design as the real scan — intercept + `r NPCS` M-value PCs + genotype
 dosage — refit here with `fit_bb_mle()`), not just a visual summary of the
-raw scatter. An earlier version of this page used a simpler proxy
-(`sum(y)/sum(n)` per group, ignoring the PC covariates and dispersion
-correction); checking that proxy against this true fit directly showed
-agreement at low-dispersion sites but a gap of up to ~0.13 in probability at
-higher-`phi` sites, so the actual model fit is shown here instead.
+raw scatter.
+
+$$
+\text{diamond}_g = \frac{\sum_{i \in g} n_i \hat\mu_i}{\sum_{i \in g} n_i}
+$$
+
+Each cell line's contribution to that average is proportional to its depth
+$n_i$ — a cell line with 10x the reads counts 10x as much.
+
+- **Raw %pU per cell line**: what the data actually looks like for that
+  group — unweighted, no model assumptions, just points.
+- **The diamond**: what the fitted beta-binomial model claims is the
+  group's central tendency, after depth-weighting and after PCs/dosage have
+  done their adjusting.
+
+The `[depth-dominated X%]` flag on a panel is the largest single-cell-line
+share of a genotype group's total depth, maximized over the 3 groups:
+
+$$
+\text{depth\_share}_g = \frac{\max_{i \in g} n_i}{\sum_{i \in g} n_i}, \qquad
+\text{flag} = \max_g \left(\text{depth\_share}_g\right) > 50\%
+$$
+
+e.g. if one cell line has 6,323 of a group's 9,548 total reads, that group's
+share is 6,323/9,548 = 66%.
 
 ```{r load-pheno-geno}
 source(file.path(PROJECT_DIR, "4.qtl_mapping_betabinomial/betabin_lib.R"))
@@ -328,18 +332,19 @@ Unlike the real top-`r N_TOP` plot above, these panels show **no clean
 separation between genotype groups** — heavily overlapping, noisy scatter
 within each group. Yet the p-values are just as extreme, and the black
 diamonds (depth-weighted group means — the actual quantity the GLM fits, not
-just the raw scatter) often differ sharply between groups even when the
-scatter looks flat, because one high-depth cell line can single-handedly set
-a group's mean. That rules out "the permutation got lucky and happened to
-look like a real effect" — instead, it means these specific sites produce
-enormous LRT statistics almost regardless of which grouping variable is
-tested, genotype or a completely unrelated random shuffle: with anywhere
-from a dozen to 900+ candidate cis-SNPs per site, some SNP's genotype
-grouping will likely isolate a high-depth, divergent cell line into a small
-group purely by chance. Checking this directly: of the 19 sites shared
-between the real and permutation-1 top 20, **0** have the same lead SNP —
-confirming it's a different candidate SNP "winning" each time, not one
-specific real association. 
+just the raw scatter) often differ between groups even when the
+scatter looks flat
+<!-- , because one high-depth cell line can single-handedly set -->
+<!-- a group's mean. That rules out "the permutation got lucky and happened to -->
+<!-- look like a real effect" — instead, it means these specific sites produce -->
+<!-- enormous LRT statistics almost regardless of which grouping variable is -->
+<!-- tested, genotype or a completely unrelated random shuffle: with anywhere -->
+<!-- from a dozen to 900+ candidate cis-SNPs per site, some SNP's genotype -->
+<!-- grouping will likely isolate a high-depth, divergent cell line into a small -->
+<!-- group purely by chance. Checking this directly: of the 19 sites shared -->
+<!-- between the real and permutation-1 top 20, **0** have the same lead SNP — -->
+<!-- confirming it's a different candidate SNP "winning" each time, not one -->
+<!-- specific real association.  -->
 <!-- These sites also have very high median read -->
 <!-- depth (hundreds to thousands of reads per cell line) alongside a bimodal -->
 <!-- %pU pattern — at that depth, even a small amount of between-individual -->
@@ -351,6 +356,70 @@ specific real association.
 <!-- above — excluding SNP-at-site SNPs or requiring larger genotype groups is -->
 <!-- not expected to fix these specific sites, since the effect survives complete -->
 <!-- randomization of genotype-phenotype pairing. -->
+
+**Replicate: permutation-2** (`set.seed(1002)`), same check.
+
+```{r perm2-load}
+p2 <- fread(file.path(CALIB, sprintf("perm2_scan_w%dkb_pc%d.txt.gz", WINDOW_KB, NPCS)))
+p2_top20 <- p2[order(nominal_min_p)][1:N_TOP]
+p2_top20[, rank := .I]
+
+overlap_n2 <- sum(paste(p2_top20$ref, p2_top20$pos) %in% paste(real_top20_sites$ref, real_top20_sites$pos))
+m2_real <- merge(p2_top20[, .(ref, pos, lead_snp_p2 = lead_snp)], d[, .(ref, pos, lead_snp_real = lead_snp)], by = c("ref", "pos"))
+same_snp_n2 <- sum(m2_real$lead_snp_p2 == m2_real$lead_snp_real)
+```
+
+**`r overlap_n2`/`r N_TOP`** overlap with the real top `r N_TOP`;
+**`r same_snp_n2`/`r nrow(m2_real)`** shared sites have the same lead SNP —
+same pattern as perm1.
+
+```{r perm2-plot}
+set.seed(1002); ord2 <- sample.int(m)   # matches --seed-idx 2 in 7.permutation_scan_one_seed.R
+
+rows_p2 <- rbindlist(lapply(seq_len(nrow(p2_top20)), function(i) {
+  s <- p2_top20[i]
+  si <- which(sites$ref == as.character(s$ref) & sites$pos == s$pos)
+  gi <- which(gid == s$lead_snp)
+  y <- Cm[si, ord2]; n <- Nm[si, ord2]; g <- Gall[, gi]
+  Xp <- Xcov[ord2, , drop = FALSE]
+  pi_v <- y / n
+  grp_tab <- table(g)
+  min_grp <- min(grp_tab)
+  depth_share <- sapply(sort(unique(g)), function(gg) { ns <- n[g == gg]; max(ns) / sum(ns) })
+  max_depth_share <- max(depth_share)
+  flags <- paste0(
+    if (s$lead_pos == s$pos) "\n[SNP-at-site]" else "",
+    if (min_grp < MIN_GRP) sprintf("\n[small group n=%d]", min_grp) else "",
+    if (max_depth_share > DEPTH_SHARE_THRESH) sprintf("\n[depth-dominated %.0f%%]", 100 * max_depth_share) else ""
+  )
+  fit <- tryCatch(fit_bb_mle(y, n, cbind(Xp, g = g)), error = function(e) NULL)
+  mu_fit <- if (!is.null(fit)) fit$mu0 else rep(NA_real_, length(y))
+  data.table(
+    rank = s$rank,
+    site_lab = sprintf("#%d chr%s:%.0f\n-log10(p)=%.0f%s",
+                        s$rank, s$ref, s$pos, -log10(max(s$nominal_min_p, 1e-300)), flags),
+    g = factor(g, levels = 0:2), pi = pi_v, n = n, y = y, mu_fit = mu_fit
+  )
+}))
+rows_p2[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
+
+dw_means_p2 <- rows_p2[!is.na(mu_fit), .(dw_mean = sum(mu_fit * n) / sum(n)), by = .(site_lab, g)]
+
+ggplot(rows_p2, aes(x = g, y = pi, color = g)) +
+  geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.4, color = "grey60", fill = NA) +
+  geom_jitter(aes(size = n), width = 0.12, alpha = 0.75) +
+  geom_point(data = dw_means_p2, aes(x = g, y = dw_mean), inherit.aes = FALSE,
+             shape = 23, fill = "black", color = "white", size = 2.6, stroke = 0.4) +
+  scale_color_manual(values = blue3, name = "genotype\n(alt-allele copies)") +
+  scale_size_continuous(name = "depth (n)", range = c(0.6, 3.5)) +
+  facet_wrap(~ site_lab, scales = "free_x", ncol = 4) +
+  labs(x = "genotype (fixed) vs. PERMUTED phenotype at the lead cis-SNP",
+       y = "%pU (y/n per cell line, permuted individual order)",
+       title = sprintf("Top %d sites under permutation-2 (genotype-phenotype pairing randomized)", N_TOP),
+       subtitle = "Black diamonds = the actual beta-binomial model's fitted mean per genotype group. Same seed as the LRT calibration check's perm2 (set.seed(1002)).") +
+  theme_bw(base_size = 11) +
+  theme(legend.position = "bottom", strip.text = element_text(size = 7.5))
+```
 
 # 5. Does excluding SNP-at-site fix the calibration?
 
