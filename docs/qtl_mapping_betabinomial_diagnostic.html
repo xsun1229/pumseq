@@ -11,7 +11,7 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-08-02" />
+<meta name="date" content="2026-08-08" />
 
 <title>QTL mapping: beta-binomial top-hit diagnostic</title>
 
@@ -374,7 +374,7 @@ div.tocify {
 <h1 class="title toc-ignore">QTL mapping: beta-binomial top-hit
 diagnostic</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-08-02</h4>
+<h4 class="date">2026-08-08</h4>
 
 </div>
 
@@ -403,7 +403,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-08-02
+<strong>Last updated:</strong> 2026-08-08
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreec82adb96d5c4e68ce94ec16faf7acc2dab4f2b16targetblankc82adb9a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreebb49ca5dbc8d598b2eb8dac704c7f67136c4338ftargetblankbb49ca5a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/c82adb96d5c4e68ce94ec16faf7acc2dab4f2b16" target="_blank">c82adb9</a>
+<a href="https://github.com/xsun1229/pumseq/tree/bb49ca5dbc8d598b2eb8dac704c7f67136c4338f" target="_blank">bb49ca5</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreec82adb96d5c4e68ce94ec16faf7acc2dab4f2b16targetblankc82adb9a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreebb49ca5dbc8d598b2eb8dac704c7f67136c4338ftargetblankbb49ca5a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/c82adb96d5c4e68ce94ec16faf7acc2dab4f2b16" target="_blank">c82adb9</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/bb49ca5dbc8d598b2eb8dac704c7f67136c4338f" target="_blank">bb49ca5</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -620,6 +620,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/bb49ca5dbc8d598b2eb8dac704c7f67136c4338f/analysis/qtl_mapping_betabinomial_diagnostic.Rmd" target="_blank">bb49ca5</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-02
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/bb49ca5dbc8d598b2eb8dac704c7f67136c4338f/docs/qtl_mapping_betabinomial_diagnostic.html" target="_blank">bb49ca5</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-02
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -933,7 +967,7 @@ update
 </div>
 </div>
 </div>
-<pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2) })
+<pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2); library(ggrepel) })
 
 knitr::opts_chunk$set(
   echo = TRUE, warning = FALSE, message = FALSE,
@@ -1128,18 +1162,35 @@ dw_means &lt;- rows[!is.na(mu_fit), .(dw_mean = sum(mu_fit * n) / sum(n)), by = 
 
 blue3 &lt;- c(`0` = &quot;#86b6ef&quot;, `1` = &quot;#2a78d6&quot;, `2` = &quot;#104281&quot;)
 
+# depth spans ~4 orders of magnitude (1 to 10,000+) -- a LINEAR size scale
+# compresses almost all of that range into barely-distinguishable dot sizes
+# (per advisor feedback: the size legend only showed 0/5000/10000 and wasn&#39;t
+# readable). Map size to log10(depth) instead, with legend breaks labeled in
+# real read counts; additionally, directly label the single highest-depth
+# cell line in each panel with its exact n -- removes any dependence on
+# perceiving size at all for the point that matters most.
+rows[, log_n := log10(pmax(n, 1))]
+top_depth &lt;- rows[, .SD[which.max(n)], by = site_lab]
+size_breaks &lt;- c(10, 100, 1000, 10000)
+
 ggplot(rows, aes(x = g, y = pi, color = g)) +
   geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.4, color = &quot;grey60&quot;, fill = NA) +
-  geom_jitter(aes(size = n), width = 0.12, alpha = 0.75) +
+  geom_jitter(aes(size = log_n), width = 0.12, alpha = 0.75) +
   geom_point(data = dw_means, aes(x = g, y = dw_mean), inherit.aes = FALSE,
              shape = 23, fill = &quot;black&quot;, color = &quot;white&quot;, size = 2.6, stroke = 0.4) +
+  ggrepel::geom_label_repel(data = top_depth, aes(label = paste0(&quot;n=&quot;, format(n, big.mark = &quot;,&quot;))),
+                           inherit.aes = TRUE, size = 2.3, color = &quot;black&quot;, fontface = &quot;bold&quot;,
+                           fill = alpha(&quot;white&quot;, 0.85), label.size = NA, label.padding = 0.1,
+                           segment.size = 0.3, segment.color = &quot;grey40&quot;,
+                           min.segment.length = 0, seed = 1, max.overlaps = Inf) +
   scale_color_manual(values = blue3, name = &quot;genotype\n(alt-allele copies)&quot;) +
-  scale_size_continuous(name = &quot;depth (n)&quot;, range = c(0.6, 3.5)) +
+  scale_size_continuous(name = &quot;depth (n)&quot;, range = c(0.6, 4.2),
+                        breaks = log10(size_breaks), labels = scales::comma(size_breaks)) +
   facet_wrap(~ site_lab, scales = &quot;free_x&quot;, ncol = 4) +
   labs(x = &quot;genotype (copies of alt allele) at the lead cis-SNP&quot;, y = &quot;%pU (y/n per cell line)&quot;,
        title = sprintf(&quot;Top %d beta-binomial QTLs by nominal LRT p-value (%dkb, %d PCs)&quot;,
                        N_TOP, WINDOW_KB, NPCS),
-       subtitle = &quot;Black diamonds = the actual beta-binomial model&#39;s fitted mean per genotype group (intercept+3 PCs+dosage, depth-weighted). &#39;[SNP-at-site]&#39; = lead SNP at the profiled base; &#39;[small group]&#39; = smallest genotype class &lt;5 cell lines; &#39;[depth-dominated]&#39; = one cell line &gt;50% of its group&#39;s total depth.&quot;) +
+       subtitle = &quot;Dot size = read depth (log scale). Text label = exact depth of the single highest-depth cell line in each panel. Black diamonds = the actual beta-binomial model&#39;s fitted mean per genotype group. &#39;[SNP-at-site]&#39; = lead SNP at the profiled base; &#39;[small group]&#39; = smallest genotype class &lt;5 cell lines; &#39;[depth-dominated]&#39; = one cell line &gt;50% of its group&#39;s total depth.&quot;) +
   theme_bw(base_size = 11) +
   theme(legend.position = &quot;bottom&quot;, strip.text = element_text(size = 7.5))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_diagnostic.Rmd/top20-select-1.png" width="1152" style="display: block; margin: auto;" /></p>
@@ -1165,6 +1216,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/bb49ca5dbc8d598b2eb8dac704c7f67136c4338f/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/top20-select-1.png" target="_blank">bb49ca5</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-02
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/c82adb96d5c4e68ce94ec16faf7acc2dab4f2b16/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/top20-select-1.png" target="_blank">c82adb9</a>
@@ -1522,18 +1584,27 @@ rows_p1[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
 
 dw_means_p1 &lt;- rows_p1[!is.na(mu_fit), .(dw_mean = sum(mu_fit * n) / sum(n)), by = .(site_lab, g)]
 
+rows_p1[, log_n := log10(pmax(n, 1))]
+top_depth_p1 &lt;- rows_p1[, .SD[which.max(n)], by = site_lab]
+
 ggplot(rows_p1, aes(x = g, y = pi, color = g)) +
   geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.4, color = &quot;grey60&quot;, fill = NA) +
-  geom_jitter(aes(size = n), width = 0.12, alpha = 0.75) +
+  geom_jitter(aes(size = log_n), width = 0.12, alpha = 0.75) +
   geom_point(data = dw_means_p1, aes(x = g, y = dw_mean), inherit.aes = FALSE,
              shape = 23, fill = &quot;black&quot;, color = &quot;white&quot;, size = 2.6, stroke = 0.4) +
+  ggrepel::geom_label_repel(data = top_depth_p1, aes(label = paste0(&quot;n=&quot;, format(n, big.mark = &quot;,&quot;))),
+                           inherit.aes = TRUE, size = 2.3, color = &quot;black&quot;, fontface = &quot;bold&quot;,
+                           fill = alpha(&quot;white&quot;, 0.85), label.size = NA, label.padding = 0.1,
+                           segment.size = 0.3, segment.color = &quot;grey40&quot;,
+                           min.segment.length = 0, seed = 1, max.overlaps = Inf) +
   scale_color_manual(values = blue3, name = &quot;genotype\n(alt-allele copies)&quot;) +
-  scale_size_continuous(name = &quot;depth (n)&quot;, range = c(0.6, 3.5)) +
+  scale_size_continuous(name = &quot;depth (n)&quot;, range = c(0.6, 4.2),
+                        breaks = log10(size_breaks), labels = scales::comma(size_breaks)) +
   facet_wrap(~ site_lab, scales = &quot;free_x&quot;, ncol = 4) +
   labs(x = &quot;genotype (fixed) vs. PERMUTED phenotype at the lead cis-SNP&quot;,
        y = &quot;%pU (y/n per cell line, permuted individual order)&quot;,
        title = sprintf(&quot;Top %d sites under permutation-1 (genotype-phenotype pairing randomized)&quot;, N_TOP),
-       subtitle = &quot;Black diamonds = the actual beta-binomial model&#39;s fitted mean per genotype group (intercept+3 PCs+dosage, depth-weighted; covariates permuted with phenotype, genotype fixed). Same seed as the LRT calibration check&#39;s perm1 (set.seed(1001)).&quot;) +
+       subtitle = &quot;Dot size = read depth (log scale); text = exact depth of the highest-depth cell line per panel. Black diamonds = the actual beta-binomial model&#39;s fitted mean per genotype group. Same seed as the LRT calibration check&#39;s perm1 (set.seed(1001)).&quot;) +
   theme_bw(base_size = 11) +
   theme(legend.position = &quot;bottom&quot;, strip.text = element_text(size = 7.5))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm1-plot-1.png" width="1152" style="display: block; margin: auto;" /></p>
@@ -1559,6 +1630,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/bb49ca5dbc8d598b2eb8dac704c7f67136c4338f/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm1-plot-1.png" target="_blank">bb49ca5</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-02
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/c82adb96d5c4e68ce94ec16faf7acc2dab4f2b16/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm1-plot-1.png" target="_blank">c82adb9</a>
@@ -1678,21 +1760,67 @@ rows_p2[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
 
 dw_means_p2 &lt;- rows_p2[!is.na(mu_fit), .(dw_mean = sum(mu_fit * n) / sum(n)), by = .(site_lab, g)]
 
+rows_p2[, log_n := log10(pmax(n, 1))]
+top_depth_p2 &lt;- rows_p2[, .SD[which.max(n)], by = site_lab]
+
 ggplot(rows_p2, aes(x = g, y = pi, color = g)) +
   geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.4, color = &quot;grey60&quot;, fill = NA) +
-  geom_jitter(aes(size = n), width = 0.12, alpha = 0.75) +
+  geom_jitter(aes(size = log_n), width = 0.12, alpha = 0.75) +
   geom_point(data = dw_means_p2, aes(x = g, y = dw_mean), inherit.aes = FALSE,
              shape = 23, fill = &quot;black&quot;, color = &quot;white&quot;, size = 2.6, stroke = 0.4) +
+  ggrepel::geom_label_repel(data = top_depth_p2, aes(label = paste0(&quot;n=&quot;, format(n, big.mark = &quot;,&quot;))),
+                           inherit.aes = TRUE, size = 2.3, color = &quot;black&quot;, fontface = &quot;bold&quot;,
+                           fill = alpha(&quot;white&quot;, 0.85), label.size = NA, label.padding = 0.1,
+                           segment.size = 0.3, segment.color = &quot;grey40&quot;,
+                           min.segment.length = 0, seed = 1, max.overlaps = Inf) +
   scale_color_manual(values = blue3, name = &quot;genotype\n(alt-allele copies)&quot;) +
-  scale_size_continuous(name = &quot;depth (n)&quot;, range = c(0.6, 3.5)) +
+  scale_size_continuous(name = &quot;depth (n)&quot;, range = c(0.6, 4.2),
+                        breaks = log10(size_breaks), labels = scales::comma(size_breaks)) +
   facet_wrap(~ site_lab, scales = &quot;free_x&quot;, ncol = 4) +
   labs(x = &quot;genotype (fixed) vs. PERMUTED phenotype at the lead cis-SNP&quot;,
        y = &quot;%pU (y/n per cell line, permuted individual order)&quot;,
        title = sprintf(&quot;Top %d sites under permutation-2 (genotype-phenotype pairing randomized)&quot;, N_TOP),
-       subtitle = &quot;Black diamonds = the actual beta-binomial model&#39;s fitted mean per genotype group. Same seed as the LRT calibration check&#39;s perm2 (set.seed(1002)).&quot;) +
+       subtitle = &quot;Dot size = read depth (log scale); text = exact depth of the highest-depth cell line per panel. Black diamonds = the actual beta-binomial model&#39;s fitted mean per genotype group. Same seed as the LRT calibration check&#39;s perm2 (set.seed(1002)).&quot;) +
   theme_bw(base_size = 11) +
   theme(legend.position = &quot;bottom&quot;, strip.text = element_text(size = 7.5))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm2-plot-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-perm2-plot-1">
+Past versions of perm2-plot-1.png
+</button>
+</p>
+<div id="fig-perm2-plot-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/bb49ca5dbc8d598b2eb8dac704c7f67136c4338f/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm2-plot-1.png" target="_blank">bb49ca5</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-02
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="does-excluding-snp-at-site-fix-the-calibration"
 class="section level1">
@@ -1795,6 +1923,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/bb49ca5dbc8d598b2eb8dac704c7f67136c4338f/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/calib-excl-qq-1.png" target="_blank">bb49ca5</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-02
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/c82adb96d5c4e68ce94ec16faf7acc2dab4f2b16/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/calib-excl-qq-1.png" target="_blank">c82adb9</a>
 </td>
 <td>
@@ -1874,7 +2013,7 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.0  
+[1] ggrepel_0.9.3     ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.0  
 
 loaded via a namespace (and not attached):
  [1] tidyselect_1.2.0  xfun_0.38         bslib_0.3.1       colorspace_2.0-3 
