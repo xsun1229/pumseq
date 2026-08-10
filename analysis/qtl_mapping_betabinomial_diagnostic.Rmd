@@ -160,7 +160,11 @@ Gall <- t(as.matrix(traw[, ..samp])); gid <- traw$SNP
 # group's total depth -- i.e. depth_share_g, the quantity defined above, shown
 # for every group rather than only the panel-worst one.
 # ---------------------------------------------------------------------------
-SEQ_BLUE   <- c("#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b")
+# Full-range single-hue ramp (light -> dark). Using the palest steps as well
+# as the dark ones maximises lightness contrast; the dark outline on every
+# point keeps even the palest, lowest-depth dots visible against white.
+SEQ_BLUE   <- c("#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5",
+                "#256abf", "#184f95", "#0d366b")
 DEPTH_BRK  <- c(10, 100, 1000, 10000)
 
 plot_top_panels <- function(dt, title, subtitle, xlab, ylab) {
@@ -173,15 +177,23 @@ plot_top_panels <- function(dt, title, subtitle, xlab, ylab) {
   ggplot(dt, aes(x = g, y = pi)) +
     geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.5,
                  colour = "grey65", fill = NA, linewidth = 0.3) +
-    geom_jitter(aes(size = log_n, fill = log_n), shape = 21, colour = "grey25",
-                stroke = 0.25, width = 0.13, height = 0, alpha = 0.9) +
+    geom_jitter(aes(size = log_n, fill = log_n), shape = 21, colour = "grey20",
+                stroke = 0.3, width = 0.13, height = 0, alpha = 1) +
     geom_point(data = dw, aes(x = g, y = dw_mean), inherit.aes = FALSE,
                shape = 23, fill = "#e34948", colour = "white", size = 2.6, stroke = 0.5) +
     geom_text(data = ann, aes(x = g, y = 1.15, label = lab), inherit.aes = FALSE,
               size = 1.95, colour = "grey15", lineheight = 0.82) +
-    scale_fill_gradientn(colours = SEQ_BLUE, name = "read depth (n)",
-                         breaks = log10(DEPTH_BRK), labels = scales::comma(DEPTH_BRK)) +
-    scale_size_continuous(range = c(1.2, 5), guide = "none") +
+    # Labels are ACTUAL read counts; only the mapping and the tick positions
+    # are log10. The bar must be wide or the "1,000"/"10,000" ticks overprint
+    # each other (they did, and read as one garbled number).
+    scale_fill_gradientn(colours = SEQ_BLUE, name = "read depth (n), log scale",
+                         breaks = log10(DEPTH_BRK), labels = scales::comma(DEPTH_BRK),
+                         guide = guide_colourbar(barwidth = unit(9, "cm"),
+                                                 barheight = unit(0.45, "cm"),
+                                                 title.position = "top",
+                                                 title.hjust = 0.5,
+                                                 ticks.colour = "grey20")) +
+    scale_size_continuous(range = c(1, 6), guide = "none") +
     scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1),
                        limits = c(-0.03, 1.26)) +
     facet_wrap(~ site_lab, scales = "free_x", ncol = 4) +
@@ -192,11 +204,14 @@ plot_top_panels <- function(dt, title, subtitle, xlab, ylab) {
           panel.grid.minor = element_blank())
 }
 
+# Kept short and hard-wrapped: an unwrapped subtitle is silently clipped at
+# the right edge of the device rather than flowing onto a second line.
 PANEL_SUB <- paste(
-  "Dot colour AND size = read depth (log scale). Above each box:",
-  "depth of that group's largest single cell line, and its share of the",
-  "group's total depth. Red diamond = the beta-binomial model's fitted mean",
-  "for that group (depth-weighted)."
+  "Dot colour AND size = read depth (log scale).",
+  "Above each box: depth of that group's largest single cell line, over its",
+  "share of that group's total depth.",
+  "\nRed diamond = the beta-binomial model's depth-weighted fitted mean for",
+  "the group."
 )
 ```
 
@@ -245,9 +260,9 @@ plot_top_panels(
   rows,
   title    = sprintf("Top %d beta-binomial QTLs by nominal LRT p-value (%dkb, %d PCs)",
                      N_TOP, WINDOW_KB, NPCS),
-  subtitle = paste(PANEL_SUB,
-                   "Panel flags: '[SNP-at-site]' lead SNP at the profiled base;",
-                   "'[small group]' smallest genotype class <5 cell lines;",
+  subtitle = paste0(PANEL_SUB,
+                   "\nPanel flags: '[SNP-at-site]' lead SNP at the profiled base; ",
+                   "'[small group]' smallest genotype class <5 cell lines; ",
                    "'[depth-dominated]' one cell line >50% of its group's depth."),
   xlab = "genotype (copies of alt allele) at the lead cis-SNP",
   ylab = "%pU (y/n per cell line)")
@@ -363,8 +378,8 @@ rows_p1[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
 plot_top_panels(
   rows_p1,
   title    = sprintf("Top %d sites under permutation-1 (genotype-phenotype pairing randomized)", N_TOP),
-  subtitle = paste(PANEL_SUB,
-                   "Same seed as the LRT calibration check's perm1 (set.seed(1001))."),
+  subtitle = paste0(PANEL_SUB,
+                   "\nSame seed as the LRT calibration check's perm1 (set.seed(1001))."),
   xlab = "genotype (fixed) vs. PERMUTED phenotype at the lead cis-SNP",
   ylab = "%pU (y/n per cell line, permuted individual order)")
 ```
@@ -447,8 +462,8 @@ rows_p2[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
 plot_top_panels(
   rows_p2,
   title    = sprintf("Top %d sites under permutation-2 (genotype-phenotype pairing randomized)", N_TOP),
-  subtitle = paste(PANEL_SUB,
-                   "Same seed as the LRT calibration check's perm2 (set.seed(1002))."),
+  subtitle = paste0(PANEL_SUB,
+                   "\nSame seed as the LRT calibration check's perm2 (set.seed(1002))."),
   xlab = "genotype (fixed) vs. PERMUTED phenotype at the lead cis-SNP",
   ylab = "%pU (y/n per cell line, permuted individual order)")
 ```

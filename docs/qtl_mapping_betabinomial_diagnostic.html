@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree3fb99b2b944c444a1183b59575ef6439ffa211fctargetblank3fb99b2a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeecd265723395c1dda0fcf1fd234a938f5d8aaf39targetblankecd2657a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/3fb99b2b944c444a1183b59575ef6439ffa211fc" target="_blank">3fb99b2</a>
+<a href="https://github.com/xsun1229/pumseq/tree/ecd265723395c1dda0fcf1fd234a938f5d8aaf39" target="_blank">ecd2657</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree3fb99b2b944c444a1183b59575ef6439ffa211fctargetblank3fb99b2a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeecd265723395c1dda0fcf1fd234a938f5d8aaf39targetblankecd2657a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/3fb99b2b944c444a1183b59575ef6439ffa211fc" target="_blank">3fb99b2</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/ecd265723395c1dda0fcf1fd234a938f5d8aaf39" target="_blank">ecd2657</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -620,6 +620,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/ecd265723395c1dda0fcf1fd234a938f5d8aaf39/analysis/qtl_mapping_betabinomial_diagnostic.Rmd" target="_blank">ecd2657</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-10
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/ecd265723395c1dda0fcf1fd234a938f5d8aaf39/docs/qtl_mapping_betabinomial_diagnostic.html" target="_blank">ecd2657</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-10
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1172,7 +1206,11 @@ Gall &lt;- t(as.matrix(traw[, ..samp])); gid &lt;- traw$SNP
 # group&#39;s total depth -- i.e. depth_share_g, the quantity defined above, shown
 # for every group rather than only the panel-worst one.
 # ---------------------------------------------------------------------------
-SEQ_BLUE   &lt;- c(&quot;#9ec5f4&quot;, &quot;#6da7ec&quot;, &quot;#3987e5&quot;, &quot;#256abf&quot;, &quot;#184f95&quot;, &quot;#0d366b&quot;)
+# Full-range single-hue ramp (light -&gt; dark). Using the palest steps as well
+# as the dark ones maximises lightness contrast; the dark outline on every
+# point keeps even the palest, lowest-depth dots visible against white.
+SEQ_BLUE   &lt;- c(&quot;#cde2fb&quot;, &quot;#9ec5f4&quot;, &quot;#6da7ec&quot;, &quot;#3987e5&quot;,
+                &quot;#256abf&quot;, &quot;#184f95&quot;, &quot;#0d366b&quot;)
 DEPTH_BRK  &lt;- c(10, 100, 1000, 10000)
 
 plot_top_panels &lt;- function(dt, title, subtitle, xlab, ylab) {
@@ -1185,15 +1223,23 @@ plot_top_panels &lt;- function(dt, title, subtitle, xlab, ylab) {
   ggplot(dt, aes(x = g, y = pi)) +
     geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.5,
                  colour = &quot;grey65&quot;, fill = NA, linewidth = 0.3) +
-    geom_jitter(aes(size = log_n, fill = log_n), shape = 21, colour = &quot;grey25&quot;,
-                stroke = 0.25, width = 0.13, height = 0, alpha = 0.9) +
+    geom_jitter(aes(size = log_n, fill = log_n), shape = 21, colour = &quot;grey20&quot;,
+                stroke = 0.3, width = 0.13, height = 0, alpha = 1) +
     geom_point(data = dw, aes(x = g, y = dw_mean), inherit.aes = FALSE,
                shape = 23, fill = &quot;#e34948&quot;, colour = &quot;white&quot;, size = 2.6, stroke = 0.5) +
     geom_text(data = ann, aes(x = g, y = 1.15, label = lab), inherit.aes = FALSE,
               size = 1.95, colour = &quot;grey15&quot;, lineheight = 0.82) +
-    scale_fill_gradientn(colours = SEQ_BLUE, name = &quot;read depth (n)&quot;,
-                         breaks = log10(DEPTH_BRK), labels = scales::comma(DEPTH_BRK)) +
-    scale_size_continuous(range = c(1.2, 5), guide = &quot;none&quot;) +
+    # Labels are ACTUAL read counts; only the mapping and the tick positions
+    # are log10. The bar must be wide or the &quot;1,000&quot;/&quot;10,000&quot; ticks overprint
+    # each other (they did, and read as one garbled number).
+    scale_fill_gradientn(colours = SEQ_BLUE, name = &quot;read depth (n), log scale&quot;,
+                         breaks = log10(DEPTH_BRK), labels = scales::comma(DEPTH_BRK),
+                         guide = guide_colourbar(barwidth = unit(9, &quot;cm&quot;),
+                                                 barheight = unit(0.45, &quot;cm&quot;),
+                                                 title.position = &quot;top&quot;,
+                                                 title.hjust = 0.5,
+                                                 ticks.colour = &quot;grey20&quot;)) +
+    scale_size_continuous(range = c(1, 6), guide = &quot;none&quot;) +
     scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1),
                        limits = c(-0.03, 1.26)) +
     facet_wrap(~ site_lab, scales = &quot;free_x&quot;, ncol = 4) +
@@ -1204,11 +1250,14 @@ plot_top_panels &lt;- function(dt, title, subtitle, xlab, ylab) {
           panel.grid.minor = element_blank())
 }
 
+# Kept short and hard-wrapped: an unwrapped subtitle is silently clipped at
+# the right edge of the device rather than flowing onto a second line.
 PANEL_SUB &lt;- paste(
-  &quot;Dot colour AND size = read depth (log scale). Above each box:&quot;,
-  &quot;depth of that group&#39;s largest single cell line, and its share of the&quot;,
-  &quot;group&#39;s total depth. Red diamond = the beta-binomial model&#39;s fitted mean&quot;,
-  &quot;for that group (depth-weighted).&quot;
+  &quot;Dot colour AND size = read depth (log scale).&quot;,
+  &quot;Above each box: depth of that group&#39;s largest single cell line, over its&quot;,
+  &quot;share of that group&#39;s total depth.&quot;,
+  &quot;\nRed diamond = the beta-binomial model&#39;s depth-weighted fitted mean for&quot;,
+  &quot;the group.&quot;
 )</code></pre>
 <pre class="r"><code>top20 &lt;- d[order(nominal_min_p)][1:N_TOP]
 top20[, rank := .I]
@@ -1254,9 +1303,9 @@ plot_top_panels(
   rows,
   title    = sprintf(&quot;Top %d beta-binomial QTLs by nominal LRT p-value (%dkb, %d PCs)&quot;,
                      N_TOP, WINDOW_KB, NPCS),
-  subtitle = paste(PANEL_SUB,
-                   &quot;Panel flags: &#39;[SNP-at-site]&#39; lead SNP at the profiled base;&quot;,
-                   &quot;&#39;[small group]&#39; smallest genotype class &lt;5 cell lines;&quot;,
+  subtitle = paste0(PANEL_SUB,
+                   &quot;\nPanel flags: &#39;[SNP-at-site]&#39; lead SNP at the profiled base; &quot;,
+                   &quot;&#39;[small group]&#39; smallest genotype class &lt;5 cell lines; &quot;,
                    &quot;&#39;[depth-dominated]&#39; one cell line &gt;50% of its group&#39;s depth.&quot;),
   xlab = &quot;genotype (copies of alt allele) at the lead cis-SNP&quot;,
   ylab = &quot;%pU (y/n per cell line)&quot;)</code></pre>
@@ -1283,6 +1332,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/ecd265723395c1dda0fcf1fd234a938f5d8aaf39/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/top20-select-1.png" target="_blank">ecd2657</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-10
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/3fb99b2b944c444a1183b59575ef6439ffa211fc/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/top20-select-1.png" target="_blank">3fb99b2</a>
@@ -1663,8 +1723,8 @@ rows_p1[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
 plot_top_panels(
   rows_p1,
   title    = sprintf(&quot;Top %d sites under permutation-1 (genotype-phenotype pairing randomized)&quot;, N_TOP),
-  subtitle = paste(PANEL_SUB,
-                   &quot;Same seed as the LRT calibration check&#39;s perm1 (set.seed(1001)).&quot;),
+  subtitle = paste0(PANEL_SUB,
+                   &quot;\nSame seed as the LRT calibration check&#39;s perm1 (set.seed(1001)).&quot;),
   xlab = &quot;genotype (fixed) vs. PERMUTED phenotype at the lead cis-SNP&quot;,
   ylab = &quot;%pU (y/n per cell line, permuted individual order)&quot;)</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm1-plot-1.png" width="1248" style="display: block; margin: auto;" /></p>
@@ -1690,6 +1750,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/ecd265723395c1dda0fcf1fd234a938f5d8aaf39/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm1-plot-1.png" target="_blank">ecd2657</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-10
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/3fb99b2b944c444a1183b59575ef6439ffa211fc/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm1-plot-1.png" target="_blank">3fb99b2</a>
@@ -1832,8 +1903,8 @@ rows_p2[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
 plot_top_panels(
   rows_p2,
   title    = sprintf(&quot;Top %d sites under permutation-2 (genotype-phenotype pairing randomized)&quot;, N_TOP),
-  subtitle = paste(PANEL_SUB,
-                   &quot;Same seed as the LRT calibration check&#39;s perm2 (set.seed(1002)).&quot;),
+  subtitle = paste0(PANEL_SUB,
+                   &quot;\nSame seed as the LRT calibration check&#39;s perm2 (set.seed(1002)).&quot;),
   xlab = &quot;genotype (fixed) vs. PERMUTED phenotype at the lead cis-SNP&quot;,
   ylab = &quot;%pU (y/n per cell line, permuted individual order)&quot;)</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm2-plot-1.png" width="1248" style="display: block; margin: auto;" /></p>
@@ -1859,6 +1930,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/ecd265723395c1dda0fcf1fd234a938f5d8aaf39/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm2-plot-1.png" target="_blank">ecd2657</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-10
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/3fb99b2b944c444a1183b59575ef6439ffa211fc/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm2-plot-1.png" target="_blank">3fb99b2</a>
