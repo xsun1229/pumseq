@@ -9,11 +9,11 @@ output:
 ---
 
 ```{r setup, warning=FALSE, message=FALSE}
-suppressMessages({ library(data.table); library(ggplot2); library(ggrepel) })
+suppressMessages({ library(data.table); library(ggplot2) })
 
 knitr::opts_chunk$set(
   echo = TRUE, warning = FALSE, message = FALSE,
-  fig.align = "center", fig.width = 12, fig.height = 14
+  fig.align = "center", fig.width = 13, fig.height = 16
 )
 
 PROJECT_DIR <- "/project/xinhe/xsun/pumseq"
@@ -138,6 +138,66 @@ Xcov <- cbind(Intercept = 1, as.matrix(cov[, paste0("PC", seq_len(NPCS)), with =
 
 traw <- fread(TRAW); samp <- paste0(go, "_", go)
 Gall <- t(as.matrix(traw[, ..samp])); gid <- traw$SNP
+
+# ---------------------------------------------------------------------------
+# Shared panel-plot builder, used identically for the real top-20 and for each
+# permutation replicate (they are meant to be compared side by side, so they
+# must not drift apart).
+#
+# Depth encoding, revised twice after advisor feedback:
+#   v1 linear dot size    -> unreadable (depth spans ~4 orders of magnitude,
+#                            so the legend degenerated to 0 / 5000 / 10000).
+#   v2 log10 dot size     -> still hard to judge; size is a weak perceptual
+#                            channel, especially in small facets.
+#   v3 (here) COLOUR = log10(depth) on a sequential blue ramp, with size kept
+#      as a redundant second cue. Genotype does not need a colour of its own --
+#      it is already the x-axis -- so colour is freed for the variable the
+#      argument actually turns on. Points are drawn as shape 21 with a dark
+#      outline so even the palest (lowest-depth) dots stay visible on white.
+#
+# Per-genotype-group annotation (also requested): each box is labelled with the
+# depth of its single largest cell line and that cell line's share of the
+# group's total depth -- i.e. depth_share_g, the quantity defined above, shown
+# for every group rather than only the panel-worst one.
+# ---------------------------------------------------------------------------
+SEQ_BLUE   <- c("#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b")
+DEPTH_BRK  <- c(10, 100, 1000, 10000)
+
+plot_top_panels <- function(dt, title, subtitle, xlab, ylab) {
+  dt <- copy(dt)[is.finite(pi)]
+  dt[, log_n := log10(pmax(n, 1))]
+  dw  <- dt[!is.na(mu_fit), .(dw_mean = sum(mu_fit * n) / sum(n)), by = .(site_lab, g)]
+  ann <- dt[, .(max_n = max(n), share = max(n) / sum(n)), by = .(site_lab, g)]
+  ann[, lab := sprintf("%s\n%.0f%%", format(max_n, big.mark = ","), 100 * share)]
+
+  ggplot(dt, aes(x = g, y = pi)) +
+    geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.5,
+                 colour = "grey65", fill = NA, linewidth = 0.3) +
+    geom_jitter(aes(size = log_n, fill = log_n), shape = 21, colour = "grey25",
+                stroke = 0.25, width = 0.13, height = 0, alpha = 0.9) +
+    geom_point(data = dw, aes(x = g, y = dw_mean), inherit.aes = FALSE,
+               shape = 23, fill = "#e34948", colour = "white", size = 2.6, stroke = 0.5) +
+    geom_text(data = ann, aes(x = g, y = 1.15, label = lab), inherit.aes = FALSE,
+              size = 1.95, colour = "grey15", lineheight = 0.82) +
+    scale_fill_gradientn(colours = SEQ_BLUE, name = "read depth (n)",
+                         breaks = log10(DEPTH_BRK), labels = scales::comma(DEPTH_BRK)) +
+    scale_size_continuous(range = c(1.2, 5), guide = "none") +
+    scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1),
+                       limits = c(-0.03, 1.26)) +
+    facet_wrap(~ site_lab, scales = "free_x", ncol = 4) +
+    labs(x = xlab, y = ylab, title = title, subtitle = subtitle) +
+    theme_bw(base_size = 11) +
+    theme(legend.position = "bottom",
+          strip.text = element_text(size = 7),
+          panel.grid.minor = element_blank())
+}
+
+PANEL_SUB <- paste(
+  "Dot colour AND size = read depth (log scale). Above each box:",
+  "depth of that group's largest single cell line, and its share of the",
+  "group's total depth. Red diamond = the beta-binomial model's fitted mean",
+  "for that group (depth-weighted)."
+)
 ```
 
 ```{r top20-select}
@@ -181,43 +241,16 @@ rows <- rbindlist(lapply(seq_len(nrow(top20)), function(i) {
 }))
 rows[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
 
-# per-group depth-weighted average of the TRUE model-fitted mean (not the
-# raw observed y/n) -- this is what actually enters the LRT's log-likelihood
-dw_means <- rows[!is.na(mu_fit), .(dw_mean = sum(mu_fit * n) / sum(n)), by = .(site_lab, g)]
-
-blue3 <- c(`0` = "#86b6ef", `1` = "#2a78d6", `2` = "#104281")
-
-# depth spans ~4 orders of magnitude (1 to 10,000+) -- a LINEAR size scale
-# compresses almost all of that range into barely-distinguishable dot sizes
-# (per advisor feedback: the size legend only showed 0/5000/10000 and wasn't
-# readable). Map size to log10(depth) instead, with legend breaks labeled in
-# real read counts; additionally, directly label the single highest-depth
-# cell line in each panel with its exact n -- removes any dependence on
-# perceiving size at all for the point that matters most.
-rows[, log_n := log10(pmax(n, 1))]
-top_depth <- rows[, .SD[which.max(n)], by = site_lab]
-size_breaks <- c(10, 100, 1000, 10000)
-
-ggplot(rows, aes(x = g, y = pi, color = g)) +
-  geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.4, color = "grey60", fill = NA) +
-  geom_jitter(aes(size = log_n), width = 0.12, alpha = 0.75) +
-  geom_point(data = dw_means, aes(x = g, y = dw_mean), inherit.aes = FALSE,
-             shape = 23, fill = "black", color = "white", size = 2.6, stroke = 0.4) +
-  ggrepel::geom_label_repel(data = top_depth, aes(label = paste0("n=", format(n, big.mark = ","))),
-                           inherit.aes = TRUE, size = 2.3, color = "black", fontface = "bold",
-                           fill = alpha("white", 0.85), label.size = NA, label.padding = 0.1,
-                           segment.size = 0.3, segment.color = "grey40",
-                           min.segment.length = 0, seed = 1, max.overlaps = Inf) +
-  scale_color_manual(values = blue3, name = "genotype\n(alt-allele copies)") +
-  scale_size_continuous(name = "depth (n)", range = c(0.6, 4.2),
-                        breaks = log10(size_breaks), labels = scales::comma(size_breaks)) +
-  facet_wrap(~ site_lab, scales = "free_x", ncol = 4) +
-  labs(x = "genotype (copies of alt allele) at the lead cis-SNP", y = "%pU (y/n per cell line)",
-       title = sprintf("Top %d beta-binomial QTLs by nominal LRT p-value (%dkb, %d PCs)",
-                       N_TOP, WINDOW_KB, NPCS),
-       subtitle = "Dot size = read depth (log scale). Text label = exact depth of the single highest-depth cell line in each panel. Black diamonds = the actual beta-binomial model's fitted mean per genotype group. '[SNP-at-site]' = lead SNP at the profiled base; '[small group]' = smallest genotype class <5 cell lines; '[depth-dominated]' = one cell line >50% of its group's total depth.") +
-  theme_bw(base_size = 11) +
-  theme(legend.position = "bottom", strip.text = element_text(size = 7.5))
+plot_top_panels(
+  rows,
+  title    = sprintf("Top %d beta-binomial QTLs by nominal LRT p-value (%dkb, %d PCs)",
+                     N_TOP, WINDOW_KB, NPCS),
+  subtitle = paste(PANEL_SUB,
+                   "Panel flags: '[SNP-at-site]' lead SNP at the profiled base;",
+                   "'[small group]' smallest genotype class <5 cell lines;",
+                   "'[depth-dominated]' one cell line >50% of its group's depth."),
+  xlab = "genotype (copies of alt allele) at the lead cis-SNP",
+  ylab = "%pU (y/n per cell line)")
 ```
 
 # 3. Pattern summary across these 20 sites
@@ -327,31 +360,13 @@ rows_p1 <- rbindlist(lapply(seq_len(nrow(p1_top20)), function(i) {
 }))
 rows_p1[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
 
-dw_means_p1 <- rows_p1[!is.na(mu_fit), .(dw_mean = sum(mu_fit * n) / sum(n)), by = .(site_lab, g)]
-
-rows_p1[, log_n := log10(pmax(n, 1))]
-top_depth_p1 <- rows_p1[, .SD[which.max(n)], by = site_lab]
-
-ggplot(rows_p1, aes(x = g, y = pi, color = g)) +
-  geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.4, color = "grey60", fill = NA) +
-  geom_jitter(aes(size = log_n), width = 0.12, alpha = 0.75) +
-  geom_point(data = dw_means_p1, aes(x = g, y = dw_mean), inherit.aes = FALSE,
-             shape = 23, fill = "black", color = "white", size = 2.6, stroke = 0.4) +
-  ggrepel::geom_label_repel(data = top_depth_p1, aes(label = paste0("n=", format(n, big.mark = ","))),
-                           inherit.aes = TRUE, size = 2.3, color = "black", fontface = "bold",
-                           fill = alpha("white", 0.85), label.size = NA, label.padding = 0.1,
-                           segment.size = 0.3, segment.color = "grey40",
-                           min.segment.length = 0, seed = 1, max.overlaps = Inf) +
-  scale_color_manual(values = blue3, name = "genotype\n(alt-allele copies)") +
-  scale_size_continuous(name = "depth (n)", range = c(0.6, 4.2),
-                        breaks = log10(size_breaks), labels = scales::comma(size_breaks)) +
-  facet_wrap(~ site_lab, scales = "free_x", ncol = 4) +
-  labs(x = "genotype (fixed) vs. PERMUTED phenotype at the lead cis-SNP",
-       y = "%pU (y/n per cell line, permuted individual order)",
-       title = sprintf("Top %d sites under permutation-1 (genotype-phenotype pairing randomized)", N_TOP),
-       subtitle = "Dot size = read depth (log scale); text = exact depth of the highest-depth cell line per panel. Black diamonds = the actual beta-binomial model's fitted mean per genotype group. Same seed as the LRT calibration check's perm1 (set.seed(1001)).") +
-  theme_bw(base_size = 11) +
-  theme(legend.position = "bottom", strip.text = element_text(size = 7.5))
+plot_top_panels(
+  rows_p1,
+  title    = sprintf("Top %d sites under permutation-1 (genotype-phenotype pairing randomized)", N_TOP),
+  subtitle = paste(PANEL_SUB,
+                   "Same seed as the LRT calibration check's perm1 (set.seed(1001))."),
+  xlab = "genotype (fixed) vs. PERMUTED phenotype at the lead cis-SNP",
+  ylab = "%pU (y/n per cell line, permuted individual order)")
 ```
 
 Unlike the real top-`r N_TOP` plot above, these panels show **no clean
@@ -429,31 +444,13 @@ rows_p2 <- rbindlist(lapply(seq_len(nrow(p2_top20)), function(i) {
 }))
 rows_p2[, site_lab := factor(site_lab, levels = unique(site_lab[order(rank)]))]
 
-dw_means_p2 <- rows_p2[!is.na(mu_fit), .(dw_mean = sum(mu_fit * n) / sum(n)), by = .(site_lab, g)]
-
-rows_p2[, log_n := log10(pmax(n, 1))]
-top_depth_p2 <- rows_p2[, .SD[which.max(n)], by = site_lab]
-
-ggplot(rows_p2, aes(x = g, y = pi, color = g)) +
-  geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.4, color = "grey60", fill = NA) +
-  geom_jitter(aes(size = log_n), width = 0.12, alpha = 0.75) +
-  geom_point(data = dw_means_p2, aes(x = g, y = dw_mean), inherit.aes = FALSE,
-             shape = 23, fill = "black", color = "white", size = 2.6, stroke = 0.4) +
-  ggrepel::geom_label_repel(data = top_depth_p2, aes(label = paste0("n=", format(n, big.mark = ","))),
-                           inherit.aes = TRUE, size = 2.3, color = "black", fontface = "bold",
-                           fill = alpha("white", 0.85), label.size = NA, label.padding = 0.1,
-                           segment.size = 0.3, segment.color = "grey40",
-                           min.segment.length = 0, seed = 1, max.overlaps = Inf) +
-  scale_color_manual(values = blue3, name = "genotype\n(alt-allele copies)") +
-  scale_size_continuous(name = "depth (n)", range = c(0.6, 4.2),
-                        breaks = log10(size_breaks), labels = scales::comma(size_breaks)) +
-  facet_wrap(~ site_lab, scales = "free_x", ncol = 4) +
-  labs(x = "genotype (fixed) vs. PERMUTED phenotype at the lead cis-SNP",
-       y = "%pU (y/n per cell line, permuted individual order)",
-       title = sprintf("Top %d sites under permutation-2 (genotype-phenotype pairing randomized)", N_TOP),
-       subtitle = "Dot size = read depth (log scale); text = exact depth of the highest-depth cell line per panel. Black diamonds = the actual beta-binomial model's fitted mean per genotype group. Same seed as the LRT calibration check's perm2 (set.seed(1002)).") +
-  theme_bw(base_size = 11) +
-  theme(legend.position = "bottom", strip.text = element_text(size = 7.5))
+plot_top_panels(
+  rows_p2,
+  title    = sprintf("Top %d sites under permutation-2 (genotype-phenotype pairing randomized)", N_TOP),
+  subtitle = paste(PANEL_SUB,
+                   "Same seed as the LRT calibration check's perm2 (set.seed(1002))."),
+  xlab = "genotype (fixed) vs. PERMUTED phenotype at the lead cis-SNP",
+  ylab = "%pU (y/n per cell line, permuted individual order)")
 ```
 
 # 5. Does excluding SNP-at-site fix the calibration?
