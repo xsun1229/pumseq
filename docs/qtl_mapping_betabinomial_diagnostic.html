@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree4d561fd4ac2999cb9dfcfd2f697006f6e7575e9btargetblank4d561fda">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree7bb5ccd1008ac5ae37315e4b13e82c6167ef17c3targetblank7bb5ccda">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/4d561fd4ac2999cb9dfcfd2f697006f6e7575e9b" target="_blank">4d561fd</a>
+<a href="https://github.com/xsun1229/pumseq/tree/7bb5ccd1008ac5ae37315e4b13e82c6167ef17c3" target="_blank">7bb5ccd</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree4d561fd4ac2999cb9dfcfd2f697006f6e7575e9btargetblank4d561fda"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree7bb5ccd1008ac5ae37315e4b13e82c6167ef17c3targetblank7bb5ccda"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/4d561fd4ac2999cb9dfcfd2f697006f6e7575e9b" target="_blank">4d561fd</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/7bb5ccd1008ac5ae37315e4b13e82c6167ef17c3" target="_blank">7bb5ccd</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -620,6 +620,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/7bb5ccd1008ac5ae37315e4b13e82c6167ef17c3/analysis/qtl_mapping_betabinomial_diagnostic.Rmd" target="_blank">7bb5ccd</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-10
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/7bb5ccd1008ac5ae37315e4b13e82c6167ef17c3/docs/qtl_mapping_betabinomial_diagnostic.html" target="_blank">7bb5ccd</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-10
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1270,8 +1304,17 @@ plot_top_panels &lt;- function(dt, title, subtitle, xlab, ylab) {
   dt &lt;- copy(dt)[is.finite(pi)]
   dt[, log_n := log10(pmax(n, 1))]
   dw  &lt;- dt[!is.na(mu_fit), .(dw_mean = sum(mu_fit * n) / sum(n)), by = .(site_lab, g)]
-  ann &lt;- dt[, .(max_n = max(n), share = max(n) / sum(n)), by = .(site_lab, g)]
-  ann[, lab := sprintf(&quot;%s\n%.0f%%&quot;, format(max_n, big.mark = &quot;,&quot;), 100 * share)]
+  # Annotation carries BOTH the depth story and the group&#39;s pooled %pU.
+  # The pooled rate matters because at many top sites every group sits within
+  # the bottom ~1% of the 0-1 axis (e.g. 0.05% vs 1.0% vs 12.3%): a real,
+  # hugely &quot;significant&quot; difference to the model that is simply invisible
+  # when plotted, which is why some panels look like they have no trend.
+  ann &lt;- dt[, .(max_n = max(n), share = max(n) / sum(n),
+                pooled = sum(y) / sum(n)), by = .(site_lab, g)]
+  ann[, lab := sprintf(&quot;%s | %.0f%%\npU %s&quot;,
+                       format(max_n, big.mark = &quot;,&quot;), 100 * share,
+                       fifelse(pooled &gt;= 0.01, sprintf(&quot;%.0f%%&quot;, 100 * pooled),
+                                               sprintf(&quot;%.2f%%&quot;, 100 * pooled)))]
 
   ggplot(dt, aes(x = g, y = pi)) +
     geom_boxplot(aes(group = g), outlier.shape = NA, width = 0.5,
@@ -1308,8 +1351,12 @@ plot_top_panels &lt;- function(dt, title, subtitle, xlab, ylab) {
 # the right edge of the device rather than flowing onto a second line.
 PANEL_SUB &lt;- paste(
   &quot;Dot colour AND size = read depth (log scale).&quot;,
-  &quot;Above each box: depth of that group&#39;s largest single cell line, over its&quot;,
-  &quot;share of that group&#39;s total depth.&quot;,
+  &quot;Above each box: depth of that group&#39;s largest single cell line | its share&quot;,
+  &quot;of the group&#39;s total depth; then &#39;pU&#39; = the group&#39;s POOLED %pU.&quot;,
+  &quot;\nPooled %pU is shown because at many sites all three groups sit inside the&quot;,
+  &quot;bottom ~1% of the axis:&quot;,
+  &quot;\na difference the model treats as decisive (e.g. 0.05% vs 1% vs 12%) is then&quot;,
+  &quot;invisible in the dots.&quot;,
   &quot;\nRed diamond = the beta-binomial model&#39;s depth-weighted fitted mean for&quot;,
   &quot;the group.&quot;
 )</code></pre>
@@ -2338,81 +2385,10 @@ i.e. no enrichment at all.</p>
 <p>Why that matters: at 200+ reads per cell line the test has enormous
 power, so any small amount of between-sample variability the model does
 not account for is amplified into a very large test statistic. The
-permuted data show this directly — there no real association can exist,
-yet the chance of an extreme p-value still climbs steadily with
-depth:</p>
-<pre class="r"><code>p1d &lt;- merge(p1[, .(sid = paste(ref, pos),
-                    nlp = -log10(pmax(nominal_min_p, 1e-300)))], dep, by = &quot;sid&quot;)
-p1d[, decile := cut(rank(tot) / .N, seq(0, 1, 0.1), labels = 1:10,
-                    include.lowest = TRUE)]
-knitr::kable(p1d[, .(`Median total reads` = format(round(median(tot)), big.mark = &quot;,&quot;),
-                     `% of sites with -log10(p) &gt; 10` =
-                        sprintf(&quot;%.1f%%&quot;, 100 * mean(nlp &gt; 10))),
-                 by = .(`Depth decile` = decile)][order(`Depth decile`)],
-  caption = &quot;PERMUTED data (no real signal possible): extreme p-values concentrate in the deepest sites&quot;)</code></pre>
-<table>
-<caption>PERMUTED data (no real signal possible): extreme p-values
-concentrate in the deepest sites</caption>
-<thead>
-<tr class="header">
-<th align="left">Depth decile</th>
-<th align="left">Median total reads</th>
-<th align="left">% of sites with -log10(p) &gt; 10</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">1</td>
-<td align="left">116</td>
-<td align="left">0.0%</td>
-</tr>
-<tr class="even">
-<td align="left">2</td>
-<td align="left">180</td>
-<td align="left">0.0%</td>
-</tr>
-<tr class="odd">
-<td align="left">3</td>
-<td align="left">256</td>
-<td align="left">0.0%</td>
-</tr>
-<tr class="even">
-<td align="left">4</td>
-<td align="left">360</td>
-<td align="left">0.0%</td>
-</tr>
-<tr class="odd">
-<td align="left">5</td>
-<td align="left">506</td>
-<td align="left">0.0%</td>
-</tr>
-<tr class="even">
-<td align="left">6</td>
-<td align="left">692</td>
-<td align="left">0.0%</td>
-</tr>
-<tr class="odd">
-<td align="left">7</td>
-<td align="left">984</td>
-<td align="left">0.0%</td>
-</tr>
-<tr class="even">
-<td align="left">8</td>
-<td align="left">1,524</td>
-<td align="left">0.2%</td>
-</tr>
-<tr class="odd">
-<td align="left">9</td>
-<td align="left">2,747</td>
-<td align="left">0.5%</td>
-</tr>
-<tr class="even">
-<td align="left">10</td>
-<td align="left">9,072</td>
-<td align="left">1.8%</td>
-</tr>
-</tbody>
-</table>
+permuted data confirm this directly: with no real association possible,
+the chance of an extreme p-value still rises steadily with site depth,
+from ~0% in the shallowest tenth of sites to ~2% in the deepest
+tenth.</p>
 <p>So the extreme p-values track sequencing depth, not genotype — which
 is why the same sites reappear at the top however the data are
 shuffled.</p>
