@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeecd265723395c1dda0fcf1fd234a938f5d8aaf39targetblankecd2657a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree4d561fd4ac2999cb9dfcfd2f697006f6e7575e9btargetblank4d561fda">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/ecd265723395c1dda0fcf1fd234a938f5d8aaf39" target="_blank">ecd2657</a>
+<a href="https://github.com/xsun1229/pumseq/tree/4d561fd4ac2999cb9dfcfd2f697006f6e7575e9b" target="_blank">4d561fd</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeecd265723395c1dda0fcf1fd234a938f5d8aaf39targetblankecd2657a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree4d561fd4ac2999cb9dfcfd2f697006f6e7575e9btargetblank4d561fda"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/ecd265723395c1dda0fcf1fd234a938f5d8aaf39" target="_blank">ecd2657</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/4d561fd4ac2999cb9dfcfd2f697006f6e7575e9b" target="_blank">4d561fd</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -620,6 +620,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/4d561fd4ac2999cb9dfcfd2f697006f6e7575e9b/analysis/qtl_mapping_betabinomial_diagnostic.Rmd" target="_blank">4d561fd</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-10
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/4d561fd4ac2999cb9dfcfd2f697006f6e7575e9b/docs/qtl_mapping_betabinomial_diagnostic.html" target="_blank">4d561fd</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-10
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1213,6 +1247,25 @@ SEQ_BLUE   &lt;- c(&quot;#cde2fb&quot;, &quot;#9ec5f4&quot;, &quot;#6da7ec&quot;
                 &quot;#256abf&quot;, &quot;#184f95&quot;, &quot;#0d366b&quot;)
 DEPTH_BRK  &lt;- c(10, 100, 1000, 10000)
 
+# Pin ONE colour range shared by all three figures. Without this each figure
+# auto-scales to its own data, so an identical colour could mean a different
+# depth in the real vs permutation panels -- silently misleading for figures
+# whose whole purpose is side-by-side comparison. (As it happens the three
+# top-20 sets currently span the same 1..13,621 range because they share the
+# deepest site, so pinning changes nothing visible today; it just stops the
+# scales drifting apart if the site lists ever diverge.)
+DEPTH_LIM &lt;- local({
+  f &lt;- c(file.path(BBR,   sprintf(&quot;scan_lrt_w%dkb_pc%d.txt.gz&quot;,  WINDOW_KB, NPCS)),
+         file.path(CALIB, sprintf(&quot;perm1_scan_w%dkb_pc%d.txt.gz&quot;, WINDOW_KB, NPCS)),
+         file.path(CALIB, sprintf(&quot;perm2_scan_w%dkb_pc%d.txt.gz&quot;, WINDOW_KB, NPCS)))
+  sid &lt;- paste(sites$ref, sites$pos)
+  ids &lt;- unique(unlist(lapply(f[file.exists(f)], function(p) {
+    x &lt;- fread(p); setorder(x, nominal_min_p); paste(x$ref, x$pos)[1:N_TOP]
+  })))
+  v &lt;- as.vector(Nm[match(ids, sid), ]); v &lt;- v[is.finite(v) &amp; v &gt; 0]
+  log10(range(v))
+})
+
 plot_top_panels &lt;- function(dt, title, subtitle, xlab, ylab) {
   dt &lt;- copy(dt)[is.finite(pi)]
   dt[, log_n := log10(pmax(n, 1))]
@@ -1233,6 +1286,7 @@ plot_top_panels &lt;- function(dt, title, subtitle, xlab, ylab) {
     # are log10. The bar must be wide or the &quot;1,000&quot;/&quot;10,000&quot; ticks overprint
     # each other (they did, and read as one garbled number).
     scale_fill_gradientn(colours = SEQ_BLUE, name = &quot;read depth (n), log scale&quot;,
+                         limits = DEPTH_LIM, oob = scales::squish,
                          breaks = log10(DEPTH_BRK), labels = scales::comma(DEPTH_BRK),
                          guide = guide_colourbar(barwidth = unit(9, &quot;cm&quot;),
                                                  barheight = unit(0.45, &quot;cm&quot;),
@@ -1332,6 +1386,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/4d561fd4ac2999cb9dfcfd2f697006f6e7575e9b/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/top20-select-1.png" target="_blank">4d561fd</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-10
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/ecd265723395c1dda0fcf1fd234a938f5d8aaf39/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/top20-select-1.png" target="_blank">ecd2657</a>
@@ -1752,6 +1817,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/4d561fd4ac2999cb9dfcfd2f697006f6e7575e9b/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm1-plot-1.png" target="_blank">4d561fd</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-10
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/ecd265723395c1dda0fcf1fd234a938f5d8aaf39/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm1-plot-1.png" target="_blank">ecd2657</a>
 </td>
 <td>
@@ -1930,6 +2006,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/4d561fd4ac2999cb9dfcfd2f697006f6e7575e9b/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm2-plot-1.png" target="_blank">4d561fd</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-10
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/ecd265723395c1dda0fcf1fd234a938f5d8aaf39/docs/figure/qtl_mapping_betabinomial_diagnostic.Rmd/perm2-plot-1.png" target="_blank">ecd2657</a>
@@ -2136,6 +2223,199 @@ XSun
 <!-- mechanistically-understood false positives from the top-hit list — see -->
 <!-- Section 1), but it was never going to be the fix for calibration; that -->
 <!-- requires addressing the depth/bimodality issue directly. -->
+</div>
+<div id="how-different-is-read-depth-across-samples"
+class="section level1">
+<h1>6. How different is read depth across samples?</h1>
+<p>Depth should not vary wildly between cell lines: ~10-fold is
+unremarkable, but &gt;100-fold would be extreme. How often does that
+actually happen?</p>
+<pre class="r"><code>pos_n &lt;- Nm; pos_n[pos_n == 0] &lt;- NA          # ignore cell lines with no coverage
+site_max &lt;- apply(pos_n, 1, max,    na.rm = TRUE)
+site_med &lt;- apply(pos_n, 1, median, na.rm = TRUE)
+fold     &lt;- site_max / site_med               # within-site spread across samples
+lib      &lt;- colSums(Nm)                       # per-cell-line library size
+
+knitr::kable(data.table(
+  Measure = c(&quot;Library size across the 50 cell lines (max/min)&quot;,
+              &quot;Depth spread across samples at a typical site (max/median)&quot;,
+              &quot;Sites where that spread exceeds 10x&quot;,
+              &quot;Sites where that spread exceeds 100x&quot;),
+  Value = c(sprintf(&quot;%.1fx&quot;,  max(lib) / min(lib)),
+            sprintf(&quot;%.1fx&quot;,  median(fold, na.rm = TRUE)),
+            sprintf(&quot;%.1f%%&quot;, 100 * mean(fold &gt; 10,  na.rm = TRUE)),
+            sprintf(&quot;%.1f%%&quot;, 100 * mean(fold &gt; 100, na.rm = TRUE)))),
+  caption = &quot;Depth variation ACROSS SAMPLES (between cell lines)&quot;)</code></pre>
+<table>
+<caption>Depth variation ACROSS SAMPLES (between cell lines)</caption>
+<thead>
+<tr class="header">
+<th align="left">Measure</th>
+<th align="left">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Library size across the 50 cell lines (max/min)</td>
+<td align="left">10.3x</td>
+</tr>
+<tr class="even">
+<td align="left">Depth spread across samples at a typical site
+(max/median)</td>
+<td align="left">3.5x</td>
+</tr>
+<tr class="odd">
+<td align="left">Sites where that spread exceeds 10x</td>
+<td align="left">7.9%</td>
+</tr>
+<tr class="even">
+<td align="left">Sites where that spread exceeds 100x</td>
+<td align="left">1.8%</td>
+</tr>
+</tbody>
+</table>
+<p>Overall sequencing depth per cell line varies only ~10-fold, and the
+typical site is far tighter than that. The &gt;100-fold case is real but
+uncommon.</p>
+<p>It is worth separating two different kinds of depth difference,
+because they behave very differently:</p>
+<pre class="r"><code>dep &lt;- data.table(sid = paste(sites$ref, sites$pos),
+                  tot = rowSums(Nm), per_cl = site_med, fold = fold)
+dd  &lt;- copy(d)[, sid := paste(ref, pos)]
+dd  &lt;- merge(dd, dep, by = &quot;sid&quot;); setorder(dd, nominal_min_p)
+
+grps &lt;- list(&quot;Top 20 hits&quot;            = seq_len(N_TOP),
+             &quot;Top 100 hits&quot;           = seq_len(100),
+             &quot;Significant (FDR&lt;0.05)&quot; = which(dd$fdr &lt; 0.05),
+             &quot;All sites tested&quot;       = seq_len(nrow(dd)))
+knitr::kable(rbindlist(lapply(names(grps), function(nm) {
+  i &lt;- grps[[nm]]
+  data.table(`Site group` = nm,
+             `Median total reads` = format(round(median(dd$tot[i], na.rm = TRUE)),
+                                           big.mark = &quot;,&quot;),
+             `Per cell line` = round(median(dd$per_cl[i], na.rm = TRUE)))
+})), caption = &quot;Depth ACROSS SITES (total sequencing depth at the site)&quot;)</code></pre>
+<table>
+<caption>Depth ACROSS SITES (total sequencing depth at the
+site)</caption>
+<thead>
+<tr class="header">
+<th align="left">Site group</th>
+<th align="left">Median total reads</th>
+<th align="right">Per cell line</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Top 20 hits</td>
+<td align="left">15,323</td>
+<td align="right">206</td>
+</tr>
+<tr class="even">
+<td align="left">Top 100 hits</td>
+<td align="left">7,576</td>
+<td align="right">128</td>
+</tr>
+<tr class="odd">
+<td align="left">Significant (FDR&lt;0.05)</td>
+<td align="left">1,934</td>
+<td align="right">34</td>
+</tr>
+<tr class="even">
+<td align="left">All sites tested</td>
+<td align="left">590</td>
+<td align="right">10</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>fold_top20 &lt;- median(dd$fold[seq_len(N_TOP)], na.rm = TRUE)   # within-site spread, top hits
+fold_all   &lt;- median(dd$fold,                 na.rm = TRUE)   # ... vs genome-wide</code></pre>
+<p>The top hits are simply the <strong>most deeply sequenced
+sites</strong> — around 26x deeper than a typical site. They are
+<em>not</em> the sites with lopsided depth between samples: the
+within-site spread at the top 20 is 3.1x against 3.4x genome-wide,
+i.e. no enrichment at all.</p>
+<p>Why that matters: at 200+ reads per cell line the test has enormous
+power, so any small amount of between-sample variability the model does
+not account for is amplified into a very large test statistic. The
+permuted data show this directly — there no real association can exist,
+yet the chance of an extreme p-value still climbs steadily with
+depth:</p>
+<pre class="r"><code>p1d &lt;- merge(p1[, .(sid = paste(ref, pos),
+                    nlp = -log10(pmax(nominal_min_p, 1e-300)))], dep, by = &quot;sid&quot;)
+p1d[, decile := cut(rank(tot) / .N, seq(0, 1, 0.1), labels = 1:10,
+                    include.lowest = TRUE)]
+knitr::kable(p1d[, .(`Median total reads` = format(round(median(tot)), big.mark = &quot;,&quot;),
+                     `% of sites with -log10(p) &gt; 10` =
+                        sprintf(&quot;%.1f%%&quot;, 100 * mean(nlp &gt; 10))),
+                 by = .(`Depth decile` = decile)][order(`Depth decile`)],
+  caption = &quot;PERMUTED data (no real signal possible): extreme p-values concentrate in the deepest sites&quot;)</code></pre>
+<table>
+<caption>PERMUTED data (no real signal possible): extreme p-values
+concentrate in the deepest sites</caption>
+<thead>
+<tr class="header">
+<th align="left">Depth decile</th>
+<th align="left">Median total reads</th>
+<th align="left">% of sites with -log10(p) &gt; 10</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">1</td>
+<td align="left">116</td>
+<td align="left">0.0%</td>
+</tr>
+<tr class="even">
+<td align="left">2</td>
+<td align="left">180</td>
+<td align="left">0.0%</td>
+</tr>
+<tr class="odd">
+<td align="left">3</td>
+<td align="left">256</td>
+<td align="left">0.0%</td>
+</tr>
+<tr class="even">
+<td align="left">4</td>
+<td align="left">360</td>
+<td align="left">0.0%</td>
+</tr>
+<tr class="odd">
+<td align="left">5</td>
+<td align="left">506</td>
+<td align="left">0.0%</td>
+</tr>
+<tr class="even">
+<td align="left">6</td>
+<td align="left">692</td>
+<td align="left">0.0%</td>
+</tr>
+<tr class="odd">
+<td align="left">7</td>
+<td align="left">984</td>
+<td align="left">0.0%</td>
+</tr>
+<tr class="even">
+<td align="left">8</td>
+<td align="left">1,524</td>
+<td align="left">0.2%</td>
+</tr>
+<tr class="odd">
+<td align="left">9</td>
+<td align="left">2,747</td>
+<td align="left">0.5%</td>
+</tr>
+<tr class="even">
+<td align="left">10</td>
+<td align="left">9,072</td>
+<td align="left">1.8%</td>
+</tr>
+</tbody>
+</table>
+<p>So the extreme p-values track sequencing depth, not genotype — which
+is why the same sites reappear at the top however the data are
+shuffled.</p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
