@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreebe6631508521f9a0f3d029db7e27358be55636e9targetblankbe66315a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreec93e1881cd70e7860630d2985ba042a2f566b12dtargetblankc93e188a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/be6631508521f9a0f3d029db7e27358be55636e9" target="_blank">be66315</a>
+<a href="https://github.com/xsun1229/pumseq/tree/c93e1881cd70e7860630d2985ba042a2f566b12d" target="_blank">c93e188</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreebe6631508521f9a0f3d029db7e27358be55636e9targetblankbe66315a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreec93e1881cd70e7860630d2985ba042a2f566b12dtargetblankc93e188a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/be6631508521f9a0f3d029db7e27358be55636e9" target="_blank">be66315</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/c93e1881cd70e7860630d2985ba042a2f566b12d" target="_blank">c93e188</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -620,6 +620,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/c93e1881cd70e7860630d2985ba042a2f566b12d/analysis/qtl_mapping_betabinomial_diagnostic.Rmd" target="_blank">c93e188</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-11
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/c93e1881cd70e7860630d2985ba042a2f566b12d/docs/qtl_mapping_betabinomial_diagnostic.html" target="_blank">c93e188</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-11
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -2405,18 +2439,33 @@ grps &lt;- list(&quot;Top 20 hits&quot;            = seq_len(N_TOP),
 knitr::kable(rbindlist(lapply(names(grps), function(nm) {
   i &lt;- grps[[nm]]
   data.table(`Site group` = nm,
-             `Median total reads` = format(round(median(dd$tot[i], na.rm = TRUE)),
-                                           big.mark = &quot;,&quot;),
-             `Per cell line` = round(median(dd$per_cl[i], na.rm = TRUE)))
-})), caption = &quot;Depth ACROSS SITES (total sequencing depth at the site)&quot;)</code></pre>
+             `Median total reads at a site` =
+               format(round(median(dd$tot[i], na.rm = TRUE)), big.mark = &quot;,&quot;),
+             `Median reads per cell line` =
+               round(median(dd$per_cl[i], na.rm = TRUE)))
+})), caption = paste(&quot;Depth ACROSS SITES. Column 2 sums reads over all cell&quot;,
+                     &quot;lines at a site. Column 3 is a median of medians: per site,&quot;,
+                     &quot;the median depth over the cell lines that have coverage&quot;,
+                     &quot;there (zeros excluded), then the median of that across the&quot;,
+                     &quot;sites in the group -- i.e. a typical cell line at a typical&quot;,
+                     &quot;site. Being a median it is not column 2 divided by 50.&quot;))</code></pre>
 <table>
-<caption>Depth ACROSS SITES (total sequencing depth at the
-site)</caption>
+<caption>Depth ACROSS SITES. Column 2 sums reads over all cell lines at
+a site. Column 3 is a median of medians: per site, the median depth over
+the cell lines that have coverage there (zeros excluded), then the
+median of that across the sites in the group – i.e. a typical cell line
+at a typical site. Being a median it is not column 2 divided by
+50.</caption>
+<colgroup>
+<col width="29%" />
+<col width="36%" />
+<col width="34%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Site group</th>
-<th align="left">Median total reads</th>
-<th align="right">Per cell line</th>
+<th align="left">Median total reads at a site</th>
+<th align="right">Median reads per cell line</th>
 </tr>
 </thead>
 <tbody>

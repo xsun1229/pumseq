@@ -606,10 +606,16 @@ grps <- list("Top 20 hits"            = seq_len(N_TOP),
 knitr::kable(rbindlist(lapply(names(grps), function(nm) {
   i <- grps[[nm]]
   data.table(`Site group` = nm,
-             `Median total reads` = format(round(median(dd$tot[i], na.rm = TRUE)),
-                                           big.mark = ","),
-             `Per cell line` = round(median(dd$per_cl[i], na.rm = TRUE)))
-})), caption = "Depth ACROSS SITES (total sequencing depth at the site)")
+             `Median total reads at a site` =
+               format(round(median(dd$tot[i], na.rm = TRUE)), big.mark = ","),
+             `Median reads per cell line` =
+               round(median(dd$per_cl[i], na.rm = TRUE)))
+})), caption = paste("Depth ACROSS SITES. Column 2 sums reads over all cell",
+                     "lines at a site. Column 3 is a median of medians: per site,",
+                     "the median depth over the cell lines that have coverage",
+                     "there (zeros excluded), then the median of that across the",
+                     "sites in the group -- i.e. a typical cell line at a typical",
+                     "site. Being a median it is not column 2 divided by 50."))
 
 fold_top20 <- median(dd$fold[seq_len(N_TOP)], na.rm = TRUE)   # within-site spread, top hits
 fold_all   <- median(dd$fold,                 na.rm = TRUE)   # ... vs genome-wide
