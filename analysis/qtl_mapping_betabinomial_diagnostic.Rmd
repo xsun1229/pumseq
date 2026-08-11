@@ -94,7 +94,7 @@ genuine cis-regulatory effect.
 
 # 2. Top `r N_TOP` QTLs: %pU by genotype at the lead cis-SNP
 
-Each panel below marks a black diamond per genotype group: the group's
+Each panel below marks a red diamond per genotype group: the group's
 depth-weighted average of the **actual beta-binomial model's fitted mean**
 (same design as the real scan — intercept + `r NPCS` M-value PCs + genotype
 dosage — refit here with `fit_bb_mle()`), not just a visual summary of the
@@ -419,7 +419,7 @@ plot_top_panels(
 
 Unlike the real top-`r N_TOP` plot above, these panels show **no clean
 separation between genotype groups** — heavily overlapping, noisy scatter
-within each group. Yet the p-values are just as extreme, and the black
+within each group. Yet the p-values are just as extreme, and the red
 diamonds (depth-weighted group means — the actual quantity the GLM fits, not
 just the raw scatter) often differ between groups even when the
 scatter looks flat
@@ -621,12 +621,3 @@ between samples: the within-site spread at the top 20 is
 `r sprintf("%.1fx", fold_top20)` against `r sprintf("%.1fx", fold_all)`
 genome-wide, i.e. no enrichment at all.
 
-Why that matters: at 200+ reads per cell line the test has enormous power,
-so any small amount of between-sample variability the model does not
-account for is amplified into a very large test statistic. The permuted
-data confirm this directly: with no real association possible, the chance
-of an extreme p-value still rises steadily with site depth, from ~0% in
-the shallowest tenth of sites to ~2% in the deepest tenth.
-
-So the extreme p-values track sequencing depth, not genotype — which is why
-the same sites reappear at the top however the data are shuffled.
