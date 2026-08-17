@@ -441,10 +441,10 @@ changes </a>
 <div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown is untracked by Git. To know which version of the R
-Markdown file created these results, you’ll want to first commit it to
-the Git repo. If you’re still working on the analysis, you can ignore
-this warning. When you’re finished, you can run
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
 <code>wflow_publish</code> to commit the R Markdown file and build the
 HTML.</p>
 </div>
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree057f47488e42072579c5db23cd7a14c36f7d0845targetblank057f474a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree53b192618822e4cad56d96d9b9a9c3ecb6cfccddtargetblank53b1926a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/057f47488e42072579c5db23cd7a14c36f7d0845" target="_blank">057f474</a>
+<a href="https://github.com/xsun1229/pumseq/tree/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd" target="_blank">53b1926</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree057f47488e42072579c5db23cd7a14c36f7d0845targetblank057f474a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree53b192618822e4cad56d96d9b9a9c3ecb6cfccddtargetblank53b1926a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/057f47488e42072579c5db23cd7a14c36f7d0845" target="_blank">057f474</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd" target="_blank">53b1926</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -572,14 +572,8 @@ were generated:
 Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
-Untracked files:
-    Untracked:  analysis/qtl_mapping_betabinomial_pathology_summary.Rmd
-    Untracked:  analysis/qtl_mapping_betabinomial_why_same_tophits.Rmd
-
 Unstaged changes:
-    Deleted:    render_binomial_updated_52688698.out
-    Deleted:    render_qtl_summary_52179078.out
-    Deleted:    render_qtl_summary_52179478.out
+    Modified:   analysis/qtl_mapping_betabinomial_pathology_summary.Rmd
 
 </code></pre>
 <p>
@@ -594,10 +588,76 @@ have uncommitted changes.
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
+
 <p>
-There are no past versions. Publish this analysis with
-<code>wflow_publish()</code> to start tracking its development.
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>analysis/qtl_mapping_betabinomial_pathology_summary.Rmd</code>)
+and HTML
+(<code>docs/qtl_mapping_betabinomial_pathology_summary.html</code>)
+files. If you’ve configured a remote Git repository (see
+<code>?wflow_git_remote</code>), click on the hyperlinks in the table
+below to view the files as they were in that past version.
 </p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd/analysis/qtl_mapping_betabinomial_pathology_summary.Rmd" target="_blank">53b1926</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd/docs/qtl_mapping_betabinomial_pathology_summary.html" target="_blank">53b1926</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+<td>
+update
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <hr>
 </div>
 </div>
@@ -854,6 +914,43 @@ ggplot(lg, aes(nlp, sid)) +
        subtitle = &quot;A working site would have its permutation points near 0. Here they land on top of the real point.&quot;) +
   theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec1-fig-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-sec1-fig-1">
+Past versions of sec1-fig-1.png
+</button>
+</p>
+<div id="fig-sec1-fig-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec1-fig-1.png" target="_blank">53b1926</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>knitr::kable(patho[order(-real)][, .(
   site = sid,
   `real -log10p` = round(real, 1),
@@ -1396,35 +1493,79 @@ strand</strong> — the same U→C change on the transcript, written against
 whichever genome strand the transcript came from. Genome-wide,
 <strong>1,118 sites</strong> (10.0% of those tested) have such a
 variant.</p>
-<p>The consequence is a phenotype with three discrete spikes: homozygous
+<p>The consequence is a phenotype with three discrete bands: homozygous
 reference near 0%, heterozygous near 50%, homozygous alternate near
 100%.</p>
 <pre class="r"><code>pu_long &lt;- function(ids, labs) rbindlist(lapply(seq_along(ids), function(k) {
   i &lt;- match(ids[k], sid_all); n &lt;- Nm[i, ]; sel &lt;- n &gt; 0
   data.table(lab = labs[k], pu = Cm[i, sel] / n[sel], n = n[sel])
 }))
+
+# One dot per cell line: x = %pU, y = its read depth on a log axis. Both axes
+# carry meaning, so the discrete %pU bands stay visible while depth is exact
+# rather than binned -- and a band made only of shallow cell lines is obvious
+# because it sits low.
+plot_pu_depth &lt;- function(dd, title, subtitle, ncol = 3) {
+  ggplot(dd, aes(pu, pmax(n, 1))) +
+    geom_vline(xintercept = c(0, 0.5, 1), colour = &quot;grey88&quot;, linewidth = 0.4) +
+    geom_point(colour = &quot;#256abf&quot;, alpha = 0.7, size = 1.7) +
+    scale_x_continuous(limits = c(-0.04, 1.04), breaks = c(0, 0.5, 1),
+                       labels = c(&quot;0&quot;, &quot;50&quot;, &quot;100&quot;)) +
+    scale_y_log10(labels = scales::comma) +
+    facet_wrap(~ lab, ncol = ncol) +
+    labs(x = &quot;%pU in one cell line&quot;, y = &quot;read depth of that cell line (log scale)&quot;,
+         title = title, subtitle = subtitle) +
+    theme_bw(base_size = 11) +
+    theme(strip.text = element_text(size = 8), panel.grid.minor = element_blank())
+}
 uc_ex &lt;- site26[class == &quot;U/C SNP on the pU base&quot;][order(-real_nlp)][1:6]
 d &lt;- pu_long(uc_ex$sid, sprintf(&quot;chr%s  (%s)\n-log10p=%.0f | %s reads&quot;,
                                 sub(&quot; .*&quot;, &quot;&quot;, uc_ex$sid),
                                 uc_ex$snp_at_site, uc_ex$real_nlp,
                                 format(uc_ex$total_depth, big.mark = &quot;,&quot;)))
-d[, depth_bin := cut(n, c(-Inf, 10, 100, 1000, Inf),
-                     labels = c(&quot;&lt; 10&quot;, &quot;10-100&quot;, &quot;100-1,000&quot;, &quot;&gt; 1,000&quot;))]
-DFILL &lt;- c(&quot;&lt; 10&quot; = &quot;#86b6ef&quot;, &quot;10-100&quot; = &quot;#2a78d6&quot;,
-           &quot;100-1,000&quot; = &quot;#184f95&quot;, &quot;&gt; 1,000&quot; = &quot;#0d366b&quot;)
-ggplot(d, aes(pu, fill = depth_bin)) +
-  geom_histogram(breaks = seq(0, 1, 0.05), colour = &quot;white&quot;, linewidth = 0.15) +
-  scale_fill_manual(values = DFILL, drop = FALSE, name = &quot;read depth of the cell line&quot;,
-                    guide = guide_legend(nrow = 1, override.aes = list(colour = NA))) +
-  scale_x_continuous(breaks = c(0, 0.5, 1), limits = c(-0.03, 1.03)) +
-  facet_wrap(~ lab, ncol = 3, scales = &quot;free_y&quot;) +
-  labs(x = &quot;%pU in one cell line&quot;, y = &quot;number of cell lines&quot;,
-       title = &quot;Mechanism A: three discrete spikes, because %pU is reporting genotype&quot;,
-       subtitle = &quot;The peaks at 0 / 50 / 100% are the three genotypes at the U/C variant, not three levels of modification.&quot;) +
-  theme_bw(base_size = 11) +
-  theme(legend.position = &quot;bottom&quot;, strip.text = element_text(size = 8),
-        panel.grid.minor = element_blank())</code></pre>
+plot_pu_depth(d,
+  &quot;Mechanism A: three discrete bands, because %pU is reporting genotype&quot;,
+  paste(&quot;Each dot is one cell line. The bands at 0 / 50 / 100% are the three&quot;,
+        &quot;genotypes at the U/C variant, not three levels of modification.&quot;,
+        &quot;\nThey persist at every depth, so they are not a low-coverage artefact.&quot;))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-uc-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-sec2-uc-1">
+Past versions of sec2-uc-1.png
+</button>
+</p>
+<div id="fig-sec2-uc-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-uc-1.png" target="_blank">53b1926</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Beyond the 14 with an actual variant call, <strong>four more show the
 same three-clump shape but have no genotyped variant at the
 base</strong>. The most likely explanation is the same mechanism with a
@@ -1443,17 +1584,49 @@ fixes it.</p>
 <pre class="r"><code>ns &lt;- site26[class == &quot;3-clump shape, no genotyped SNP at the base&quot;][order(-real_nlp)]
 d2 &lt;- pu_long(ns$sid, sprintf(&quot;chr%s\n-log10p=%.0f | frac at 0/50/100%% = %.2f&quot;,
                               sub(&quot; .*&quot;, &quot;&quot;, ns$sid), ns$real_nlp, ns$spike3))
-ggplot(d2, aes(pu)) +
-  geom_histogram(breaks = seq(0, 1, 0.05), fill = &quot;#3987e5&quot;,
-                 colour = &quot;white&quot;, linewidth = 0.15) +
-  scale_x_continuous(breaks = c(0, 0.5, 1), limits = c(-0.03, 1.03)) +
-  facet_wrap(~ lab, nrow = 1, scales = &quot;free_y&quot;) +
-  labs(x = &quot;%pU in one cell line&quot;, y = &quot;cell lines&quot;,
-       title = &quot;The same signature with no genotyped variant at the base&quot;,
-       subtitle = &quot;Consistent with a U/C variant below MAF 0.05, or one that was not called.&quot;) +
-  theme_bw(base_size = 11) +
-  theme(strip.text = element_text(size = 8), panel.grid.minor = element_blank())</code></pre>
+plot_pu_depth(d2,
+  &quot;The same signature, with no genotyped variant at the base&quot;,
+  paste(&quot;Consistent with a U/C variant below MAF 0.05, or one that was not called.&quot;,
+        &quot;\nNote the cell lines at exactly 0% carry thousands of reads -- this is not missing data.&quot;),
+  ncol = 4)</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-nosnp-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-sec2-nosnp-1">
+Past versions of sec2-nosnp-1.png
+</button>
+</p>
+<div id="fig-sec2-nosnp-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-nosnp-1.png" target="_blank">53b1926</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div
 id="mechanism-b-one-cell-line-supplies-nearly-all-the-converted-reads-8-of-26"
@@ -1468,21 +1641,49 @@ on modest depth.</p>
 d3 &lt;- pu_long(cc$sid, sprintf(&quot;chr%s\n-log10p=%.0f | pooled %%pU=%.3f | top line=%.0f%%&quot;,
                               sub(&quot; .*&quot;, &quot;&quot;, cc$sid), cc$real_nlp,
                               cc$pooled_pu, 100 * cc$top_share))
-d3[, depth_bin := cut(n, c(-Inf, 10, 100, 1000, Inf),
-                      labels = c(&quot;&lt; 10&quot;, &quot;10-100&quot;, &quot;100-1,000&quot;, &quot;&gt; 1,000&quot;))]
-ggplot(d3, aes(pu, fill = depth_bin)) +
-  geom_histogram(breaks = seq(0, 1, 0.05), colour = &quot;white&quot;, linewidth = 0.15) +
-  scale_fill_manual(values = DFILL, drop = FALSE, name = &quot;read depth of the cell line&quot;,
-                    guide = guide_legend(nrow = 1, override.aes = list(colour = NA))) +
-  scale_x_continuous(breaks = c(0, 0.5, 1), limits = c(-0.03, 1.03)) +
-  facet_wrap(~ lab, ncol = 3, scales = &quot;free_y&quot;) +
-  labs(x = &quot;%pU in one cell line&quot;, y = &quot;number of cell lines&quot;,
-       title = &quot;Mechanism B: a near-empty site plus one discordant cell line&quot;,
-       subtitle = &quot;&#39;top line&#39; = share of the site&#39;s converted reads contributed by a single cell line.&quot;) +
-  theme_bw(base_size = 11) +
-  theme(legend.position = &quot;bottom&quot;, strip.text = element_text(size = 8),
-        panel.grid.minor = element_blank())</code></pre>
+plot_pu_depth(d3,
+  &quot;Mechanism B: a near-empty site plus one discordant cell line&quot;,
+  paste(&quot;&#39;top line&#39; = share of the site&#39;s converted reads from a single cell line.&quot;,
+        &quot;\nThe deep cell lines all sit at 0%, and the one outlier to their right is&quot;,
+        &quot;usually shallower -- yet it carries the site&#39;s entire p-value (\u00a73.5).&quot;))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-conc-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-sec2-conc-1">
+Past versions of sec2-conc-1.png
+</button>
+</p>
+<div id="fig-sec2-conc-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-conc-1.png" target="_blank">53b1926</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>The most extreme case, chr9:107330635, has <strong>98% of its
 converted reads from one cell line out of 50</strong>. There is nothing
 to make a QTL out of.</p>
@@ -1505,17 +1706,136 @@ the no-SNP fit must describe all 50 cell lines with a single mean.</p>
 <div id="null-misfit-how-much-room-the-no-snp-fit-leaves"
 class="section level2">
 <h2>3.2 Null misfit: how much room the no-SNP fit leaves</h2>
-<p>Define <strong>null misfit</strong> as how much the log-likelihood
-improves if the phenotype is simply <em>allowed</em> to have three
-separate levels — the log-likelihood of a model with two extra indicator
-columns (from a 3-group k-means on %pU) minus that of the one-mean null.
-Crucially this uses <strong>no genotype at all</strong>, so it is a
-property of the phenotype values alone.</p>
+<div id="the-idea-in-one-small-example" class="section level3">
+<h3>The idea, in one small example</h3>
+<p>Six cell lines, 100 reads each, and two toy sites. Fit each twice —
+once forced to use a single rate for all six cell lines, once allowed
+three — then ask the model how probable the observed data is:</p>
+<pre class="r"><code>toy &lt;- function(y) {
+  sc  &lt;- function(y, p) sum(dbinom(y, 100, p, log = TRUE))
+  one &lt;- sc(y, mean(y) / 100)
+  three &lt;- sum(sapply(split(y, rep(1:3, each = 2)),
+                      function(g) sc(g, mean(g) / 100)))
+  list(one = one, three = three)
+}
+A &lt;- toy(c(96, 96, 49, 49, 3, 3)); B &lt;- toy(c(52, 48, 51, 49, 50, 50))
+knitr::kable(data.table(
+  site = c(&quot;A: three clumps -- 96, 96, 49, 49, 3, 3&quot;,
+           &quot;B: one blob -- 52, 48, 51, 49, 50, 50&quot;),
+  `P(data), one rate`    = sprintf(&quot;%.0e&quot;, exp(c(A$one, B$one))),
+  `P(data), three rates` = sprintf(&quot;%.0e&quot;, exp(c(A$three, B$three))),
+  `misfit` = sprintf(&quot;%.1f&quot;, c(A$three - A$one, B$three - B$one))),
+  caption = paste(&quot;A binomial version, for legibility. The one-rate model calls&quot;,
+                  &quot;site A&#39;s data essentially impossible; at site B, allowing&quot;,
+                  &quot;three rates buys nothing at all.&quot;))</code></pre>
+<table>
+<caption>A binomial version, for legibility. The one-rate model calls
+site A’s data essentially impossible; at site B, allowing three rates
+buys nothing at all.</caption>
+<colgroup>
+<col width="46%" />
+<col width="20%" />
+<col width="24%" />
+<col width="8%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="left">P(data), one rate</th>
+<th align="left">P(data), three rates</th>
+<th align="left">misfit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">A: three clumps – 96, 96, 49, 49, 3, 3</td>
+<td align="left">1e-99</td>
+<td align="left">1e-05</td>
+<td align="left">216.7</td>
+</tr>
+<tr class="even">
+<td align="left">B: one blob – 52, 48, 51, 49, 50, 50</td>
+<td align="left">2e-07</td>
+<td align="left">2e-07</td>
+<td align="left">0.0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Misfit is that improvement.</strong> At site A roughly 217
+log-likelihood units of improvement are available and the one-rate model
+collects none of them; at site B there are none to collect. Nothing else
+is meant by “unexplained”.</p>
 <p>A beta distribution with one mean can be a single hump, a tilted
 hump, or a U-shape with mass at both ends. It <strong>cannot</strong>
 place three separate spikes at 0, 0.5 and 1. So at the pathological
 sites the null fit is not merely imperfect, it is structurally
 incapable, and the misfit is enormous.</p>
+</div>
+<div id="the-definition-used-in-this-page" class="section level3">
+<h3>The definition used in this page</h3>
+<p>For cell line <span class="math inline">\(i\)</span>, <span
+class="math inline">\(y_i\)</span> converted reads out of <span
+class="math inline">\(n_i\)</span> total. Beta-binomial with mean <span
+class="math inline">\(\mu_i\)</span> and a single dispersion <span
+class="math inline">\(\phi\)</span> shared across cell lines:</p>
+<p><span class="math display">\[\mu_i =
+\operatorname{logit}^{-1}\!\left(X_i^\top\beta\right), \qquad
+  k = \frac{1-\phi}{\phi}, \qquad a_i = \mu_i k, \qquad b_i =
+(1-\mu_i)k\]</span></p>
+<p><span class="math display">\[\ell(\beta,\phi) \;=\; \sum_i
+\left[\log\binom{n_i}{y_i}
+  \;+\; \log B\!\left(y_i + a_i,\; n_i - y_i + b_i\right)
+  \;-\; \log B\!\left(a_i,\, b_i\right)\right]\]</span></p>
+<p>with <span class="math inline">\(B\)</span> the beta function. Each
+fit maximises this over <span
+class="math inline">\((\beta,\phi)\)</span> using <code>optim</code>
+with an analytic gradient, started from a binomial <code>glm.fit</code>;
+<span class="math inline">\(\phi\)</span> is reparameterised as <span
+class="math inline">\(\phi = \varepsilon +
+(1-2\varepsilon)\operatorname{logit}^{-1}(\theta)\)</span> with <span
+class="math inline">\(\varepsilon = 10^{-6}\)</span>, to keep it off the
+<span class="math inline">\(\phi = 0\)</span> boundary where <span
+class="math inline">\(k \to \infty\)</span> degenerates the
+likelihood.</p>
+<p>Two designs are fitted to the same <span class="math inline">\(y,
+n\)</span>:</p>
+<p><span class="math display">\[X_{\text{null}} = \left[\mathbf{1},\
+\text{PC}_1,\ \text{PC}_2,\ \text{PC}_3\right]\]</span></p>
+<p><span class="math display">\[X_{\text{ref}} = \left[X_{\text{null}},\
+\mathbb{1}\{c_i = 2\},\ \mathbb{1}\{c_i = 3\}\right]\]</span></p>
+<p>where <span class="math inline">\(c_i \in \{1,2,3\}\)</span> comes
+from 3-means clustering of the observed rates <span
+class="math inline">\(p_i = y_i/n_i\)</span>, relabelled by ascending
+cluster centre. Then</p>
+<p><span class="math display">\[\textbf{misfit} \;=\;
+\hat\ell\!\left(X_{\text{ref}}\right) -
+\hat\ell\!\left(X_{\text{null}}\right)\]</span></p>
+<p>Two properties make this the right yardstick.</p>
+<p><strong>It is nested</strong>, so misfit <span
+class="math inline">\(\ge 0\)</span> up to optimiser noise — and it has
+the same form as the test statistic itself, which is <span
+class="math inline">\(2\!\left(\hat\ell_{\text{full}} -
+\hat\ell_{\text{null}}\right)\)</span> with the SNP appended in place of
+the indicators. The statistic and the misfit draw on the same quantity,
+which is the whole argument of this section.</p>
+<p><strong>It is genotype-free.</strong> <span
+class="math inline">\(X_{\text{ref}}\)</span> is built from <span
+class="math inline">\(p_i\)</span> alone. Under a permutation <span
+class="math inline">\(\sigma\)</span>, all of <span
+class="math inline">\(y\)</span>, <span
+class="math inline">\(n\)</span>, <span
+class="math inline">\(X_{\text{null}}\)</span> and the cluster labels
+are reindexed by that same <span class="math inline">\(\sigma\)</span>,
+so every term in the sum is the same term in a different order. Misfit
+is therefore <em>exactly</em> permutation-invariant — §3.3.</p>
+<p>Two caveats. Three clusters is an arbitrary choice, so this is a
+<strong>floor</strong> on the unexplained likelihood rather than all of
+it: a phenotype with four distinct levels would have more than this
+measures. And it is <strong>undefined</strong> wherever fewer than six
+cell lines are covered or fewer than three distinct <span
+class="math inline">\(p_i\)</span> exist — with 49 cell lines at exactly
+zero there is no third cluster to form. That is why misfit cannot
+replace the concentration cap (§4.3).</p>
 <pre class="r"><code>mfp &lt;- mf[is.finite(misfit)]
 mfp[, class := factor(class, levels = names(CLS_COL))]
 knitr::kable(mfp[, .(sites = .N,
@@ -1585,6 +1905,44 @@ one-mean model), computed without using genotype.</caption>
                                 nrow(mfp[class == &quot;the 26 pathological sites&quot;])))) +
   theme_bw(base_size = 12)</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec3-misfit-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-sec3-misfit-1">
+Past versions of sec3-misfit-1.png
+</button>
+</p>
+<div id="fig-sec3-misfit-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec3-misfit-1.png" target="_blank">53b1926</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
 </div>
 <div id="permutation-preserves-the-misfit-exactly"
 class="section level2">
@@ -1638,6 +1996,43 @@ ggplot(pw, aes(pearson_nlp, lrt_nlp, colour = class)) +
                         &quot;\nEvery point is permuted data, so the true association is zero throughout.&quot;)) +
   theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec3-gap-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-sec3-gap-1">
+Past versions of sec3-gap-1.png
+</button>
+</p>
+<div id="fig-sec3-gap-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec3-gap-1.png" target="_blank">53b1926</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>knitr::kable(pw[, .(sites = .N,
                     `median LRT -log10p`     = round(median(lrt_nlp), 1),
                     `median Pearson -log10p` = round(median(pearson_nlp), 1),
@@ -2041,6 +2436,43 @@ ggplot(qq, aes(expected, observed, colour = dataset)) +
                         &quot;not, the test is manufacturing signal from shuffled data.&quot;)) +
   theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec4-qq-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-sec4-qq-1">
+Past versions of sec4-qq-1.png
+</button>
+</p>
+<div id="fig-sec4-qq-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec4-qq-1.png" target="_blank">53b1926</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="what-actually-changed" class="section level2">
 <h2>4.3 What actually changed</h2>
@@ -2420,6 +2852,43 @@ ggplot(af, aes(perm_ceil, fill = class)) +
        title = &quot;How large a p-value each significant site can fake under permutation&quot;) +
   theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec5-ceilfig-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-sec5-ceilfig-1">
+Past versions of sec5-ceilfig-1.png
+</button>
+</p>
+<div id="fig-sec5-ceilfig-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec5-ceilfig-1.png" target="_blank">53b1926</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="check-1-on-hits-spanning-the-significance-range"
 class="section level2">

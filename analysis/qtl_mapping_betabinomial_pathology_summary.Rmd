@@ -219,7 +219,7 @@ U→C change on the transcript, written against whichever genome strand the
 transcript came from. Genome-wide, **`r format(fread(file.path(DIAG, "uc_aliasing_sites.txt"))[, .N], big.mark = ",")`
 sites** (10.0% of those tested) have such a variant.
 
-The consequence is a phenotype with three discrete spikes: homozygous
+The consequence is a phenotype with three discrete bands: homozygous
 reference near 0%, heterozygous near 50%, homozygous alternate near 100%.
 
 ```{r sec2-uc, fig.height=6.5}
@@ -227,27 +227,34 @@ pu_long <- function(ids, labs) rbindlist(lapply(seq_along(ids), function(k) {
   i <- match(ids[k], sid_all); n <- Nm[i, ]; sel <- n > 0
   data.table(lab = labs[k], pu = Cm[i, sel] / n[sel], n = n[sel])
 }))
+
+# One dot per cell line: x = %pU, y = its read depth on a log axis. Both axes
+# carry meaning, so the discrete %pU bands stay visible while depth is exact
+# rather than binned -- and a band made only of shallow cell lines is obvious
+# because it sits low.
+plot_pu_depth <- function(dd, title, subtitle, ncol = 3) {
+  ggplot(dd, aes(pu, pmax(n, 1))) +
+    geom_vline(xintercept = c(0, 0.5, 1), colour = "grey88", linewidth = 0.4) +
+    geom_point(colour = "#256abf", alpha = 0.7, size = 1.7) +
+    scale_x_continuous(limits = c(-0.04, 1.04), breaks = c(0, 0.5, 1),
+                       labels = c("0", "50", "100")) +
+    scale_y_log10(labels = scales::comma) +
+    facet_wrap(~ lab, ncol = ncol) +
+    labs(x = "%pU in one cell line", y = "read depth of that cell line (log scale)",
+         title = title, subtitle = subtitle) +
+    theme_bw(base_size = 11) +
+    theme(strip.text = element_text(size = 8), panel.grid.minor = element_blank())
+}
 uc_ex <- site26[class == "U/C SNP on the pU base"][order(-real_nlp)][1:6]
 d <- pu_long(uc_ex$sid, sprintf("chr%s  (%s)\n-log10p=%.0f | %s reads",
                                 sub(" .*", "", uc_ex$sid),
                                 uc_ex$snp_at_site, uc_ex$real_nlp,
                                 format(uc_ex$total_depth, big.mark = ",")))
-d[, depth_bin := cut(n, c(-Inf, 10, 100, 1000, Inf),
-                     labels = c("< 10", "10-100", "100-1,000", "> 1,000"))]
-DFILL <- c("< 10" = "#86b6ef", "10-100" = "#2a78d6",
-           "100-1,000" = "#184f95", "> 1,000" = "#0d366b")
-ggplot(d, aes(pu, fill = depth_bin)) +
-  geom_histogram(breaks = seq(0, 1, 0.05), colour = "white", linewidth = 0.15) +
-  scale_fill_manual(values = DFILL, drop = FALSE, name = "read depth of the cell line",
-                    guide = guide_legend(nrow = 1, override.aes = list(colour = NA))) +
-  scale_x_continuous(breaks = c(0, 0.5, 1), limits = c(-0.03, 1.03)) +
-  facet_wrap(~ lab, ncol = 3, scales = "free_y") +
-  labs(x = "%pU in one cell line", y = "number of cell lines",
-       title = "Mechanism A: three discrete spikes, because %pU is reporting genotype",
-       subtitle = "The peaks at 0 / 50 / 100% are the three genotypes at the U/C variant, not three levels of modification.") +
-  theme_bw(base_size = 11) +
-  theme(legend.position = "bottom", strip.text = element_text(size = 8),
-        panel.grid.minor = element_blank())
+plot_pu_depth(d,
+  "Mechanism A: three discrete bands, because %pU is reporting genotype",
+  paste("Each dot is one cell line. The bands at 0 / 50 / 100% are the three",
+        "genotypes at the U/C variant, not three levels of modification.",
+        "\nThey persist at every depth, so they are not a low-coverage artefact."))
 ```
 
 Beyond the 14 with an actual variant call, **four more show the same three-clump
@@ -269,16 +276,11 @@ where it started; §4 shows this happening and what fixes it.
 ns <- site26[class == "3-clump shape, no genotyped SNP at the base"][order(-real_nlp)]
 d2 <- pu_long(ns$sid, sprintf("chr%s\n-log10p=%.0f | frac at 0/50/100%% = %.2f",
                               sub(" .*", "", ns$sid), ns$real_nlp, ns$spike3))
-ggplot(d2, aes(pu)) +
-  geom_histogram(breaks = seq(0, 1, 0.05), fill = "#3987e5",
-                 colour = "white", linewidth = 0.15) +
-  scale_x_continuous(breaks = c(0, 0.5, 1), limits = c(-0.03, 1.03)) +
-  facet_wrap(~ lab, nrow = 1, scales = "free_y") +
-  labs(x = "%pU in one cell line", y = "cell lines",
-       title = "The same signature with no genotyped variant at the base",
-       subtitle = "Consistent with a U/C variant below MAF 0.05, or one that was not called.") +
-  theme_bw(base_size = 11) +
-  theme(strip.text = element_text(size = 8), panel.grid.minor = element_blank())
+plot_pu_depth(d2,
+  "The same signature, with no genotyped variant at the base",
+  paste("Consistent with a U/C variant below MAF 0.05, or one that was not called.",
+        "\nNote the cell lines at exactly 0% carry thousands of reads -- this is not missing data."),
+  ncol = 4)
 ```
 
 ## 2.3 Mechanism B: one cell line supplies nearly all the converted reads (8 of 26)
@@ -292,20 +294,11 @@ cc <- site26[class == "one cell line dominates"][order(-real_nlp)]
 d3 <- pu_long(cc$sid, sprintf("chr%s\n-log10p=%.0f | pooled %%pU=%.3f | top line=%.0f%%",
                               sub(" .*", "", cc$sid), cc$real_nlp,
                               cc$pooled_pu, 100 * cc$top_share))
-d3[, depth_bin := cut(n, c(-Inf, 10, 100, 1000, Inf),
-                      labels = c("< 10", "10-100", "100-1,000", "> 1,000"))]
-ggplot(d3, aes(pu, fill = depth_bin)) +
-  geom_histogram(breaks = seq(0, 1, 0.05), colour = "white", linewidth = 0.15) +
-  scale_fill_manual(values = DFILL, drop = FALSE, name = "read depth of the cell line",
-                    guide = guide_legend(nrow = 1, override.aes = list(colour = NA))) +
-  scale_x_continuous(breaks = c(0, 0.5, 1), limits = c(-0.03, 1.03)) +
-  facet_wrap(~ lab, ncol = 3, scales = "free_y") +
-  labs(x = "%pU in one cell line", y = "number of cell lines",
-       title = "Mechanism B: a near-empty site plus one discordant cell line",
-       subtitle = "'top line' = share of the site's converted reads contributed by a single cell line.") +
-  theme_bw(base_size = 11) +
-  theme(legend.position = "bottom", strip.text = element_text(size = 8),
-        panel.grid.minor = element_blank())
+plot_pu_depth(d3,
+  "Mechanism B: a near-empty site plus one discordant cell line",
+  paste("'top line' = share of the site's converted reads from a single cell line.",
+        "\nThe deep cell lines all sit at 0%, and the one outlier to their right is",
+        "usually shallower -- yet it carries the site's entire p-value (\u00a73.5)."))
 ```
 
 The most extreme case, chr9:107330635, has **98% of its converted reads from
@@ -325,16 +318,90 @@ must describe all 50 cell lines with a single mean.
 
 ## 3.2 Null misfit: how much room the no-SNP fit leaves
 
-Define **null misfit** as how much the log-likelihood improves if the phenotype
-is simply *allowed* to have three separate levels — the log-likelihood of a
-model with two extra indicator columns (from a 3-group k-means on %pU) minus
-that of the one-mean null. Crucially this uses **no genotype at all**, so it is
-a property of the phenotype values alone.
+### The idea, in one small example
+
+Six cell lines, 100 reads each, and two toy sites. Fit each twice — once forced
+to use a single rate for all six cell lines, once allowed three — then ask the
+model how probable the observed data is:
+
+```{r sec3-toy}
+toy <- function(y) {
+  sc  <- function(y, p) sum(dbinom(y, 100, p, log = TRUE))
+  one <- sc(y, mean(y) / 100)
+  three <- sum(sapply(split(y, rep(1:3, each = 2)),
+                      function(g) sc(g, mean(g) / 100)))
+  list(one = one, three = three)
+}
+A <- toy(c(96, 96, 49, 49, 3, 3)); B <- toy(c(52, 48, 51, 49, 50, 50))
+knitr::kable(data.table(
+  site = c("A: three clumps -- 96, 96, 49, 49, 3, 3",
+           "B: one blob -- 52, 48, 51, 49, 50, 50"),
+  `P(data), one rate`    = sprintf("%.0e", exp(c(A$one, B$one))),
+  `P(data), three rates` = sprintf("%.0e", exp(c(A$three, B$three))),
+  `misfit` = sprintf("%.1f", c(A$three - A$one, B$three - B$one))),
+  caption = paste("A binomial version, for legibility. The one-rate model calls",
+                  "site A's data essentially impossible; at site B, allowing",
+                  "three rates buys nothing at all."))
+```
+
+**Misfit is that improvement.** At site A roughly 217 log-likelihood units of
+improvement are available and the one-rate model collects none of them; at site B
+there are none to collect. Nothing else is meant by "unexplained".
 
 A beta distribution with one mean can be a single hump, a tilted hump, or a
 U-shape with mass at both ends. It **cannot** place three separate spikes at 0,
 0.5 and 1. So at the pathological sites the null fit is not merely imperfect,
 it is structurally incapable, and the misfit is enormous.
+
+### The definition used in this page
+
+For cell line $i$, $y_i$ converted reads out of $n_i$ total. Beta-binomial with
+mean $\mu_i$ and a single dispersion $\phi$ shared across cell lines:
+
+$$\mu_i = \operatorname{logit}^{-1}\!\left(X_i^\top\beta\right), \qquad
+  k = \frac{1-\phi}{\phi}, \qquad a_i = \mu_i k, \qquad b_i = (1-\mu_i)k$$
+
+$$\ell(\beta,\phi) \;=\; \sum_i \left[\log\binom{n_i}{y_i}
+  \;+\; \log B\!\left(y_i + a_i,\; n_i - y_i + b_i\right)
+  \;-\; \log B\!\left(a_i,\, b_i\right)\right]$$
+
+with $B$ the beta function. Each fit maximises this over $(\beta,\phi)$ using
+`optim` with an analytic gradient, started from a binomial `glm.fit`; $\phi$ is
+reparameterised as
+$\phi = \varepsilon + (1-2\varepsilon)\operatorname{logit}^{-1}(\theta)$ with
+$\varepsilon = 10^{-6}$, to keep it off the $\phi = 0$ boundary where
+$k \to \infty$ degenerates the likelihood.
+
+Two designs are fitted to the same $y, n$:
+
+$$X_{\text{null}} = \left[\mathbf{1},\ \text{PC}_1,\ \text{PC}_2,\ \text{PC}_3\right]$$
+
+$$X_{\text{ref}} = \left[X_{\text{null}},\ \mathbb{1}\{c_i = 2\},\ \mathbb{1}\{c_i = 3\}\right]$$
+
+where $c_i \in \{1,2,3\}$ comes from 3-means clustering of the observed rates
+$p_i = y_i/n_i$, relabelled by ascending cluster centre. Then
+
+$$\textbf{misfit} \;=\; \hat\ell\!\left(X_{\text{ref}}\right) - \hat\ell\!\left(X_{\text{null}}\right)$$
+
+Two properties make this the right yardstick.
+
+**It is nested**, so misfit $\ge 0$ up to optimiser noise — and it has the same
+form as the test statistic itself, which is
+$2\!\left(\hat\ell_{\text{full}} - \hat\ell_{\text{null}}\right)$ with the SNP
+appended in place of the indicators. The statistic and the misfit draw on the
+same quantity, which is the whole argument of this section.
+
+**It is genotype-free.** $X_{\text{ref}}$ is built from $p_i$ alone. Under a
+permutation $\sigma$, all of $y$, $n$, $X_{\text{null}}$ and the cluster labels
+are reindexed by that same $\sigma$, so every term in the sum is the same term in
+a different order. Misfit is therefore *exactly* permutation-invariant — §3.3.
+
+Two caveats. Three clusters is an arbitrary choice, so this is a **floor** on the
+unexplained likelihood rather than all of it: a phenotype with four distinct
+levels would have more than this measures. And it is **undefined** wherever fewer
+than six cell lines are covered or fewer than three distinct $p_i$ exist — with
+49 cell lines at exactly zero there is no third cluster to form. That is why
+misfit cannot replace the concentration cap (§4.3).
 
 ```{r sec3-misfit, fig.height=4.6}
 mfp <- mf[is.finite(misfit)]
