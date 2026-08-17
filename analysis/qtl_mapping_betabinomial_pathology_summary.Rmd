@@ -91,9 +91,13 @@ This page traces that to its cause. In brief:
    that generalize beyond this curated list — a U/C variant call, a
    single-cell-line cap, and a misfit cut — do better than the list itself when
    combined, but no one of them is sufficient alone (§4).
-5. The remaining significant hits do **not** show this signature: their
-   p-values agree with an ordinary correlation test, and their permutation
-   p-values sit exactly at chance level.
+5. The remaining significant hits do **not** show this statistical signature:
+   their p-values agree with an ordinary correlation test, and their permutation
+   p-values sit at exactly the level chance predicts. One caveat survives that,
+   though — **93 of the 311 survivors have %pU as banded as a U/C-aliasing
+   site** (§2.4). Banding is produced both by aliasing *and* by a genuine
+   large-effect QTL, so it cannot settle which, and for those sites the question
+   is still open.
 
 ```{r headline}
 knitr::kable(exc, col.names = c("", "n"),
@@ -251,10 +255,13 @@ d <- pu_long(uc_ex$sid, sprintf("chr%s  (%s)\n-log10p=%.0f | %s reads",
                                 uc_ex$snp_at_site, uc_ex$real_nlp,
                                 format(uc_ex$total_depth, big.mark = ",")))
 plot_pu_depth(d,
-  "Mechanism A: three discrete bands, because %pU is reporting genotype",
-  paste("Each dot is one cell line. The bands at 0 / 50 / 100% are the three",
-        "genotypes at the U/C variant, not three levels of modification.",
-        "\nThey persist at every depth, so they are not a low-coverage artefact."))
+  "Mechanism A: discrete %pU bands, because %pU is reporting genotype",
+  paste("Each dot is one cell line. Bands at 0 / 50 / 100% are the three genotypes",
+        "at the U/C variant, not three levels of modification, and they persist at",
+        "every depth -- so they are not a low-coverage artefact.",
+        "\nThe pattern is not uniformly clean: at the two strongest sites (chr6, chr2)",
+        "only the 0% band is sharp and the rest is diffuse, so aliasing is plainly",
+        "present but is not the whole story there."))
 ```
 
 Beyond the 14 with an actual variant call, **four more show the same three-clump
@@ -264,6 +271,29 @@ not called — but that is inferred from the phenotype shape and **not directly
 confirmed**. The clearest is chr14:22551976: 11 cell lines at exactly 0.00, 26 in
 a tight band near 0.40, 12 at ~1.00, with ~130 reads each. No enzymatic
 modification rate behaves that way.
+
+### Where these sites sit in the genome
+
+```{r sec2-mhc}
+s26 <- copy(site26)
+s26[, chr := sub(" .*", "", sid)][, pos := as.integer(sub(".* ", "", sid))]
+s26[, mhc := chr == "6" & pos > 28.5e6 & pos < 33.4e6]
+knitr::kable(s26[, .(sites = .N,
+                     `median -log10p` = round(median(real_nlp), 1),
+                     classes = paste(sort(unique(sub(",.*", "", class))), collapse = "; ")),
+                 by = .(region = ifelse(mhc, "chr6 MHC (28.5-33.4 Mb)", "rest of the genome"))],
+  caption = paste("The MHC is 5 Mb, about 0.16% of the genome, but supplies",
+                  sprintf("%d of the 26 (%.0f%%).", sum(s26$mhc), 100*mean(s26$mhc))))
+```
+
+**`r sum(s26$mhc)` of the 26 sit in the MHC** — every chr6 site among them, inside
+a 5 Mb window that is roughly 0.16% of the genome. That is a ~`r sprintf("%.0f", (sum(s26$mhc)/nrow(s26)) / 0.0016)`-fold
+enrichment, and it fits the mechanism: the MHC is the most polymorphic region in
+the human genome and among the hardest to map, so it is exactly where you would
+expect both uncalled U↔C variants and reference-mapping artefacts to concentrate.
+It also strengthens the inference about the four sites with no variant call —
+**two of those four are in the MHC**, where a variant missing from our call set is
+unsurprising rather than a stretch.
 
 These four matter out of proportion to their number. Because no variant is
 called at the base, **no annotation-based filter can see them** — and they
@@ -303,6 +333,117 @@ plot_pu_depth(d3,
 
 The most extreme case, chr9:107330635, has **98% of its converted reads from
 one cell line out of 50**. There is nothing to make a QTL out of.
+
+One thing the figure invites but does not support: many of the cell lines sitting
+at 0% have only a handful of reads, which looks like it might be the real
+problem. It is not. Shallow cell lines are the norm throughout this dataset — at
+a randomly chosen site the median cell line has **9** reads and **53%** of covered
+cell lines have fewer than 10, whereas these eight sites are *better* covered than
+average (median 40 reads, 25% below 10 reads). So low depth is background
+conditions here, not the distinguishing feature. What singles these sites out is
+the concentration of the converted reads, which is why the filter is written on
+`top_share` rather than on depth.
+
+## 2.4 For comparison: what ordinary sites look like
+
+The panels above are only interpretable against a baseline. Same axes, same
+builder, two comparison sets: significant hits that survive both filters, and
+sites drawn at random from those tested but never significant.
+
+```{r sec2-compare, fig.height=6.5}
+set.seed(20260817)
+surv_ids <- aud[class == "surviving" & !is.na(real)][order(real)]$sid
+pick_s <- surv_ids[unique(round(seq(1, length(surv_ids), length.out = 6)))]
+rand_ids <- sample(setdiff(mf_all$sid, aud$sid), 6)
+
+lab_of <- function(ids, with_p) vapply(seq_along(ids), function(k) {
+  i <- match(ids[k], sid_all)
+  base <- sprintf("chr%s\npooled %%pU=%.3f | %s reads", sub(" .*", "", ids[k]),
+                  sum(Cm[i, ]) / sum(Nm[i, ]), format(sum(Nm[i, ]), big.mark = ","))
+  if (!with_p) return(base)
+  sub("\n", sprintf("\n-log10p=%.1f | ", aud[sid == ids[k]]$real), base)
+}, character(1))
+
+ds <- pu_long(pick_s, lab_of(pick_s, TRUE))
+dr <- pu_long(rand_ids, lab_of(rand_ids, FALSE))
+```
+
+### Significant hits that survive both filters
+
+```{r sec2-surv, fig.height=4.6}
+plot_pu_depth(ds,
+  "Surviving significant hits, spanning the significance range",
+  paste("Some (chr11, chr19, chr20) form the single gradual cloud one would hope for.",
+        "\nOthers (chr5, chr15, chr16) look banded -- see the caveat below. The banded",
+        "appearance alone does not separate a real large-effect QTL from an artefact."))
+```
+
+### Random sites, never significant
+
+```{r sec2-rand, fig.height=4.6}
+plot_pu_depth(dr,
+  "Six sites drawn at random from those tested but never significant",
+  paste("The typical site: low %pU, shallow coverage in most cell lines,",
+        "no structure. Note how much shallower these are than the",
+        "pathological panels -- low depth is the norm here, not the defect."))
+```
+
+### The banded pattern is not diagnostic on its own
+
+The tempting conclusion — pathological sites have **gaps**, working sites have a
+**continuum** — is only half right, and the comparison panels are what expose it.
+
+```{r sec2-spike-overlap}
+s3 <- function(x) sprintf("%.2f  (range %.2f-%.2f)", median(x, na.rm = TRUE),
+                          min(x, na.rm = TRUE), max(x, na.rm = TRUE))
+knitr::kable(data.table(
+  `site set` = c("the 14 U/C-aliasing sites", "the 311 surviving significant hits"),
+  `frac of cell lines at 0 / 50 / 100%` = c(s3(site26[uc_alias == TRUE]$spike3),
+                                            s3(aud[class == "surviving"]$spike3)),
+  `n with frac >= 0.80` = c(sum(site26[uc_alias == TRUE]$spike3 >= 0.80, na.rm = TRUE),
+                            sum(aud[class == "surviving"]$spike3 >= 0.80, na.rm = TRUE))),
+  caption = paste("The distributions overlap heavily:",
+                  sum(aud[class == "surviving"]$spike3 >= 0.80, na.rm = TRUE),
+                  "of the 311 survivors are as banded as the median U/C site."))
+```
+
+The reason is uncomfortable but simple. **A genuine large-effect pU-QTL produces
+the same picture as aliasing.** If a variant largely abolishes modification, then
+non-carriers sit high, homozygous carriers sit near 0%, heterozygotes sit between
+— three bands, from real biology.
+
+The clearest case is the strongest surviving hit, chr5:170083186:
+
+```{r sec2-chr5}
+knitr::kable(data.table(
+  quantity = c("frac of cell lines at 0 / 50 / 100%",
+               "|cor| of lead SNP with %pU",
+               "beta-binomial LRT -log10p",
+               "ordinary Pearson -log10p, same SNP",
+               "permutation ceiling",
+               "lead SNP distance from the pU base",
+               "variant called on the pU base?"),
+  value = c(sprintf("%.2f -- as banded as a U/C site", aud[sid == "5 170083186"]$spike3),
+            sprintf("%.3f", c10[sid == "5 170083186"]$abs_cor),
+            sprintf("%.1f", c10[sid == "5 170083186"]$lrt_nlp),
+            sprintf("%.1f -- agrees", c10[sid == "5 170083186"]$pearson_nlp),
+            sprintf("%.1f -- chance level", aud[sid == "5 170083186"]$perm_ceil),
+            "202 bp", "no")),
+  caption = "Statistically textbook; visually indistinguishable from aliasing.")
+```
+
+Every statistical check passes: permutation destroys the signal, an ordinary
+correlation test agrees with the LRT, and the correlation is 0.97. Yet the %pU
+pattern is banded and no variant is called at the base. Both readings fit —
+either a real variant 202 bp away with a near-complete effect on modification, or
+an uncalled U↔C variant at the base in linkage with it — **and the data on this
+page cannot separate them.** Resolving it needs the base-level sequence, not more
+statistics.
+
+So the honest version of the rule: gaps in %pU are a **red flag requiring a
+variant check at the base**, not a verdict. What §3 quantifies is why gaps break
+the *test*; whether a given set of gaps is biology or artefact is a separate
+question, and for a minority of the survivors it is still open.
 
 # 3. Why permutation does not remove these sites
 
@@ -396,12 +537,39 @@ permutation $\sigma$, all of $y$, $n$, $X_{\text{null}}$ and the cluster labels
 are reindexed by that same $\sigma$, so every term in the sum is the same term in
 a different order. Misfit is therefore *exactly* permutation-invariant — §3.3.
 
-Two caveats. Three clusters is an arbitrary choice, so this is a **floor** on the
-unexplained likelihood rather than all of it: a phenotype with four distinct
-levels would have more than this measures. And it is **undefined** wherever fewer
-than six cell lines are covered or fewer than three distinct $p_i$ exist — with
-49 cell lines at exactly zero there is no third cluster to form. That is why
-misfit cannot replace the concentration cap (§4.3).
+Two caveats, the second of them serious.
+
+Three clusters is an arbitrary choice, so this is a **floor** on the unexplained
+likelihood rather than all of it: a phenotype with four distinct levels would have
+more than this measures.
+
+More importantly, misfit is **undefined** wherever fewer than six cell lines are
+covered, fewer than three distinct $p_i$ exist, or either fit fails to converge —
+with 49 cell lines at exactly zero there is no third cluster to form. That is not
+a rare edge case:
+
+```{r sec3-na-rate}
+knitr::kable(data.table(
+  `site set` = c("all tested sites", "the 26 pathological sites",
+                 "the 311 surviving significant hits"),
+  n = c(nrow(mf_all), sum(mf_all$is26), sum(aud$class == "surviving")),
+  `misfit undefined` = c(
+    sprintf("%s (%.1f%%)", format(sum(is.na(mf_all$misfit)), big.mark = ","),
+            100 * mean(is.na(mf_all$misfit))),
+    sprintf("%d", sum(is.na(mf_all[is26 == TRUE]$misfit))),
+    sprintf("%d (%.0f%%)",
+            sum(is.na(mf_all[sid %chin% aud[class == "surviving"]$sid]$misfit)),
+            100 * mean(is.na(mf_all[sid %chin% aud[class == "surviving"]$sid]$misfit))))),
+  caption = "Where misfit cannot be computed at all")
+```
+
+**Misfit is uncomputable for over 40% of tested sites.** A filter blind to two
+fifths of the data is a partial instrument, not a solution — and the blindness is
+not random: it concentrates exactly where the phenotype is most degenerate, which
+is where the artefacts live. Four of the five unmeasurable sites among the 26 are
+concentration sites. This is the main reason misfit cannot replace the
+concentration cap, and it should temper how §4.3's combined-filter numbers are
+read.
 
 ```{r sec3-misfit, fig.height=4.6}
 mfp <- mf[is.finite(misfit)]
@@ -670,13 +838,17 @@ calibration check reported reassuring-looking numbers while the tail was at 289.
 
 **Misfit alone is not sufficient either.** It cuts the tail to
 `r th_of("minus high-misfit sites")`, better than the annotation rules but well
-short of the curated list. The reason is specific: misfit is **undefined at 5 of
-the 26 sites**, because with 49 cell lines at exactly zero there are not three
-distinct %pU levels to fit, so the reference model cannot be built. Four of
-those five are concentration sites — so misfit and the concentration cap are
-complementary by construction, not redundant.
+short of the curated list. The reason is specific and limits the rule generally:
+misfit is **undefined at 5 of the 26**, and indeed at
+`r sprintf("%.0f%%", 100 * mean(is.na(mf_all$misfit)))` of all tested sites
+(§3.2), because a site with 49 cell lines at exactly zero has no three distinct
+%pU levels for the reference model to use. Four of those five are concentration
+sites, so misfit and the concentration cap are complementary by construction
+rather than redundant — but it also means the misfit rule is silent on a large
+fraction of the genome, and silent precisely where phenotypes are most
+degenerate.
 
-**The three rules together beat the curated list.** Applying all three gives
+**The three rules together beat the curated list on these metrics.** Applying all three gives
 λ = `r lam_of("minus U/C + concentration + misfit")`, a real tail of
 `r th_of("minus U/C + concentration + misfit")`, and a permuted tail of
 `r round(max(tailh[condition == "minus U/C + concentration + misfit" & tailh$dataset != "real"]$mx), 1)` —
@@ -843,6 +1015,18 @@ careful distinction:
 - **Assay direction.** The U/C interpretation rests on pseudouridine being read
   at the same base that the variant changes. Worth confirming with whoever ran
   the PUM-seq protocol.
+- **The banded survivors (§2.4).** `r sum(aud[class == "surviving"]$spike3 >= 0.80, na.rm = TRUE)`
+  of the 311 look like aliasing but pass every statistical check, chr5:170083186
+  most conspicuously (|cor| 0.97, Pearson agrees, permutation at chance, lead SNP
+  202 bp away, no variant called at the base). Distinguishing a real
+  near-complete-effect QTL from an uncalled U↔C variant needs base-level sequence
+  at those positions — reads piled at the pU base, or a deeper variant call set —
+  not further statistics. Until then the surviving count should be read as an
+  upper bound.
+- **Misfit covers only ~59% of sites.** The rule is undefined wherever the
+  phenotype is too degenerate to fit a three-level reference, which is
+  disproportionately where artefacts are (§3.2). Any production filter needs
+  something that works on those sites too.
 - **Which filter to adopt.** All three rules in §4.1 are computable without
   knowing which sites are broken, but they are not interchangeable: the
   annotation-based ones cannot see the four sites with no variant call at the

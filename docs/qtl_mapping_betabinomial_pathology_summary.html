@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree53b192618822e4cad56d96d9b9a9c3ecb6cfccddtargetblank53b1926a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree9b5f28eb8e5284009de0649277424a5def3e3ad7targetblank9b5f28ea">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd" target="_blank">53b1926</a>
+<a href="https://github.com/xsun1229/pumseq/tree/9b5f28eb8e5284009de0649277424a5def3e3ad7" target="_blank">9b5f28e</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree53b192618822e4cad56d96d9b9a9c3ecb6cfccddtargetblank53b1926a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree9b5f28eb8e5284009de0649277424a5def3e3ad7targetblank9b5f28ea"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd" target="_blank">53b1926</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/9b5f28eb8e5284009de0649277424a5def3e3ad7" target="_blank">9b5f28e</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -621,6 +621,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/9b5f28eb8e5284009de0649277424a5def3e3ad7/analysis/qtl_mapping_betabinomial_pathology_summary.Rmd" target="_blank">9b5f28e</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/9b5f28eb8e5284009de0649277424a5def3e3ad7/docs/qtl_mapping_betabinomial_pathology_summary.html" target="_blank">9b5f28e</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -744,8 +778,13 @@ generalize beyond this curated list — a U/C variant call, a
 single-cell-line cap, and a misfit cut — do better than the list itself
 when combined, but no one of them is sufficient alone (§4).</li>
 <li>The remaining significant hits do <strong>not</strong> show this
-signature: their p-values agree with an ordinary correlation test, and
-their permutation p-values sit exactly at chance level.</li>
+statistical signature: their p-values agree with an ordinary correlation
+test, and their permutation p-values sit at exactly the level chance
+predicts. One caveat survives that, though — <strong>93 of the 311
+survivors have %pU as banded as a U/C-aliasing site</strong> (§2.4).
+Banding is produced both by aliasing <em>and</em> by a genuine
+large-effect QTL, so it cannot settle which, and for those sites the
+question is still open.</li>
 </ol>
 <pre class="r"><code>knitr::kable(exc, col.names = c(&quot;&quot;, &quot;n&quot;),
              caption = &quot;Scale of the problem, and what each filter removes&quot;)</code></pre>
@@ -1524,10 +1563,13 @@ d &lt;- pu_long(uc_ex$sid, sprintf(&quot;chr%s  (%s)\n-log10p=%.0f | %s reads&qu
                                 uc_ex$snp_at_site, uc_ex$real_nlp,
                                 format(uc_ex$total_depth, big.mark = &quot;,&quot;)))
 plot_pu_depth(d,
-  &quot;Mechanism A: three discrete bands, because %pU is reporting genotype&quot;,
-  paste(&quot;Each dot is one cell line. The bands at 0 / 50 / 100% are the three&quot;,
-        &quot;genotypes at the U/C variant, not three levels of modification.&quot;,
-        &quot;\nThey persist at every depth, so they are not a low-coverage artefact.&quot;))</code></pre>
+  &quot;Mechanism A: discrete %pU bands, because %pU is reporting genotype&quot;,
+  paste(&quot;Each dot is one cell line. Bands at 0 / 50 / 100% are the three genotypes&quot;,
+        &quot;at the U/C variant, not three levels of modification, and they persist at&quot;,
+        &quot;every depth -- so they are not a low-coverage artefact.&quot;,
+        &quot;\nThe pattern is not uniformly clean: at the two strongest sites (chr6, chr2)&quot;,
+        &quot;only the 0% band is sharp and the rest is diffuse, so aliasing is plainly&quot;,
+        &quot;present but is not the whole story there.&quot;))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-uc-1.png" width="1056" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-sec2-uc-1">
@@ -1553,6 +1595,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/9b5f28eb8e5284009de0649277424a5def3e3ad7/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-uc-1.png" target="_blank">9b5f28e</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-uc-1.png" target="_blank">53b1926</a>
 </td>
 <td>
@@ -1574,6 +1627,60 @@ that is inferred from the phenotype shape and <strong>not directly
 confirmed</strong>. The clearest is chr14:22551976: 11 cell lines at
 exactly 0.00, 26 in a tight band near 0.40, 12 at ~1.00, with ~130 reads
 each. No enzymatic modification rate behaves that way.</p>
+<div id="where-these-sites-sit-in-the-genome" class="section level3">
+<h3>Where these sites sit in the genome</h3>
+<pre class="r"><code>s26 &lt;- copy(site26)
+s26[, chr := sub(&quot; .*&quot;, &quot;&quot;, sid)][, pos := as.integer(sub(&quot;.* &quot;, &quot;&quot;, sid))]
+s26[, mhc := chr == &quot;6&quot; &amp; pos &gt; 28.5e6 &amp; pos &lt; 33.4e6]
+knitr::kable(s26[, .(sites = .N,
+                     `median -log10p` = round(median(real_nlp), 1),
+                     classes = paste(sort(unique(sub(&quot;,.*&quot;, &quot;&quot;, class))), collapse = &quot;; &quot;)),
+                 by = .(region = ifelse(mhc, &quot;chr6 MHC (28.5-33.4 Mb)&quot;, &quot;rest of the genome&quot;))],
+  caption = paste(&quot;The MHC is 5 Mb, about 0.16% of the genome, but supplies&quot;,
+                  sprintf(&quot;%d of the 26 (%.0f%%).&quot;, sum(s26$mhc), 100*mean(s26$mhc))))</code></pre>
+<table>
+<caption>The MHC is 5 Mb, about 0.16% of the genome, but supplies 6 of
+the 26 (23%).</caption>
+<colgroup>
+<col width="22%" />
+<col width="5%" />
+<col width="13%" />
+<col width="58%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">region</th>
+<th align="right">sites</th>
+<th align="right">median -log10p</th>
+<th align="left">classes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr6 MHC (28.5-33.4 Mb)</td>
+<td align="right">6</td>
+<td align="right">165.2</td>
+<td align="left">3-clump shape; U/C SNP on the pU base; one cell line
+dominates</td>
+</tr>
+<tr class="even">
+<td align="left">rest of the genome</td>
+<td align="right">20</td>
+<td align="right">130.2</td>
+<td align="left">3-clump shape; U/C SNP on the pU base; one cell line
+dominates</td>
+</tr>
+</tbody>
+</table>
+<p><strong>6 of the 26 sit in the MHC</strong> — every chr6 site among
+them, inside a 5 Mb window that is roughly 0.16% of the genome. That is
+a ~144-fold enrichment, and it fits the mechanism: the MHC is the most
+polymorphic region in the human genome and among the hardest to map, so
+it is exactly where you would expect both uncalled U↔︎C variants and
+reference-mapping artefacts to concentrate. It also strengthens the
+inference about the four sites with no variant call — <strong>two of
+those four are in the MHC</strong>, where a variant missing from our
+call set is unsurprising rather than a stretch.</p>
 <p>These four matter out of proportion to their number. Because no
 variant is called at the base, <strong>no annotation-based filter can
 see them</strong> — and they include the second, third and fourth
@@ -1614,6 +1721,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/9b5f28eb8e5284009de0649277424a5def3e3ad7/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-nosnp-1.png" target="_blank">9b5f28e</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-nosnp-1.png" target="_blank">53b1926</a>
 </td>
 <td>
@@ -1625,6 +1743,7 @@ XSun
 </tr>
 </tbody>
 </table>
+</div>
 </div>
 </div>
 </div>
@@ -1671,6 +1790,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/9b5f28eb8e5284009de0649277424a5def3e3ad7/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-conc-1.png" target="_blank">9b5f28e</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/53b192618822e4cad56d96d9b9a9c3ecb6cfccdd/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-conc-1.png" target="_blank">53b1926</a>
 </td>
 <td>
@@ -1687,6 +1817,179 @@ XSun
 <p>The most extreme case, chr9:107330635, has <strong>98% of its
 converted reads from one cell line out of 50</strong>. There is nothing
 to make a QTL out of.</p>
+<p>One thing the figure invites but does not support: many of the cell
+lines sitting at 0% have only a handful of reads, which looks like it
+might be the real problem. It is not. Shallow cell lines are the norm
+throughout this dataset — at a randomly chosen site the median cell line
+has <strong>9</strong> reads and <strong>53%</strong> of covered cell
+lines have fewer than 10, whereas these eight sites are <em>better</em>
+covered than average (median 40 reads, 25% below 10 reads). So low depth
+is background conditions here, not the distinguishing feature. What
+singles these sites out is the concentration of the converted reads,
+which is why the filter is written on <code>top_share</code> rather than
+on depth.</p>
+</div>
+<div id="for-comparison-what-ordinary-sites-look-like"
+class="section level2">
+<h2>2.4 For comparison: what ordinary sites look like</h2>
+<p>The panels above are only interpretable against a baseline. Same
+axes, same builder, two comparison sets: significant hits that survive
+both filters, and sites drawn at random from those tested but never
+significant.</p>
+<pre class="r"><code>set.seed(20260817)
+surv_ids &lt;- aud[class == &quot;surviving&quot; &amp; !is.na(real)][order(real)]$sid
+pick_s &lt;- surv_ids[unique(round(seq(1, length(surv_ids), length.out = 6)))]
+rand_ids &lt;- sample(setdiff(mf_all$sid, aud$sid), 6)
+
+lab_of &lt;- function(ids, with_p) vapply(seq_along(ids), function(k) {
+  i &lt;- match(ids[k], sid_all)
+  base &lt;- sprintf(&quot;chr%s\npooled %%pU=%.3f | %s reads&quot;, sub(&quot; .*&quot;, &quot;&quot;, ids[k]),
+                  sum(Cm[i, ]) / sum(Nm[i, ]), format(sum(Nm[i, ]), big.mark = &quot;,&quot;))
+  if (!with_p) return(base)
+  sub(&quot;\n&quot;, sprintf(&quot;\n-log10p=%.1f | &quot;, aud[sid == ids[k]]$real), base)
+}, character(1))
+
+ds &lt;- pu_long(pick_s, lab_of(pick_s, TRUE))
+dr &lt;- pu_long(rand_ids, lab_of(rand_ids, FALSE))</code></pre>
+<div id="significant-hits-that-survive-both-filters"
+class="section level3">
+<h3>Significant hits that survive both filters</h3>
+<pre class="r"><code>plot_pu_depth(ds,
+  &quot;Surviving significant hits, spanning the significance range&quot;,
+  paste(&quot;Some (chr11, chr19, chr20) form the single gradual cloud one would hope for.&quot;,
+        &quot;\nOthers (chr5, chr15, chr16) look banded -- see the caveat below. The banded&quot;,
+        &quot;appearance alone does not separate a real large-effect QTL from an artefact.&quot;))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-surv-1.png" width="1056" style="display: block; margin: auto;" /></p>
+</div>
+<div id="random-sites-never-significant" class="section level3">
+<h3>Random sites, never significant</h3>
+<pre class="r"><code>plot_pu_depth(dr,
+  &quot;Six sites drawn at random from those tested but never significant&quot;,
+  paste(&quot;The typical site: low %pU, shallow coverage in most cell lines,&quot;,
+        &quot;no structure. Note how much shallower these are than the&quot;,
+        &quot;pathological panels -- low depth is the norm here, not the defect.&quot;))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-rand-1.png" width="1056" style="display: block; margin: auto;" /></p>
+</div>
+<div id="the-banded-pattern-is-not-diagnostic-on-its-own"
+class="section level3">
+<h3>The banded pattern is not diagnostic on its own</h3>
+<p>The tempting conclusion — pathological sites have
+<strong>gaps</strong>, working sites have a <strong>continuum</strong> —
+is only half right, and the comparison panels are what expose it.</p>
+<pre class="r"><code>s3 &lt;- function(x) sprintf(&quot;%.2f  (range %.2f-%.2f)&quot;, median(x, na.rm = TRUE),
+                          min(x, na.rm = TRUE), max(x, na.rm = TRUE))
+knitr::kable(data.table(
+  `site set` = c(&quot;the 14 U/C-aliasing sites&quot;, &quot;the 311 surviving significant hits&quot;),
+  `frac of cell lines at 0 / 50 / 100%` = c(s3(site26[uc_alias == TRUE]$spike3),
+                                            s3(aud[class == &quot;surviving&quot;]$spike3)),
+  `n with frac &gt;= 0.80` = c(sum(site26[uc_alias == TRUE]$spike3 &gt;= 0.80, na.rm = TRUE),
+                            sum(aud[class == &quot;surviving&quot;]$spike3 &gt;= 0.80, na.rm = TRUE))),
+  caption = paste(&quot;The distributions overlap heavily:&quot;,
+                  sum(aud[class == &quot;surviving&quot;]$spike3 &gt;= 0.80, na.rm = TRUE),
+                  &quot;of the 311 survivors are as banded as the median U/C site.&quot;))</code></pre>
+<table>
+<caption>The distributions overlap heavily: 93 of the 311 survivors are
+as banded as the median U/C site.</caption>
+<colgroup>
+<col width="38%" />
+<col width="39%" />
+<col width="21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site set</th>
+<th align="left">frac of cell lines at 0 / 50 / 100%</th>
+<th align="right">n with frac &gt;= 0.80</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">the 14 U/C-aliasing sites</td>
+<td align="left">0.85 (range 0.46-0.96)</td>
+<td align="right">11</td>
+</tr>
+<tr class="even">
+<td align="left">the 311 surviving significant hits</td>
+<td align="left">0.70 (range 0.00-1.00)</td>
+<td align="right">93</td>
+</tr>
+</tbody>
+</table>
+<p>The reason is uncomfortable but simple. <strong>A genuine
+large-effect pU-QTL produces the same picture as aliasing.</strong> If a
+variant largely abolishes modification, then non-carriers sit high,
+homozygous carriers sit near 0%, heterozygotes sit between — three
+bands, from real biology.</p>
+<p>The clearest case is the strongest surviving hit, chr5:170083186:</p>
+<pre class="r"><code>knitr::kable(data.table(
+  quantity = c(&quot;frac of cell lines at 0 / 50 / 100%&quot;,
+               &quot;|cor| of lead SNP with %pU&quot;,
+               &quot;beta-binomial LRT -log10p&quot;,
+               &quot;ordinary Pearson -log10p, same SNP&quot;,
+               &quot;permutation ceiling&quot;,
+               &quot;lead SNP distance from the pU base&quot;,
+               &quot;variant called on the pU base?&quot;),
+  value = c(sprintf(&quot;%.2f -- as banded as a U/C site&quot;, aud[sid == &quot;5 170083186&quot;]$spike3),
+            sprintf(&quot;%.3f&quot;, c10[sid == &quot;5 170083186&quot;]$abs_cor),
+            sprintf(&quot;%.1f&quot;, c10[sid == &quot;5 170083186&quot;]$lrt_nlp),
+            sprintf(&quot;%.1f -- agrees&quot;, c10[sid == &quot;5 170083186&quot;]$pearson_nlp),
+            sprintf(&quot;%.1f -- chance level&quot;, aud[sid == &quot;5 170083186&quot;]$perm_ceil),
+            &quot;202 bp&quot;, &quot;no&quot;)),
+  caption = &quot;Statistically textbook; visually indistinguishable from aliasing.&quot;)</code></pre>
+<table>
+<caption>Statistically textbook; visually indistinguishable from
+aliasing.</caption>
+<thead>
+<tr class="header">
+<th align="left">quantity</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">frac of cell lines at 0 / 50 / 100%</td>
+<td align="left">0.84 – as banded as a U/C site</td>
+</tr>
+<tr class="even">
+<td align="left">|cor| of lead SNP with %pU</td>
+<td align="left">0.967</td>
+</tr>
+<tr class="odd">
+<td align="left">beta-binomial LRT -log10p</td>
+<td align="left">28.1</td>
+</tr>
+<tr class="even">
+<td align="left">ordinary Pearson -log10p, same SNP</td>
+<td align="left">29.4 – agrees</td>
+</tr>
+<tr class="odd">
+<td align="left">permutation ceiling</td>
+<td align="left">3.6 – chance level</td>
+</tr>
+<tr class="even">
+<td align="left">lead SNP distance from the pU base</td>
+<td align="left">202 bp</td>
+</tr>
+<tr class="odd">
+<td align="left">variant called on the pU base?</td>
+<td align="left">no</td>
+</tr>
+</tbody>
+</table>
+<p>Every statistical check passes: permutation destroys the signal, an
+ordinary correlation test agrees with the LRT, and the correlation is
+0.97. Yet the %pU pattern is banded and no variant is called at the
+base. Both readings fit — either a real variant 202 bp away with a
+near-complete effect on modification, or an uncalled U↔︎C variant at the
+base in linkage with it — <strong>and the data on this page cannot
+separate them.</strong> Resolving it needs the base-level sequence, not
+more statistics.</p>
+<p>So the honest version of the rule: gaps in %pU are a <strong>red flag
+requiring a variant check at the base</strong>, not a verdict. What §3
+quantifies is why gaps break the <em>test</em>; whether a given set of
+gaps is biology or artefact is a separate question, and for a minority
+of the survivors it is still open.</p>
+</div>
 </div>
 </div>
 <div id="why-permutation-does-not-remove-these-sites"
@@ -1828,14 +2131,63 @@ class="math inline">\(X_{\text{null}}\)</span> and the cluster labels
 are reindexed by that same <span class="math inline">\(\sigma\)</span>,
 so every term in the sum is the same term in a different order. Misfit
 is therefore <em>exactly</em> permutation-invariant — §3.3.</p>
-<p>Two caveats. Three clusters is an arbitrary choice, so this is a
+<p>Two caveats, the second of them serious.</p>
+<p>Three clusters is an arbitrary choice, so this is a
 <strong>floor</strong> on the unexplained likelihood rather than all of
 it: a phenotype with four distinct levels would have more than this
-measures. And it is <strong>undefined</strong> wherever fewer than six
-cell lines are covered or fewer than three distinct <span
-class="math inline">\(p_i\)</span> exist — with 49 cell lines at exactly
-zero there is no third cluster to form. That is why misfit cannot
-replace the concentration cap (§4.3).</p>
+measures.</p>
+<p>More importantly, misfit is <strong>undefined</strong> wherever fewer
+than six cell lines are covered, fewer than three distinct <span
+class="math inline">\(p_i\)</span> exist, or either fit fails to
+converge — with 49 cell lines at exactly zero there is no third cluster
+to form. That is not a rare edge case:</p>
+<pre class="r"><code>knitr::kable(data.table(
+  `site set` = c(&quot;all tested sites&quot;, &quot;the 26 pathological sites&quot;,
+                 &quot;the 311 surviving significant hits&quot;),
+  n = c(nrow(mf_all), sum(mf_all$is26), sum(aud$class == &quot;surviving&quot;)),
+  `misfit undefined` = c(
+    sprintf(&quot;%s (%.1f%%)&quot;, format(sum(is.na(mf_all$misfit)), big.mark = &quot;,&quot;),
+            100 * mean(is.na(mf_all$misfit))),
+    sprintf(&quot;%d&quot;, sum(is.na(mf_all[is26 == TRUE]$misfit))),
+    sprintf(&quot;%d (%.0f%%)&quot;,
+            sum(is.na(mf_all[sid %chin% aud[class == &quot;surviving&quot;]$sid]$misfit)),
+            100 * mean(is.na(mf_all[sid %chin% aud[class == &quot;surviving&quot;]$sid]$misfit))))),
+  caption = &quot;Where misfit cannot be computed at all&quot;)</code></pre>
+<table>
+<caption>Where misfit cannot be computed at all</caption>
+<thead>
+<tr class="header">
+<th align="left">site set</th>
+<th align="right">n</th>
+<th align="left">misfit undefined</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">all tested sites</td>
+<td align="right">11187</td>
+<td align="left">4,557 (40.7%)</td>
+</tr>
+<tr class="even">
+<td align="left">the 26 pathological sites</td>
+<td align="right">26</td>
+<td align="left">5</td>
+</tr>
+<tr class="odd">
+<td align="left">the 311 surviving significant hits</td>
+<td align="right">311</td>
+<td align="left">57 (18%)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Misfit is uncomputable for over 40% of tested sites.</strong>
+A filter blind to two fifths of the data is a partial instrument, not a
+solution — and the blindness is not random: it concentrates exactly
+where the phenotype is most degenerate, which is where the artefacts
+live. Four of the five unmeasurable sites among the 26 are concentration
+sites. This is the main reason misfit cannot replace the concentration
+cap, and it should temper how §4.3’s combined-filter numbers are
+read.</p>
 <pre class="r"><code>mfp &lt;- mf[is.finite(misfit)]
 mfp[, class := factor(class, levels = names(CLS_COL))]
 knitr::kable(mfp[, .(sites = .N,
@@ -2715,16 +3067,20 @@ problem</strong>, which is why the original calibration check reported
 reassuring-looking numbers while the tail was at 289.</p>
 <p><strong>Misfit alone is not sufficient either.</strong> It cuts the
 tail to 97.7, better than the annotation rules but well short of the
-curated list. The reason is specific: misfit is <strong>undefined at 5
-of the 26 sites</strong>, because with 49 cell lines at exactly zero
-there are not three distinct %pU levels to fit, so the reference model
-cannot be built. Four of those five are concentration sites — so misfit
-and the concentration cap are complementary by construction, not
-redundant.</p>
-<p><strong>The three rules together beat the curated list.</strong>
-Applying all three gives λ = 1.337, a real tail of 28.1, and a permuted
-tail of 8.8 — better on every measure than naming the 26 by hand, and
-computable on data where nobody has told you which sites are broken.</p>
+curated list. The reason is specific and limits the rule generally:
+misfit is <strong>undefined at 5 of the 26</strong>, and indeed at 41%
+of all tested sites (§3.2), because a site with 49 cell lines at exactly
+zero has no three distinct %pU levels for the reference model to use.
+Four of those five are concentration sites, so misfit and the
+concentration cap are complementary by construction rather than
+redundant — but it also means the misfit rule is silent on a large
+fraction of the genome, and silent precisely where phenotypes are most
+degenerate.</p>
+<p><strong>The three rules together beat the curated list on these
+metrics.</strong> Applying all three gives λ = 1.337, a real tail of
+28.1, and a permuted tail of 8.8 — better on every measure than naming
+the 26 by hand, and computable on data where nobody has told you which
+sites are broken.</p>
 <p><strong>What it costs.</strong> The combined filter removes 2,740 of
 11,187 tested sites (24%). That is not a small price, and the misfit
 threshold is the loose part of it: the 26 sites where misfit is
@@ -3367,6 +3723,18 @@ surviving count here.</li>
 <li><strong>Assay direction.</strong> The U/C interpretation rests on
 pseudouridine being read at the same base that the variant changes.
 Worth confirming with whoever ran the PUM-seq protocol.</li>
+<li><strong>The banded survivors (§2.4).</strong> 93 of the 311 look
+like aliasing but pass every statistical check, chr5:170083186 most
+conspicuously (|cor| 0.97, Pearson agrees, permutation at chance, lead
+SNP 202 bp away, no variant called at the base). Distinguishing a real
+near-complete-effect QTL from an uncalled U↔︎C variant needs base-level
+sequence at those positions — reads piled at the pU base, or a deeper
+variant call set — not further statistics. Until then the surviving
+count should be read as an upper bound.</li>
+<li><strong>Misfit covers only ~59% of sites.</strong> The rule is
+undefined wherever the phenotype is too degenerate to fit a three-level
+reference, which is disproportionately where artefacts are (§3.2). Any
+production filter needs something that works on those sites too.</li>
 <li><strong>Which filter to adopt.</strong> All three rules in §4.1 are
 computable without knowing which sites are broken, but they are not
 interchangeable: the annotation-based ones cannot see the four sites
