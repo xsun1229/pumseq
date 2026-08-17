@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-08-17" />
+
+<title>Beta-binomial pU-QTL: the 26 sites that survive permutation</title>
+
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Beta-binomial pU-QTL: the 26 sites that
+survive permutation</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-08-17</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-08-17
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree6ab3165a744d13b80bdc0cddca04fd23d04de5c2targetblank6ab3165a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/6ab3165a744d13b80bdc0cddca04fd23d04de5c2" target="_blank">6ab3165</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree6ab3165a744d13b80bdc0cddca04fd23d04de5c2targetblank6ab3165a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/6ab3165a744d13b80bdc0cddca04fd23d04de5c2" target="_blank">6ab3165</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/qtl_mapping_betabinomial_site26.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = &quot;center&quot;, fig.width = 11)
+
+BASE &lt;- &quot;/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl&quot;
+DAT  &lt;- file.path(BASE, &quot;qtl_betabinomial/site26_page_data&quot;)
+DIAG &lt;- file.path(BASE, &quot;qtl_betabinomial/diagnostic_figures&quot;)
+
+pan   &lt;- fread(file.path(DAT, &quot;geno_panels.tsv.gz&quot;))
+labs  &lt;- fread(file.path(DAT, &quot;site_labels.tsv&quot;))
+qq    &lt;- fread(file.path(DAT, &quot;qq2.tsv.gz&quot;))
+lam   &lt;- fread(file.path(DAT, &quot;lambda2.tsv&quot;))
+cnt   &lt;- fread(file.path(DAT, &quot;counts.tsv&quot;))
+patho &lt;- fread(file.path(DIAG, &quot;pathological_sites.txt&quot;))
+
+pan[, geno := factor(geno, levels = c(0, 1, 2))]
+COND_LV &lt;- c(&quot;all sites&quot;, &quot;minus the 26 sites&quot;, &quot;minus all U/C-aliasing sites&quot;)
+GRP &lt;- c(&quot;Mechanism A: U/C variant on the pU base&quot;,
+         &quot;Mechanism A: same shape, no variant called&quot;,
+         &quot;Mechanism B: one cell line dominates&quot;,
+         &quot;Comparison: surviving significant hits&quot;,
+         &quot;Comparison: random non-significant sites&quot;)
+
+# Panel label. Kept short: these figures carry up to 14 facets.
+mk_lab &lt;- function(g, with_p = TRUE) {
+  L &lt;- labs[group == g]
+  setkey(L, sid)
+  lab &lt;- L[, sprintf(&quot;chr%s:%s%s\n%spooled %%pU=%.3f | %s reads&quot;,
+                     chr, format(pos, big.mark = &quot;,&quot;, trim = TRUE),
+                     ifelse(snp_at_site == &quot;&quot;, &quot;&quot;, paste0(&quot;  (&quot;, snp_at_site, &quot;)&quot;)),
+                     ifelse(with_p &amp; is.finite(nlp), sprintf(&quot;-log10p=%.0f | &quot;, nlp), &quot;&quot;),
+                     pooled_pu, format(total_depth, big.mark = &quot;,&quot;, trim = TRUE))]
+  data.table(sid = L$sid, lab = lab)
+}
+attach_lab &lt;- function(g, with_p = TRUE) {
+  d &lt;- merge(pan[group == g], mk_lab(g, with_p), by = &quot;sid&quot;)
+  ord &lt;- labs[group == g][order(-nlp)]$sid
+  d[, lab := factor(lab, levels = unique(merge(data.table(sid = ord),
+                     mk_lab(g, with_p), by = &quot;sid&quot;, sort = FALSE)$lab))]
+  d
+}
+
+# ---- figure 1 style: %pU against read depth (one dot per cell line) -------
+plot_pu_depth &lt;- function(dd, title, subtitle, ncol = 4) {
+  ggplot(dd, aes(pu, pmax(n, 1))) +
+    geom_vline(xintercept = c(0, 0.5, 1), colour = &quot;grey88&quot;, linewidth = 0.4) +
+    geom_point(colour = &quot;#256abf&quot;, alpha = 0.7, size = 1.6) +
+    scale_x_continuous(limits = c(-0.04, 1.04), breaks = c(0, 0.5, 1),
+                       labels = c(&quot;0&quot;, &quot;50&quot;, &quot;100&quot;)) +
+    scale_y_log10(labels = scales::comma) +
+    facet_wrap(~ lab, ncol = ncol) +
+    labs(x = &quot;%pU in one cell line&quot;, y = &quot;read depth (log scale)&quot;,
+         title = title, subtitle = subtitle) +
+    theme_bw(base_size = 11) +
+    theme(strip.text = element_text(size = 7.5), panel.grid.minor = element_blank())
+}
+
+# ---- figure 2 style: %pU against genotype at the lead cis-SNP -------------
+# A boxplot IS appropriate here: we are comparing three defined groups, which is
+# what a box summarises well. Groups with fewer than 5 cell lines are outlined in
+# red, because a &quot;genotype effect&quot; resting on 2 cell lines is not interpretable.
+plot_pu_geno &lt;- function(dd, title, subtitle, ncol = 4) {
+  gn &lt;- dd[, .(n_cl = .N, small = .N &lt; 5), by = .(lab, geno)]
+  dd2 &lt;- merge(dd, gn, by = c(&quot;lab&quot;, &quot;geno&quot;))
+  ggplot(dd2, aes(geno, pu)) +
+    geom_boxplot(aes(colour = small), fill = &quot;grey96&quot;, width = 0.6,
+                 outlier.shape = NA, linewidth = 0.45) +
+    geom_jitter(aes(size = pmax(n, 1)), width = 0.16, height = 0,
+                colour = &quot;#256abf&quot;, alpha = 0.65) +
+    geom_text(data = gn, aes(geno, y = 1.09, label = paste0(&quot;n=&quot;, n_cl)),
+              size = 2.4, colour = &quot;grey30&quot;, inherit.aes = FALSE) +
+    scale_colour_manual(values = c(`FALSE` = &quot;grey45&quot;, `TRUE` = &quot;#e34948&quot;),
+                        labels = c(&quot;5 or more cell lines&quot;, &quot;fewer than 5&quot;),
+                        name = &quot;genotype group size&quot;) +
+    scale_size_continuous(trans = &quot;log10&quot;, range = c(0.7, 3.6),
+                          breaks = c(10, 100, 1000, 10000),
+                          labels = scales::comma, name = &quot;read depth (n)&quot;) +
+    scale_y_continuous(limits = c(-0.04, 1.16), breaks = c(0, 0.5, 1),
+                       labels = c(&quot;0&quot;, &quot;50&quot;, &quot;100&quot;)) +
+    facet_wrap(~ lab, ncol = ncol) +
+    labs(x = &quot;copies of the ALT allele at the lead cis-SNP&quot;, y = &quot;%pU&quot;,
+         title = title, subtitle = subtitle) +
+    theme_bw(base_size = 11) +
+    theme(legend.position = &quot;bottom&quot;, strip.text = element_text(size = 7.5),
+          panel.grid.minor = element_blank())
+}</code></pre>
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<p>The beta-binomial cis scan produced top hits that <strong>a phenotype
+permutation did not displace</strong> — 19 of the 20 strongest sites
+under permutation were the same sites as the real top 20, none sharing a
+lead SNP. Permutation is supposed to destroy all genotype–phenotype
+signal, so those sites were being selected for some reason other than
+genotype.</p>
+<p>26 sites are responsible. This page describes what they are and what
+removing them does to calibration.</p>
+<pre class="r"><code>knitr::kable(cnt, col.names = c(&quot;&quot;, &quot;n&quot;), caption = &quot;Scale&quot;)</code></pre>
+<table>
+<caption>Scale</caption>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">sites tested in the calibration scan</td>
+<td align="right">11187</td>
+</tr>
+<tr class="even">
+<td align="left">the 26 pathological sites</td>
+<td align="right">26</td>
+</tr>
+<tr class="odd">
+<td align="left">U/C-aliasing sites genome-wide</td>
+<td align="right">1118</td>
+</tr>
+<tr class="even">
+<td align="left">of the 26, U/C-aliasing</td>
+<td align="right">14</td>
+</tr>
+<tr class="odd">
+<td align="left">significant hits (q&lt;0.05)</td>
+<td align="right">1385</td>
+</tr>
+<tr class="even">
+<td align="left">of those, U/C-aliasing</td>
+<td align="right">1052</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>14 of the 26 carry a U↔︎C sequence variant on the pU base
+itself</strong>, which makes the measured “%pU” partly a read-out of
+genotype instead of modification (§2.2).</li>
+<li><strong>4 more show the identical pattern with no variant
+called</strong> at the base — consistent with the same cause, but not
+confirmed.</li>
+<li><strong>8 are a different problem</strong>: sites with almost no
+modification where a single cell line supplies nearly all converted
+reads (§2.3).</li>
+<li>Removing the 26 collapses the QQ tail from 289 to 40; removing every
+U/C site instead is what fixes λ (§3).</li>
+</ul>
+<p>A companion page, <a
+href="qtl_mapping_betabinomial_pathology_summary.html">the full
+pathology write-up</a>, covers the statistical mechanism and the wider
+audit of the other significant hits.</p>
+</div>
+<div id="how-the-26-sites-were-found" class="section level1">
+<h1>1. How the 26 sites were found</h1>
+<p>The cis scan was rerun six times — once on the real data, once under
+each of five phenotype permutations (<code>set.seed(1000 + k)</code>,
+phenotype and covariates reindexed together, genotypes untouched) — this
+time <strong>keeping the site identity attached to every
+p-value</strong>, which the original calibration script discarded.</p>
+<p>Under permutation no genotype–phenotype relationship exists, so any
+site still returning an extreme p-value there is broken on its own
+terms. Two criteria:</p>
+<pre class="r"><code>knitr::kable(data.table(
+  criterion = c(&quot;nominal p &lt; 1e-10 in at least one of the 5 permutations&quot;,
+                &quot;and real -log10(p) &gt; 10&quot;),
+  `sites` = c(&quot;27&quot;, as.character(nrow(patho)))),
+  caption = paste(&quot;Selection used the PERMUTED data only, so looking at the real&quot;,
+                  &quot;QQ plot afterwards (§3) is not circular.&quot;))</code></pre>
+<table>
+<caption>Selection used the PERMUTED data only, so looking at the real
+QQ plot afterwards (&lt;U+00A7&gt;3) is not circular.</caption>
+<thead>
+<tr class="header">
+<th align="left">criterion</th>
+<th align="left">sites</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">nominal p &lt; 1e-10 in at least one of the 5
+permutations</td>
+<td align="left">27</td>
+</tr>
+<tr class="even">
+<td align="left">and real -log10(p) &gt; 10</td>
+<td align="left">26</td>
+</tr>
+</tbody>
+</table>
+<p>Of the 27 candidates, one was extreme in a single permutation by
+chance. The other <strong>26 were extreme in all six datasets</strong> —
+checked individually, and their permutation-to-permutation spread is
+tiny (median SD 0.57 on the <code>-log10 p</code> scale), so this is a
+stable property of each site rather than a fluke.</p>
+<pre class="r"><code>P &lt;- paste0(&quot;perm&quot;, 1:5)
+lg &lt;- melt(patho[, c(&quot;sid&quot;, &quot;real&quot;, P), with = FALSE], id.vars = &quot;sid&quot;,
+           variable.name = &quot;dataset&quot;, value.name = &quot;nlp&quot;)
+lg[, sid := factor(sid, levels = patho[order(real)]$sid)]
+ggplot(lg, aes(nlp, sid)) +
+  geom_line(aes(group = sid), colour = &quot;grey70&quot;, linewidth = 0.4) +
+  geom_point(data = lg[dataset != &quot;real&quot;], aes(colour = &quot;the 5 permutations&quot;),
+             size = 1.7, alpha = 0.85) +
+  geom_point(data = lg[dataset == &quot;real&quot;], aes(colour = &quot;real data&quot;), size = 2.6) +
+  scale_colour_manual(values = c(`real data` = &quot;#e34948&quot;,
+                                 `the 5 permutations` = &quot;#3987e5&quot;), name = NULL) +
+  labs(x = expression(-log[10](&quot;p&quot;)~&quot;of the site&#39;s best cis-SNP&quot;), y = NULL,
+       title = &quot;At all 26 sites the permutations reach almost the same p-value as the real data&quot;,
+       subtitle = &quot;A working site would have its permutation points near 0.&quot;) +
+  theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_site26.Rmd/sec1-fig-1.png" width="1056" style="display: block; margin: auto;" /></p>
+</div>
+<div id="what-the-26-sites-are" class="section level1">
+<h1>2. What the 26 sites are</h1>
+<div id="classification" class="section level2">
+<h2>2.1 Classification</h2>
+<pre class="r"><code>knitr::kable(labs[is26 == TRUE, .(
+  site = sprintf(&quot;chr%s:%s&quot;, chr, format(pos, big.mark = &quot;,&quot;, trim = TRUE)),
+  `-log10p` = nlp,
+  `variant on the pU base` = ifelse(snp_at_site == &quot;&quot;, &quot;--&quot;, snp_at_site),
+  `pooled %pU` = round(pooled_pu, 3),
+  `top cell-line share` = round(top_share, 2),
+  `lead cis-SNP` = lead_snp,
+  `its distance` = sprintf(&quot;%+d bp&quot;, lead_dist),
+  mechanism = sub(&quot;:.*&quot;, &quot;&quot;, group))][order(-`-log10p`)],
+  caption = paste(&quot;All 26. &#39;top cell-line share&#39; is the largest fraction of the&quot;,
+                  &quot;site&#39;s converted reads coming from one cell line.&quot;))</code></pre>
+<table style="width:100%;">
+<caption>All 26. ‘top cell-line share’ is the largest fraction of the
+site’s converted reads coming from one cell line.</caption>
+<colgroup>
+<col width="14%" />
+<col width="6%" />
+<col width="18%" />
+<col width="9%" />
+<col width="16%" />
+<col width="13%" />
+<col width="10%" />
+<col width="9%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="right">-log10p</th>
+<th align="left">variant on the pU base</th>
+<th align="right">pooled %pU</th>
+<th align="right">top cell-line share</th>
+<th align="left">lead cis-SNP</th>
+<th align="left">its distance</th>
+<th align="left">mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr6:31,271,283</td>
+<td align="right">289.1</td>
+<td align="left">A/G</td>
+<td align="right">0.431</td>
+<td align="right">0.09</td>
+<td align="left">6:31267998:T:C</td>
+<td align="left">-3285 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="even">
+<td align="left">chr19:46,609,391</td>
+<td align="right">270.8</td>
+<td align="left">T/C</td>
+<td align="right">0.561</td>
+<td align="right">0.10</td>
+<td align="left">19:46609391:T:C</td>
+<td align="left">+0 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="odd">
+<td align="left">chr16:67,935,628</td>
+<td align="right">251.2</td>
+<td align="left">A/G</td>
+<td align="right">0.440</td>
+<td align="right">0.07</td>
+<td align="left">16:67935628:A:G</td>
+<td align="left">+0 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="even">
+<td align="left">chr2:68,396,142</td>
+<td align="right">234.8</td>
+<td align="left">T/C</td>
+<td align="right">0.256</td>
+<td align="right">0.12</td>
+<td align="left">2:68396170:A:G</td>
+<td align="left">+28 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="odd">
+<td align="left">chr16:11,548,841</td>
+<td align="right">215.9</td>
+<td align="left">A/G</td>
+<td align="right">0.310</td>
+<td align="right">0.07</td>
+<td align="left">16:11548841:A:G</td>
+<td align="left">+0 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="even">
+<td align="left">chr5:314,820</td>
+<td align="right">214.4</td>
+<td align="left">T/C</td>
+<td align="right">0.560</td>
+<td align="right">0.05</td>
+<td align="left">5:310017:C:G</td>
+<td align="left">-4803 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="odd">
+<td align="left">chr6:31,667,933</td>
+<td align="right">206.0</td>
+<td align="left">T/C</td>
+<td align="right">0.456</td>
+<td align="right">0.09</td>
+<td align="left">6:31667933:T:C</td>
+<td align="left">+0 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="even">
+<td align="left">chr17:75,240,043</td>
+<td align="right">199.8</td>
+<td align="left">A/G</td>
+<td align="right">0.592</td>
+<td align="right">0.10</td>
+<td align="left">17:75240043:A:G</td>
+<td align="left">+0 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="odd">
+<td align="left">chr6:32,660,211</td>
+<td align="right">180.7</td>
+<td align="left">A/G</td>
+<td align="right">0.148</td>
+<td align="right">0.08</td>
+<td align="left">6:32659850:C:T</td>
+<td align="left">-361 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:22,551,976</td>
+<td align="right">179.8</td>
+<td align="left">–</td>
+<td align="right">0.416</td>
+<td align="right">0.07</td>
+<td align="left">14:22550059:C:G</td>
+<td align="left">-1917 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="odd">
+<td align="left">chr19:7,698,817</td>
+<td align="right">170.8</td>
+<td align="left">A/G</td>
+<td align="right">0.199</td>
+<td align="right">0.12</td>
+<td align="left">19:7698817:A:G</td>
+<td align="left">+0 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="even">
+<td align="left">chr13:39,013,029</td>
+<td align="right">161.5</td>
+<td align="left">A/G</td>
+<td align="right">0.500</td>
+<td align="right">0.08</td>
+<td align="left">13:39011871:A:G</td>
+<td align="left">-1158 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="odd">
+<td align="left">chr6:32,664,993</td>
+<td align="right">149.7</td>
+<td align="left">–</td>
+<td align="right">0.175</td>
+<td align="right">0.14</td>
+<td align="left">6:32661941:G:A</td>
+<td align="left">-3052 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="even">
+<td align="left">chr3:37,277,733</td>
+<td align="right">141.3</td>
+<td align="left">–</td>
+<td align="right">0.534</td>
+<td align="right">0.11</td>
+<td align="left">3:37275552:T:C</td>
+<td align="left">-2181 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="odd">
+<td align="left">chr12:56,664,365</td>
+<td align="right">119.1</td>
+<td align="left">A/G</td>
+<td align="right">0.108</td>
+<td align="right">0.21</td>
+<td align="left">12:56660300:G:A</td>
+<td align="left">-4065 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="even">
+<td align="left">chr11:102,323,961</td>
+<td align="right">97.7</td>
+<td align="left">T/C</td>
+<td align="right">0.116</td>
+<td align="right">0.26</td>
+<td align="left">11:102323961:T:C</td>
+<td align="left">+0 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:37,126,321</td>
+<td align="right">54.9</td>
+<td align="left">A/G</td>
+<td align="right">0.100</td>
+<td align="right">0.39</td>
+<td align="left">2:37126321:A:G</td>
+<td align="left">+0 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="even">
+<td align="left">chr2:88,886,147</td>
+<td align="right">54.5</td>
+<td align="left">–</td>
+<td align="right">0.064</td>
+<td align="right">0.91</td>
+<td align="left">2:88886429:G:A</td>
+<td align="left">+282 bp</td>
+<td align="left">Mechanism B</td>
+</tr>
+<tr class="odd">
+<td align="left">chr6:32,745,178</td>
+<td align="right">53.5</td>
+<td align="left">–</td>
+<td align="right">0.357</td>
+<td align="right">0.23</td>
+<td align="left">6:32740437:C:T</td>
+<td align="left">-4741 bp</td>
+<td align="left">Mechanism A</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106,360,212</td>
+<td align="right">33.5</td>
+<td align="left">–</td>
+<td align="right">0.015</td>
+<td align="right">0.52</td>
+<td align="left">14:106364803:C:T</td>
+<td align="left">+4591 bp</td>
+<td align="left">Mechanism B</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:90,039,467</td>
+<td align="right">32.5</td>
+<td align="left">–</td>
+<td align="right">0.045</td>
+<td align="right">0.50</td>
+<td align="left">2:90040779:G:A</td>
+<td align="left">+1312 bp</td>
+<td align="left">Mechanism B</td>
+</tr>
+<tr class="even">
+<td align="left">chr2:90,039,470</td>
+<td align="right">27.5</td>
+<td align="left">–</td>
+<td align="right">0.034</td>
+<td align="right">0.54</td>
+<td align="left">2:90038664:A:G</td>
+<td align="left">-806 bp</td>
+<td align="left">Mechanism B</td>
+</tr>
+<tr class="odd">
+<td align="left">chr22:22,432,410</td>
+<td align="right">23.0</td>
+<td align="left">–</td>
+<td align="right">0.012</td>
+<td align="right">0.92</td>
+<td align="left">22:22430687:A:G</td>
+<td align="left">-1723 bp</td>
+<td align="left">Mechanism B</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:32,643,315</td>
+<td align="right">12.6</td>
+<td align="left">T/G</td>
+<td align="right">0.088</td>
+<td align="right">0.63</td>
+<td align="left">6:32639017:T:C</td>
+<td align="left">-4298 bp</td>
+<td align="left">Mechanism B</td>
+</tr>
+<tr class="odd">
+<td align="left">chr9:107,330,635</td>
+<td align="right">12.1</td>
+<td align="left">–</td>
+<td align="right">0.020</td>
+<td align="right">0.98</td>
+<td align="left">9:107326047:A:G</td>
+<td align="left">-4588 bp</td>
+<td align="left">Mechanism B</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106,537,954</td>
+<td align="right">11.6</td>
+<td align="left">–</td>
+<td align="right">0.020</td>
+<td align="right">0.96</td>
+<td align="left">14:106535971:A:G</td>
+<td align="left">-1983 bp</td>
+<td align="left">Mechanism B</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="mechanism-a-a-uc-variant-on-the-pu-base"
+class="section level2">
+<h2>2.2 Mechanism A: a U↔︎C variant on the pU base</h2>
+<div id="what-the-problem-is" class="section level3">
+<h3>What the problem is</h3>
+<p>Pseudouridine is a <strong>modified uridine</strong> — chemically
+still a U, and the assay detects it by reading the base at that position
+and scoring conversions. The readout is therefore a statement about
+<em>what base is there</em>, and it cannot distinguish two different
+reasons for seeing something other than a plain U:</p>
+<ol style="list-style-type: decimal">
+<li>the U was <strong>modified</strong> to pseudouridine — the biology
+we want to measure; or</li>
+<li>the cell line <strong>inherited a C</strong> at that position
+instead of a U.</li>
+</ol>
+<p>When a common sequence variant changes that exact base from U to C,
+the two are indistinguishable. A cell line homozygous for the C allele
+reads as ~100% “modified” at every read; a heterozygote reads ~50%,
+because half its transcripts carry the C; a homozygous-reference cell
+line reads whatever the true modification rate is. <strong>The phenotype
+becomes a genotype assay.</strong></p>
+<p>That gives three consequences, all visible below:</p>
+<ul>
+<li>%pU clusters into three discrete levels near 0%, 50% and 100% rather
+than varying continuously;</li>
+<li>those levels track the variant almost perfectly, so any SNP in
+linkage with it predicts the phenotype — a real association, but of the
+wrong thing; and</li>
+<li>the effect does not weaken with depth, because it is not a sampling
+artefact.</li>
+</ul>
+<p>Written against the genome this appears as <strong>C/T on the +
+strand and A/G on the − strand</strong> — the same U→C change on the
+transcript, seen from whichever strand the transcript came from.
+Genome-wide, <strong>1,118 sites</strong> carry such a variant.</p>
+</div>
+<div id="pu-across-cell-lines" class="section level3">
+<h3>%pU across cell lines</h3>
+<pre class="r"><code>dA &lt;- attach_lab(GRP[1])
+plot_pu_depth(dA,
+  &quot;Mechanism A: %pU forms discrete bands, because it is reporting genotype&quot;,
+  paste(&quot;All&quot;, uniqueN(dA$sid), &quot;sites with a U/C variant called on the pU base.&quot;,
+        &quot;Each dot is one cell line; the panel header gives the variant.&quot;,
+        &quot;\nThe bands persist at every read depth, so they are not a coverage artefact.&quot;))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_site26.Rmd/sec2a-depth-1.png" width="1056" style="display: block; margin: auto;" /></p>
+</div>
+<div id="pu-against-genotype-at-the-lead-cis-snp"
+class="section level3">
+<h3>%pU against genotype at the lead cis-SNP</h3>
+<p>If %pU is a genotype read-out, it should line up with genotype in
+steps rather than as a gradual trend.</p>
+<pre class="r"><code>plot_pu_geno(dA,
+  &quot;Mechanism A: %pU against copies of the ALT allele at the lead cis-SNP&quot;,
+  paste(&quot;Dot size is read depth. At most sites the three genotype groups sit at&quot;,
+        &quot;separated %pU levels -- a step function rather than a dose-response.&quot;,
+        &quot;\nchr6:31,271,283 is the exception, showing a gradient instead.&quot;,
+        &quot;\nBoxes outlined in red rest on fewer than 5 cell lines, so their level is&quot;,
+        &quot;not interpretable.&quot;))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_site26.Rmd/sec2a-geno-1.png" width="1056" style="display: block; margin: auto;" /></p>
+</div>
+<div id="the-four-with-no-variant-called" class="section level3">
+<h3>The four with no variant called</h3>
+<pre class="r"><code>dB &lt;- attach_lab(GRP[2])
+plot_pu_depth(dB,
+  &quot;The same signature, with no variant called on the pU base&quot;,
+  paste(&quot;Consistent with a U/C variant below the MAF 0.05 threshold, or one&quot;,
+        &quot;absent from our call set -- inferred from the shape, not confirmed.&quot;),
+  ncol = 4)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_site26.Rmd/sec2b-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_pu_geno(dB,
+  &quot;The same four, against genotype at the lead cis-SNP&quot;,
+  &quot;Same stepped pattern as the confirmed U/C sites.&quot;, ncol = 4)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_site26.Rmd/sec2b-geno-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>Two of these four sit in the chr6 MHC, the most polymorphic and
+hardest-to-map region of the genome, where a variant missing from a call
+set is unsurprising. In fact <strong>6 of the 26 are in the MHC</strong>
+(chr6:28.5–33.4 Mb, about 0.16% of the genome).</p>
+</div>
+</div>
+<div
+id="mechanism-b-one-cell-line-supplies-nearly-all-the-converted-reads"
+class="section level2">
+<h2>2.3 Mechanism B: one cell line supplies nearly all the converted
+reads</h2>
+<p>These sites have essentially <strong>no modification</strong> —
+pooled %pU between 1.2% and 8.8%. Most cell lines report zero converted
+reads. Then one cell line reports a large %pU, and it alone accounts for
+up to 98% of every converted read at the site.</p>
+<pre class="r"><code>dC &lt;- attach_lab(GRP[3])
+plot_pu_depth(dC,
+  &quot;Mechanism B: a near-empty site plus one discordant cell line&quot;,
+  paste(&quot;A wall of cell lines at exactly 0%, and one or two lone dots to the&quot;,
+        &quot;right. Nothing here supports a genotype effect.&quot;))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_site26.Rmd/sec2c-depth-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_pu_geno(dC,
+  &quot;Mechanism B: %pU against genotype at the lead cis-SNP&quot;,
+  paste(&quot;The apparent &#39;effect&#39; is one or two cell lines lifting a single genotype&quot;,
+        &quot;group off the floor -- not a shift of the group as a whole.&quot;))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_site26.Rmd/sec2c-geno-1.png" width="1056" style="display: block; margin: auto;" /></p>
+</div>
+<div id="for-comparison-what-ordinary-sites-look-like"
+class="section level2">
+<h2>2.4 For comparison: what ordinary sites look like</h2>
+<p>Same axes, same builders. Two comparison sets: significant hits that
+are not U/C-aliasing and not concentration-driven, and sites drawn at
+random from those tested but never significant.</p>
+<div id="significant-hits-spanning-the-significance-range"
+class="section level3">
+<h3>Significant hits, spanning the significance range</h3>
+<pre class="r"><code>dD &lt;- attach_lab(GRP[4])
+plot_pu_depth(dD, &quot;Ordinary significant hits: %pU against read depth&quot;,
+  &quot;Chosen to span the whole significance range, from the strongest to the weakest.&quot;,
+  ncol = 3)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_site26.Rmd/sec2d-depth-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_pu_geno(dD, &quot;Ordinary significant hits: %pU against genotype&quot;,
+  paste(&quot;Compare with 2.2: the genotype groups overlap and shift gradually&quot;,
+        &quot;rather than sitting at separated levels.&quot;), ncol = 3)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_site26.Rmd/sec2d-geno-1.png" width="1056" style="display: block; margin: auto;" /></p>
+</div>
+<div id="random-sites-never-significant" class="section level3">
+<h3>Random sites, never significant</h3>
+<pre class="r"><code>dE &lt;- attach_lab(GRP[5], with_p = FALSE)
+plot_pu_depth(dE, &quot;Random non-significant sites: %pU against read depth&quot;,
+  paste(&quot;The typical site: low %pU and shallow coverage in most cell lines.&quot;,
+        &quot;Shallow coverage is the norm in this dataset, not a property of the&quot;,
+        &quot;pathological sites.&quot;), ncol = 3)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_site26.Rmd/sec2e-depth-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_pu_geno(dE, &quot;Random non-significant sites: %pU against genotype&quot;,
+  &quot;No relationship, which is what the bulk of the genome should look like.&quot;,
+  ncol = 3)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_site26.Rmd/sec2e-geno-1.png" width="1056" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+</div>
+<div id="calibration-after-removing-these-sites" class="section level1">
+<h1>3. Calibration after removing these sites</h1>
+<p>Two exclusions, each shown against the unfiltered scan. The 26 were
+selected from the permuted data alone (§1), so the real panels are not
+circular.</p>
+<pre class="r"><code>qq[, condition := factor(condition, levels = COND_LV)]
+qq[, dataset := factor(dataset, levels = c(&quot;real&quot;, paste0(&quot;perm&quot;, 1:5)))]
+COLS &lt;- c(real = &quot;#e34948&quot;, perm1 = &quot;#9ec5f4&quot;, perm2 = &quot;#6da7ec&quot;,
+          perm3 = &quot;#3987e5&quot;, perm4 = &quot;#256abf&quot;, perm5 = &quot;#0d366b&quot;)
+ggplot(qq, aes(expected, observed, colour = dataset)) +
+  geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, colour = &quot;grey45&quot;) +
+  geom_point(size = 0.6, alpha = 0.75) +
+  scale_colour_manual(values = COLS, name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
+  facet_wrap(~ condition, ncol = 1, scales = &quot;free_y&quot;) +
+  labs(x = expression(-log[10](&quot;expected p&quot;)), y = expression(-log[10](&quot;observed p&quot;)),
+       title = &quot;Beta-binomial LRT calibration, before and after each exclusion&quot;,
+       subtitle = paste(&quot;Note the free y-axis. The permutation series (blues) should&quot;,
+                        &quot;hug the dashed line; where they rise above it the test is&quot;,
+                        &quot;producing signal from shuffled data.&quot;)) +
+  theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_site26.Rmd/sec3-qq-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ORD &lt;- c(&quot;real&quot;, paste0(&quot;perm&quot;, 1:5))
+lw &lt;- dcast(lam, dataset ~ condition, value.var = &quot;lambda&quot;)
+setcolorder(lw, c(&quot;dataset&quot;, COND_LV)); lw &lt;- lw[order(factor(dataset, levels = ORD))]
+knitr::kable(lw, digits = 3, caption = &quot;lambda, the median-based inflation factor&quot;)</code></pre>
+<table>
+<caption>lambda, the median-based inflation factor</caption>
+<thead>
+<tr class="header">
+<th align="left">dataset</th>
+<th align="right">all sites</th>
+<th align="right">minus the 26 sites</th>
+<th align="right">minus all U/C-aliasing sites</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">real</td>
+<td align="right">2.473</td>
+<td align="right">2.430</td>
+<td align="right">1.402</td>
+</tr>
+<tr class="even">
+<td align="left">perm1</td>
+<td align="right">1.195</td>
+<td align="right">1.178</td>
+<td align="right">1.066</td>
+</tr>
+<tr class="odd">
+<td align="left">perm2</td>
+<td align="right">0.961</td>
+<td align="right">0.950</td>
+<td align="right">1.029</td>
+</tr>
+<tr class="even">
+<td align="left">perm3</td>
+<td align="right">1.102</td>
+<td align="right">1.089</td>
+<td align="right">1.049</td>
+</tr>
+<tr class="odd">
+<td align="left">perm4</td>
+<td align="right">1.087</td>
+<td align="right">1.073</td>
+<td align="right">1.056</td>
+</tr>
+<tr class="even">
+<td align="left">perm5</td>
+<td align="right">1.034</td>
+<td align="right">1.020</td>
+<td align="right">1.038</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>tw &lt;- dcast(lam, dataset ~ condition, value.var = &quot;max_nlp&quot;)
+setcolorder(tw, c(&quot;dataset&quot;, COND_LV)); tw &lt;- tw[order(factor(dataset, levels = ORD))]
+knitr::kable(tw, digits = 1, caption = &quot;Largest observed -log10(p): the QQ tail height&quot;)</code></pre>
+<table>
+<caption>Largest observed -log10(p): the QQ tail height</caption>
+<thead>
+<tr class="header">
+<th align="left">dataset</th>
+<th align="right">all sites</th>
+<th align="right">minus the 26 sites</th>
+<th align="right">minus all U/C-aliasing sites</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">real</td>
+<td align="right">289.1</td>
+<td align="right">40.2</td>
+<td align="right">179.8</td>
+</tr>
+<tr class="even">
+<td align="left">perm1</td>
+<td align="right">285.0</td>
+<td align="right">12.4</td>
+<td align="right">177.9</td>
+</tr>
+<tr class="odd">
+<td align="left">perm2</td>
+<td align="right">284.9</td>
+<td align="right">7.7</td>
+<td align="right">178.7</td>
+</tr>
+<tr class="even">
+<td align="left">perm3</td>
+<td align="right">284.3</td>
+<td align="right">8.5</td>
+<td align="right">178.3</td>
+</tr>
+<tr class="odd">
+<td align="left">perm4</td>
+<td align="right">284.4</td>
+<td align="right">8.3</td>
+<td align="right">177.9</td>
+</tr>
+<tr class="even">
+<td align="left">perm5</td>
+<td align="right">284.6</td>
+<td align="right">8.8</td>
+<td align="right">177.6</td>
+</tr>
+</tbody>
+</table>
+<p>The two tables move independently, and that is the main result
+here.</p>
+<pre class="r"><code>g &lt;- function(cond, col) {
+  v &lt;- lam[condition == cond &amp; dataset == &quot;real&quot;][[col]]
+  if (col == &quot;lambda&quot;) round(v, 3) else round(v, 1)
+}
+pmax_of &lt;- function(cond) round(max(lam[condition == cond &amp; dataset != &quot;real&quot;]$max_nlp), 1)
+knitr::kable(data.table(
+  condition = COND_LV,
+  `real lambda` = vapply(COND_LV, g, numeric(1), col = &quot;lambda&quot;),
+  `real tail` = vapply(COND_LV, g, numeric(1), col = &quot;max_nlp&quot;),
+  `worst permuted tail` = vapply(COND_LV, pmax_of, numeric(1)),
+  `sites removed` = c(0L, nrow(patho),
+                      cnt[grepl(&quot;U/C-aliasing sites genome-wide&quot;, quantity)]$n)),
+  row.names = FALSE,
+  caption = &quot;With the phenotype shuffled the permuted tail should be near 0.&quot;)</code></pre>
+<table style="width:100%;">
+<caption>With the phenotype shuffled the permuted tail should be near
+0.</caption>
+<colgroup>
+<col width="34%" />
+<col width="14%" />
+<col width="11%" />
+<col width="23%" />
+<col width="16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">condition</th>
+<th align="right">real lambda</th>
+<th align="right">real tail</th>
+<th align="right">worst permuted tail</th>
+<th align="right">sites removed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">all sites</td>
+<td align="right">2.473</td>
+<td align="right">289.1</td>
+<td align="right">285.0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">minus the 26 sites</td>
+<td align="right">2.430</td>
+<td align="right">40.2</td>
+<td align="right">12.4</td>
+<td align="right">26</td>
+</tr>
+<tr class="odd">
+<td align="left">minus all U/C-aliasing sites</td>
+<td align="right">1.402</td>
+<td align="right">179.8</td>
+<td align="right">178.7</td>
+<td align="right">1118</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Removing the 26 fixes the tail.</strong> The largest
+<code>-log10 p</code> falls from 289.1 to 40.2 in the real data and from
+285 to 12.4 in the permutations — so essentially all of the manufactured
+signal lived in those 26 sites. λ barely moves (2.473 → 2.43), because λ
+is computed from the <em>median</em> statistic and 26 sites out of
+~11,000 cannot shift a median.</p>
+<p><strong>Removing all U/C sites fixes λ.</strong> The opposite
+pattern: λ drops to 1.402, a much larger change, while the tail stays at
+179.8 — because the four sites with no variant call (§2.2) are not in
+the U/C list and are among the worst offenders.</p>
+<p>Neither exclusion alone does both. Worth noting for interpretation:
+the ~1,100 U/C sites that are <em>not</em> among the 26 are not a
+calibration failure at all — permutation removes their signal normally.
+They are a problem because the phenotype is a genotype read-out, so a
+statistically sound association is being reported as a modification
+QTL.</p>
+</div>
+<div id="caveats" class="section level1">
+<h1>Caveats</h1>
+<ul>
+<li><strong>The four sites with no variant call</strong> are assigned to
+mechanism A on the strength of their %pU shape. Confirming that needs
+base-level sequence at those positions, not more statistics.</li>
+<li><strong>A large-effect QTL and aliasing look alike.</strong> If a
+variant largely abolished modification, non-carriers would sit high,
+homozygous carriers near zero and heterozygotes between — the same three
+bands. So banding is a reason to check the base, not a verdict on its
+own. This matters for the ordinary hits in §2.4 as well; the <a
+href="qtl_mapping_betabinomial_pathology_summary.html">companion
+page</a> quantifies how many are affected.</li>
+<li><strong>The exclusion has not been re-run.</strong> These figures
+filter the existing results. Rebuilding the phenotype matrix without the
+excluded sites would also change the multiple-testing correction.</li>
+<li><strong>Assay direction unconfirmed.</strong> The U/C reading
+assumes pseudouridine is detected at the same base the variant changes;
+worth confirming with whoever ran the protocol.</li>
+</ul>
+</div>
+<div id="reproducing-this-page" class="section level1">
+<h1>Reproducing this page</h1>
+<pre class="r"><code>knitr::kable(fread(file.path(DAT, &quot;runinfo.tsv&quot;)), caption = &quot;Parameters&quot;)</code></pre>
+<table>
+<caption>Parameters</caption>
+<thead>
+<tr class="header">
+<th align="left">parameter</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">window_bp</td>
+<td align="left">5000</td>
+</tr>
+<tr class="even">
+<td align="left">npcs</td>
+<td align="left">3</td>
+</tr>
+<tr class="odd">
+<td align="left">maf_min</td>
+<td align="left">0.05</td>
+</tr>
+<tr class="even">
+<td align="left">n_comparison_sites</td>
+<td align="left">6</td>
+</tr>
+<tr class="odd">
+<td align="left">comparison_seed</td>
+<td align="left">20260817</td>
+</tr>
+<tr class="even">
+<td align="left">lead_snp_rule</td>
+<td align="left">min-p cis-SNP on the real data</td>
+</tr>
+<tr class="odd">
+<td align="left">script</td>
+<td align="left">11.site26_page_data.R</td>
+</tr>
+<tr class="even">
+<td align="left">date</td>
+<td align="left">2026-08-17 14:10:43</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(data.table(
+  step = c(&quot;site-resolved calibration scan (6 datasets, site identity kept)&quot;,
+           &quot;selection of the 26 sites&quot;,
+           &quot;U/C-aliasing site list&quot;,
+           &quot;classification of the 26&quot;,
+           &quot;genotype panels + QQ for this page&quot;,
+           &quot;this page&quot;),
+  script = c(&quot;8.calibration_site_resolved.R&quot;, &quot;9.qq_exclude_pathological.R&quot;,
+             &quot;9.qq_exclude_pathological.R (+ .traw allele check)&quot;,
+             &quot;10.summary_page_data.R&quot;, &quot;11.site26_page_data.R&quot;,
+             &quot;analysis/qtl_mapping_betabinomial_site26.Rmd&quot;),
+  submitted_via = c(&quot;run_calibration_siteres.sbatch&quot;, &quot;-- (light)&quot;, &quot;-- (light)&quot;,
+                    &quot;run_summary_page_data.sbatch&quot;, &quot;run_site26_page_data.sbatch&quot;,
+                    &quot;run_render_rmd.sbatch&quot;)),
+  caption = &quot;Provenance. The heavy steps need a compute node.&quot;)</code></pre>
+<table>
+<caption>Provenance. The heavy steps need a compute node.</caption>
+<colgroup>
+<col width="43%" />
+<col width="34%" />
+<col width="21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">step</th>
+<th align="left">script</th>
+<th align="left">submitted_via</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">site-resolved calibration scan (6 datasets, site
+identity kept)</td>
+<td align="left">8.calibration_site_resolved.R</td>
+<td align="left">run_calibration_siteres.sbatch</td>
+</tr>
+<tr class="even">
+<td align="left">selection of the 26 sites</td>
+<td align="left">9.qq_exclude_pathological.R</td>
+<td align="left">– (light)</td>
+</tr>
+<tr class="odd">
+<td align="left">U/C-aliasing site list</td>
+<td align="left">9.qq_exclude_pathological.R (+ .traw allele check)</td>
+<td align="left">– (light)</td>
+</tr>
+<tr class="even">
+<td align="left">classification of the 26</td>
+<td align="left">10.summary_page_data.R</td>
+<td align="left">run_summary_page_data.sbatch</td>
+</tr>
+<tr class="odd">
+<td align="left">genotype panels + QQ for this page</td>
+<td align="left">11.site26_page_data.R</td>
+<td align="left">run_site26_page_data.sbatch</td>
+</tr>
+<tr class="even">
+<td align="left">this page</td>
+<td align="left">analysis/qtl_mapping_betabinomial_site26.Rmd</td>
+<td align="left">run_render_rmd.sbatch</td>
+</tr>
+</tbody>
+</table>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 8
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.0  
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.2.0  xfun_0.38         bslib_0.3.1       colorspace_2.0-3 
+ [5] vctrs_0.6.1       generics_0.1.3    htmltools_0.5.7   yaml_2.3.5       
+ [9] utf8_1.2.2        rlang_1.1.2       R.oo_1.24.0       jquerylib_0.1.4  
+[13] later_1.3.0       pillar_1.9.0      glue_1.6.2        withr_2.5.0      
+[17] R.utils_2.11.0    lifecycle_1.0.4   stringr_1.5.0     munsell_0.5.0    
+[21] gtable_0.3.0      R.methodsS3_1.8.1 evaluate_0.15     labeling_0.4.2   
+[25] knitr_1.42        callr_3.7.0       fastmap_1.1.0     httpuv_1.6.5     
+[29] ps_1.7.0          fansi_1.0.3       highr_0.9         Rcpp_1.0.11      
+[33] promises_1.2.0.1  scales_1.2.0      jsonlite_1.8.7    farver_2.1.0     
+[37] fs_1.5.2          digest_0.6.29     stringi_1.7.6     processx_3.5.3   
+[41] dplyr_1.1.2       getPass_0.2-2     rprojroot_2.0.3   grid_4.2.0       
+[45] cli_3.6.2         tools_4.2.0       magrittr_2.0.3    sass_0.4.1       
+[49] tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3   rmarkdown_2.21   
+[53] httr_1.4.5        rstudioapi_0.14   R6_2.5.1          git2r_0.30.1     
+[57] compiler_4.2.0   </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

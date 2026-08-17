@@ -1,0 +1,447 @@
+---
+title: "Beta-binomial pU-QTL: the 26 sites that survive permutation"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = "center", fig.width = 11)
+
+BASE <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl"
+DAT  <- file.path(BASE, "qtl_betabinomial/site26_page_data")
+DIAG <- file.path(BASE, "qtl_betabinomial/diagnostic_figures")
+
+pan   <- fread(file.path(DAT, "geno_panels.tsv.gz"))
+labs  <- fread(file.path(DAT, "site_labels.tsv"))
+qq    <- fread(file.path(DAT, "qq2.tsv.gz"))
+lam   <- fread(file.path(DAT, "lambda2.tsv"))
+cnt   <- fread(file.path(DAT, "counts.tsv"))
+patho <- fread(file.path(DIAG, "pathological_sites.txt"))
+
+pan[, geno := factor(geno, levels = c(0, 1, 2))]
+COND_LV <- c("all sites", "minus the 26 sites", "minus all U/C-aliasing sites")
+GRP <- c("Mechanism A: U/C variant on the pU base",
+         "Mechanism A: same shape, no variant called",
+         "Mechanism B: one cell line dominates",
+         "Comparison: surviving significant hits",
+         "Comparison: random non-significant sites")
+
+# Panel label. Kept short: these figures carry up to 14 facets.
+mk_lab <- function(g, with_p = TRUE) {
+  L <- labs[group == g]
+  setkey(L, sid)
+  lab <- L[, sprintf("chr%s:%s%s\n%spooled %%pU=%.3f | %s reads",
+                     chr, format(pos, big.mark = ",", trim = TRUE),
+                     ifelse(snp_at_site == "", "", paste0("  (", snp_at_site, ")")),
+                     ifelse(with_p & is.finite(nlp), sprintf("-log10p=%.0f | ", nlp), ""),
+                     pooled_pu, format(total_depth, big.mark = ",", trim = TRUE))]
+  data.table(sid = L$sid, lab = lab)
+}
+attach_lab <- function(g, with_p = TRUE) {
+  d <- merge(pan[group == g], mk_lab(g, with_p), by = "sid")
+  ord <- labs[group == g][order(-nlp)]$sid
+  d[, lab := factor(lab, levels = unique(merge(data.table(sid = ord),
+                     mk_lab(g, with_p), by = "sid", sort = FALSE)$lab))]
+  d
+}
+
+# ---- figure 1 style: %pU against read depth (one dot per cell line) -------
+plot_pu_depth <- function(dd, title, subtitle, ncol = 4) {
+  ggplot(dd, aes(pu, pmax(n, 1))) +
+    geom_vline(xintercept = c(0, 0.5, 1), colour = "grey88", linewidth = 0.4) +
+    geom_point(colour = "#256abf", alpha = 0.7, size = 1.6) +
+    scale_x_continuous(limits = c(-0.04, 1.04), breaks = c(0, 0.5, 1),
+                       labels = c("0", "50", "100")) +
+    scale_y_log10(labels = scales::comma) +
+    facet_wrap(~ lab, ncol = ncol) +
+    labs(x = "%pU in one cell line", y = "read depth (log scale)",
+         title = title, subtitle = subtitle) +
+    theme_bw(base_size = 11) +
+    theme(strip.text = element_text(size = 7.5), panel.grid.minor = element_blank())
+}
+
+# ---- figure 2 style: %pU against genotype at the lead cis-SNP -------------
+# A boxplot IS appropriate here: we are comparing three defined groups, which is
+# what a box summarises well. Groups with fewer than 5 cell lines are outlined in
+# red, because a "genotype effect" resting on 2 cell lines is not interpretable.
+plot_pu_geno <- function(dd, title, subtitle, ncol = 4) {
+  gn <- dd[, .(n_cl = .N, small = .N < 5), by = .(lab, geno)]
+  dd2 <- merge(dd, gn, by = c("lab", "geno"))
+  ggplot(dd2, aes(geno, pu)) +
+    geom_boxplot(aes(colour = small), fill = "grey96", width = 0.6,
+                 outlier.shape = NA, linewidth = 0.45) +
+    geom_jitter(aes(size = pmax(n, 1)), width = 0.16, height = 0,
+                colour = "#256abf", alpha = 0.65) +
+    geom_text(data = gn, aes(geno, y = 1.09, label = paste0("n=", n_cl)),
+              size = 2.4, colour = "grey30", inherit.aes = FALSE) +
+    scale_colour_manual(values = c(`FALSE` = "grey45", `TRUE` = "#e34948"),
+                        labels = c("5 or more cell lines", "fewer than 5"),
+                        name = "genotype group size") +
+    scale_size_continuous(trans = "log10", range = c(0.7, 3.6),
+                          breaks = c(10, 100, 1000, 10000),
+                          labels = scales::comma, name = "read depth (n)") +
+    scale_y_continuous(limits = c(-0.04, 1.16), breaks = c(0, 0.5, 1),
+                       labels = c("0", "50", "100")) +
+    facet_wrap(~ lab, ncol = ncol) +
+    labs(x = "copies of the ALT allele at the lead cis-SNP", y = "%pU",
+         title = title, subtitle = subtitle) +
+    theme_bw(base_size = 11) +
+    theme(legend.position = "bottom", strip.text = element_text(size = 7.5),
+          panel.grid.minor = element_blank())
+}
+```
+
+# Summary
+
+The beta-binomial cis scan produced top hits that **a phenotype permutation did
+not displace** — 19 of the 20 strongest sites under permutation were the same
+sites as the real top 20, none sharing a lead SNP. Permutation is supposed to
+destroy all genotype–phenotype signal, so those sites were being selected for
+some reason other than genotype.
+
+`r nrow(patho)` sites are responsible. This page describes what they are and what
+removing them does to calibration.
+
+```{r headline}
+knitr::kable(cnt, col.names = c("", "n"), caption = "Scale")
+```
+
+- **`r sum(labs$group == GRP[1] )` of the 26 carry a U↔C sequence variant on the
+  pU base itself**, which makes the measured "%pU" partly a read-out of genotype
+  instead of modification (§2.2).
+- **`r sum(labs$group == GRP[2])` more show the identical pattern with no variant
+  called** at the base — consistent with the same cause, but not confirmed.
+- **`r sum(labs$group == GRP[3])` are a different problem**: sites with almost no
+  modification where a single cell line supplies nearly all converted reads
+  (§2.3).
+- Removing the 26 collapses the QQ tail from
+  `r round(lam[condition == "all sites" & dataset == "real"]$max_nlp, 0)` to
+  `r round(lam[condition == "minus the 26 sites" & dataset == "real"]$max_nlp, 0)`;
+  removing every U/C site instead is what fixes λ (§3).
+
+A companion page, [the full pathology write-up](qtl_mapping_betabinomial_pathology_summary.html),
+covers the statistical mechanism and the wider audit of the other significant hits.
+
+# 1. How the 26 sites were found
+
+The cis scan was rerun six times — once on the real data, once under each of five
+phenotype permutations (`set.seed(1000 + k)`, phenotype and covariates reindexed
+together, genotypes untouched) — this time **keeping the site identity attached to
+every p-value**, which the original calibration script discarded.
+
+Under permutation no genotype–phenotype relationship exists, so any site still
+returning an extreme p-value there is broken on its own terms. Two criteria:
+
+```{r criteria}
+knitr::kable(data.table(
+  criterion = c("nominal p < 1e-10 in at least one of the 5 permutations",
+                "and real -log10(p) > 10"),
+  `sites` = c("27", as.character(nrow(patho)))),
+  caption = paste("Selection used the PERMUTED data only, so looking at the real",
+                  "QQ plot afterwards (§3) is not circular."))
+```
+
+Of the 27 candidates, one was extreme in a single permutation by chance. The other
+**`r nrow(patho)` were extreme in all six datasets** — checked individually, and
+their permutation-to-permutation spread is tiny (median SD
+`r sprintf("%.2f", median(patho$perm_sd))` on the `-log10 p` scale), so this is a
+stable property of each site rather than a fluke.
+
+```{r sec1-fig, fig.height=6.5}
+P <- paste0("perm", 1:5)
+lg <- melt(patho[, c("sid", "real", P), with = FALSE], id.vars = "sid",
+           variable.name = "dataset", value.name = "nlp")
+lg[, sid := factor(sid, levels = patho[order(real)]$sid)]
+ggplot(lg, aes(nlp, sid)) +
+  geom_line(aes(group = sid), colour = "grey70", linewidth = 0.4) +
+  geom_point(data = lg[dataset != "real"], aes(colour = "the 5 permutations"),
+             size = 1.7, alpha = 0.85) +
+  geom_point(data = lg[dataset == "real"], aes(colour = "real data"), size = 2.6) +
+  scale_colour_manual(values = c(`real data` = "#e34948",
+                                 `the 5 permutations` = "#3987e5"), name = NULL) +
+  labs(x = expression(-log[10]("p")~"of the site's best cis-SNP"), y = NULL,
+       title = "At all 26 sites the permutations reach almost the same p-value as the real data",
+       subtitle = "A working site would have its permutation points near 0.") +
+  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+```
+
+# 2. What the 26 sites are
+
+## 2.1 Classification
+
+```{r sec2-class}
+knitr::kable(labs[is26 == TRUE, .(
+  site = sprintf("chr%s:%s", chr, format(pos, big.mark = ",", trim = TRUE)),
+  `-log10p` = nlp,
+  `variant on the pU base` = ifelse(snp_at_site == "", "--", snp_at_site),
+  `pooled %pU` = round(pooled_pu, 3),
+  `top cell-line share` = round(top_share, 2),
+  `lead cis-SNP` = lead_snp,
+  `its distance` = sprintf("%+d bp", lead_dist),
+  mechanism = sub(":.*", "", group))][order(-`-log10p`)],
+  caption = paste("All 26. 'top cell-line share' is the largest fraction of the",
+                  "site's converted reads coming from one cell line."))
+```
+
+## 2.2 Mechanism A: a U↔C variant on the pU base
+
+### What the problem is
+
+Pseudouridine is a **modified uridine** — chemically still a U, and the assay
+detects it by reading the base at that position and scoring conversions. The
+readout is therefore a statement about *what base is there*, and it cannot
+distinguish two different reasons for seeing something other than a plain U:
+
+1. the U was **modified** to pseudouridine — the biology we want to measure; or
+2. the cell line **inherited a C** at that position instead of a U.
+
+When a common sequence variant changes that exact base from U to C, the two are
+indistinguishable. A cell line homozygous for the C allele reads as ~100%
+"modified" at every read; a heterozygote reads ~50%, because half its transcripts
+carry the C; a homozygous-reference cell line reads whatever the true modification
+rate is. **The phenotype becomes a genotype assay.**
+
+That gives three consequences, all visible below:
+
+- %pU clusters into three discrete levels near 0%, 50% and 100% rather than
+  varying continuously;
+- those levels track the variant almost perfectly, so any SNP in linkage with it
+  predicts the phenotype — a real association, but of the wrong thing; and
+- the effect does not weaken with depth, because it is not a sampling artefact.
+
+Written against the genome this appears as **C/T on the + strand and A/G on the −
+strand** — the same U→C change on the transcript, seen from whichever strand the
+transcript came from. Genome-wide,
+**`r format(cnt[grepl("U/C-aliasing sites genome-wide", quantity)]$n, big.mark = ",")`
+sites** carry such a variant.
+
+### %pU across cell lines
+
+```{r sec2a-depth, fig.height=8}
+dA <- attach_lab(GRP[1])
+plot_pu_depth(dA,
+  "Mechanism A: %pU forms discrete bands, because it is reporting genotype",
+  paste("All", uniqueN(dA$sid), "sites with a U/C variant called on the pU base.",
+        "Each dot is one cell line; the panel header gives the variant.",
+        "\nThe bands persist at every read depth, so they are not a coverage artefact."))
+```
+
+### %pU against genotype at the lead cis-SNP
+
+If %pU is a genotype read-out, it should line up with genotype in steps rather
+than as a gradual trend.
+
+```{r sec2a-geno, fig.height=8.5}
+plot_pu_geno(dA,
+  "Mechanism A: %pU against copies of the ALT allele at the lead cis-SNP",
+  paste("Dot size is read depth. At most sites the three genotype groups sit at",
+        "separated %pU levels -- a step function rather than a dose-response.",
+        "\nchr6:31,271,283 is the exception, showing a gradient instead.",
+        "\nBoxes outlined in red rest on fewer than 5 cell lines, so their level is",
+        "not interpretable."))
+```
+
+### The four with no variant called
+
+```{r sec2b, fig.height=3.4}
+dB <- attach_lab(GRP[2])
+plot_pu_depth(dB,
+  "The same signature, with no variant called on the pU base",
+  paste("Consistent with a U/C variant below the MAF 0.05 threshold, or one",
+        "absent from our call set -- inferred from the shape, not confirmed."),
+  ncol = 4)
+```
+
+```{r sec2b-geno, fig.height=3.8}
+plot_pu_geno(dB,
+  "The same four, against genotype at the lead cis-SNP",
+  "Same stepped pattern as the confirmed U/C sites.", ncol = 4)
+```
+
+Two of these four sit in the chr6 MHC, the most polymorphic and hardest-to-map
+region of the genome, where a variant missing from a call set is unsurprising.
+In fact **`r sum(labs[is26 == TRUE]$chr == "6")` of the 26 are in the MHC**
+(chr6:28.5–33.4 Mb, about 0.16% of the genome).
+
+## 2.3 Mechanism B: one cell line supplies nearly all the converted reads
+
+These sites have essentially **no modification** — pooled %pU between
+`r sprintf("%.1f%%", 100*min(labs[group == GRP[3]]$pooled_pu))` and
+`r sprintf("%.1f%%", 100*max(labs[group == GRP[3]]$pooled_pu))`. Most cell lines
+report zero converted reads. Then one cell line reports a large %pU, and it alone
+accounts for up to
+`r sprintf("%.0f%%", 100*max(labs[group == GRP[3]]$top_share, na.rm = TRUE))` of
+every converted read at the site.
+
+```{r sec2c-depth, fig.height=5}
+dC <- attach_lab(GRP[3])
+plot_pu_depth(dC,
+  "Mechanism B: a near-empty site plus one discordant cell line",
+  paste("A wall of cell lines at exactly 0%, and one or two lone dots to the",
+        "right. Nothing here supports a genotype effect."))
+```
+
+```{r sec2c-geno, fig.height=5.5}
+plot_pu_geno(dC,
+  "Mechanism B: %pU against genotype at the lead cis-SNP",
+  paste("The apparent 'effect' is one or two cell lines lifting a single genotype",
+        "group off the floor -- not a shift of the group as a whole."))
+```
+
+## 2.4 For comparison: what ordinary sites look like
+
+Same axes, same builders. Two comparison sets: significant hits that are not
+U/C-aliasing and not concentration-driven, and sites drawn at random from those
+tested but never significant.
+
+### Significant hits, spanning the significance range
+
+```{r sec2d-depth, fig.height=4.4}
+dD <- attach_lab(GRP[4])
+plot_pu_depth(dD, "Ordinary significant hits: %pU against read depth",
+  "Chosen to span the whole significance range, from the strongest to the weakest.",
+  ncol = 3)
+```
+
+```{r sec2d-geno, fig.height=5}
+plot_pu_geno(dD, "Ordinary significant hits: %pU against genotype",
+  paste("Compare with 2.2: the genotype groups overlap and shift gradually",
+        "rather than sitting at separated levels."), ncol = 3)
+```
+
+### Random sites, never significant
+
+```{r sec2e-depth, fig.height=4.4}
+dE <- attach_lab(GRP[5], with_p = FALSE)
+plot_pu_depth(dE, "Random non-significant sites: %pU against read depth",
+  paste("The typical site: low %pU and shallow coverage in most cell lines.",
+        "Shallow coverage is the norm in this dataset, not a property of the",
+        "pathological sites."), ncol = 3)
+```
+
+```{r sec2e-geno, fig.height=5}
+plot_pu_geno(dE, "Random non-significant sites: %pU against genotype",
+  "No relationship, which is what the bulk of the genome should look like.",
+  ncol = 3)
+```
+
+# 3. Calibration after removing these sites
+
+Two exclusions, each shown against the unfiltered scan. The 26 were selected from
+the permuted data alone (§1), so the real panels are not circular.
+
+```{r sec3-qq, fig.height=9}
+qq[, condition := factor(condition, levels = COND_LV)]
+qq[, dataset := factor(dataset, levels = c("real", paste0("perm", 1:5)))]
+COLS <- c(real = "#e34948", perm1 = "#9ec5f4", perm2 = "#6da7ec",
+          perm3 = "#3987e5", perm4 = "#256abf", perm5 = "#0d366b")
+ggplot(qq, aes(expected, observed, colour = dataset)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey45") +
+  geom_point(size = 0.6, alpha = 0.75) +
+  scale_colour_manual(values = COLS, name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
+  facet_wrap(~ condition, ncol = 1, scales = "free_y") +
+  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
+       title = "Beta-binomial LRT calibration, before and after each exclusion",
+       subtitle = paste("Note the free y-axis. The permutation series (blues) should",
+                        "hug the dashed line; where they rise above it the test is",
+                        "producing signal from shuffled data.")) +
+  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+```
+
+```{r sec3-tab}
+ORD <- c("real", paste0("perm", 1:5))
+lw <- dcast(lam, dataset ~ condition, value.var = "lambda")
+setcolorder(lw, c("dataset", COND_LV)); lw <- lw[order(factor(dataset, levels = ORD))]
+knitr::kable(lw, digits = 3, caption = "lambda, the median-based inflation factor")
+
+tw <- dcast(lam, dataset ~ condition, value.var = "max_nlp")
+setcolorder(tw, c("dataset", COND_LV)); tw <- tw[order(factor(dataset, levels = ORD))]
+knitr::kable(tw, digits = 1, caption = "Largest observed -log10(p): the QQ tail height")
+```
+
+The two tables move independently, and that is the main result here.
+
+```{r sec3-compare}
+g <- function(cond, col) {
+  v <- lam[condition == cond & dataset == "real"][[col]]
+  if (col == "lambda") round(v, 3) else round(v, 1)
+}
+pmax_of <- function(cond) round(max(lam[condition == cond & dataset != "real"]$max_nlp), 1)
+knitr::kable(data.table(
+  condition = COND_LV,
+  `real lambda` = vapply(COND_LV, g, numeric(1), col = "lambda"),
+  `real tail` = vapply(COND_LV, g, numeric(1), col = "max_nlp"),
+  `worst permuted tail` = vapply(COND_LV, pmax_of, numeric(1)),
+  `sites removed` = c(0L, nrow(patho),
+                      cnt[grepl("U/C-aliasing sites genome-wide", quantity)]$n)),
+  row.names = FALSE,
+  caption = "With the phenotype shuffled the permuted tail should be near 0.")
+```
+
+**Removing the 26 fixes the tail.** The largest `-log10 p` falls from
+`r g("all sites", "max_nlp")` to `r g("minus the 26 sites", "max_nlp")` in the
+real data and from `r pmax_of("all sites")` to
+`r pmax_of("minus the 26 sites")` in the permutations — so essentially all of the
+manufactured signal lived in those 26 sites. λ barely moves
+(`r g("all sites", "lambda")` → `r g("minus the 26 sites", "lambda")`), because λ
+is computed from the *median* statistic and 26 sites out of ~11,000 cannot shift a
+median.
+
+**Removing all U/C sites fixes λ.** The opposite pattern: λ drops to
+`r g("minus all U/C-aliasing sites", "lambda")`, a much larger change, while the
+tail stays at `r g("minus all U/C-aliasing sites", "max_nlp")` — because the four
+sites with no variant call (§2.2) are not in the U/C list and are among the worst
+offenders.
+
+Neither exclusion alone does both. Worth noting for interpretation: the ~1,100
+U/C sites that are *not* among the 26 are not a calibration failure at all —
+permutation removes their signal normally. They are a problem because the
+phenotype is a genotype read-out, so a statistically sound association is being
+reported as a modification QTL.
+
+# Caveats
+
+- **The four sites with no variant call** are assigned to mechanism A on the
+  strength of their %pU shape. Confirming that needs base-level sequence at those
+  positions, not more statistics.
+- **A large-effect QTL and aliasing look alike.** If a variant largely abolished
+  modification, non-carriers would sit high, homozygous carriers near zero and
+  heterozygotes between — the same three bands. So banding is a reason to check
+  the base, not a verdict on its own. This matters for the ordinary hits in §2.4
+  as well; the [companion page](qtl_mapping_betabinomial_pathology_summary.html)
+  quantifies how many are affected.
+- **The exclusion has not been re-run.** These figures filter the existing
+  results. Rebuilding the phenotype matrix without the excluded sites would also
+  change the multiple-testing correction.
+- **Assay direction unconfirmed.** The U/C reading assumes pseudouridine is
+  detected at the same base the variant changes; worth confirming with whoever ran
+  the protocol.
+
+# Reproducing this page
+
+```{r prov}
+knitr::kable(fread(file.path(DAT, "runinfo.tsv")), caption = "Parameters")
+knitr::kable(data.table(
+  step = c("site-resolved calibration scan (6 datasets, site identity kept)",
+           "selection of the 26 sites",
+           "U/C-aliasing site list",
+           "classification of the 26",
+           "genotype panels + QQ for this page",
+           "this page"),
+  script = c("8.calibration_site_resolved.R", "9.qq_exclude_pathological.R",
+             "9.qq_exclude_pathological.R (+ .traw allele check)",
+             "10.summary_page_data.R", "11.site26_page_data.R",
+             "analysis/qtl_mapping_betabinomial_site26.Rmd"),
+  submitted_via = c("run_calibration_siteres.sbatch", "-- (light)", "-- (light)",
+                    "run_summary_page_data.sbatch", "run_site26_page_data.sbatch",
+                    "run_render_rmd.sbatch")),
+  caption = "Provenance. The heavy steps need a compute node.")
+```
