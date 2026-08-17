@@ -116,11 +116,13 @@ knitr::kable(cnt, col.names = c("", "n"), caption = "Scale")
 - **`r sum(labs$group == GRP[1] )` of the 26 carry a U↔C sequence variant on the
   pU base itself**, which makes the measured "%pU" partly a read-out of genotype
   instead of modification (§2.2).
-- **`r sum(labs$group == GRP[2])` more show the identical pattern with no variant
-  called** at the base — consistent with the same cause, but not confirmed.
+- **`r sum(labs$group == GRP[2])` more have no variant called** at the base. Only
+  one of those four has the heterozygote band a U↔C variant requires; the other
+  three show a two-level split that aliasing does not explain, and are
+  **unexplained** (§2.3).
 - **`r sum(labs$group == GRP[3])` are a different problem**: sites with almost no
   modification where a single cell line supplies nearly all converted reads
-  (§2.3).
+  (§2.4).
 - Removing the 26 collapses the QQ tail from
   `r round(lam[condition == "all sites" & dataset == "real"]$max_nlp, 0)` to
   `r round(lam[condition == "minus the 26 sites" & dataset == "real"]$max_nlp, 0)`;
@@ -185,9 +187,15 @@ knitr::kable(labs[is26 == TRUE, .(
   `top cell-line share` = round(top_share, 2),
   `lead cis-SNP` = lead_snp,
   `its distance` = sprintf("%+d bp", lead_dist),
-  mechanism = sub(":.*", "", group))][order(-`-log10p`)],
+  mechanism = c(`Mechanism A: U/C variant on the pU base` = "A: U/C variant on the base",
+                `Mechanism A: same shape, no variant called` = "unexplained (see 2.3)",
+                `Mechanism B: one cell line dominates` = "B: one cell line dominates")[group]
+  )][order(-`-log10p`)],
   caption = paste("All 26. 'top cell-line share' is the largest fraction of the",
-                  "site's converted reads coming from one cell line."))
+                  "site's converted reads coming from one cell line.",
+                  "The four marked 'unexplained' have no variant called on the pU",
+                  "base and, with one exception, lack the heterozygote band that",
+                  "aliasing would produce -- see 2.3."))
 ```
 
 ## 2.2 Mechanism A: a U↔C variant on the pU base
@@ -248,29 +256,80 @@ plot_pu_geno(dA,
         "not interpretable."))
 ```
 
-### The four with no variant called
+## 2.3 Four sites with no variant called — mostly unexplained
+
+Four of the 26 have no variant called on the pU base. An earlier version of this
+page assigned them to mechanism A on the strength of their %pU shape. **The plots
+below do not support that**, so the counts are set out explicitly.
+
+A codominant U↔C variant makes a specific prediction: three levels, including a
+**heterozygote band near 50%**, because half of a heterozygote's transcripts carry
+the C. That band is the signature, and it is testable.
+
+```{r sec2b-bins}
+bin_tab <- function(g) {
+  ids <- labs[group == g][order(-nlp)]$sid
+  rbindlist(lapply(ids, function(s) {
+    pu <- pan[sid == s]$pu
+    data.table(site = sprintf("chr%s:%s", sub(" .*", "", s),
+                              format(as.integer(sub(".* ", "", s)), big.mark = ",")),
+               `~0%` = sum(pu <= 0.08),
+               `8-42%` = sum(pu > 0.08 & pu < 0.42),
+               `~50% (42-58%)` = sum(pu >= 0.42 & pu <= 0.58),
+               `58-92%` = sum(pu > 0.58 & pu < 0.92),
+               `~100%` = sum(pu >= 0.92))
+  }))
+}
+bt <- bin_tab(GRP[2])
+knitr::kable(bt, caption = paste("Cell lines per %pU band, for the four sites with",
+                                 "no variant call. The middle column is the",
+                                 "heterozygote band a U/C variant requires."))
+uc_ids <- labs[group == GRP[1]]$sid
+n50_uc <- vapply(uc_ids, function(s) sum(pan[sid == s]$pu >= 0.42 & pan[sid == s]$pu <= 0.58), numeric(1))
+n50_ns <- bt$`~50% (42-58%)`
+knitr::kable(data.table(
+  `site set` = c("the 14 confirmed U/C sites", "the 4 with no variant call"),
+  `have a heterozygote band (>=5 cell lines at 42-58%)` =
+    c(sprintf("%d of %d", sum(n50_uc >= 5), length(n50_uc)),
+      sprintf("%d of %d", sum(n50_ns >= 5), length(n50_ns)))),
+  caption = "The band is present at most confirmed sites and absent at most of these four.")
+```
 
 ```{r sec2b, fig.height=3.4}
 dB <- attach_lab(GRP[2])
 plot_pu_depth(dB,
-  "The same signature, with no variant called on the pU base",
-  paste("Consistent with a U/C variant below the MAF 0.05 threshold, or one",
-        "absent from our call set -- inferred from the shape, not confirmed."),
+  "The four sites with no variant called on the pU base",
+  paste("Only chr6:32,745,178 shows tight clusters, and they are at 0% and 100%",
+        "with no 50% group. The other three are diffuse.",
+        "\nThis is not the clean three-level pattern of 2.2."),
   ncol = 4)
 ```
 
 ```{r sec2b-geno, fig.height=3.8}
 plot_pu_geno(dB,
   "The same four, against genotype at the lead cis-SNP",
-  "Same stepped pattern as the confirmed U/C sites.", ncol = 4)
+  paste("No stepped pattern. Note also that two of the genotype-0 groups contain a",
+        "single cell line (red), so no level can be read off them."), ncol = 4)
 ```
 
-Two of these four sit in the chr6 MHC, the most polymorphic and hardest-to-map
-region of the genome, where a variant missing from a call set is unsurprising.
-In fact **`r sum(labs[is26 == TRUE]$chr == "6")` of the 26 are in the MHC**
-(chr6:28.5–33.4 Mb, about 0.16% of the genome).
+**What this leaves.** Only **chr14:22,551,976** has a genuine three-level structure
+(`r n50_ns[1]` cell lines in the heterozygote band), and for that site the
+uncalled-U/C explanation is reasonable. The other three show a **two-level split**
+— a wall at 0% and a group at high %pU, with no heterozygote band — which is *not*
+what a codominant U↔C variant produces. They remain **unexplained**: they behave
+pathologically under permutation but neither mechanism on this page accounts for
+them.
 
-## 2.3 Mechanism B: one cell line supplies nearly all the converted reads
+One further inconvenience for the aliasing story: the two of these four that sit
+in the chr6 MHC (`r paste(sprintf("chr%s:%s", labs[group == GRP[2] & chr == "6"]$chr, format(labs[group == GRP[2] & chr == "6"]$pos, big.mark = ",")), collapse = " and ")`)
+are among the three *without* the heterozygote band. The MHC is the most
+polymorphic and hardest-to-map region of the genome, so an uncalled variant there
+would be unsurprising — but it is the wrong site that looks like aliasing, so MHC
+location is not evidence for it. For the record, **`r sum(labs[is26 == TRUE]$chr == "6")`
+of the 26 are in the MHC** (chr6:28.5–33.4 Mb, ~0.16% of the genome), which is a
+strong enrichment and worth following up on its own terms.
+
+## 2.4 Mechanism B: one cell line supplies nearly all the converted reads
 
 These sites have essentially **no modification** — pooled %pU between
 `r sprintf("%.1f%%", 100*min(labs[group == GRP[3]]$pooled_pu))` and
@@ -295,7 +354,7 @@ plot_pu_geno(dC,
         "group off the floor -- not a shift of the group as a whole."))
 ```
 
-## 2.4 For comparison: what ordinary sites look like
+## 2.5 For comparison: what ordinary sites look like
 
 Same axes, same builders. Two comparison sets: significant hits that are not
 U/C-aliasing and not concentration-driven, and sites drawn at random from those
@@ -398,7 +457,7 @@ median.
 **Removing all U/C sites fixes λ.** The opposite pattern: λ drops to
 `r g("minus all U/C-aliasing sites", "lambda")`, a much larger change, while the
 tail stays at `r g("minus all U/C-aliasing sites", "max_nlp")` — because the four
-sites with no variant call (§2.2) are not in the U/C list and are among the worst
+sites with no variant call (§2.3) are not in the U/C list and are among the worst
 offenders.
 
 Neither exclusion alone does both. Worth noting for interpretation: the ~1,100
@@ -415,7 +474,7 @@ reported as a modification QTL.
 <!-- - **A large-effect QTL and aliasing look alike.** If a variant largely abolished -->
 <!--   modification, non-carriers would sit high, homozygous carriers near zero and -->
 <!--   heterozygotes between — the same three bands. So banding is a reason to check -->
-<!--   the base, not a verdict on its own. This matters for the ordinary hits in §2.4 -->
+<!--   the base, not a verdict on its own. This matters for the ordinary hits in §2.5 -->
 <!--   as well; the [companion page](qtl_mapping_betabinomial_pathology_summary.html) -->
 <!--   quantifies how many are affected. -->
 <!-- - **The exclusion has not been re-run.** These figures filter the existing -->
