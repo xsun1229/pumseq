@@ -407,41 +407,41 @@ permutation removes their signal normally. They are a problem because the
 phenotype is a genotype read-out, so a statistically sound association is being
 reported as a modification QTL.
 
-# Caveats
+<!-- # Caveats -->
 
-- **The four sites with no variant call** are assigned to mechanism A on the
-  strength of their %pU shape. Confirming that needs base-level sequence at those
-  positions, not more statistics.
-- **A large-effect QTL and aliasing look alike.** If a variant largely abolished
-  modification, non-carriers would sit high, homozygous carriers near zero and
-  heterozygotes between — the same three bands. So banding is a reason to check
-  the base, not a verdict on its own. This matters for the ordinary hits in §2.4
-  as well; the [companion page](qtl_mapping_betabinomial_pathology_summary.html)
-  quantifies how many are affected.
-- **The exclusion has not been re-run.** These figures filter the existing
-  results. Rebuilding the phenotype matrix without the excluded sites would also
-  change the multiple-testing correction.
-- **Assay direction unconfirmed.** The U/C reading assumes pseudouridine is
-  detected at the same base the variant changes; worth confirming with whoever ran
-  the protocol.
+<!-- - **The four sites with no variant call** are assigned to mechanism A on the -->
+<!--   strength of their %pU shape. Confirming that needs base-level sequence at those -->
+<!--   positions, not more statistics. -->
+<!-- - **A large-effect QTL and aliasing look alike.** If a variant largely abolished -->
+<!--   modification, non-carriers would sit high, homozygous carriers near zero and -->
+<!--   heterozygotes between — the same three bands. So banding is a reason to check -->
+<!--   the base, not a verdict on its own. This matters for the ordinary hits in §2.4 -->
+<!--   as well; the [companion page](qtl_mapping_betabinomial_pathology_summary.html) -->
+<!--   quantifies how many are affected. -->
+<!-- - **The exclusion has not been re-run.** These figures filter the existing -->
+<!--   results. Rebuilding the phenotype matrix without the excluded sites would also -->
+<!--   change the multiple-testing correction. -->
+<!-- - **Assay direction unconfirmed.** The U/C reading assumes pseudouridine is -->
+<!--   detected at the same base the variant changes; worth confirming with whoever ran -->
+<!--   the protocol. -->
 
-# Reproducing this page
+<!-- # Reproducing this page -->
 
-```{r prov}
-knitr::kable(fread(file.path(DAT, "runinfo.tsv")), caption = "Parameters")
-knitr::kable(data.table(
-  step = c("site-resolved calibration scan (6 datasets, site identity kept)",
-           "selection of the 26 sites",
-           "U/C-aliasing site list",
-           "classification of the 26",
-           "genotype panels + QQ for this page",
-           "this page"),
-  script = c("8.calibration_site_resolved.R", "9.qq_exclude_pathological.R",
-             "9.qq_exclude_pathological.R (+ .traw allele check)",
-             "10.summary_page_data.R", "11.site26_page_data.R",
-             "analysis/qtl_mapping_betabinomial_site26.Rmd"),
-  submitted_via = c("run_calibration_siteres.sbatch", "-- (light)", "-- (light)",
-                    "run_summary_page_data.sbatch", "run_site26_page_data.sbatch",
-                    "run_render_rmd.sbatch")),
-  caption = "Provenance. The heavy steps need a compute node.")
-```
+<!-- ```{r prov} -->
+<!-- knitr::kable(fread(file.path(DAT, "runinfo.tsv")), caption = "Parameters") -->
+<!-- knitr::kable(data.table( -->
+<!--   step = c("site-resolved calibration scan (6 datasets, site identity kept)", -->
+<!--            "selection of the 26 sites", -->
+<!--            "U/C-aliasing site list", -->
+<!--            "classification of the 26", -->
+<!--            "genotype panels + QQ for this page", -->
+<!--            "this page"), -->
+<!--   script = c("8.calibration_site_resolved.R", "9.qq_exclude_pathological.R", -->
+<!--              "9.qq_exclude_pathological.R (+ .traw allele check)", -->
+<!--              "10.summary_page_data.R", "11.site26_page_data.R", -->
+<!--              "analysis/qtl_mapping_betabinomial_site26.Rmd"), -->
+<!--   submitted_via = c("run_calibration_siteres.sbatch", "-- (light)", "-- (light)", -->
+<!--                     "run_summary_page_data.sbatch", "run_site26_page_data.sbatch", -->
+<!--                     "run_render_rmd.sbatch")), -->
+<!--   caption = "Provenance. The heavy steps need a compute node.") -->
+<!-- ``` -->
