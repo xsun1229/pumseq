@@ -1,0 +1,813 @@
+---
+title: "Beta-binomial pU-QTL: why permutation did not remove the top hits"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = "center", fig.width = 11)
+
+BASE   <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl"
+DAT    <- file.path(BASE, "qtl_betabinomial/summary_page_data")
+DIAG   <- file.path(BASE, "qtl_betabinomial/diagnostic_figures")
+COUNTS <- file.path(BASE, "phenotype/fold5_union/counts")
+PSAM   <- file.path(BASE, "genotype/plink2/pumseq_genotype.hg38.chr1-22.psam")
+
+site26 <- fread(file.path(DAT, "site26_class.tsv"))
+mf     <- fread(file.path(DAT, "misfit_by_class.tsv"))
+pw     <- fread(file.path(DAT, "perm_winner.tsv"))
+lev    <- fread(file.path(DAT, "leverage_demo.tsv"))
+aud    <- fread(file.path(DAT, "sig_audit.tsv"))
+c10    <- fread(file.path(DAT, "clean10_pearson.tsv"))
+qq     <- fread(file.path(DAT, "qq_conditions.tsv.gz"))
+lam    <- fread(file.path(DAT, "lambda_conditions.tsv"))
+exc    <- fread(file.path(DAT, "exclusion_counts.tsv"))
+patho  <- fread(file.path(DIAG, "pathological_sites.txt"))
+
+C <- fread(file.path(COUNTS, "C_matrix.txt.gz")); N <- fread(file.path(COUNTS, "N_matrix.txt.gz"))
+go <- fread(PSAM)[[2]]
+Cm <- as.matrix(C[, ..go]); Nm <- as.matrix(N[, ..go]); sid_all <- paste(C$ref, C$pos)
+
+CLS_COL <- c(`the 26 pathological sites`      = "#e34948",
+             `clean significant hits`         = "#3987e5",
+             `random non-significant sites`   = "#9aa4b1")
+COND_LV <- c("all sites", "minus the 26 (curated list)",
+             "minus U/C + concentration", "minus high-misfit sites",
+             "minus U/C + concentration + misfit")
+mf_all <- fread(file.path(DAT, "misfit_all_sites.tsv.gz"))
+sens   <- fread(file.path(DAT, "misfit_threshold_sensitivity.tsv"))
+runinf <- fread(file.path(DAT, "runinfo.tsv"))
+MISFIT_CUT <- as.numeric(runinf[parameter == "misfit_cut"]$value)
+
+# tail height per condition, used in the prose below
+tailh <- qq[, .(mx = max(observed)), by = .(condition, dataset)]
+th_of <- function(cond, ds = "real") round(tailh[condition == cond & dataset == ds]$mx, 1)
+lam_of <- function(cond, ds = "real") round(lam[condition == cond & dataset == ds]$lambda, 3)
+```
+
+# Summary
+
+The beta-binomial LRT scan produced a set of top hits that **permutation did not
+displace**: 19 of the 20 strongest sites under a random permutation of the
+phenotype were the same sites as the real top 20, and not one of them shared a
+lead SNP with its real counterpart. A permutation is supposed to destroy all
+genotype-phenotype signal, so this meant the sites were being selected for a
+reason unrelated to genotype.
+
+This page traces that to its cause. In brief:
+
+1. **26 sites** produce extreme p-values even when the phenotype is shuffled.
+   They were found by rerunning the whole cis scan six times — on the real data
+   and under five phenotype permutations — while **keeping the site identity
+   attached to every p-value**, which the original calibration script discarded.
+   Of the ~11,000 tested sites, 27 reached a nominal p below 1e-10 in at least
+   one permutation; 26 of those were also extreme in the real data
+   (`-log10 p > 10`), and those 26 turn out to be extreme in all six datasets.
+   The selection used the **permuted data only**, so nothing here is circular.
+2. **14 of the 26 carry a genotyped U↔C variant on the pU base itself**, so the
+   measured "%pU" is partly a read-out of genotype rather than of modification.
+   A further **4** show the same three-level signature but have *no variant call
+   at the base* — consistent with the same mechanism from a variant below our
+   MAF 0.05 threshold, though that is inferred from the phenotype shape and not
+   directly confirmed. The remaining **8** are a separate problem: sites with
+   almost no modification where a *single* cell line supplies nearly all the
+   converted reads.
+3. Both make the phenotype impossible for a one-mean beta-binomial to fit. The
+   LRT then rewards any covariate that absorbs part of that misfit — and
+   **permutation preserves the misfit**, because it reorders the phenotype
+   values without changing them.
+4. Removing them collapses the QQ tail from `r th_of("all sites")` to
+   `r th_of("minus the 26 (curated list)")`, and the *permuted* tail from ~285 to
+   ~12. Notably **λ barely moves** (`r lam_of("all sites")` →
+   `r lam_of("minus the 26 (curated list)")`), which is why the original
+   calibration check looked acceptable while the tail was at 289. Three rules
+   that generalize beyond this curated list — a U/C variant call, a
+   single-cell-line cap, and a misfit cut — do better than the list itself when
+   combined, but no one of them is sufficient alone (§4).
+5. The remaining significant hits do **not** show this signature: their
+   p-values agree with an ordinary correlation test, and their permutation
+   p-values sit exactly at chance level.
+
+```{r headline}
+knitr::kable(exc, col.names = c("", "n"),
+             caption = "Scale of the problem, and what each filter removes")
+```
+
+# 1. How the 26 sites were found
+
+## 1.1 The idea
+
+Under permutation there is, by construction, no genotype-phenotype
+relationship. So **any site that still returns an extreme p-value under
+permutation is broken on its own terms** — no comparison with the real data is
+needed to establish that.
+
+This is important for what follows: the 26 sites were selected using the
+**permuted data only**. Looking afterwards at the real QQ plot is therefore not
+circular. Had they been picked using the real p-values, flattening the real tail
+would have been guaranteed and would have proved nothing.
+
+## 1.2 The scan
+
+`8.calibration_site_resolved.R` repeats the genome-wide cis scan six times —
+once on the real data and once under each of five phenotype permutations
+(`set.seed(1000 + k)`; the phenotype *and* the covariates are reindexed, the
+genotypes are not) — and, unlike the earlier calibration script, **keeps the
+site identity attached to every p-value**. That is what makes it possible to
+ask which sites the inflated tail comes from.
+
+## 1.3 The two criteria
+
+```{r criteria}
+knitr::kable(data.table(
+  criterion = c("minimum p < 1e-10 in at least one of the 5 permutations",
+                "real -log10(p) > 10",
+                "-> sites meeting both"),
+  purpose = c("the site can fake an extreme p-value with no signal present",
+              "drops sites that were extreme in a single permutation by chance",
+              "extreme in every one of the 6 datasets (verified individually)"),
+  n = c("27", "", paste0(nrow(site26)))),
+  caption = "Selection criteria (9.qq_exclude_pathological.R)")
+```
+
+Exactly one of the 27 candidates was extreme in a single permutation only; the
+other **26 are extreme in all six datasets**.
+
+## 1.4 What the selected sites look like across the six datasets
+
+Each row is one site. The red point is the real data; the blue points are the
+five permutations. For a normal site the permutations would sit near zero,
+far below the real point.
+
+```{r sec1-fig, fig.height=7}
+P <- paste0("perm", 1:5)
+lg <- melt(patho[, c("sid", "real", P), with = FALSE], id.vars = "sid",
+           variable.name = "dataset", value.name = "nlp")
+lg[, is_real := dataset == "real"]
+ordv <- patho[order(real)]$sid
+lg[, sid := factor(sid, levels = ordv)]
+
+ggplot(lg, aes(nlp, sid)) +
+  geom_line(aes(group = sid), colour = "grey70", linewidth = 0.4) +
+  geom_point(data = lg[!is_real & TRUE], aes(colour = "the 5 permutations"),
+             size = 1.7, alpha = 0.85) +
+  geom_point(data = lg[is_real == TRUE], aes(colour = "real data"), size = 2.6) +
+  scale_colour_manual(values = c(`real data` = "#e34948",
+                                 `the 5 permutations` = "#3987e5"), name = NULL) +
+  labs(x = expression(-log[10]("p")~"of the site's best cis-SNP"), y = NULL,
+       title = "The 26 sites: the permutations reach almost the same p-value as the real data",
+       subtitle = "A working site would have its permutation points near 0. Here they land on top of the real point.") +
+  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+```
+
+```{r sec1-tab}
+knitr::kable(patho[order(-real)][, .(
+  site = sid,
+  `real -log10p` = round(real, 1),
+  `permutation mean` = round(perm_mean, 1),
+  `permutation SD` = round(perm_sd, 2),
+  `real - best permutation` = round(real_excess_over_perm_max, 1))],
+  caption = paste("The 26 sites. The last column is how much of the real signal",
+                  "survives after subtracting what permutation produces at the",
+                  "same site -- for most of them, a few percent of the total."))
+```
+
+Two things stand out. The permutation SD is tiny (mostly < 1 unit on the
+`-log10 p` scale), so the five permutations agree closely with each other: this
+is a stable property of the site, not a fluke. And the real data exceeds the
+best permutation by only **`r sprintf("%.0f%%", 100 * median(patho$real_excess_over_perm_max / patho$real))`**
+of its total (median) — for five sites the real data does not exceed the
+permutations at all.
+
+# 2. What the 26 sites are
+
+## 2.1 Classification
+
+```{r sec2-class}
+cnt <- site26[, .N, by = class][order(-N)]
+knitr::kable(cnt, col.names = c("class", "n"),
+             caption = "The 26 sites fall into two mechanisms")
+knitr::kable(site26[, .(site = sid, `-log10p` = real_nlp,
+                        `SNP at the pU base` = ifelse(snp_at_site == "", "--", snp_at_site),
+                        `pooled %pU` = pooled_pu,
+                        `frac at 0/50/100%` = spike3,
+                        `top cell-line share` = top_share,
+                        class)],
+  caption = paste("Every one of the 26, classified.",
+                  "'frac at 0/50/100%' is the fraction of cell lines whose %pU is within",
+                  "0.08 of 0, 0.5 or 1 -- the signature of a genotype read-out.",
+                  "'top cell-line share' is the largest share of the site's converted",
+                  "reads coming from a single cell line."))
+```
+
+## 2.2 Mechanism A: a U↔C variant on the pU base (14 confirmed, 4 suspected)
+
+Pseudouridine is a *modified uridine*: the assay reads out the base at that
+position. If a common sequence variant changes that same base from U to C, then
+an inherited C is indistinguishable from a modification event. The measured
+"%pU" becomes a read-out of genotype.
+
+This shows up as **C/T on the + strand and A/G on the − strand** — the same
+U→C change on the transcript, written against whichever genome strand the
+transcript came from. Genome-wide, **`r format(fread(file.path(DIAG, "uc_aliasing_sites.txt"))[, .N], big.mark = ",")`
+sites** (10.0% of those tested) have such a variant.
+
+The consequence is a phenotype with three discrete spikes: homozygous
+reference near 0%, heterozygous near 50%, homozygous alternate near 100%.
+
+```{r sec2-uc, fig.height=6.5}
+pu_long <- function(ids, labs) rbindlist(lapply(seq_along(ids), function(k) {
+  i <- match(ids[k], sid_all); n <- Nm[i, ]; sel <- n > 0
+  data.table(lab = labs[k], pu = Cm[i, sel] / n[sel], n = n[sel])
+}))
+uc_ex <- site26[class == "U/C SNP on the pU base"][order(-real_nlp)][1:6]
+d <- pu_long(uc_ex$sid, sprintf("chr%s  (%s)\n-log10p=%.0f | %s reads",
+                                sub(" .*", "", uc_ex$sid),
+                                uc_ex$snp_at_site, uc_ex$real_nlp,
+                                format(uc_ex$total_depth, big.mark = ",")))
+d[, depth_bin := cut(n, c(-Inf, 10, 100, 1000, Inf),
+                     labels = c("< 10", "10-100", "100-1,000", "> 1,000"))]
+DFILL <- c("< 10" = "#86b6ef", "10-100" = "#2a78d6",
+           "100-1,000" = "#184f95", "> 1,000" = "#0d366b")
+ggplot(d, aes(pu, fill = depth_bin)) +
+  geom_histogram(breaks = seq(0, 1, 0.05), colour = "white", linewidth = 0.15) +
+  scale_fill_manual(values = DFILL, drop = FALSE, name = "read depth of the cell line",
+                    guide = guide_legend(nrow = 1, override.aes = list(colour = NA))) +
+  scale_x_continuous(breaks = c(0, 0.5, 1), limits = c(-0.03, 1.03)) +
+  facet_wrap(~ lab, ncol = 3, scales = "free_y") +
+  labs(x = "%pU in one cell line", y = "number of cell lines",
+       title = "Mechanism A: three discrete spikes, because %pU is reporting genotype",
+       subtitle = "The peaks at 0 / 50 / 100% are the three genotypes at the U/C variant, not three levels of modification.") +
+  theme_bw(base_size = 11) +
+  theme(legend.position = "bottom", strip.text = element_text(size = 8),
+        panel.grid.minor = element_blank())
+```
+
+Beyond the 14 with an actual variant call, **four more show the same three-clump
+shape but have no genotyped variant at the base**. The most likely explanation is
+the same mechanism with a variant below our MAF 0.05 threshold or one that was
+not called — but that is inferred from the phenotype shape and **not directly
+confirmed**. The clearest is chr14:22551976: 11 cell lines at exactly 0.00, 26 in
+a tight band near 0.40, 12 at ~1.00, with ~130 reads each. No enzymatic
+modification rate behaves that way.
+
+These four matter out of proportion to their number. Because no variant is
+called at the base, **no annotation-based filter can see them** — and they
+include the second, third and fourth strongest offenders in the entire scan
+(`-log10 p` of `r paste(site26[class == "3-clump shape, no genotyped SNP at the base"][order(-real_nlp)]$real_nlp[1:3], collapse = ", ")`).
+Any filter that works only from variant calls will leave the QQ tail nearly
+where it started; §4 shows this happening and what fixes it.
+
+```{r sec2-nosnp, fig.height=3.2}
+ns <- site26[class == "3-clump shape, no genotyped SNP at the base"][order(-real_nlp)]
+d2 <- pu_long(ns$sid, sprintf("chr%s\n-log10p=%.0f | frac at 0/50/100%% = %.2f",
+                              sub(" .*", "", ns$sid), ns$real_nlp, ns$spike3))
+ggplot(d2, aes(pu)) +
+  geom_histogram(breaks = seq(0, 1, 0.05), fill = "#3987e5",
+                 colour = "white", linewidth = 0.15) +
+  scale_x_continuous(breaks = c(0, 0.5, 1), limits = c(-0.03, 1.03)) +
+  facet_wrap(~ lab, nrow = 1, scales = "free_y") +
+  labs(x = "%pU in one cell line", y = "cell lines",
+       title = "The same signature with no genotyped variant at the base",
+       subtitle = "Consistent with a U/C variant below MAF 0.05, or one that was not called.") +
+  theme_bw(base_size = 11) +
+  theme(strip.text = element_text(size = 8), panel.grid.minor = element_blank())
+```
+
+## 2.3 Mechanism B: one cell line supplies nearly all the converted reads (8 of 26)
+
+These sites have essentially **no modification at all** — pooled %pU between
+1% and 9%. Most cell lines have thousands of reads and a handful of converted
+ones. Then one cell line reports a large %pU on modest depth.
+
+```{r sec2-conc, fig.height=6.5}
+cc <- site26[class == "one cell line dominates"][order(-real_nlp)]
+d3 <- pu_long(cc$sid, sprintf("chr%s\n-log10p=%.0f | pooled %%pU=%.3f | top line=%.0f%%",
+                              sub(" .*", "", cc$sid), cc$real_nlp,
+                              cc$pooled_pu, 100 * cc$top_share))
+d3[, depth_bin := cut(n, c(-Inf, 10, 100, 1000, Inf),
+                      labels = c("< 10", "10-100", "100-1,000", "> 1,000"))]
+ggplot(d3, aes(pu, fill = depth_bin)) +
+  geom_histogram(breaks = seq(0, 1, 0.05), colour = "white", linewidth = 0.15) +
+  scale_fill_manual(values = DFILL, drop = FALSE, name = "read depth of the cell line",
+                    guide = guide_legend(nrow = 1, override.aes = list(colour = NA))) +
+  scale_x_continuous(breaks = c(0, 0.5, 1), limits = c(-0.03, 1.03)) +
+  facet_wrap(~ lab, ncol = 3, scales = "free_y") +
+  labs(x = "%pU in one cell line", y = "number of cell lines",
+       title = "Mechanism B: a near-empty site plus one discordant cell line",
+       subtitle = "'top line' = share of the site's converted reads contributed by a single cell line.") +
+  theme_bw(base_size = 11) +
+  theme(legend.position = "bottom", strip.text = element_text(size = 8),
+        panel.grid.minor = element_blank())
+```
+
+The most extreme case, chr9:107330635, has **98% of its converted reads from
+one cell line out of 50**. There is nothing to make a QTL out of.
+
+# 3. Why permutation does not remove these sites
+
+## 3.1 The LRT measures an improvement, not an association
+
+The test fits the site twice — once without the SNP, once with it — and the
+p-value comes from **the gap between the two fits**. It does not come from how
+well the second fit works in absolute terms.
+
+The model has only two knobs, a mean and a dispersion, and "the SNP has an
+effect" can only be expressed as "the SNP shifts the mean". So the no-SNP fit
+must describe all 50 cell lines with a single mean.
+
+## 3.2 Null misfit: how much room the no-SNP fit leaves
+
+Define **null misfit** as how much the log-likelihood improves if the phenotype
+is simply *allowed* to have three separate levels — the log-likelihood of a
+model with two extra indicator columns (from a 3-group k-means on %pU) minus
+that of the one-mean null. Crucially this uses **no genotype at all**, so it is
+a property of the phenotype values alone.
+
+A beta distribution with one mean can be a single hump, a tilted hump, or a
+U-shape with mass at both ends. It **cannot** place three separate spikes at 0,
+0.5 and 1. So at the pathological sites the null fit is not merely imperfect,
+it is structurally incapable, and the misfit is enormous.
+
+```{r sec3-misfit, fig.height=4.6}
+mfp <- mf[is.finite(misfit)]
+mfp[, class := factor(class, levels = names(CLS_COL))]
+knitr::kable(mfp[, .(sites = .N,
+                     `median misfit` = round(median(misfit), 1),
+                     `25th pct` = round(quantile(misfit, .25), 1),
+                     `75th pct` = round(quantile(misfit, .75), 1),
+                     `max` = round(max(misfit), 1)), by = class],
+  caption = paste("Null misfit (log-likelihood units left unexplained by the",
+                  "one-mean model), computed without using genotype."))
+ggplot(mfp, aes(class, pmax(misfit, 0.05), fill = class)) +
+  geom_boxplot(width = 0.5, alpha = 0.85, outlier.size = 0.9) +
+  scale_y_log10() + scale_fill_manual(values = CLS_COL, guide = "none") +
+  labs(x = NULL, y = "null misfit, log-likelihood units (log scale)",
+       title = "The pathological sites leave orders of magnitude more log-likelihood unexplained",
+       subtitle = paste("Computed from the phenotype values only -- no genotype enters,",
+                        "so permutation cannot change it.",
+                        sprintf("\nMisfit is undefined at %d of the 26 (too few distinct %%pU levels to fit a 3-group reference), so %d are shown.",
+                                26 - nrow(mfp[class == "the 26 pathological sites"]),
+                                nrow(mfp[class == "the 26 pathological sites"])))) +
+  theme_bw(base_size = 12)
+```
+
+## 3.3 Permutation preserves the misfit exactly
+
+Permutation reorders which cell line holds which %pU value. **The set of values
+is unchanged.** Since misfit is a property of that set and not of its
+alignment with genotype, permutation leaves it untouched — the whole pot of
+unexplained log-likelihood is still on the table after shuffling.
+
+That is the entire failure. The LRT depends on two things:
+
+- how much unexplained log-likelihood is available, and
+- how well genotype happens to line up with the phenotype.
+
+Permutation destroys only the second. When the first is large enough, the
+p-value barely moves.
+
+## 3.4 The consequence: an association no ordinary test would report
+
+If the p-value came from association, then an ordinary Pearson correlation test
+on the same lead SNP should broadly agree with it. Pearson has no dispersion
+parameter and no depth weighting, so **misfit cannot inflate it** — which makes
+it a useful independent yardstick.
+
+Below, for each site, the LRT `-log10 p` **under permutation 1** against the
+Pearson `-log10 p` for the very same SNP and the same data.
+
+```{r sec3-gap, fig.height=5}
+pw[, class := factor(class, levels = names(CLS_COL))]
+# NB: geom_abline() in a log-scaled panel is drawn in TRANSFORMED space, i.e. it
+# renders y = 10^x rather than y = x. The identity line must be supplied as
+# explicit data so that it curves correctly under the log transform.
+# The line spans the x-axis data range only -- extending it to the y range would
+# stretch the x-axis to ~290 and squash every point into a sliver.
+xr   <- range(pw$pearson_nlp, na.rm = TRUE)
+iden <- data.table(x = seq(max(xr[1], 0.15), xr[2], length.out = 200))
+iden[, y := x]
+
+ggplot(pw, aes(pearson_nlp, lrt_nlp, colour = class)) +
+  geom_line(data = iden, aes(x, y), inherit.aes = FALSE,
+            linetype = "dashed", colour = "grey45") +
+  geom_point(size = 2, alpha = 0.8) +
+  scale_colour_manual(values = CLS_COL, name = NULL) +
+  scale_y_log10() +
+  labs(x = expression(-log[10]("p")~"from an ordinary Pearson correlation test"),
+       y = expression(-log[10]("p")~"from the beta-binomial LRT (log scale)"),
+       title = "Under permutation, only the pathological sites disagree with an ordinary correlation test",
+       subtitle = paste("Dashed line = the two tests give the same answer. Points far above it are",
+                        "p-values the LRT manufactures and Pearson does not.",
+                        "\nEvery point is permuted data, so the true association is zero throughout.")) +
+  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+
+knitr::kable(pw[, .(sites = .N,
+                    `median LRT -log10p`     = round(median(lrt_nlp), 1),
+                    `median Pearson -log10p` = round(median(pearson_nlp), 1),
+                    `median gap`             = round(median(gap), 1),
+                    `median |cor| of the LRT winner` = round(median(abs_cor), 2)),
+                by = class],
+  caption = paste("Under permutation 1: what the LRT reports versus what an",
+                  "ordinary correlation test reports for the same SNP."))
+```
+
+Two worked examples make the size of the gap concrete.
+
+```{r sec3-examples}
+ex_ids <- c("19 46609391", "14 106360212")
+ee <- pw[sid %chin% ex_ids]
+knitr::kable(data.table(
+  site = ee$sid,
+  mechanism = ifelse(ee$sid == "19 46609391", "A: U/C variant on the base",
+                                              "B: one cell line dominates"),
+  `cis-SNPs tested` = ee$n_cis,
+  `null misfit` = round(ee$misfit, 0),
+  `|cor| of the LRT winner` = round(ee$abs_cor, 3),
+  `best |cor| available at the site` = round(ee$best_abs_cor, 3),
+  `Pearson p for that SNP` = signif(ee$pearson_p, 2),
+  `beta-binomial LRT p` = sprintf("%.0e", 10^(-ee$lrt_nlp))),
+  caption = "Both rows are permuted data, so the true association is zero by construction.")
+```
+
+At chr19:46609391 the winning SNP correlates with the permuted phenotype at
+|cor| = `r sprintf("%.2f", pw[sid=="19 46609391"]$abs_cor)`, which an ordinary
+test rates p = `r signif(pw[sid=="19 46609391"]$pearson_p, 2)` — nothing. At
+chr14:106360212 it is |cor| = `r sprintf("%.3f", pw[sid=="14 106360212"]$abs_cor)`,
+p = `r signif(pw[sid=="14 106360212"]$pearson_p, 2)` — a shapeless cloud. The
+LRT converts both into p-values of astronomical size, because there is a large
+pot of misfit for even a negligible correlation to draw on.
+
+Note also that neither site's *best available* correlation is large. With a few
+dozen cis-SNPs to choose from, one always lands slightly closer to the clumps
+than the others by luck — which is why a different SNP wins in every
+permutation, and why the top hits share sites but never lead SNPs.
+
+## 3.5 For mechanism B, one cell line carries the whole p-value
+
+For the concentration sites the point can be made directly: drop the single
+most extreme cell line and rerun the site unchanged.
+
+```{r sec3-lev}
+knitr::kable(lev[order(-orders_lost, na.last = FALSE)][, .(
+  site = sid,
+  `top cell-line share` = top_share,
+  `converted reads it holds` = format(dropped_conv, big.mark = ","),
+  `its total reads` = format(dropped_depth, big.mark = ","),
+  `-log10p with all cell lines` = round(nlp_all, 1),
+  `-log10p after dropping it` = ifelse(is.na(nlp_drop1), "no fit",
+                                       sprintf("%.1f", nlp_drop1)),
+  `orders lost` = ifelse(is.na(orders_lost), "--", sprintf("%.1f", orders_lost)))],
+  caption = paste("Under permutation 1: removing the single cell line that holds",
+                  "the most converted reads. 'no fit' means the site could not be",
+                  "fitted at all once that cell line was gone."))
+```
+
+Why Pearson misses this while the likelihood does not: a cell line with 6,000
+reads at %pU 0.0005 and a cell line with 20 reads at 0.05 count **equally** in
+a correlation, but the likelihood weights the first thousands of times more
+heavily. A SNP can therefore split the deep near-zero cell lines from the rest
+— worth an enormous amount of likelihood — while barely moving the correlation.
+(For the record, the earlier guess that rare-allele SNPs isolating one or two
+cell lines were responsible is **wrong**: with MAF ≥ 0.05 across 50 cell lines
+the minor allele is always carried by at least 5, and none of the cis-SNPs at
+these sites had fewer than 4 carriers.)
+
+# 4. Calibration after removing these sites
+
+## 4.1 A curated list is not a filter
+
+Dropping the 26 sites by name would fix this page's QQ plot and nothing else:
+the next dataset will have a different 26. So each exclusion below is stated as
+a **rule computable for any site**, and the curated list is kept only as the
+reference for what a perfect filter would achieve.
+
+Three rules are available:
+
+```{r sec4-rules}
+knitr::kable(data.table(
+  rule = c("U/C-aliasing", "concentration", "high misfit"),
+  definition = c("a genotyped C/T (+ strand) or A/G (- strand) variant on the pU base",
+                 sprintf("one cell line supplies >= %.0f%% of the site's converted reads",
+                         100 * as.numeric(runinf[parameter == "conc_cut"]$value)),
+                 sprintf("null misfit > %g log-likelihood units", MISFIT_CUT)),
+  `needs genotype?` = c("yes, a variant call at the base", "no", "no"),
+  `sites removed` = format(c(as.integer(runinf[parameter == "n_uc_alias"]$value),
+                             as.integer(runinf[parameter == "n_conc_bad"]$value),
+                             as.integer(runinf[parameter == "n_misfit_bad"]$value)),
+                           big.mark = ",")),
+  caption = "The three exclusion rules, each computable without knowing which sites are broken")
+```
+
+The misfit rule matters because **the first two rules miss four of the 26** —
+the sites with the three-clump shape but no genotyped variant at the base
+(§2.2). Those four include the second, third and fourth worst offenders in the
+whole scan, so an annotation-only filter leaves the tail almost untouched.
+
+The misfit threshold was chosen as the smallest round value that catches every
+one of the 26 for which misfit is measurable, then reported here rather than
+tuned against the QQ plot:
+
+```{r sec4-sens}
+knitr::kable(sens[, .(
+  `misfit threshold` = threshold,
+  `sites removed` = format(sites_removed, big.mark = ","),
+  `% of tested` = sprintf("%.1f%%", pct_of_tested),
+  `of the 26, caught` = sprintf("%d of %d", of_the_26_caught, of_the_26_measurable))],
+  caption = sprintf("Threshold sensitivity. The value used is %g.", MISFIT_CUT))
+```
+
+## 4.2 QQ plots under each condition
+
+`all sites` is the calibration as originally run. Recall that the 26 were chosen
+using the permuted data only, so the real panels are not circular.
+
+```{r sec4-qq, fig.height=12}
+qq[, condition := factor(condition, levels = COND_LV)]
+qq[, dataset := factor(dataset, levels = c("real", paste0("perm", 1:5)))]
+COLS <- c(real = "#e34948", perm1 = "#9ec5f4", perm2 = "#6da7ec",
+          perm3 = "#3987e5", perm4 = "#256abf", perm5 = "#0d366b")
+lab <- lam[, .(t = paste(sprintf("%s=%.2f", dataset, lambda), collapse = "  ")),
+           by = condition]
+ggplot(qq, aes(expected, observed, colour = dataset)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey45") +
+  geom_point(size = 0.6, alpha = 0.75) +
+  scale_colour_manual(values = COLS, name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
+  facet_wrap(~ condition, ncol = 2, scales = "free_y") +
+  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
+       title = sprintf("Beta-binomial LRT calibration under %d exclusion conditions",
+                       length(COND_LV)),
+       subtitle = paste("Note the free y-axis -- the tail height is what changes, not the bulk.",
+                        "\nThe permutation series (blues) should hug the dashed line; where they do",
+                        "not, the test is manufacturing signal from shuffled data.")) +
+  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+```
+
+## 4.3 What actually changed
+
+```{r sec4-lam}
+ORD <- c("real", paste0("perm", 1:5))
+lw <- dcast(lam, dataset ~ condition, value.var = "lambda")
+setcolorder(lw, c("dataset", COND_LV))
+lw <- lw[order(factor(dataset, levels = ORD))]
+knitr::kable(lw, digits = 3,
+  caption = "lambda -- the median-based genomic inflation factor")
+
+tw <- dcast(tailh, dataset ~ condition, value.var = "mx")
+setcolorder(tw, c("dataset", COND_LV))
+tw <- tw[order(factor(dataset, levels = ORD))]
+knitr::kable(tw, digits = 1,
+  caption = "Height of the QQ tail: the largest observed -log10(p)")
+```
+
+The two tables measure different things, and the key result of this section is
+that **the rules fix different things, and no single one of them is enough.**
+
+```{r sec4-compare}
+knitr::kable(data.table(
+  condition = COND_LV,
+  `real lambda` = vapply(COND_LV, lam_of, numeric(1)),
+  `real tail` = vapply(COND_LV, th_of, numeric(1)),
+  `worst permuted tail` = vapply(COND_LV, function(c)
+    round(max(tailh[condition == c & dataset != "real"]$mx), 1), numeric(1)),
+  `p-values retained` = vapply(COND_LV, function(c)
+    format(lam[condition == c & dataset == "real"]$n_pvalues, big.mark = ","),
+    character(1))),
+  row.names = FALSE,
+  caption = paste("The permuted tail is the diagnostic that matters: with the",
+                  "phenotype shuffled it should be near 0, and anything above",
+                  "~3 is signal the test is manufacturing."))
+```
+
+Reading down that table:
+
+**λ and the tail are almost independent.** Removing the 26 collapses the tail
+from `r th_of("all sites")` to `r th_of("minus the 26 (curated list)")` — and
+the permuted tail from ~285 to `r round(max(tailh[condition == "minus the 26 (curated list)" & tailh$dataset != "real"]$mx), 1)` —
+while barely touching λ (`r lam_of("all sites")` →
+`r lam_of("minus the 26 (curated list)")`). λ comes from the *median* test
+statistic, and 26 sites out of ~11,000 cannot move a median. Conversely the U/C
+plus concentration rules pull λ down to
+`r lam_of("minus U/C + concentration")` — much the larger effect on λ — yet
+leave the tail at `r th_of("minus U/C + concentration")`, essentially unchanged.
+**λ was never the right diagnostic for this problem**, which is why the original
+calibration check reported reassuring-looking numbers while the tail was at 289.
+
+**Misfit alone is not sufficient either.** It cuts the tail to
+`r th_of("minus high-misfit sites")`, better than the annotation rules but well
+short of the curated list. The reason is specific: misfit is **undefined at 5 of
+the 26 sites**, because with 49 cell lines at exactly zero there are not three
+distinct %pU levels to fit, so the reference model cannot be built. Four of
+those five are concentration sites — so misfit and the concentration cap are
+complementary by construction, not redundant.
+
+**The three rules together beat the curated list.** Applying all three gives
+λ = `r lam_of("minus U/C + concentration + misfit")`, a real tail of
+`r th_of("minus U/C + concentration + misfit")`, and a permuted tail of
+`r round(max(tailh[condition == "minus U/C + concentration + misfit" & tailh$dataset != "real"]$mx), 1)` —
+better on every measure than naming the 26 by hand, and computable on data where
+nobody has told you which sites are broken.
+
+**What it costs.** The combined filter removes
+`r format(as.integer(exc[grepl("all three filters combined", filter)]$n), big.mark = ",")`
+of `r format(as.integer(exc[grepl("sites tested", filter)]$n), big.mark = ",")`
+tested sites
+(`r sprintf("%.0f%%", 100 * as.integer(exc[grepl("all three filters combined", filter)]$n) / as.integer(exc[grepl("sites tested", filter)]$n))`).
+That is not a small price, and the misfit threshold is the loose part of it: the
+26 sites where misfit is measurable range from
+`r round(min(mf_all[is26 & is.finite(misfit)]$misfit), 1)` to
+`r round(max(mf_all[is26 & is.finite(misfit)]$misfit), 1)`, while ordinary
+significant hits reach `r round(max(mf[class == "clean significant hits" & is.finite(mf$misfit)]$misfit), 1)`,
+so the two distributions overlap and a cut of `r MISFIT_CUT` necessarily removes
+some legitimate sites — `r exc[grepl("survivors also flagged by misfit", filter)]$n`
+of the `r exc[grepl("surviving the U/C", filter)]$n` hits that pass the other two
+rules. Whether that trade is worth making is a judgement call, not something
+these numbers settle.
+
+A residual permuted excess remains even after all exclusions, so this is a large
+improvement rather than a complete fix — see [Open questions](#open-questions).
+
+# 5. Are the other significant hits affected?
+
+## 5.1 Two independent checks
+
+The concern is that misfit might explain a large share of the ~1,400
+significant hits, not just 26 of them. Two checks, applied to the hits that are
+*not* among the 26:
+
+**Check 1 — a second opinion.** Compare the LRT against an ordinary Pearson
+correlation test on the same lead SNP. Agreement means the signal is real;
+a large gap means only the fancy machinery sees it.
+
+**Check 2 — the site's own fake-signal ceiling.** For each site, take the best
+`-log10 p` it reached in *any* of the five permutations. That is how large a
+p-value the site can manufacture with no signal present. Compare the real
+result against it.
+
+## 5.2 Check 2, applied to every significant hit
+
+```{r sec5-ceiling}
+aud[, class := factor(class, levels = c("one of the 26", "U/C-aliasing (not in the 26)",
+                                        "concentration-pathological", "surviving"))]
+knitr::kable(aud[, .(hits = .N,
+  `median real -log10p`   = round(median(real, na.rm = TRUE), 1),
+  `median perm ceiling`   = round(median(perm_ceil, na.rm = TRUE), 1),
+  `median excess`         = round(median(excess, na.rm = TRUE), 1),
+  `excess < 2`            = sum(excess < 2, na.rm = TRUE),
+  `excess > 5`            = sum(excess > 5, na.rm = TRUE)), by = class],
+  caption = paste("For every q<0.05 hit: the real signal against the largest",
+                  "p-value the same site reached under permutation."))
+```
+
+The permutation ceiling for the non-pathological hits sits at about **2.2**,
+and that number is exactly what chance predicts: with roughly 40 cis-SNPs per
+site across 5 permutations, the best of ~200 uniform p-values falls near
+1/200, i.e. `-log10 p` ≈ 2.3. **These sites have no capacity to fake signal at
+all.** The 26, by contrast, reach ~122.
+
+```{r sec5-ceilfig, fig.height=4.6}
+af <- aud[!is.na(perm_ceil)]
+ggplot(af, aes(perm_ceil, fill = class)) +
+  geom_histogram(bins = 60) +
+  geom_vline(xintercept = 2.3, linetype = "dashed", colour = "grey30") +
+  annotate("text", x = 2.3, y = Inf, label = "  chance expectation\n  for ~200 tests",
+           hjust = 0, vjust = 1.4, size = 3, colour = "grey30") +
+  scale_fill_manual(values = c(`one of the 26` = "#e34948",
+                               `U/C-aliasing (not in the 26)` = "#f0a24f",
+                               `concentration-pathological` = "#9aa4b1",
+                               `surviving` = "#3987e5"), name = NULL) +
+  scale_x_log10() +
+  labs(x = "the site's permutation ceiling, -log10p (log scale)", y = "hits",
+       title = "How large a p-value each significant site can fake under permutation") +
+  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+```
+
+## 5.3 Check 1, on hits spanning the significance range
+
+Ten surviving hits, chosen to span the whole range from the strongest to the
+weakest, each tested both ways on the **real** data.
+
+```{r sec5-c10}
+knitr::kable(c10[, .(site = sid, lead_SNP = lead,
+  `LRT -log10p` = round(lrt_nlp, 1),
+  `Pearson -log10p` = round(pearson_nlp, 1),
+  gap = round(gap, 1),
+  `|cor|` = round(abs_cor, 2),
+  `perm ceiling` = round(perm_ceil, 1),
+  `total depth` = format(round(total_depth), big.mark = ","),
+  `pooled %pU` = round(pooled_pu, 3))],
+  caption = "Ten surviving hits: the beta-binomial LRT against an ordinary correlation test")
+```
+
+The gap is small in both directions — at the strongest site the Pearson test is
+*more* significant than the LRT — and the correlations are large and visible.
+Against gaps of ~241 and ~34 at the two pathological examples, these behave
+like ordinary associations tested by a slightly better-powered method, which is
+what the beta-binomial is supposed to be.
+
+## 5.4 What the checks did turn up
+
+Check 2 screens every site cheaply, and it found a class the original
+26-site criteria missed: hits with the **mechanism-B concentration signature**
+that never happened to produce a p-value below 1e-10 under permutation.
+
+```{r sec5-conc}
+cn <- aud[class == "concentration-pathological"][order(-top_share)]
+knitr::kable(cn[, .(site = sid,
+  `top cell-line share` = round(top_share, 2),
+  `pooled %pU` = round(pooled_pu, 3),
+  `real -log10p` = round(real, 1),
+  `perm ceiling` = round(perm_ceil, 1),
+  excess = round(excess, 1),
+  qvalue = signif(qvalue, 2))],
+  caption = paste("Significant hits where one cell line supplies at least half",
+                  "the converted reads. These are not misfit artifacts -- they are",
+                  "single-observation artifacts, and they need a separate filter."))
+```
+
+The worst has a single cell line supplying **100%** of the site's converted
+reads. At least one has a permutation ceiling *above* its real result (negative
+excess) and still passes q < 0.05. Several cluster inside a narrow window on
+chr14, which suggests a regional mapping artifact rather than independent
+events.
+
+## 5.5 Where the discovery count lands
+
+```{r sec5-funnel}
+knitr::kable(aud[, .(hits = .N,
+  `median -log10p` = round(median(real, na.rm = TRUE), 1),
+  `share of all hits` = sprintf("%.1f%%", 100 * .N / nrow(aud))), by = class],
+  caption = "The q<0.05 hit list, partitioned")
+```
+
+Only **`r sum(aud$class == "one of the 26")`** of the significant hits are among
+the 26 — the per-site permutation `perm_p` did filter out most of them, so it
+offers partial protection, not none. The large category is
+**U/C-aliasing sites that are *not* in the 26**
+(`r sum(aud$class == "U/C-aliasing (not in the 26)")` hits), and these deserve a
+careful distinction:
+
+> Their permutation ceiling is ~2.3, i.e. chance level, so they are **not a
+> calibration failure**. Statistically the associations are sound: SNPs in
+> linkage with the site variant genuinely do predict the measured phenotype.
+> The problem is **interpretive** — the phenotype is a genotype read-out rather
+> than a modification rate, so a real association is being reported as a
+> pU-QTL. Same exclusion, entirely different reason. This is also why `perm_p`
+> cannot protect against them: there is nothing statistically wrong to detect.
+
+# Open questions {#open-questions}
+
+- **Residual permuted inflation.** After removing both the 26 and the full
+  U/C-aliasing set, the fraction of permuted p-values below 0.05 remains ~0.058
+  against an expected 0.050. Small, but a third effect that is not yet
+  accounted for.
+- **The exclusion has not been re-run.** The counts above partition the
+  *existing* result list. Rebuilding the phenotype matrix without the excluded
+  sites and rescanning would also change the multiple-testing correction, so
+  the final number will not be exactly the surviving count here.
+- **Assay direction.** The U/C interpretation rests on pseudouridine being read
+  at the same base that the variant changes. Worth confirming with whoever ran
+  the PUM-seq protocol.
+- **Which filter to adopt.** All three rules in §4.1 are computable without
+  knowing which sites are broken, but they are not interchangeable: the
+  annotation-based ones cannot see the four sites with no variant call at the
+  base, and misfit alone does not tell you *why* a site is broken. Using the
+  U/C annotation for interpretation and misfit for calibration is probably the
+  right split, but the threshold deserves a second look — it was set to catch
+  all of the 26, which is a small calibration set.
+
+# Reproducing this page
+
+```{r prov}
+knitr::kable(fread(file.path(DAT, "runinfo.tsv")),
+             caption = "Parameters (10.summary_page_data.R)")
+```
+
+```{r prov2}
+knitr::kable(data.table(
+  step = c("site-resolved calibration scan (6 datasets, site identity retained)",
+           "selection of the pathological sites",
+           "U/C-aliasing site list",
+           "all precomputed tables behind this page",
+           "this page"),
+  script = c("4.qtl_mapping_betabinomial/8.calibration_site_resolved.R",
+             "4.qtl_mapping_betabinomial/9.qq_exclude_pathological.R",
+             "4.qtl_mapping_betabinomial/9.qq_exclude_pathological.R (+ .traw allele check)",
+             "4.qtl_mapping_betabinomial/10.summary_page_data.R",
+             "analysis/qtl_mapping_betabinomial_pathology_summary.Rmd"),
+  submitted_via = c("run_calibration_siteres.sbatch", "-- (light)", "-- (light)",
+                    "run_summary_page_data.sbatch", "run_render_rmd.sbatch")),
+  caption = "Provenance. The heavy steps require a compute node; a login node SIGKILLs them.")
+```
+
+Related pages: [top-hit diagnostic](qtl_mapping_betabinomial_diagnostic.html) ·
+[why the same top hits](qtl_mapping_betabinomial_why_same_tophits.html) ·
+[beta-binomial scan summary](qtl_mapping_summary_betabinomial.html)

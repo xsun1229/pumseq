@@ -1,0 +1,209 @@
+---
+title: "Beta-binomial: why do permuted and real data return the same top hits?"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+
+knitr::opts_chunk$set(
+  echo = TRUE, warning = FALSE, message = FALSE,
+  fig.align = "center", fig.width = 13, fig.height = 15
+)
+
+PROJECT_DIR <- "/project/xinhe/xsun/pumseq"
+BASE   <- file.path(PROJECT_DIR, "pumseq_processed/psi_qtl")
+BBR    <- file.path(BASE, "qtl_betabinomial/lrt_results_merged")
+CALIB  <- file.path(BASE, "qtl_betabinomial/lrt_calibration")
+COUNTS <- file.path(BASE, "phenotype/fold5_union/counts")
+PSAM   <- file.path(BASE, "genotype/plink2/pumseq_genotype.hg38.chr1-22.psam")
+
+WINDOW_KB <- 5
+NPCS      <- 3
+N_TOP     <- 20
+SEED      <- 2026     # for the random-site comparison set
+
+SEQ_BLUE  <- c("#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5",
+               "#256abf", "#184f95", "#0d366b")
+DEPTH_BRK <- c(10, 100, 1000, 10000)
+GRP_COL   <- c(`top 20 hits` = "#e34948", `random 20 sites` = "#2a78d6")
+```
+
+# The question
+
+In the [top-hit diagnostic](qtl_mapping_betabinomial_diagnostic.html) we found
+that **19 of the 20 top sites under a random permutation are the same sites as
+the real top 20**, and that none of them share a lead SNP. That means the site
+gets selected for reasons that have nothing to do with genotype — permuting
+the phenotype does not dislodge it.
+
+This page asks what is different about those sites. We start with the simplest
+question: **how is %pU distributed at the top sites, compared with ordinary
+sites?**
+
+```{r load}
+C <- fread(file.path(COUNTS, "C_matrix.txt.gz"))
+N <- fread(file.path(COUNTS, "N_matrix.txt.gz"))
+go <- fread(PSAM)[[2]]
+Cm <- as.matrix(C[, ..go]); Nm <- as.matrix(N[, ..go])
+sid_all <- paste(C$ref, C$pos)
+
+res <- fread(file.path(BBR, sprintf("scan_lrt_w%dkb_pc%d.txt.gz", WINDOW_KB, NPCS)))
+res[, sid := paste(ref, pos)]
+setorder(res, nominal_min_p)
+
+top_ids <- res$sid[seq_len(N_TOP)]
+set.seed(SEED)
+rand_ids <- sample(setdiff(res$sid, top_ids), N_TOP)   # random comparison set
+
+# long table: one row per (site, cell line)
+mk <- function(ids, grp) rbindlist(lapply(seq_along(ids), function(k) {
+  i <- match(ids[k], sid_all)
+  r <- res[sid == ids[k]]
+  data.table(group = grp, ord = k, sid = ids[k],
+             # %.1f not %.0f for -log10(p): the random sites sit at 0.4-2,
+             # which %.0f would print as "0" / "1" / "2".
+             lab = sprintf("%s%d chr%s:%.0f\n-log10(p)=%.1f | %s reads",
+                           if (grp == "top 20 hits") "#" else "R", k,
+                           r$ref, r$pos, -log10(max(r$nominal_min_p, 1e-300)),
+                           format(sum(Nm[i, ]), big.mark = ",")),
+             pu = Cm[i, ] / Nm[i, ], n = Nm[i, ])
+}))
+dat <- rbind(mk(top_ids, "top 20 hits"), mk(rand_ids, "random 20 sites"))
+dat <- dat[is.finite(pu)]
+dat[, log_n := log10(pmax(n, 1))]
+dat[, group := factor(group, levels = names(GRP_COL))]
+```
+
+# 1. %pU per cell line, site by site
+
+Each panel is one site. Bar height is a real count -- how many of the 50 cell
+lines fall in that %pU bin -- and each bar is split by read depth, so you can
+see whether the cell lines in a bin are shallow or deep. The panel header
+gives that site's `-log10(p)` and its total read count.
+
+The two groups are shown as separate figures so they can be read on their own
+terms; note the y-axis is free per panel, since counts differ a lot between
+sites.
+
+```{r hist-helper}
+dat[, depth_bin := cut(n, breaks = c(-Inf, 10, 100, 1000, Inf),
+                       labels = c("< 10", "10-100", "100-1,000", "> 1,000"))]
+DEPTH_FILL <- c("< 10" = "#86b6ef", "10-100" = "#2a78d6",
+                "100-1,000" = "#184f95", "> 1,000" = "#0d366b")
+
+# One builder for both groups so the two figures stay directly comparable.
+plot_pu_hist <- function(dd, title, subtitle) {
+  ggplot(dd, aes(x = pu, fill = depth_bin)) +
+    geom_histogram(breaks = seq(0, 1, by = 0.05), colour = "white",
+                   linewidth = 0.15) +
+    scale_fill_manual(values = DEPTH_FILL, drop = FALSE,
+                      name = "read depth of the cell line",
+                      guide = guide_legend(nrow = 1,
+                                           override.aes = list(colour = NA))) +
+    scale_x_continuous(limits = c(-0.03, 1.03), breaks = c(0, 0.5, 1)) +
+    facet_wrap(~ lab, ncol = 5, scales = "free_y") +
+    labs(x = "%pU in one cell line",
+         y = "number of cell lines (out of 50)",
+         title = title, subtitle = subtitle) +
+    theme_bw(base_size = 11) +
+    theme(legend.position = "bottom", strip.text = element_text(size = 7),
+          panel.grid.minor = element_blank())
+}
+```
+
+## 1a. The 20 top hits
+
+```{r hist-top20, fig.height=8.5}
+plot_pu_hist(dat[group == "top 20 hits"],
+  "TOP 20 beta-binomial hits: how %pU is distributed across the 50 cell lines",
+  "Bar height = how many cell lines fall in that %pU bin; fill = their read depth.")
+```
+
+## 1b. 20 random sites, for comparison
+
+```{r hist-rand20, fig.height=8.5}
+plot_pu_hist(dat[group == "random 20 sites"],
+  "RANDOM 20 sites: how %pU is distributed across the 50 cell lines",
+  "Same axes and bins as 1a. Drawn at random from the tested sites (excluding the top 20).")
+```
+
+# 2. Pooled distribution of %pU
+
+The same values, pooled within each group, so the overall shape is directly
+comparable.
+
+```{r pooled-hist, fig.height=4.5}
+ggplot(dat, aes(x = pu, fill = group)) +
+  geom_histogram(bins = 40, position = "identity", alpha = 0.55, colour = NA) +
+  scale_fill_manual(values = GRP_COL, name = NULL) +
+  labs(x = "%pU in one cell line", y = "number of (site, cell line) pairs",
+       title = "Pooled %pU distribution: top 20 hits vs 20 random sites") +
+  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+```
+
+```{r shape-table}
+shape <- dat[, .(
+  `(site, cell line) pairs` = .N,
+  `median %pU`      = sprintf("%.3f", median(pu)),
+  `%pU < 0.05`      = sprintf("%.1f%%", 100 * mean(pu < 0.05)),
+  `%pU > 0.95`      = sprintf("%.1f%%", 100 * mean(pu > 0.95)),
+  `intermediate (0.05-0.95)` = sprintf("%.1f%%", 100 * mean(pu >= 0.05 & pu <= 0.95)),
+  `median depth`    = round(as.numeric(median(n)))
+), by = group]
+knitr::kable(shape, caption = "Shape of the %pU distribution, and depth, by group")
+```
+
+# 3. Per-site spread of %pU
+
+If the top sites simply had more between-cell-line variability in %pU, that
+would be an obvious candidate explanation. This compares the per-site spread
+(standard deviation and interquartile range of %pU across cell lines) between
+the two groups.
+
+```{r spread, fig.height=4.5}
+# as.numeric() on the medians: median() of an INTEGER vector returns integer
+# when the group size is odd and double when it is even, so the column type
+# flips between sites and data.table refuses to rbind the groups.
+per_site <- dat[, .(sd_pu = sd(pu), iqr_pu = IQR(pu),
+                    med_depth = as.numeric(median(n)),
+                    tot_depth = as.numeric(sum(n))), by = .(group, sid)]
+knitr::kable(per_site[, .(
+  sites = .N,
+  `median SD of %pU`   = sprintf("%.3f", median(sd_pu)),
+  `median IQR of %pU`  = sprintf("%.3f", median(iqr_pu)),
+  `median depth per cell line` = round(as.numeric(median(med_depth))),
+  `median total depth` = format(round(as.numeric(median(tot_depth))), big.mark = ",")
+), by = group], caption = "Per-site spread of %pU, and depth, by group")
+
+ggplot(melt(per_site, id.vars = c("group", "sid"),
+            measure.vars = c("sd_pu", "iqr_pu")),
+       aes(x = group, y = value, fill = group)) +
+  geom_boxplot(width = 0.5, outlier.size = 0.8, alpha = 0.8) +
+  facet_wrap(~ variable, scales = "free_y",
+             labeller = as_labeller(c(sd_pu = "SD of %pU across cell lines",
+                                      iqr_pu = "IQR of %pU across cell lines"))) +
+  scale_fill_manual(values = GRP_COL, guide = "none") +
+  labs(x = NULL, y = NULL, title = "Per-site variability in %pU") +
+  theme_bw(base_size = 12)
+```
+
+# 4. Depth, for reference
+
+Depth is the variable that separated these groups in the earlier diagnostic,
+shown here on the same footing as the %pU summaries above.
+
+```{r depth-box, fig.height=4.5}
+ggplot(per_site, aes(x = group, y = tot_depth, fill = group)) +
+  geom_boxplot(width = 0.5, outlier.size = 0.8, alpha = 0.8) +
+  scale_y_log10(labels = scales::comma) +
+  scale_fill_manual(values = GRP_COL, guide = "none") +
+  labs(x = NULL, y = "total reads at the site (log scale)",
+       title = "Total sequencing depth per site") +
+  theme_bw(base_size = 12)
+```

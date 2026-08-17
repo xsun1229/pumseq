@@ -1,0 +1,3190 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-08-17" />
+
+<title>Beta-binomial pU-QTL: why permutation did not remove the top hits</title>
+
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Beta-binomial pU-QTL: why permutation did
+not remove the top hits</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-08-17</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-08-17
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree057f47488e42072579c5db23cd7a14c36f7d0845targetblank057f474a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/057f47488e42072579c5db23cd7a14c36f7d0845" target="_blank">057f474</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree057f47488e42072579c5db23cd7a14c36f7d0845targetblank057f474a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/057f47488e42072579c5db23cd7a14c36f7d0845" target="_blank">057f474</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/qtl_mapping_betabinomial_pathology_summary.Rmd
+    Untracked:  analysis/qtl_mapping_betabinomial_why_same_tophits.Rmd
+
+Unstaged changes:
+    Deleted:    render_binomial_updated_52688698.out
+    Deleted:    render_qtl_summary_52179078.out
+    Deleted:    render_qtl_summary_52179478.out
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = &quot;center&quot;, fig.width = 11)
+
+BASE   &lt;- &quot;/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl&quot;
+DAT    &lt;- file.path(BASE, &quot;qtl_betabinomial/summary_page_data&quot;)
+DIAG   &lt;- file.path(BASE, &quot;qtl_betabinomial/diagnostic_figures&quot;)
+COUNTS &lt;- file.path(BASE, &quot;phenotype/fold5_union/counts&quot;)
+PSAM   &lt;- file.path(BASE, &quot;genotype/plink2/pumseq_genotype.hg38.chr1-22.psam&quot;)
+
+site26 &lt;- fread(file.path(DAT, &quot;site26_class.tsv&quot;))
+mf     &lt;- fread(file.path(DAT, &quot;misfit_by_class.tsv&quot;))
+pw     &lt;- fread(file.path(DAT, &quot;perm_winner.tsv&quot;))
+lev    &lt;- fread(file.path(DAT, &quot;leverage_demo.tsv&quot;))
+aud    &lt;- fread(file.path(DAT, &quot;sig_audit.tsv&quot;))
+c10    &lt;- fread(file.path(DAT, &quot;clean10_pearson.tsv&quot;))
+qq     &lt;- fread(file.path(DAT, &quot;qq_conditions.tsv.gz&quot;))
+lam    &lt;- fread(file.path(DAT, &quot;lambda_conditions.tsv&quot;))
+exc    &lt;- fread(file.path(DAT, &quot;exclusion_counts.tsv&quot;))
+patho  &lt;- fread(file.path(DIAG, &quot;pathological_sites.txt&quot;))
+
+C &lt;- fread(file.path(COUNTS, &quot;C_matrix.txt.gz&quot;)); N &lt;- fread(file.path(COUNTS, &quot;N_matrix.txt.gz&quot;))
+go &lt;- fread(PSAM)[[2]]
+Cm &lt;- as.matrix(C[, ..go]); Nm &lt;- as.matrix(N[, ..go]); sid_all &lt;- paste(C$ref, C$pos)
+
+CLS_COL &lt;- c(`the 26 pathological sites`      = &quot;#e34948&quot;,
+             `clean significant hits`         = &quot;#3987e5&quot;,
+             `random non-significant sites`   = &quot;#9aa4b1&quot;)
+COND_LV &lt;- c(&quot;all sites&quot;, &quot;minus the 26 (curated list)&quot;,
+             &quot;minus U/C + concentration&quot;, &quot;minus high-misfit sites&quot;,
+             &quot;minus U/C + concentration + misfit&quot;)
+mf_all &lt;- fread(file.path(DAT, &quot;misfit_all_sites.tsv.gz&quot;))
+sens   &lt;- fread(file.path(DAT, &quot;misfit_threshold_sensitivity.tsv&quot;))
+runinf &lt;- fread(file.path(DAT, &quot;runinfo.tsv&quot;))
+MISFIT_CUT &lt;- as.numeric(runinf[parameter == &quot;misfit_cut&quot;]$value)
+
+# tail height per condition, used in the prose below
+tailh &lt;- qq[, .(mx = max(observed)), by = .(condition, dataset)]
+th_of &lt;- function(cond, ds = &quot;real&quot;) round(tailh[condition == cond &amp; dataset == ds]$mx, 1)
+lam_of &lt;- function(cond, ds = &quot;real&quot;) round(lam[condition == cond &amp; dataset == ds]$lambda, 3)</code></pre>
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<p>The beta-binomial LRT scan produced a set of top hits that
+<strong>permutation did not displace</strong>: 19 of the 20 strongest
+sites under a random permutation of the phenotype were the same sites as
+the real top 20, and not one of them shared a lead SNP with its real
+counterpart. A permutation is supposed to destroy all genotype-phenotype
+signal, so this meant the sites were being selected for a reason
+unrelated to genotype.</p>
+<p>This page traces that to its cause. In brief:</p>
+<ol style="list-style-type: decimal">
+<li><strong>26 sites</strong> produce extreme p-values even when the
+phenotype is shuffled. They were found by rerunning the whole cis scan
+six times — on the real data and under five phenotype permutations —
+while <strong>keeping the site identity attached to every
+p-value</strong>, which the original calibration script discarded. Of
+the ~11,000 tested sites, 27 reached a nominal p below 1e-10 in at least
+one permutation; 26 of those were also extreme in the real data
+(<code>-log10 p &gt; 10</code>), and those 26 turn out to be extreme in
+all six datasets. The selection used the <strong>permuted data
+only</strong>, so nothing here is circular.</li>
+<li><strong>14 of the 26 carry a genotyped U↔︎C variant on the pU base
+itself</strong>, so the measured “%pU” is partly a read-out of genotype
+rather than of modification. A further <strong>4</strong> show the same
+three-level signature but have <em>no variant call at the base</em> —
+consistent with the same mechanism from a variant below our MAF 0.05
+threshold, though that is inferred from the phenotype shape and not
+directly confirmed. The remaining <strong>8</strong> are a separate
+problem: sites with almost no modification where a <em>single</em> cell
+line supplies nearly all the converted reads.</li>
+<li>Both make the phenotype impossible for a one-mean beta-binomial to
+fit. The LRT then rewards any covariate that absorbs part of that misfit
+— and <strong>permutation preserves the misfit</strong>, because it
+reorders the phenotype values without changing them.</li>
+<li>Removing them collapses the QQ tail from 289.1 to 40.2, and the
+<em>permuted</em> tail from ~285 to ~12. Notably <strong>λ barely
+moves</strong> (2.473 → 2.43), which is why the original calibration
+check looked acceptable while the tail was at 289. Three rules that
+generalize beyond this curated list — a U/C variant call, a
+single-cell-line cap, and a misfit cut — do better than the list itself
+when combined, but no one of them is sufficient alone (§4).</li>
+<li>The remaining significant hits do <strong>not</strong> show this
+signature: their p-values agree with an ordinary correlation test, and
+their permutation p-values sit exactly at chance level.</li>
+</ol>
+<pre class="r"><code>knitr::kable(exc, col.names = c(&quot;&quot;, &quot;n&quot;),
+             caption = &quot;Scale of the problem, and what each filter removes&quot;)</code></pre>
+<table>
+<caption>Scale of the problem, and what each filter removes</caption>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">sites tested (in the calibration scan)</td>
+<td align="right">11187</td>
+</tr>
+<tr class="even">
+<td align="left">the 26 pathological sites</td>
+<td align="right">26</td>
+</tr>
+<tr class="odd">
+<td align="left">U/C-aliasing sites (SNP on the pU base)</td>
+<td align="right">1118</td>
+</tr>
+<tr class="even">
+<td align="left">concentration-pathological sites (top_share &gt;=
+0.5)</td>
+<td align="right">1588</td>
+</tr>
+<tr class="odd">
+<td align="left">high-misfit sites (misfit &gt; 50)</td>
+<td align="right">435</td>
+</tr>
+<tr class="even">
+<td align="left">sites removed by all three filters combined</td>
+<td align="right">2740</td>
+</tr>
+<tr class="odd">
+<td align="left">significant hits, q &lt; 0.05</td>
+<td align="right">1385</td>
+</tr>
+<tr class="even">
+<td align="left">of those: one of the 26</td>
+<td align="right">6</td>
+</tr>
+<tr class="odd">
+<td align="left">of those: U/C-aliasing (not in the 26)</td>
+<td align="right">1047</td>
+</tr>
+<tr class="even">
+<td align="left">of those: concentration-pathological</td>
+<td align="right">21</td>
+</tr>
+<tr class="odd">
+<td align="left">of those: surviving the U/C + concentration
+filters</td>
+<td align="right">311</td>
+</tr>
+<tr class="even">
+<td align="left">of those survivors also flagged by misfit</td>
+<td align="right">37</td>
+</tr>
+<tr class="odd">
+<td align="left">surviving all three filters</td>
+<td align="right">274</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="how-the-26-sites-were-found" class="section level1">
+<h1>1. How the 26 sites were found</h1>
+<div id="the-idea" class="section level2">
+<h2>1.1 The idea</h2>
+<p>Under permutation there is, by construction, no genotype-phenotype
+relationship. So <strong>any site that still returns an extreme p-value
+under permutation is broken on its own terms</strong> — no comparison
+with the real data is needed to establish that.</p>
+<p>This is important for what follows: the 26 sites were selected using
+the <strong>permuted data only</strong>. Looking afterwards at the real
+QQ plot is therefore not circular. Had they been picked using the real
+p-values, flattening the real tail would have been guaranteed and would
+have proved nothing.</p>
+</div>
+<div id="the-scan" class="section level2">
+<h2>1.2 The scan</h2>
+<p><code>8.calibration_site_resolved.R</code> repeats the genome-wide
+cis scan six times — once on the real data and once under each of five
+phenotype permutations (<code>set.seed(1000 + k)</code>; the phenotype
+<em>and</em> the covariates are reindexed, the genotypes are not) — and,
+unlike the earlier calibration script, <strong>keeps the site identity
+attached to every p-value</strong>. That is what makes it possible to
+ask which sites the inflated tail comes from.</p>
+</div>
+<div id="the-two-criteria" class="section level2">
+<h2>1.3 The two criteria</h2>
+<pre class="r"><code>knitr::kable(data.table(
+  criterion = c(&quot;minimum p &lt; 1e-10 in at least one of the 5 permutations&quot;,
+                &quot;real -log10(p) &gt; 10&quot;,
+                &quot;-&gt; sites meeting both&quot;),
+  purpose = c(&quot;the site can fake an extreme p-value with no signal present&quot;,
+              &quot;drops sites that were extreme in a single permutation by chance&quot;,
+              &quot;extreme in every one of the 6 datasets (verified individually)&quot;),
+  n = c(&quot;27&quot;, &quot;&quot;, paste0(nrow(site26)))),
+  caption = &quot;Selection criteria (9.qq_exclude_pathological.R)&quot;)</code></pre>
+<table>
+<caption>Selection criteria (9.qq_exclude_pathological.R)</caption>
+<colgroup>
+<col width="45%" />
+<col width="52%" />
+<col width="2%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">criterion</th>
+<th align="left">purpose</th>
+<th align="left">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">minimum p &lt; 1e-10 in at least one of the 5
+permutations</td>
+<td align="left">the site can fake an extreme p-value with no signal
+present</td>
+<td align="left">27</td>
+</tr>
+<tr class="even">
+<td align="left">real -log10(p) &gt; 10</td>
+<td align="left">drops sites that were extreme in a single permutation
+by chance</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">-&gt; sites meeting both</td>
+<td align="left">extreme in every one of the 6 datasets (verified
+individually)</td>
+<td align="left">26</td>
+</tr>
+</tbody>
+</table>
+<p>Exactly one of the 27 candidates was extreme in a single permutation
+only; the other <strong>26 are extreme in all six datasets</strong>.</p>
+</div>
+<div id="what-the-selected-sites-look-like-across-the-six-datasets"
+class="section level2">
+<h2>1.4 What the selected sites look like across the six datasets</h2>
+<p>Each row is one site. The red point is the real data; the blue points
+are the five permutations. For a normal site the permutations would sit
+near zero, far below the real point.</p>
+<pre class="r"><code>P &lt;- paste0(&quot;perm&quot;, 1:5)
+lg &lt;- melt(patho[, c(&quot;sid&quot;, &quot;real&quot;, P), with = FALSE], id.vars = &quot;sid&quot;,
+           variable.name = &quot;dataset&quot;, value.name = &quot;nlp&quot;)
+lg[, is_real := dataset == &quot;real&quot;]
+ordv &lt;- patho[order(real)]$sid
+lg[, sid := factor(sid, levels = ordv)]
+
+ggplot(lg, aes(nlp, sid)) +
+  geom_line(aes(group = sid), colour = &quot;grey70&quot;, linewidth = 0.4) +
+  geom_point(data = lg[!is_real &amp; TRUE], aes(colour = &quot;the 5 permutations&quot;),
+             size = 1.7, alpha = 0.85) +
+  geom_point(data = lg[is_real == TRUE], aes(colour = &quot;real data&quot;), size = 2.6) +
+  scale_colour_manual(values = c(`real data` = &quot;#e34948&quot;,
+                                 `the 5 permutations` = &quot;#3987e5&quot;), name = NULL) +
+  labs(x = expression(-log[10](&quot;p&quot;)~&quot;of the site&#39;s best cis-SNP&quot;), y = NULL,
+       title = &quot;The 26 sites: the permutations reach almost the same p-value as the real data&quot;,
+       subtitle = &quot;A working site would have its permutation points near 0. Here they land on top of the real point.&quot;) +
+  theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec1-fig-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>knitr::kable(patho[order(-real)][, .(
+  site = sid,
+  `real -log10p` = round(real, 1),
+  `permutation mean` = round(perm_mean, 1),
+  `permutation SD` = round(perm_sd, 2),
+  `real - best permutation` = round(real_excess_over_perm_max, 1))],
+  caption = paste(&quot;The 26 sites. The last column is how much of the real signal&quot;,
+                  &quot;survives after subtracting what permutation produces at the&quot;,
+                  &quot;same site -- for most of them, a few percent of the total.&quot;))</code></pre>
+<table>
+<caption>The 26 sites. The last column is how much of the real signal
+survives after subtracting what permutation produces at the same site –
+for most of them, a few percent of the total.</caption>
+<colgroup>
+<col width="15%" />
+<col width="15%" />
+<col width="20%" />
+<col width="18%" />
+<col width="29%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="right">real -log10p</th>
+<th align="right">permutation mean</th>
+<th align="right">permutation SD</th>
+<th align="right">real - best permutation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">6 31271283</td>
+<td align="right">289.1</td>
+<td align="right">284.6</td>
+<td align="right">0.33</td>
+<td align="right">4.1</td>
+</tr>
+<tr class="even">
+<td align="left">19 46609391</td>
+<td align="right">270.8</td>
+<td align="right">241.0</td>
+<td align="right">0.23</td>
+<td align="right">29.5</td>
+</tr>
+<tr class="odd">
+<td align="left">16 67935628</td>
+<td align="right">251.2</td>
+<td align="right">224.8</td>
+<td align="right">0.74</td>
+<td align="right">25.5</td>
+</tr>
+<tr class="even">
+<td align="left">2 68396142</td>
+<td align="right">234.8</td>
+<td align="right">210.4</td>
+<td align="right">0.56</td>
+<td align="right">23.7</td>
+</tr>
+<tr class="odd">
+<td align="left">16 11548841</td>
+<td align="right">215.9</td>
+<td align="right">192.2</td>
+<td align="right">0.85</td>
+<td align="right">22.2</td>
+</tr>
+<tr class="even">
+<td align="left">5 314820</td>
+<td align="right">214.4</td>
+<td align="right">182.3</td>
+<td align="right">0.28</td>
+<td align="right">31.8</td>
+</tr>
+<tr class="odd">
+<td align="left">6 31667933</td>
+<td align="right">206.0</td>
+<td align="right">173.1</td>
+<td align="right">0.59</td>
+<td align="right">32.3</td>
+</tr>
+<tr class="even">
+<td align="left">17 75240043</td>
+<td align="right">199.8</td>
+<td align="right">172.2</td>
+<td align="right">0.63</td>
+<td align="right">26.6</td>
+</tr>
+<tr class="odd">
+<td align="left">6 32660211</td>
+<td align="right">180.7</td>
+<td align="right">167.0</td>
+<td align="right">1.05</td>
+<td align="right">12.0</td>
+</tr>
+<tr class="even">
+<td align="left">14 22551976</td>
+<td align="right">179.8</td>
+<td align="right">178.1</td>
+<td align="right">0.43</td>
+<td align="right">1.0</td>
+</tr>
+<tr class="odd">
+<td align="left">19 7698817</td>
+<td align="right">170.8</td>
+<td align="right">160.0</td>
+<td align="right">0.65</td>
+<td align="right">10.3</td>
+</tr>
+<tr class="even">
+<td align="left">13 39013029</td>
+<td align="right">161.5</td>
+<td align="right">137.5</td>
+<td align="right">0.81</td>
+<td align="right">22.9</td>
+</tr>
+<tr class="odd">
+<td align="left">6 32664993</td>
+<td align="right">149.7</td>
+<td align="right">145.5</td>
+<td align="right">0.44</td>
+<td align="right">3.8</td>
+</tr>
+<tr class="even">
+<td align="left">3 37277733</td>
+<td align="right">141.3</td>
+<td align="right">141.6</td>
+<td align="right">0.65</td>
+<td align="right">-1.3</td>
+</tr>
+<tr class="odd">
+<td align="left">12 56664365</td>
+<td align="right">119.1</td>
+<td align="right">105.6</td>
+<td align="right">0.19</td>
+<td align="right">13.3</td>
+</tr>
+<tr class="even">
+<td align="left">11 102323961</td>
+<td align="right">97.7</td>
+<td align="right">84.5</td>
+<td align="right">0.77</td>
+<td align="right">12.2</td>
+</tr>
+<tr class="odd">
+<td align="left">2 37126321</td>
+<td align="right">54.9</td>
+<td align="right">49.0</td>
+<td align="right">0.15</td>
+<td align="right">5.7</td>
+</tr>
+<tr class="even">
+<td align="left">2 88886147</td>
+<td align="right">54.5</td>
+<td align="right">53.8</td>
+<td align="right">0.64</td>
+<td align="right">-0.2</td>
+</tr>
+<tr class="odd">
+<td align="left">6 32745178</td>
+<td align="right">53.5</td>
+<td align="right">52.0</td>
+<td align="right">0.34</td>
+<td align="right">1.0</td>
+</tr>
+<tr class="even">
+<td align="left">14 106360212</td>
+<td align="right">33.5</td>
+<td align="right">33.7</td>
+<td align="right">0.29</td>
+<td align="right">-0.5</td>
+</tr>
+<tr class="odd">
+<td align="left">2 90039467</td>
+<td align="right">32.5</td>
+<td align="right">32.8</td>
+<td align="right">0.28</td>
+<td align="right">-0.6</td>
+</tr>
+<tr class="even">
+<td align="left">2 90039470</td>
+<td align="right">27.5</td>
+<td align="right">27.2</td>
+<td align="right">0.16</td>
+<td align="right">0.1</td>
+</tr>
+<tr class="odd">
+<td align="left">22 22432410</td>
+<td align="right">23.0</td>
+<td align="right">23.7</td>
+<td align="right">1.06</td>
+<td align="right">-2.0</td>
+</tr>
+<tr class="even">
+<td align="left">6 32643315</td>
+<td align="right">12.6</td>
+<td align="right">12.3</td>
+<td align="right">0.79</td>
+<td align="right">-1.0</td>
+</tr>
+<tr class="odd">
+<td align="left">9 107330635</td>
+<td align="right">12.1</td>
+<td align="right">12.5</td>
+<td align="right">1.02</td>
+<td align="right">-1.9</td>
+</tr>
+<tr class="even">
+<td align="left">14 106537954</td>
+<td align="right">11.6</td>
+<td align="right">11.3</td>
+<td align="right">0.28</td>
+<td align="right">0.0</td>
+</tr>
+</tbody>
+</table>
+<p>Two things stand out. The permutation SD is tiny (mostly &lt; 1 unit
+on the <code>-log10 p</code> scale), so the five permutations agree
+closely with each other: this is a stable property of the site, not a
+fluke. And the real data exceeds the best permutation by only
+<strong>4%</strong> of its total (median) — for five sites the real data
+does not exceed the permutations at all.</p>
+</div>
+</div>
+<div id="what-the-26-sites-are" class="section level1">
+<h1>2. What the 26 sites are</h1>
+<div id="classification" class="section level2">
+<h2>2.1 Classification</h2>
+<pre class="r"><code>cnt &lt;- site26[, .N, by = class][order(-N)]
+knitr::kable(cnt, col.names = c(&quot;class&quot;, &quot;n&quot;),
+             caption = &quot;The 26 sites fall into two mechanisms&quot;)</code></pre>
+<table>
+<caption>The 26 sites fall into two mechanisms</caption>
+<thead>
+<tr class="header">
+<th align="left">class</th>
+<th align="right">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">U/C SNP on the pU base</td>
+<td align="right">14</td>
+</tr>
+<tr class="even">
+<td align="left">one cell line dominates</td>
+<td align="right">8</td>
+</tr>
+<tr class="odd">
+<td align="left">3-clump shape, no genotyped SNP at the base</td>
+<td align="right">4</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(site26[, .(site = sid, `-log10p` = real_nlp,
+                        `SNP at the pU base` = ifelse(snp_at_site == &quot;&quot;, &quot;--&quot;, snp_at_site),
+                        `pooled %pU` = pooled_pu,
+                        `frac at 0/50/100%` = spike3,
+                        `top cell-line share` = top_share,
+                        class)],
+  caption = paste(&quot;Every one of the 26, classified.&quot;,
+                  &quot;&#39;frac at 0/50/100%&#39; is the fraction of cell lines whose %pU is within&quot;,
+                  &quot;0.08 of 0, 0.5 or 1 -- the signature of a genotype read-out.&quot;,
+                  &quot;&#39;top cell-line share&#39; is the largest share of the site&#39;s converted&quot;,
+                  &quot;reads coming from a single cell line.&quot;))</code></pre>
+<table>
+<caption>Every one of the 26, classified. ‘frac at 0/50/100%’ is the
+fraction of cell lines whose %pU is within 0.08 of 0, 0.5 or 1 – the
+signature of a genotype read-out. ‘top cell-line share’ is the largest
+share of the site’s converted reads coming from a single cell
+line.</caption>
+<colgroup>
+<col width="9%" />
+<col width="6%" />
+<col width="14%" />
+<col width="8%" />
+<col width="13%" />
+<col width="15%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="right">-log10p</th>
+<th align="left">SNP at the pU base</th>
+<th align="right">pooled %pU</th>
+<th align="right">frac at 0/50/100%</th>
+<th align="right">top cell-line share</th>
+<th align="left">class</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">6 31271283</td>
+<td align="right">289.1</td>
+<td align="left">A/G</td>
+<td align="right">0.431</td>
+<td align="right">0.60</td>
+<td align="right">0.09</td>
+<td align="left">U/C SNP on the pU base</td>
+</tr>
+<tr class="even">
+<td align="left">19 46609391</td>
+<td align="right">270.8</td>
+<td align="left">T/C</td>
+<td align="right">0.561</td>
+<td align="right">0.86</td>
+<td align="right">0.10</td>
+<td align="left">U/C SNP on the pU base</td>
+</tr>
+<tr class="odd">
+<td align="left">16 67935628</td>
+<td align="right">251.2</td>
+<td align="left">A/G</td>
+<td align="right">0.440</td>
+<td align="right">0.86</td>
+<td align="right">0.07</td>
+<td align="left">U/C SNP on the pU base</td>
+</tr>
+<tr class="even">
+<td align="left">2 68396142</td>
+<td align="right">234.8</td>
+<td align="left">T/C</td>
+<td align="right">0.256</td>
+<td align="right">0.46</td>
+<td align="right">0.12</td>
+<td align="left">U/C SNP on the pU base</td>
+</tr>
+<tr class="odd">
+<td align="left">16 11548841</td>
+<td align="right">215.9</td>
+<td align="left">A/G</td>
+<td align="right">0.310</td>
+<td align="right">0.84</td>
+<td align="right">0.07</td>
+<td align="left">U/C SNP on the pU base</td>
+</tr>
+<tr class="even">
+<td align="left">5 314820</td>
+<td align="right">214.4</td>
+<td align="left">T/C</td>
+<td align="right">0.560</td>
+<td align="right">0.84</td>
+<td align="right">0.05</td>
+<td align="left">U/C SNP on the pU base</td>
+</tr>
+<tr class="odd">
+<td align="left">6 31667933</td>
+<td align="right">206.0</td>
+<td align="left">T/C</td>
+<td align="right">0.456</td>
+<td align="right">0.94</td>
+<td align="right">0.09</td>
+<td align="left">U/C SNP on the pU base</td>
+</tr>
+<tr class="even">
+<td align="left">17 75240043</td>
+<td align="right">199.8</td>
+<td align="left">A/G</td>
+<td align="right">0.592</td>
+<td align="right">0.84</td>
+<td align="right">0.10</td>
+<td align="left">U/C SNP on the pU base</td>
+</tr>
+<tr class="odd">
+<td align="left">6 32660211</td>
+<td align="right">180.7</td>
+<td align="left">A/G</td>
+<td align="right">0.148</td>
+<td align="right">0.66</td>
+<td align="right">0.08</td>
+<td align="left">U/C SNP on the pU base</td>
+</tr>
+<tr class="even">
+<td align="left">14 22551976</td>
+<td align="right">179.8</td>
+<td align="left">–</td>
+<td align="right">0.416</td>
+<td align="right">0.68</td>
+<td align="right">0.07</td>
+<td align="left">3-clump shape, no genotyped SNP at the base</td>
+</tr>
+<tr class="odd">
+<td align="left">19 7698817</td>
+<td align="right">170.8</td>
+<td align="left">A/G</td>
+<td align="right">0.199</td>
+<td align="right">0.86</td>
+<td align="right">0.12</td>
+<td align="left">U/C SNP on the pU base</td>
+</tr>
+<tr class="even">
+<td align="left">13 39013029</td>
+<td align="right">161.5</td>
+<td align="left">A/G</td>
+<td align="right">0.500</td>
+<td align="right">0.82</td>
+<td align="right">0.08</td>
+<td align="left">U/C SNP on the pU base</td>
+</tr>
+<tr class="odd">
+<td align="left">6 32664993</td>
+<td align="right">149.7</td>
+<td align="left">–</td>
+<td align="right">0.175</td>
+<td align="right">0.78</td>
+<td align="right">0.14</td>
+<td align="left">3-clump shape, no genotyped SNP at the base</td>
+</tr>
+<tr class="even">
+<td align="left">3 37277733</td>
+<td align="right">141.3</td>
+<td align="left">–</td>
+<td align="right">0.534</td>
+<td align="right">0.64</td>
+<td align="right">0.11</td>
+<td align="left">3-clump shape, no genotyped SNP at the base</td>
+</tr>
+<tr class="odd">
+<td align="left">12 56664365</td>
+<td align="right">119.1</td>
+<td align="left">A/G</td>
+<td align="right">0.108</td>
+<td align="right">0.96</td>
+<td align="right">0.21</td>
+<td align="left">U/C SNP on the pU base</td>
+</tr>
+<tr class="even">
+<td align="left">11 102323961</td>
+<td align="right">97.7</td>
+<td align="left">T/C</td>
+<td align="right">0.116</td>
+<td align="right">0.90</td>
+<td align="right">0.26</td>
+<td align="left">U/C SNP on the pU base</td>
+</tr>
+<tr class="odd">
+<td align="left">2 37126321</td>
+<td align="right">54.9</td>
+<td align="left">A/G</td>
+<td align="right">0.100</td>
+<td align="right">0.94</td>
+<td align="right">0.39</td>
+<td align="left">U/C SNP on the pU base</td>
+</tr>
+<tr class="even">
+<td align="left">2 88886147</td>
+<td align="right">54.5</td>
+<td align="left">–</td>
+<td align="right">0.064</td>
+<td align="right">0.93</td>
+<td align="right">0.91</td>
+<td align="left">one cell line dominates</td>
+</tr>
+<tr class="odd">
+<td align="left">6 32745178</td>
+<td align="right">53.5</td>
+<td align="left">–</td>
+<td align="right">0.357</td>
+<td align="right">0.97</td>
+<td align="right">0.23</td>
+<td align="left">3-clump shape, no genotyped SNP at the base</td>
+</tr>
+<tr class="even">
+<td align="left">14 106360212</td>
+<td align="right">33.5</td>
+<td align="left">–</td>
+<td align="right">0.015</td>
+<td align="right">0.96</td>
+<td align="right">0.52</td>
+<td align="left">one cell line dominates</td>
+</tr>
+<tr class="odd">
+<td align="left">2 90039467</td>
+<td align="right">32.5</td>
+<td align="left">–</td>
+<td align="right">0.045</td>
+<td align="right">0.95</td>
+<td align="right">0.50</td>
+<td align="left">one cell line dominates</td>
+</tr>
+<tr class="even">
+<td align="left">2 90039470</td>
+<td align="right">27.5</td>
+<td align="left">–</td>
+<td align="right">0.034</td>
+<td align="right">0.95</td>
+<td align="right">0.54</td>
+<td align="left">one cell line dominates</td>
+</tr>
+<tr class="odd">
+<td align="left">22 22432410</td>
+<td align="right">23.0</td>
+<td align="left">–</td>
+<td align="right">0.012</td>
+<td align="right">1.00</td>
+<td align="right">0.92</td>
+<td align="left">one cell line dominates</td>
+</tr>
+<tr class="even">
+<td align="left">6 32643315</td>
+<td align="right">12.6</td>
+<td align="left">T/G</td>
+<td align="right">0.088</td>
+<td align="right">0.98</td>
+<td align="right">0.63</td>
+<td align="left">one cell line dominates</td>
+</tr>
+<tr class="odd">
+<td align="left">9 107330635</td>
+<td align="right">12.1</td>
+<td align="left">–</td>
+<td align="right">0.020</td>
+<td align="right">1.00</td>
+<td align="right">0.98</td>
+<td align="left">one cell line dominates</td>
+</tr>
+<tr class="even">
+<td align="left">14 106537954</td>
+<td align="right">11.6</td>
+<td align="left">–</td>
+<td align="right">0.020</td>
+<td align="right">1.00</td>
+<td align="right">0.96</td>
+<td align="left">one cell line dominates</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div
+id="mechanism-a-a-uc-variant-on-the-pu-base-14-confirmed-4-suspected"
+class="section level2">
+<h2>2.2 Mechanism A: a U↔︎C variant on the pU base (14 confirmed, 4
+suspected)</h2>
+<p>Pseudouridine is a <em>modified uridine</em>: the assay reads out the
+base at that position. If a common sequence variant changes that same
+base from U to C, then an inherited C is indistinguishable from a
+modification event. The measured “%pU” becomes a read-out of
+genotype.</p>
+<p>This shows up as <strong>C/T on the + strand and A/G on the −
+strand</strong> — the same U→C change on the transcript, written against
+whichever genome strand the transcript came from. Genome-wide,
+<strong>1,118 sites</strong> (10.0% of those tested) have such a
+variant.</p>
+<p>The consequence is a phenotype with three discrete spikes: homozygous
+reference near 0%, heterozygous near 50%, homozygous alternate near
+100%.</p>
+<pre class="r"><code>pu_long &lt;- function(ids, labs) rbindlist(lapply(seq_along(ids), function(k) {
+  i &lt;- match(ids[k], sid_all); n &lt;- Nm[i, ]; sel &lt;- n &gt; 0
+  data.table(lab = labs[k], pu = Cm[i, sel] / n[sel], n = n[sel])
+}))
+uc_ex &lt;- site26[class == &quot;U/C SNP on the pU base&quot;][order(-real_nlp)][1:6]
+d &lt;- pu_long(uc_ex$sid, sprintf(&quot;chr%s  (%s)\n-log10p=%.0f | %s reads&quot;,
+                                sub(&quot; .*&quot;, &quot;&quot;, uc_ex$sid),
+                                uc_ex$snp_at_site, uc_ex$real_nlp,
+                                format(uc_ex$total_depth, big.mark = &quot;,&quot;)))
+d[, depth_bin := cut(n, c(-Inf, 10, 100, 1000, Inf),
+                     labels = c(&quot;&lt; 10&quot;, &quot;10-100&quot;, &quot;100-1,000&quot;, &quot;&gt; 1,000&quot;))]
+DFILL &lt;- c(&quot;&lt; 10&quot; = &quot;#86b6ef&quot;, &quot;10-100&quot; = &quot;#2a78d6&quot;,
+           &quot;100-1,000&quot; = &quot;#184f95&quot;, &quot;&gt; 1,000&quot; = &quot;#0d366b&quot;)
+ggplot(d, aes(pu, fill = depth_bin)) +
+  geom_histogram(breaks = seq(0, 1, 0.05), colour = &quot;white&quot;, linewidth = 0.15) +
+  scale_fill_manual(values = DFILL, drop = FALSE, name = &quot;read depth of the cell line&quot;,
+                    guide = guide_legend(nrow = 1, override.aes = list(colour = NA))) +
+  scale_x_continuous(breaks = c(0, 0.5, 1), limits = c(-0.03, 1.03)) +
+  facet_wrap(~ lab, ncol = 3, scales = &quot;free_y&quot;) +
+  labs(x = &quot;%pU in one cell line&quot;, y = &quot;number of cell lines&quot;,
+       title = &quot;Mechanism A: three discrete spikes, because %pU is reporting genotype&quot;,
+       subtitle = &quot;The peaks at 0 / 50 / 100% are the three genotypes at the U/C variant, not three levels of modification.&quot;) +
+  theme_bw(base_size = 11) +
+  theme(legend.position = &quot;bottom&quot;, strip.text = element_text(size = 8),
+        panel.grid.minor = element_blank())</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-uc-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>Beyond the 14 with an actual variant call, <strong>four more show the
+same three-clump shape but have no genotyped variant at the
+base</strong>. The most likely explanation is the same mechanism with a
+variant below our MAF 0.05 threshold or one that was not called — but
+that is inferred from the phenotype shape and <strong>not directly
+confirmed</strong>. The clearest is chr14:22551976: 11 cell lines at
+exactly 0.00, 26 in a tight band near 0.40, 12 at ~1.00, with ~130 reads
+each. No enzymatic modification rate behaves that way.</p>
+<p>These four matter out of proportion to their number. Because no
+variant is called at the base, <strong>no annotation-based filter can
+see them</strong> — and they include the second, third and fourth
+strongest offenders in the entire scan (<code>-log10 p</code> of 179.8,
+149.7, 141.3). Any filter that works only from variant calls will leave
+the QQ tail nearly where it started; §4 shows this happening and what
+fixes it.</p>
+<pre class="r"><code>ns &lt;- site26[class == &quot;3-clump shape, no genotyped SNP at the base&quot;][order(-real_nlp)]
+d2 &lt;- pu_long(ns$sid, sprintf(&quot;chr%s\n-log10p=%.0f | frac at 0/50/100%% = %.2f&quot;,
+                              sub(&quot; .*&quot;, &quot;&quot;, ns$sid), ns$real_nlp, ns$spike3))
+ggplot(d2, aes(pu)) +
+  geom_histogram(breaks = seq(0, 1, 0.05), fill = &quot;#3987e5&quot;,
+                 colour = &quot;white&quot;, linewidth = 0.15) +
+  scale_x_continuous(breaks = c(0, 0.5, 1), limits = c(-0.03, 1.03)) +
+  facet_wrap(~ lab, nrow = 1, scales = &quot;free_y&quot;) +
+  labs(x = &quot;%pU in one cell line&quot;, y = &quot;cell lines&quot;,
+       title = &quot;The same signature with no genotyped variant at the base&quot;,
+       subtitle = &quot;Consistent with a U/C variant below MAF 0.05, or one that was not called.&quot;) +
+  theme_bw(base_size = 11) +
+  theme(strip.text = element_text(size = 8), panel.grid.minor = element_blank())</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-nosnp-1.png" width="1056" style="display: block; margin: auto;" /></p>
+</div>
+<div
+id="mechanism-b-one-cell-line-supplies-nearly-all-the-converted-reads-8-of-26"
+class="section level2">
+<h2>2.3 Mechanism B: one cell line supplies nearly all the converted
+reads (8 of 26)</h2>
+<p>These sites have essentially <strong>no modification at all</strong>
+— pooled %pU between 1% and 9%. Most cell lines have thousands of reads
+and a handful of converted ones. Then one cell line reports a large %pU
+on modest depth.</p>
+<pre class="r"><code>cc &lt;- site26[class == &quot;one cell line dominates&quot;][order(-real_nlp)]
+d3 &lt;- pu_long(cc$sid, sprintf(&quot;chr%s\n-log10p=%.0f | pooled %%pU=%.3f | top line=%.0f%%&quot;,
+                              sub(&quot; .*&quot;, &quot;&quot;, cc$sid), cc$real_nlp,
+                              cc$pooled_pu, 100 * cc$top_share))
+d3[, depth_bin := cut(n, c(-Inf, 10, 100, 1000, Inf),
+                      labels = c(&quot;&lt; 10&quot;, &quot;10-100&quot;, &quot;100-1,000&quot;, &quot;&gt; 1,000&quot;))]
+ggplot(d3, aes(pu, fill = depth_bin)) +
+  geom_histogram(breaks = seq(0, 1, 0.05), colour = &quot;white&quot;, linewidth = 0.15) +
+  scale_fill_manual(values = DFILL, drop = FALSE, name = &quot;read depth of the cell line&quot;,
+                    guide = guide_legend(nrow = 1, override.aes = list(colour = NA))) +
+  scale_x_continuous(breaks = c(0, 0.5, 1), limits = c(-0.03, 1.03)) +
+  facet_wrap(~ lab, ncol = 3, scales = &quot;free_y&quot;) +
+  labs(x = &quot;%pU in one cell line&quot;, y = &quot;number of cell lines&quot;,
+       title = &quot;Mechanism B: a near-empty site plus one discordant cell line&quot;,
+       subtitle = &quot;&#39;top line&#39; = share of the site&#39;s converted reads contributed by a single cell line.&quot;) +
+  theme_bw(base_size = 11) +
+  theme(legend.position = &quot;bottom&quot;, strip.text = element_text(size = 8),
+        panel.grid.minor = element_blank())</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-conc-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>The most extreme case, chr9:107330635, has <strong>98% of its
+converted reads from one cell line out of 50</strong>. There is nothing
+to make a QTL out of.</p>
+</div>
+</div>
+<div id="why-permutation-does-not-remove-these-sites"
+class="section level1">
+<h1>3. Why permutation does not remove these sites</h1>
+<div id="the-lrt-measures-an-improvement-not-an-association"
+class="section level2">
+<h2>3.1 The LRT measures an improvement, not an association</h2>
+<p>The test fits the site twice — once without the SNP, once with it —
+and the p-value comes from <strong>the gap between the two
+fits</strong>. It does not come from how well the second fit works in
+absolute terms.</p>
+<p>The model has only two knobs, a mean and a dispersion, and “the SNP
+has an effect” can only be expressed as “the SNP shifts the mean”. So
+the no-SNP fit must describe all 50 cell lines with a single mean.</p>
+</div>
+<div id="null-misfit-how-much-room-the-no-snp-fit-leaves"
+class="section level2">
+<h2>3.2 Null misfit: how much room the no-SNP fit leaves</h2>
+<p>Define <strong>null misfit</strong> as how much the log-likelihood
+improves if the phenotype is simply <em>allowed</em> to have three
+separate levels — the log-likelihood of a model with two extra indicator
+columns (from a 3-group k-means on %pU) minus that of the one-mean null.
+Crucially this uses <strong>no genotype at all</strong>, so it is a
+property of the phenotype values alone.</p>
+<p>A beta distribution with one mean can be a single hump, a tilted
+hump, or a U-shape with mass at both ends. It <strong>cannot</strong>
+place three separate spikes at 0, 0.5 and 1. So at the pathological
+sites the null fit is not merely imperfect, it is structurally
+incapable, and the misfit is enormous.</p>
+<pre class="r"><code>mfp &lt;- mf[is.finite(misfit)]
+mfp[, class := factor(class, levels = names(CLS_COL))]
+knitr::kable(mfp[, .(sites = .N,
+                     `median misfit` = round(median(misfit), 1),
+                     `25th pct` = round(quantile(misfit, .25), 1),
+                     `75th pct` = round(quantile(misfit, .75), 1),
+                     `max` = round(max(misfit), 1)), by = class],
+  caption = paste(&quot;Null misfit (log-likelihood units left unexplained by the&quot;,
+                  &quot;one-mean model), computed without using genotype.&quot;))</code></pre>
+<table>
+<caption>Null misfit (log-likelihood units left unexplained by the
+one-mean model), computed without using genotype.</caption>
+<colgroup>
+<col width="39%" />
+<col width="8%" />
+<col width="19%" />
+<col width="12%" />
+<col width="12%" />
+<col width="8%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">class</th>
+<th align="right">sites</th>
+<th align="right">median misfit</th>
+<th align="right">25th pct</th>
+<th align="right">75th pct</th>
+<th align="right">max</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">the 26 pathological sites</td>
+<td align="right">21</td>
+<td align="right">412.3</td>
+<td align="right">145.6</td>
+<td align="right">490.0</td>
+<td align="right">704.1</td>
+</tr>
+<tr class="even">
+<td align="left">clean significant hits</td>
+<td align="right">134</td>
+<td align="right">38.6</td>
+<td align="right">29.9</td>
+<td align="right">48.3</td>
+<td align="right">105.5</td>
+</tr>
+<tr class="odd">
+<td align="left">random non-significant sites</td>
+<td align="right">167</td>
+<td align="right">18.2</td>
+<td align="right">15.2</td>
+<td align="right">23.5</td>
+<td align="right">88.2</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>ggplot(mfp, aes(class, pmax(misfit, 0.05), fill = class)) +
+  geom_boxplot(width = 0.5, alpha = 0.85, outlier.size = 0.9) +
+  scale_y_log10() + scale_fill_manual(values = CLS_COL, guide = &quot;none&quot;) +
+  labs(x = NULL, y = &quot;null misfit, log-likelihood units (log scale)&quot;,
+       title = &quot;The pathological sites leave orders of magnitude more log-likelihood unexplained&quot;,
+       subtitle = paste(&quot;Computed from the phenotype values only -- no genotype enters,&quot;,
+                        &quot;so permutation cannot change it.&quot;,
+                        sprintf(&quot;\nMisfit is undefined at %d of the 26 (too few distinct %%pU levels to fit a 3-group reference), so %d are shown.&quot;,
+                                26 - nrow(mfp[class == &quot;the 26 pathological sites&quot;]),
+                                nrow(mfp[class == &quot;the 26 pathological sites&quot;])))) +
+  theme_bw(base_size = 12)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec3-misfit-1.png" width="1056" style="display: block; margin: auto;" /></p>
+</div>
+<div id="permutation-preserves-the-misfit-exactly"
+class="section level2">
+<h2>3.3 Permutation preserves the misfit exactly</h2>
+<p>Permutation reorders which cell line holds which %pU value.
+<strong>The set of values is unchanged.</strong> Since misfit is a
+property of that set and not of its alignment with genotype, permutation
+leaves it untouched — the whole pot of unexplained log-likelihood is
+still on the table after shuffling.</p>
+<p>That is the entire failure. The LRT depends on two things:</p>
+<ul>
+<li>how much unexplained log-likelihood is available, and</li>
+<li>how well genotype happens to line up with the phenotype.</li>
+</ul>
+<p>Permutation destroys only the second. When the first is large enough,
+the p-value barely moves.</p>
+</div>
+<div id="the-consequence-an-association-no-ordinary-test-would-report"
+class="section level2">
+<h2>3.4 The consequence: an association no ordinary test would
+report</h2>
+<p>If the p-value came from association, then an ordinary Pearson
+correlation test on the same lead SNP should broadly agree with it.
+Pearson has no dispersion parameter and no depth weighting, so
+<strong>misfit cannot inflate it</strong> — which makes it a useful
+independent yardstick.</p>
+<p>Below, for each site, the LRT <code>-log10 p</code> <strong>under
+permutation 1</strong> against the Pearson <code>-log10 p</code> for the
+very same SNP and the same data.</p>
+<pre class="r"><code>pw[, class := factor(class, levels = names(CLS_COL))]
+# NB: geom_abline() in a log-scaled panel is drawn in TRANSFORMED space, i.e. it
+# renders y = 10^x rather than y = x. The identity line must be supplied as
+# explicit data so that it curves correctly under the log transform.
+# The line spans the x-axis data range only -- extending it to the y range would
+# stretch the x-axis to ~290 and squash every point into a sliver.
+xr   &lt;- range(pw$pearson_nlp, na.rm = TRUE)
+iden &lt;- data.table(x = seq(max(xr[1], 0.15), xr[2], length.out = 200))
+iden[, y := x]
+
+ggplot(pw, aes(pearson_nlp, lrt_nlp, colour = class)) +
+  geom_line(data = iden, aes(x, y), inherit.aes = FALSE,
+            linetype = &quot;dashed&quot;, colour = &quot;grey45&quot;) +
+  geom_point(size = 2, alpha = 0.8) +
+  scale_colour_manual(values = CLS_COL, name = NULL) +
+  scale_y_log10() +
+  labs(x = expression(-log[10](&quot;p&quot;)~&quot;from an ordinary Pearson correlation test&quot;),
+       y = expression(-log[10](&quot;p&quot;)~&quot;from the beta-binomial LRT (log scale)&quot;),
+       title = &quot;Under permutation, only the pathological sites disagree with an ordinary correlation test&quot;,
+       subtitle = paste(&quot;Dashed line = the two tests give the same answer. Points far above it are&quot;,
+                        &quot;p-values the LRT manufactures and Pearson does not.&quot;,
+                        &quot;\nEvery point is permuted data, so the true association is zero throughout.&quot;)) +
+  theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec3-gap-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>knitr::kable(pw[, .(sites = .N,
+                    `median LRT -log10p`     = round(median(lrt_nlp), 1),
+                    `median Pearson -log10p` = round(median(pearson_nlp), 1),
+                    `median gap`             = round(median(gap), 1),
+                    `median |cor| of the LRT winner` = round(median(abs_cor), 2)),
+                by = class],
+  caption = paste(&quot;Under permutation 1: what the LRT reports versus what an&quot;,
+                  &quot;ordinary correlation test reports for the same SNP.&quot;))</code></pre>
+<table>
+<caption>Under permutation 1: what the LRT reports versus what an
+ordinary correlation test reports for the same SNP.</caption>
+<colgroup>
+<col width="22%" />
+<col width="4%" />
+<col width="14%" />
+<col width="17%" />
+<col width="8%" />
+<col width="31%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">class</th>
+<th align="right">sites</th>
+<th align="right">median LRT -log10p</th>
+<th align="right">median Pearson -log10p</th>
+<th align="right">median gap</th>
+<th align="right">median |cor| of the LRT winner</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">the 26 pathological sites</td>
+<td align="right">26</td>
+<td align="right">140.6</td>
+<td align="right">0.9</td>
+<td align="right">138.7</td>
+<td align="right">0.22</td>
+</tr>
+<tr class="even">
+<td align="left">clean significant hits</td>
+<td align="right">60</td>
+<td align="right">1.5</td>
+<td align="right">1.1</td>
+<td align="right">0.2</td>
+<td align="right">0.26</td>
+</tr>
+<tr class="odd">
+<td align="left">random non-significant sites</td>
+<td align="right">56</td>
+<td align="right">1.1</td>
+<td align="right">0.8</td>
+<td align="right">0.2</td>
+<td align="right">0.21</td>
+</tr>
+</tbody>
+</table>
+<p>Two worked examples make the size of the gap concrete.</p>
+<pre class="r"><code>ex_ids &lt;- c(&quot;19 46609391&quot;, &quot;14 106360212&quot;)
+ee &lt;- pw[sid %chin% ex_ids]
+knitr::kable(data.table(
+  site = ee$sid,
+  mechanism = ifelse(ee$sid == &quot;19 46609391&quot;, &quot;A: U/C variant on the base&quot;,
+                                              &quot;B: one cell line dominates&quot;),
+  `cis-SNPs tested` = ee$n_cis,
+  `null misfit` = round(ee$misfit, 0),
+  `|cor| of the LRT winner` = round(ee$abs_cor, 3),
+  `best |cor| available at the site` = round(ee$best_abs_cor, 3),
+  `Pearson p for that SNP` = signif(ee$pearson_p, 2),
+  `beta-binomial LRT p` = sprintf(&quot;%.0e&quot;, 10^(-ee$lrt_nlp))),
+  caption = &quot;Both rows are permuted data, so the true association is zero by construction.&quot;)</code></pre>
+<table>
+<caption>Both rows are permuted data, so the true association is zero by
+construction.</caption>
+<colgroup>
+<col width="6%" />
+<col width="14%" />
+<col width="8%" />
+<col width="6%" />
+<col width="18%" />
+<col width="22%" />
+<col width="12%" />
+<col width="10%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="left">mechanism</th>
+<th align="right">cis-SNPs tested</th>
+<th align="right">null misfit</th>
+<th align="right">|cor| of the LRT winner</th>
+<th align="right">best |cor| available at the site</th>
+<th align="right">Pearson p for that SNP</th>
+<th align="left">beta-binomial LRT p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">19 46609391</td>
+<td align="left">A: U/C variant on the base</td>
+<td align="right">14</td>
+<td align="right">620</td>
+<td align="right">0.214</td>
+<td align="right">0.228</td>
+<td align="right">0.13</td>
+<td align="left">2e-241</td>
+</tr>
+<tr class="even">
+<td align="left">14 106360212</td>
+<td align="left">B: one cell line dominates</td>
+<td align="right">44</td>
+<td align="right">95</td>
+<td align="right">0.045</td>
+<td align="right">0.328</td>
+<td align="right">0.76</td>
+<td align="left">1e-34</td>
+</tr>
+</tbody>
+</table>
+<p>At chr19:46609391 the winning SNP correlates with the permuted
+phenotype at |cor| = 0.21, which an ordinary test rates p = 0.13 —
+nothing. At chr14:106360212 it is |cor| = 0.045, p = 0.76 — a shapeless
+cloud. The LRT converts both into p-values of astronomical size, because
+there is a large pot of misfit for even a negligible correlation to draw
+on.</p>
+<p>Note also that neither site’s <em>best available</em> correlation is
+large. With a few dozen cis-SNPs to choose from, one always lands
+slightly closer to the clumps than the others by luck — which is why a
+different SNP wins in every permutation, and why the top hits share
+sites but never lead SNPs.</p>
+</div>
+<div id="for-mechanism-b-one-cell-line-carries-the-whole-p-value"
+class="section level2">
+<h2>3.5 For mechanism B, one cell line carries the whole p-value</h2>
+<p>For the concentration sites the point can be made directly: drop the
+single most extreme cell line and rerun the site unchanged.</p>
+<pre class="r"><code>knitr::kable(lev[order(-orders_lost, na.last = FALSE)][, .(
+  site = sid,
+  `top cell-line share` = top_share,
+  `converted reads it holds` = format(dropped_conv, big.mark = &quot;,&quot;),
+  `its total reads` = format(dropped_depth, big.mark = &quot;,&quot;),
+  `-log10p with all cell lines` = round(nlp_all, 1),
+  `-log10p after dropping it` = ifelse(is.na(nlp_drop1), &quot;no fit&quot;,
+                                       sprintf(&quot;%.1f&quot;, nlp_drop1)),
+  `orders lost` = ifelse(is.na(orders_lost), &quot;--&quot;, sprintf(&quot;%.1f&quot;, orders_lost)))],
+  caption = paste(&quot;Under permutation 1: removing the single cell line that holds&quot;,
+                  &quot;the most converted reads. &#39;no fit&#39; means the site could not be&quot;,
+                  &quot;fitted at all once that cell line was gone.&quot;))</code></pre>
+<table>
+<caption>Under permutation 1: removing the single cell line that holds
+the most converted reads. ‘no fit’ means the site could not be fitted at
+all once that cell line was gone.</caption>
+<colgroup>
+<col width="9%" />
+<col width="14%" />
+<col width="17%" />
+<col width="11%" />
+<col width="20%" />
+<col width="18%" />
+<col width="8%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="right">top cell-line share</th>
+<th align="left">converted reads it holds</th>
+<th align="left">its total reads</th>
+<th align="right">-log10p with all cell lines</th>
+<th align="left">-log10p after dropping it</th>
+<th align="left">orders lost</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">6 32643315</td>
+<td align="right">0.63</td>
+<td align="left">109</td>
+<td align="left">145</td>
+<td align="right">11.7</td>
+<td align="left">no fit</td>
+<td align="left">–</td>
+</tr>
+<tr class="even">
+<td align="left">9 107330635</td>
+<td align="right">0.98</td>
+<td align="left">54</td>
+<td align="left">104</td>
+<td align="right">14.0</td>
+<td align="left">no fit</td>
+<td align="left">–</td>
+</tr>
+<tr class="odd">
+<td align="left">2 88886147</td>
+<td align="right">0.91</td>
+<td align="left">1,263</td>
+<td align="left">1,278</td>
+<td align="right">53.2</td>
+<td align="left">0.4</td>
+<td align="left">52.9</td>
+</tr>
+<tr class="even">
+<td align="left">2 90039467</td>
+<td align="right">0.50</td>
+<td align="left">243</td>
+<td align="left">1,804</td>
+<td align="right">32.6</td>
+<td align="left">0.6</td>
+<td align="left">31.9</td>
+</tr>
+<tr class="odd">
+<td align="left">2 90039470</td>
+<td align="right">0.54</td>
+<td align="left">151</td>
+<td align="left">1,687</td>
+<td align="right">27.1</td>
+<td align="left">0.4</td>
+<td align="left">26.8</td>
+</tr>
+<tr class="even">
+<td align="left">14 106360212</td>
+<td align="right">0.52</td>
+<td align="left">176</td>
+<td align="left">192</td>
+<td align="right">34.0</td>
+<td align="left">7.3</td>
+<td align="left">26.6</td>
+</tr>
+<tr class="odd">
+<td align="left">22 22432410</td>
+<td align="right">0.92</td>
+<td align="left">47</td>
+<td align="left">47</td>
+<td align="right">24.7</td>
+<td align="left">1.1</td>
+<td align="left">23.7</td>
+</tr>
+<tr class="even">
+<td align="left">14 106537954</td>
+<td align="right">0.96</td>
+<td align="left">94</td>
+<td align="left">95</td>
+<td align="right">11.2</td>
+<td align="left">0.6</td>
+<td align="left">10.7</td>
+</tr>
+</tbody>
+</table>
+<p>Why Pearson misses this while the likelihood does not: a cell line
+with 6,000 reads at %pU 0.0005 and a cell line with 20 reads at 0.05
+count <strong>equally</strong> in a correlation, but the likelihood
+weights the first thousands of times more heavily. A SNP can therefore
+split the deep near-zero cell lines from the rest — worth an enormous
+amount of likelihood — while barely moving the correlation. (For the
+record, the earlier guess that rare-allele SNPs isolating one or two
+cell lines were responsible is <strong>wrong</strong>: with MAF ≥ 0.05
+across 50 cell lines the minor allele is always carried by at least 5,
+and none of the cis-SNPs at these sites had fewer than 4 carriers.)</p>
+</div>
+</div>
+<div id="calibration-after-removing-these-sites" class="section level1">
+<h1>4. Calibration after removing these sites</h1>
+<div id="a-curated-list-is-not-a-filter" class="section level2">
+<h2>4.1 A curated list is not a filter</h2>
+<p>Dropping the 26 sites by name would fix this page’s QQ plot and
+nothing else: the next dataset will have a different 26. So each
+exclusion below is stated as a <strong>rule computable for any
+site</strong>, and the curated list is kept only as the reference for
+what a perfect filter would achieve.</p>
+<p>Three rules are available:</p>
+<pre class="r"><code>knitr::kable(data.table(
+  rule = c(&quot;U/C-aliasing&quot;, &quot;concentration&quot;, &quot;high misfit&quot;),
+  definition = c(&quot;a genotyped C/T (+ strand) or A/G (- strand) variant on the pU base&quot;,
+                 sprintf(&quot;one cell line supplies &gt;= %.0f%% of the site&#39;s converted reads&quot;,
+                         100 * as.numeric(runinf[parameter == &quot;conc_cut&quot;]$value)),
+                 sprintf(&quot;null misfit &gt; %g log-likelihood units&quot;, MISFIT_CUT)),
+  `needs genotype?` = c(&quot;yes, a variant call at the base&quot;, &quot;no&quot;, &quot;no&quot;),
+  `sites removed` = format(c(as.integer(runinf[parameter == &quot;n_uc_alias&quot;]$value),
+                             as.integer(runinf[parameter == &quot;n_conc_bad&quot;]$value),
+                             as.integer(runinf[parameter == &quot;n_misfit_bad&quot;]$value)),
+                           big.mark = &quot;,&quot;)),
+  caption = &quot;The three exclusion rules, each computable without knowing which sites are broken&quot;)</code></pre>
+<table>
+<caption>The three exclusion rules, each computable without knowing
+which sites are broken</caption>
+<colgroup>
+<col width="10%" />
+<col width="53%" />
+<col width="25%" />
+<col width="10%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">rule</th>
+<th align="left">definition</th>
+<th align="left">needs genotype?</th>
+<th align="left">sites removed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">U/C-aliasing</td>
+<td align="left">a genotyped C/T (+ strand) or A/G (- strand) variant on
+the pU base</td>
+<td align="left">yes, a variant call at the base</td>
+<td align="left">1,118</td>
+</tr>
+<tr class="even">
+<td align="left">concentration</td>
+<td align="left">one cell line supplies &gt;= 50% of the site’s
+converted reads</td>
+<td align="left">no</td>
+<td align="left">1,588</td>
+</tr>
+<tr class="odd">
+<td align="left">high misfit</td>
+<td align="left">null misfit &gt; 50 log-likelihood units</td>
+<td align="left">no</td>
+<td align="left">435</td>
+</tr>
+</tbody>
+</table>
+<p>The misfit rule matters because <strong>the first two rules miss four
+of the 26</strong> — the sites with the three-clump shape but no
+genotyped variant at the base (§2.2). Those four include the second,
+third and fourth worst offenders in the whole scan, so an
+annotation-only filter leaves the tail almost untouched.</p>
+<p>The misfit threshold was chosen as the smallest round value that
+catches every one of the 26 for which misfit is measurable, then
+reported here rather than tuned against the QQ plot:</p>
+<pre class="r"><code>knitr::kable(sens[, .(
+  `misfit threshold` = threshold,
+  `sites removed` = format(sites_removed, big.mark = &quot;,&quot;),
+  `% of tested` = sprintf(&quot;%.1f%%&quot;, pct_of_tested),
+  `of the 26, caught` = sprintf(&quot;%d of %d&quot;, of_the_26_caught, of_the_26_measurable))],
+  caption = sprintf(&quot;Threshold sensitivity. The value used is %g.&quot;, MISFIT_CUT))</code></pre>
+<table>
+<caption>Threshold sensitivity. The value used is 50.</caption>
+<thead>
+<tr class="header">
+<th align="right">misfit threshold</th>
+<th align="left">sites removed</th>
+<th align="left">% of tested</th>
+<th align="left">of the 26, caught</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">50</td>
+<td align="left">435</td>
+<td align="left">3.9%</td>
+<td align="left">21 of 21</td>
+</tr>
+<tr class="even">
+<td align="right">100</td>
+<td align="left">19</td>
+<td align="left">0.2%</td>
+<td align="left">18 of 21</td>
+</tr>
+<tr class="odd">
+<td align="right">150</td>
+<td align="left">15</td>
+<td align="left">0.1%</td>
+<td align="left">15 of 21</td>
+</tr>
+<tr class="even">
+<td align="right">200</td>
+<td align="left">15</td>
+<td align="left">0.1%</td>
+<td align="left">15 of 21</td>
+</tr>
+<tr class="odd">
+<td align="right">300</td>
+<td align="left">14</td>
+<td align="left">0.1%</td>
+<td align="left">14 of 21</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="qq-plots-under-each-condition" class="section level2">
+<h2>4.2 QQ plots under each condition</h2>
+<p><code>all sites</code> is the calibration as originally run. Recall
+that the 26 were chosen using the permuted data only, so the real panels
+are not circular.</p>
+<pre class="r"><code>qq[, condition := factor(condition, levels = COND_LV)]
+qq[, dataset := factor(dataset, levels = c(&quot;real&quot;, paste0(&quot;perm&quot;, 1:5)))]
+COLS &lt;- c(real = &quot;#e34948&quot;, perm1 = &quot;#9ec5f4&quot;, perm2 = &quot;#6da7ec&quot;,
+          perm3 = &quot;#3987e5&quot;, perm4 = &quot;#256abf&quot;, perm5 = &quot;#0d366b&quot;)
+lab &lt;- lam[, .(t = paste(sprintf(&quot;%s=%.2f&quot;, dataset, lambda), collapse = &quot;  &quot;)),
+           by = condition]
+ggplot(qq, aes(expected, observed, colour = dataset)) +
+  geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, colour = &quot;grey45&quot;) +
+  geom_point(size = 0.6, alpha = 0.75) +
+  scale_colour_manual(values = COLS, name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
+  facet_wrap(~ condition, ncol = 2, scales = &quot;free_y&quot;) +
+  labs(x = expression(-log[10](&quot;expected p&quot;)), y = expression(-log[10](&quot;observed p&quot;)),
+       title = sprintf(&quot;Beta-binomial LRT calibration under %d exclusion conditions&quot;,
+                       length(COND_LV)),
+       subtitle = paste(&quot;Note the free y-axis -- the tail height is what changes, not the bulk.&quot;,
+                        &quot;\nThe permutation series (blues) should hug the dashed line; where they do&quot;,
+                        &quot;not, the test is manufacturing signal from shuffled data.&quot;)) +
+  theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec4-qq-1.png" width="1056" style="display: block; margin: auto;" /></p>
+</div>
+<div id="what-actually-changed" class="section level2">
+<h2>4.3 What actually changed</h2>
+<pre class="r"><code>ORD &lt;- c(&quot;real&quot;, paste0(&quot;perm&quot;, 1:5))
+lw &lt;- dcast(lam, dataset ~ condition, value.var = &quot;lambda&quot;)
+setcolorder(lw, c(&quot;dataset&quot;, COND_LV))
+lw &lt;- lw[order(factor(dataset, levels = ORD))]
+knitr::kable(lw, digits = 3,
+  caption = &quot;lambda -- the median-based genomic inflation factor&quot;)</code></pre>
+<table>
+<caption>lambda – the median-based genomic inflation factor</caption>
+<colgroup>
+<col width="6%" />
+<col width="7%" />
+<col width="21%" />
+<col width="19%" />
+<col width="18%" />
+<col width="26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">dataset</th>
+<th align="right">all sites</th>
+<th align="right">minus the 26 (curated list)</th>
+<th align="right">minus U/C + concentration</th>
+<th align="right">minus high-misfit sites</th>
+<th align="right">minus U/C + concentration + misfit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">real</td>
+<td align="right">2.473</td>
+<td align="right">2.430</td>
+<td align="right">1.426</td>
+<td align="right">2.052</td>
+<td align="right">1.337</td>
+</tr>
+<tr class="even">
+<td align="left">perm1</td>
+<td align="right">1.195</td>
+<td align="right">1.178</td>
+<td align="right">1.062</td>
+<td align="right">1.169</td>
+<td align="right">1.055</td>
+</tr>
+<tr class="odd">
+<td align="left">perm2</td>
+<td align="right">0.961</td>
+<td align="right">0.950</td>
+<td align="right">1.032</td>
+<td align="right">0.976</td>
+<td align="right">1.040</td>
+</tr>
+<tr class="even">
+<td align="left">perm3</td>
+<td align="right">1.102</td>
+<td align="right">1.089</td>
+<td align="right">1.045</td>
+<td align="right">1.103</td>
+<td align="right">1.048</td>
+</tr>
+<tr class="odd">
+<td align="left">perm4</td>
+<td align="right">1.087</td>
+<td align="right">1.073</td>
+<td align="right">1.059</td>
+<td align="right">1.109</td>
+<td align="right">1.057</td>
+</tr>
+<tr class="even">
+<td align="left">perm5</td>
+<td align="right">1.034</td>
+<td align="right">1.020</td>
+<td align="right">1.034</td>
+<td align="right">1.052</td>
+<td align="right">1.047</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>tw &lt;- dcast(tailh, dataset ~ condition, value.var = &quot;mx&quot;)
+setcolorder(tw, c(&quot;dataset&quot;, COND_LV))
+tw &lt;- tw[order(factor(dataset, levels = ORD))]
+knitr::kable(tw, digits = 1,
+  caption = &quot;Height of the QQ tail: the largest observed -log10(p)&quot;)</code></pre>
+<table>
+<caption>Height of the QQ tail: the largest observed -log10(p)</caption>
+<colgroup>
+<col width="6%" />
+<col width="7%" />
+<col width="21%" />
+<col width="19%" />
+<col width="18%" />
+<col width="26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">dataset</th>
+<th align="right">all sites</th>
+<th align="right">minus the 26 (curated list)</th>
+<th align="right">minus U/C + concentration</th>
+<th align="right">minus high-misfit sites</th>
+<th align="right">minus U/C + concentration + misfit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">real</td>
+<td align="right">289.1</td>
+<td align="right">40.2</td>
+<td align="right">179.8</td>
+<td align="right">97.7</td>
+<td align="right">28.1</td>
+</tr>
+<tr class="even">
+<td align="left">perm1</td>
+<td align="right">285.0</td>
+<td align="right">12.4</td>
+<td align="right">177.9</td>
+<td align="right">85.5</td>
+<td align="right">8.8</td>
+</tr>
+<tr class="odd">
+<td align="left">perm2</td>
+<td align="right">284.9</td>
+<td align="right">7.7</td>
+<td align="right">178.7</td>
+<td align="right">85.1</td>
+<td align="right">4.7</td>
+</tr>
+<tr class="even">
+<td align="left">perm3</td>
+<td align="right">284.3</td>
+<td align="right">8.5</td>
+<td align="right">178.3</td>
+<td align="right">83.7</td>
+<td align="right">8.1</td>
+</tr>
+<tr class="odd">
+<td align="left">perm4</td>
+<td align="right">284.4</td>
+<td align="right">8.3</td>
+<td align="right">177.9</td>
+<td align="right">83.9</td>
+<td align="right">6.1</td>
+</tr>
+<tr class="even">
+<td align="left">perm5</td>
+<td align="right">284.6</td>
+<td align="right">8.8</td>
+<td align="right">177.6</td>
+<td align="right">84.4</td>
+<td align="right">6.8</td>
+</tr>
+</tbody>
+</table>
+<p>The two tables measure different things, and the key result of this
+section is that <strong>the rules fix different things, and no single
+one of them is enough.</strong></p>
+<pre class="r"><code>knitr::kable(data.table(
+  condition = COND_LV,
+  `real lambda` = vapply(COND_LV, lam_of, numeric(1)),
+  `real tail` = vapply(COND_LV, th_of, numeric(1)),
+  `worst permuted tail` = vapply(COND_LV, function(c)
+    round(max(tailh[condition == c &amp; dataset != &quot;real&quot;]$mx), 1), numeric(1)),
+  `p-values retained` = vapply(COND_LV, function(c)
+    format(lam[condition == c &amp; dataset == &quot;real&quot;]$n_pvalues, big.mark = &quot;,&quot;),
+    character(1))),
+  row.names = FALSE,
+  caption = paste(&quot;The permuted tail is the diagnostic that matters: with the&quot;,
+                  &quot;phenotype shuffled it should be near 0, and anything above&quot;,
+                  &quot;~3 is signal the test is manufacturing.&quot;))</code></pre>
+<table>
+<caption>The permuted tail is the diagnostic that matters: with the
+phenotype shuffled it should be near 0, and anything above ~3 is signal
+the test is manufacturing.</caption>
+<colgroup>
+<col width="36%" />
+<col width="12%" />
+<col width="10%" />
+<col width="21%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">condition</th>
+<th align="right">real lambda</th>
+<th align="right">real tail</th>
+<th align="right">worst permuted tail</th>
+<th align="left">p-values retained</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">all sites</td>
+<td align="right">2.473</td>
+<td align="right">289.1</td>
+<td align="right">285.0</td>
+<td align="left">424,293</td>
+</tr>
+<tr class="even">
+<td align="left">minus the 26 (curated list)</td>
+<td align="right">2.430</td>
+<td align="right">40.2</td>
+<td align="right">12.4</td>
+<td align="left">420,919</td>
+</tr>
+<tr class="odd">
+<td align="left">minus U/C + concentration</td>
+<td align="right">1.426</td>
+<td align="right">179.8</td>
+<td align="right">178.7</td>
+<td align="left">271,592</td>
+</tr>
+<tr class="even">
+<td align="left">minus high-misfit sites</td>
+<td align="right">2.052</td>
+<td align="right">97.7</td>
+<td align="right">85.5</td>
+<td align="left">374,893</td>
+</tr>
+<tr class="odd">
+<td align="left">minus U/C + concentration + misfit</td>
+<td align="right">1.337</td>
+<td align="right">28.1</td>
+<td align="right">8.8</td>
+<td align="left">259,420</td>
+</tr>
+</tbody>
+</table>
+<p>Reading down that table:</p>
+<p><strong>λ and the tail are almost independent.</strong> Removing the
+26 collapses the tail from 289.1 to 40.2 — and the permuted tail from
+~285 to 12.4 — while barely touching λ (2.473 → 2.43). λ comes from the
+<em>median</em> test statistic, and 26 sites out of ~11,000 cannot move
+a median. Conversely the U/C plus concentration rules pull λ down to
+1.426 — much the larger effect on λ — yet leave the tail at 179.8,
+essentially unchanged. <strong>λ was never the right diagnostic for this
+problem</strong>, which is why the original calibration check reported
+reassuring-looking numbers while the tail was at 289.</p>
+<p><strong>Misfit alone is not sufficient either.</strong> It cuts the
+tail to 97.7, better than the annotation rules but well short of the
+curated list. The reason is specific: misfit is <strong>undefined at 5
+of the 26 sites</strong>, because with 49 cell lines at exactly zero
+there are not three distinct %pU levels to fit, so the reference model
+cannot be built. Four of those five are concentration sites — so misfit
+and the concentration cap are complementary by construction, not
+redundant.</p>
+<p><strong>The three rules together beat the curated list.</strong>
+Applying all three gives λ = 1.337, a real tail of 28.1, and a permuted
+tail of 8.8 — better on every measure than naming the 26 by hand, and
+computable on data where nobody has told you which sites are broken.</p>
+<p><strong>What it costs.</strong> The combined filter removes 2,740 of
+11,187 tested sites (24%). That is not a small price, and the misfit
+threshold is the loose part of it: the 26 sites where misfit is
+measurable range from 69.9 to 704.1, while ordinary significant hits
+reach 105.5, so the two distributions overlap and a cut of 50
+necessarily removes some legitimate sites — 37 of the 311 hits that pass
+the other two rules. Whether that trade is worth making is a judgement
+call, not something these numbers settle.</p>
+<p>A residual permuted excess remains even after all exclusions, so this
+is a large improvement rather than a complete fix — see <a
+href="#open-questions">Open questions</a>.</p>
+</div>
+</div>
+<div id="are-the-other-significant-hits-affected"
+class="section level1">
+<h1>5. Are the other significant hits affected?</h1>
+<div id="two-independent-checks" class="section level2">
+<h2>5.1 Two independent checks</h2>
+<p>The concern is that misfit might explain a large share of the ~1,400
+significant hits, not just 26 of them. Two checks, applied to the hits
+that are <em>not</em> among the 26:</p>
+<p><strong>Check 1 — a second opinion.</strong> Compare the LRT against
+an ordinary Pearson correlation test on the same lead SNP. Agreement
+means the signal is real; a large gap means only the fancy machinery
+sees it.</p>
+<p><strong>Check 2 — the site’s own fake-signal ceiling.</strong> For
+each site, take the best <code>-log10 p</code> it reached in
+<em>any</em> of the five permutations. That is how large a p-value the
+site can manufacture with no signal present. Compare the real result
+against it.</p>
+</div>
+<div id="check-2-applied-to-every-significant-hit"
+class="section level2">
+<h2>5.2 Check 2, applied to every significant hit</h2>
+<pre class="r"><code>aud[, class := factor(class, levels = c(&quot;one of the 26&quot;, &quot;U/C-aliasing (not in the 26)&quot;,
+                                        &quot;concentration-pathological&quot;, &quot;surviving&quot;))]
+knitr::kable(aud[, .(hits = .N,
+  `median real -log10p`   = round(median(real, na.rm = TRUE), 1),
+  `median perm ceiling`   = round(median(perm_ceil, na.rm = TRUE), 1),
+  `median excess`         = round(median(excess, na.rm = TRUE), 1),
+  `excess &lt; 2`            = sum(excess &lt; 2, na.rm = TRUE),
+  `excess &gt; 5`            = sum(excess &gt; 5, na.rm = TRUE)), by = class],
+  caption = paste(&quot;For every q&lt;0.05 hit: the real signal against the largest&quot;,
+                  &quot;p-value the same site reached under permutation.&quot;))</code></pre>
+<table>
+<caption>For every q&lt;0.05 hit: the real signal against the largest
+p-value the same site reached under permutation.</caption>
+<colgroup>
+<col width="26%" />
+<col width="4%" />
+<col width="18%" />
+<col width="18%" />
+<col width="12%" />
+<col width="10%" />
+<col width="10%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">class</th>
+<th align="right">hits</th>
+<th align="right">median real -log10p</th>
+<th align="right">median perm ceiling</th>
+<th align="right">median excess</th>
+<th align="right">excess &lt; 2</th>
+<th align="right">excess &gt; 5</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">one of the 26</td>
+<td align="right">6</td>
+<td align="right">134.4</td>
+<td align="right">122.2</td>
+<td align="right">11.2</td>
+<td align="right">0</td>
+<td align="right">5</td>
+</tr>
+<tr class="even">
+<td align="left">U/C-aliasing (not in the 26)</td>
+<td align="right">1047</td>
+<td align="right">15.7</td>
+<td align="right">2.3</td>
+<td align="right">13.5</td>
+<td align="right">16</td>
+<td align="right">942</td>
+</tr>
+<tr class="odd">
+<td align="left">surviving</td>
+<td align="right">311</td>
+<td align="right">5.9</td>
+<td align="right">2.2</td>
+<td align="right">3.6</td>
+<td align="right">80</td>
+<td align="right">115</td>
+</tr>
+<tr class="even">
+<td align="left">concentration-pathological</td>
+<td align="right">21</td>
+<td align="right">4.3</td>
+<td align="right">2.0</td>
+<td align="right">2.0</td>
+<td align="right">10</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+<p>The permutation ceiling for the non-pathological hits sits at about
+<strong>2.2</strong>, and that number is exactly what chance predicts:
+with roughly 40 cis-SNPs per site across 5 permutations, the best of
+~200 uniform p-values falls near 1/200, i.e. <code>-log10 p</code> ≈
+2.3. <strong>These sites have no capacity to fake signal at
+all.</strong> The 26, by contrast, reach ~122.</p>
+<pre class="r"><code>af &lt;- aud[!is.na(perm_ceil)]
+ggplot(af, aes(perm_ceil, fill = class)) +
+  geom_histogram(bins = 60) +
+  geom_vline(xintercept = 2.3, linetype = &quot;dashed&quot;, colour = &quot;grey30&quot;) +
+  annotate(&quot;text&quot;, x = 2.3, y = Inf, label = &quot;  chance expectation\n  for ~200 tests&quot;,
+           hjust = 0, vjust = 1.4, size = 3, colour = &quot;grey30&quot;) +
+  scale_fill_manual(values = c(`one of the 26` = &quot;#e34948&quot;,
+                               `U/C-aliasing (not in the 26)` = &quot;#f0a24f&quot;,
+                               `concentration-pathological` = &quot;#9aa4b1&quot;,
+                               `surviving` = &quot;#3987e5&quot;), name = NULL) +
+  scale_x_log10() +
+  labs(x = &quot;the site&#39;s permutation ceiling, -log10p (log scale)&quot;, y = &quot;hits&quot;,
+       title = &quot;How large a p-value each significant site can fake under permutation&quot;) +
+  theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec5-ceilfig-1.png" width="1056" style="display: block; margin: auto;" /></p>
+</div>
+<div id="check-1-on-hits-spanning-the-significance-range"
+class="section level2">
+<h2>5.3 Check 1, on hits spanning the significance range</h2>
+<p>Ten surviving hits, chosen to span the whole range from the strongest
+to the weakest, each tested both ways on the <strong>real</strong>
+data.</p>
+<pre class="r"><code>knitr::kable(c10[, .(site = sid, lead_SNP = lead,
+  `LRT -log10p` = round(lrt_nlp, 1),
+  `Pearson -log10p` = round(pearson_nlp, 1),
+  gap = round(gap, 1),
+  `|cor|` = round(abs_cor, 2),
+  `perm ceiling` = round(perm_ceil, 1),
+  `total depth` = format(round(total_depth), big.mark = &quot;,&quot;),
+  `pooled %pU` = round(pooled_pu, 3))],
+  caption = &quot;Ten surviving hits: the beta-binomial LRT against an ordinary correlation test&quot;)</code></pre>
+<table style="width:100%;">
+<caption>Ten surviving hits: the beta-binomial LRT against an ordinary
+correlation test</caption>
+<colgroup>
+<col width="10%" />
+<col width="14%" />
+<col width="10%" />
+<col width="14%" />
+<col width="4%" />
+<col width="14%" />
+<col width="11%" />
+<col width="10%" />
+<col width="9%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="left">lead_SNP</th>
+<th align="right">LRT -log10p</th>
+<th align="right">Pearson -log10p</th>
+<th align="right">gap</th>
+<th align="right">|cor|</th>
+<th align="right">perm ceiling</th>
+<th align="left">total depth</th>
+<th align="right">pooled %pU</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">5 170083186</td>
+<td align="left">5:170083388:G:A</td>
+<td align="right">28.1</td>
+<td align="right">29.4</td>
+<td align="right">-1.2</td>
+<td align="right">0.97</td>
+<td align="right">3.6</td>
+<td align="left">7,641</td>
+<td align="right">0.621</td>
+</tr>
+<tr class="even">
+<td align="left">6 32643306</td>
+<td align="left">6:32643864:A:G</td>
+<td align="right">15.2</td>
+<td align="right">17.3</td>
+<td align="right">-2.1</td>
+<td align="right">0.89</td>
+<td align="right">4.7</td>
+<td align="left">7,887</td>
+<td align="right">0.687</td>
+</tr>
+<tr class="odd">
+<td align="left">22 44170685</td>
+<td align="left">22:44170554:G:A</td>
+<td align="right">11.6</td>
+<td align="right">10.9</td>
+<td align="right">0.7</td>
+<td align="right">0.79</td>
+<td align="right">1.9</td>
+<td align="left">879</td>
+<td align="right">0.150</td>
+</tr>
+<tr class="even">
+<td align="left">6 32665102</td>
+<td align="left">6:32664801:T:G</td>
+<td align="right">8.3</td>
+<td align="right">10.1</td>
+<td align="right">-1.8</td>
+<td align="right">0.88</td>
+<td align="right">3.6</td>
+<td align="left">175</td>
+<td align="right">0.486</td>
+</tr>
+<tr class="odd">
+<td align="left">7 44802176</td>
+<td align="left">7:44797723:C:A</td>
+<td align="right">6.6</td>
+<td align="right">4.7</td>
+<td align="right">1.9</td>
+<td align="right">0.56</td>
+<td align="right">2.0</td>
+<td align="left">1,136</td>
+<td align="right">0.568</td>
+</tr>
+<tr class="even">
+<td align="left">1 630974</td>
+<td align="left">1:632317:G:A</td>
+<td align="right">5.4</td>
+<td align="right">2.2</td>
+<td align="right">3.2</td>
+<td align="right">0.38</td>
+<td align="right">2.3</td>
+<td align="left">20,897</td>
+<td align="right">0.465</td>
+</tr>
+<tr class="odd">
+<td align="left">13 24426505</td>
+<td align="left">13:24423561:A:C</td>
+<td align="right">4.5</td>
+<td align="right">3.0</td>
+<td align="right">1.5</td>
+<td align="right">0.45</td>
+<td align="right">1.6</td>
+<td align="left">1,513</td>
+<td align="right">0.566</td>
+</tr>
+<tr class="even">
+<td align="left">7 24668632</td>
+<td align="left">7:24671345:A:G</td>
+<td align="right">3.9</td>
+<td align="right">4.9</td>
+<td align="right">-1.0</td>
+<td align="right">0.58</td>
+<td align="right">1.3</td>
+<td align="left">653</td>
+<td align="right">0.043</td>
+</tr>
+<tr class="odd">
+<td align="left">6 30490918</td>
+<td align="left">6:30486299:T:C</td>
+<td align="right">3.2</td>
+<td align="right">3.1</td>
+<td align="right">0.2</td>
+<td align="right">0.46</td>
+<td align="right">1.8</td>
+<td align="left">838</td>
+<td align="right">0.041</td>
+</tr>
+<tr class="even">
+<td align="left">16 29511256</td>
+<td align="left">16:29509752:G:T</td>
+<td align="right">1.5</td>
+<td align="right">4.6</td>
+<td align="right">-3.1</td>
+<td align="right">0.57</td>
+<td align="right">0.0</td>
+<td align="left">176</td>
+<td align="right">0.040</td>
+</tr>
+</tbody>
+</table>
+<p>The gap is small in both directions — at the strongest site the
+Pearson test is <em>more</em> significant than the LRT — and the
+correlations are large and visible. Against gaps of ~241 and ~34 at the
+two pathological examples, these behave like ordinary associations
+tested by a slightly better-powered method, which is what the
+beta-binomial is supposed to be.</p>
+</div>
+<div id="what-the-checks-did-turn-up" class="section level2">
+<h2>5.4 What the checks did turn up</h2>
+<p>Check 2 screens every site cheaply, and it found a class the original
+26-site criteria missed: hits with the <strong>mechanism-B concentration
+signature</strong> that never happened to produce a p-value below 1e-10
+under permutation.</p>
+<pre class="r"><code>cn &lt;- aud[class == &quot;concentration-pathological&quot;][order(-top_share)]
+knitr::kable(cn[, .(site = sid,
+  `top cell-line share` = round(top_share, 2),
+  `pooled %pU` = round(pooled_pu, 3),
+  `real -log10p` = round(real, 1),
+  `perm ceiling` = round(perm_ceil, 1),
+  excess = round(excess, 1),
+  qvalue = signif(qvalue, 2))],
+  caption = paste(&quot;Significant hits where one cell line supplies at least half&quot;,
+                  &quot;the converted reads. These are not misfit artifacts -- they are&quot;,
+                  &quot;single-observation artifacts, and they need a separate filter.&quot;))</code></pre>
+<table>
+<caption>Significant hits where one cell line supplies at least half the
+converted reads. These are not misfit artifacts – they are
+single-observation artifacts, and they need a separate filter.</caption>
+<colgroup>
+<col width="15%" />
+<col width="23%" />
+<col width="12%" />
+<col width="15%" />
+<col width="15%" />
+<col width="8%" />
+<col width="9%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="right">top cell-line share</th>
+<th align="right">pooled %pU</th>
+<th align="right">real -log10p</th>
+<th align="right">perm ceiling</th>
+<th align="right">excess</th>
+<th align="right">qvalue</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">14 106062163</td>
+<td align="right">1.00</td>
+<td align="right">0.407</td>
+<td align="right">4.1</td>
+<td align="right">1.9</td>
+<td align="right">2.2</td>
+<td align="right">8.6e-03</td>
+</tr>
+<tr class="even">
+<td align="left">2 88861486</td>
+<td align="right">0.97</td>
+<td align="right">0.010</td>
+<td align="right">2.9</td>
+<td align="right">2.5</td>
+<td align="right">0.4</td>
+<td align="right">4.8e-02</td>
+</tr>
+<tr class="odd">
+<td align="left">1 109100574</td>
+<td align="right">0.96</td>
+<td align="right">0.055</td>
+<td align="right">4.3</td>
+<td align="right">4.1</td>
+<td align="right">0.3</td>
+<td align="right">1.9e-02</td>
+</tr>
+<tr class="even">
+<td align="left">2 89085376</td>
+<td align="right">0.96</td>
+<td align="right">0.015</td>
+<td align="right">7.4</td>
+<td align="right">2.4</td>
+<td align="right">5.0</td>
+<td align="right">1.4e-05</td>
+</tr>
+<tr class="odd">
+<td align="left">14 106715102</td>
+<td align="right">0.95</td>
+<td align="right">0.023</td>
+<td align="right">5.1</td>
+<td align="right">8.8</td>
+<td align="right">-3.7</td>
+<td align="right">4.3e-02</td>
+</tr>
+<tr class="even">
+<td align="left">14 106360094</td>
+<td align="right">0.95</td>
+<td align="right">0.083</td>
+<td align="right">5.2</td>
+<td align="right">2.8</td>
+<td align="right">2.4</td>
+<td align="right">1.0e-03</td>
+</tr>
+<tr class="odd">
+<td align="left">6 37028882</td>
+<td align="right">0.92</td>
+<td align="right">0.024</td>
+<td align="right">3.9</td>
+<td align="right">2.0</td>
+<td align="right">1.9</td>
+<td align="right">1.6e-02</td>
+</tr>
+<tr class="even">
+<td align="left">3 157154639</td>
+<td align="right">0.83</td>
+<td align="right">0.022</td>
+<td align="right">4.5</td>
+<td align="right">1.2</td>
+<td align="right">3.3</td>
+<td align="right">6.0e-03</td>
+</tr>
+<tr class="odd">
+<td align="left">16 89557215</td>
+<td align="right">0.69</td>
+<td align="right">0.014</td>
+<td align="right">3.5</td>
+<td align="right">1.4</td>
+<td align="right">2.0</td>
+<td align="right">4.8e-02</td>
+</tr>
+<tr class="even">
+<td align="left">6 106569361</td>
+<td align="right">0.69</td>
+<td align="right">0.019</td>
+<td align="right">3.5</td>
+<td align="right">1.5</td>
+<td align="right">2.0</td>
+<td align="right">5.0e-02</td>
+</tr>
+<tr class="odd">
+<td align="left">2 152656145</td>
+<td align="right">0.67</td>
+<td align="right">0.028</td>
+<td align="right">3.8</td>
+<td align="right">2.5</td>
+<td align="right">1.2</td>
+<td align="right">7.6e-03</td>
+</tr>
+<tr class="even">
+<td align="left">11 59182401</td>
+<td align="right">0.67</td>
+<td align="right">0.013</td>
+<td align="right">5.4</td>
+<td align="right">3.1</td>
+<td align="right">2.3</td>
+<td align="right">1.6e-04</td>
+</tr>
+<tr class="odd">
+<td align="left">14 106421966</td>
+<td align="right">0.64</td>
+<td align="right">0.092</td>
+<td align="right">2.6</td>
+<td align="right">1.9</td>
+<td align="right">0.7</td>
+<td align="right">2.1e-02</td>
+</tr>
+<tr class="even">
+<td align="left">10 87050843</td>
+<td align="right">0.62</td>
+<td align="right">0.036</td>
+<td align="right">4.9</td>
+<td align="right">3.7</td>
+<td align="right">1.2</td>
+<td align="right">1.5e-02</td>
+</tr>
+<tr class="odd">
+<td align="left">2 89319679</td>
+<td align="right">0.62</td>
+<td align="right">0.009</td>
+<td align="right">6.7</td>
+<td align="right">2.0</td>
+<td align="right">4.7</td>
+<td align="right">1.4e-05</td>
+</tr>
+<tr class="even">
+<td align="left">17 36166151</td>
+<td align="right">0.60</td>
+<td align="right">0.033</td>
+<td align="right">3.2</td>
+<td align="right">1.6</td>
+<td align="right">1.5</td>
+<td align="right">4.3e-02</td>
+</tr>
+<tr class="odd">
+<td align="left">11 34471001</td>
+<td align="right">0.52</td>
+<td align="right">0.027</td>
+<td align="right">4.0</td>
+<td align="right">2.1</td>
+<td align="right">1.9</td>
+<td align="right">3.2e-03</td>
+</tr>
+<tr class="even">
+<td align="left">6 32852077</td>
+<td align="right">0.52</td>
+<td align="right">0.054</td>
+<td align="right">5.5</td>
+<td align="right">1.9</td>
+<td align="right">3.6</td>
+<td align="right">1.1e-03</td>
+</tr>
+<tr class="odd">
+<td align="left">1 629617</td>
+<td align="right">0.50</td>
+<td align="right">0.028</td>
+<td align="right">5.5</td>
+<td align="right">2.1</td>
+<td align="right">3.4</td>
+<td align="right">4.8e-04</td>
+</tr>
+<tr class="even">
+<td align="left">9 137454828</td>
+<td align="right">0.50</td>
+<td align="right">0.041</td>
+<td align="right">4.5</td>
+<td align="right">1.4</td>
+<td align="right">3.1</td>
+<td align="right">2.1e-03</td>
+</tr>
+<tr class="odd">
+<td align="left">16 74674988</td>
+<td align="right">0.50</td>
+<td align="right">0.031</td>
+<td align="right">4.0</td>
+<td align="right">1.4</td>
+<td align="right">2.6</td>
+<td align="right">8.5e-03</td>
+</tr>
+</tbody>
+</table>
+<p>The worst has a single cell line supplying <strong>100%</strong> of
+the site’s converted reads. At least one has a permutation ceiling
+<em>above</em> its real result (negative excess) and still passes q &lt;
+0.05. Several cluster inside a narrow window on chr14, which suggests a
+regional mapping artifact rather than independent events.</p>
+</div>
+<div id="where-the-discovery-count-lands" class="section level2">
+<h2>5.5 Where the discovery count lands</h2>
+<pre class="r"><code>knitr::kable(aud[, .(hits = .N,
+  `median -log10p` = round(median(real, na.rm = TRUE), 1),
+  `share of all hits` = sprintf(&quot;%.1f%%&quot;, 100 * .N / nrow(aud))), by = class],
+  caption = &quot;The q&lt;0.05 hit list, partitioned&quot;)</code></pre>
+<table>
+<caption>The q&lt;0.05 hit list, partitioned</caption>
+<thead>
+<tr class="header">
+<th align="left">class</th>
+<th align="right">hits</th>
+<th align="right">median -log10p</th>
+<th align="left">share of all hits</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">one of the 26</td>
+<td align="right">6</td>
+<td align="right">134.4</td>
+<td align="left">0.4%</td>
+</tr>
+<tr class="even">
+<td align="left">U/C-aliasing (not in the 26)</td>
+<td align="right">1047</td>
+<td align="right">15.7</td>
+<td align="left">75.6%</td>
+</tr>
+<tr class="odd">
+<td align="left">surviving</td>
+<td align="right">311</td>
+<td align="right">5.9</td>
+<td align="left">22.5%</td>
+</tr>
+<tr class="even">
+<td align="left">concentration-pathological</td>
+<td align="right">21</td>
+<td align="right">4.3</td>
+<td align="left">1.5%</td>
+</tr>
+</tbody>
+</table>
+<p>Only <strong>6</strong> of the significant hits are among the 26 —
+the per-site permutation <code>perm_p</code> did filter out most of
+them, so it offers partial protection, not none. The large category is
+<strong>U/C-aliasing sites that are <em>not</em> in the 26</strong>
+(1047 hits), and these deserve a careful distinction:</p>
+<blockquote>
+<p>Their permutation ceiling is ~2.3, i.e. chance level, so they are
+<strong>not a calibration failure</strong>. Statistically the
+associations are sound: SNPs in linkage with the site variant genuinely
+do predict the measured phenotype. The problem is
+<strong>interpretive</strong> — the phenotype is a genotype read-out
+rather than a modification rate, so a real association is being reported
+as a pU-QTL. Same exclusion, entirely different reason. This is also why
+<code>perm_p</code> cannot protect against them: there is nothing
+statistically wrong to detect.</p>
+</blockquote>
+</div>
+</div>
+<div id="open-questions" class="section level1">
+<h1>Open questions</h1>
+<ul>
+<li><strong>Residual permuted inflation.</strong> After removing both
+the 26 and the full U/C-aliasing set, the fraction of permuted p-values
+below 0.05 remains ~0.058 against an expected 0.050. Small, but a third
+effect that is not yet accounted for.</li>
+<li><strong>The exclusion has not been re-run.</strong> The counts above
+partition the <em>existing</em> result list. Rebuilding the phenotype
+matrix without the excluded sites and rescanning would also change the
+multiple-testing correction, so the final number will not be exactly the
+surviving count here.</li>
+<li><strong>Assay direction.</strong> The U/C interpretation rests on
+pseudouridine being read at the same base that the variant changes.
+Worth confirming with whoever ran the PUM-seq protocol.</li>
+<li><strong>Which filter to adopt.</strong> All three rules in §4.1 are
+computable without knowing which sites are broken, but they are not
+interchangeable: the annotation-based ones cannot see the four sites
+with no variant call at the base, and misfit alone does not tell you
+<em>why</em> a site is broken. Using the U/C annotation for
+interpretation and misfit for calibration is probably the right split,
+but the threshold deserves a second look — it was set to catch all of
+the 26, which is a small calibration set.</li>
+</ul>
+</div>
+<div id="reproducing-this-page" class="section level1">
+<h1>Reproducing this page</h1>
+<pre class="r"><code>knitr::kable(fread(file.path(DAT, &quot;runinfo.tsv&quot;)),
+             caption = &quot;Parameters (10.summary_page_data.R)&quot;)</code></pre>
+<table>
+<caption>Parameters (10.summary_page_data.R)</caption>
+<thead>
+<tr class="header">
+<th align="left">parameter</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">window_bp</td>
+<td align="left">5000</td>
+</tr>
+<tr class="even">
+<td align="left">npcs</td>
+<td align="left">3</td>
+</tr>
+<tr class="odd">
+<td align="left">maf_min</td>
+<td align="left">0.05</td>
+</tr>
+<tr class="even">
+<td align="left">conc_cut</td>
+<td align="left">0.5</td>
+</tr>
+<tr class="odd">
+<td align="left">misfit_cut</td>
+<td align="left">50</td>
+</tr>
+<tr class="even">
+<td align="left">n_sites_tested</td>
+<td align="left">11187</td>
+</tr>
+<tr class="odd">
+<td align="left">n_pathological</td>
+<td align="left">26</td>
+</tr>
+<tr class="even">
+<td align="left">n_uc_alias</td>
+<td align="left">1118</td>
+</tr>
+<tr class="odd">
+<td align="left">n_conc_bad</td>
+<td align="left">1588</td>
+</tr>
+<tr class="even">
+<td align="left">n_misfit_bad</td>
+<td align="left">435</td>
+</tr>
+<tr class="odd">
+<td align="left">perm_seed_formula</td>
+<td align="left">set.seed(1000+k)</td>
+</tr>
+<tr class="even">
+<td align="left">control_seed</td>
+<td align="left">4242</td>
+</tr>
+<tr class="odd">
+<td align="left">script</td>
+<td align="left">10.summary_page_data.R</td>
+</tr>
+<tr class="even">
+<td align="left">date</td>
+<td align="left">2026-08-17 10:13:01</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(data.table(
+  step = c(&quot;site-resolved calibration scan (6 datasets, site identity retained)&quot;,
+           &quot;selection of the pathological sites&quot;,
+           &quot;U/C-aliasing site list&quot;,
+           &quot;all precomputed tables behind this page&quot;,
+           &quot;this page&quot;),
+  script = c(&quot;4.qtl_mapping_betabinomial/8.calibration_site_resolved.R&quot;,
+             &quot;4.qtl_mapping_betabinomial/9.qq_exclude_pathological.R&quot;,
+             &quot;4.qtl_mapping_betabinomial/9.qq_exclude_pathological.R (+ .traw allele check)&quot;,
+             &quot;4.qtl_mapping_betabinomial/10.summary_page_data.R&quot;,
+             &quot;analysis/qtl_mapping_betabinomial_pathology_summary.Rmd&quot;),
+  submitted_via = c(&quot;run_calibration_siteres.sbatch&quot;, &quot;-- (light)&quot;, &quot;-- (light)&quot;,
+                    &quot;run_summary_page_data.sbatch&quot;, &quot;run_render_rmd.sbatch&quot;)),
+  caption = &quot;Provenance. The heavy steps require a compute node; a login node SIGKILLs them.&quot;)</code></pre>
+<table>
+<caption>Provenance. The heavy steps require a compute node; a login
+node SIGKILLs them.</caption>
+<colgroup>
+<col width="38%" />
+<col width="44%" />
+<col width="17%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">step</th>
+<th align="left">script</th>
+<th align="left">submitted_via</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">site-resolved calibration scan (6 datasets, site
+identity retained)</td>
+<td
+align="left">4.qtl_mapping_betabinomial/8.calibration_site_resolved.R</td>
+<td align="left">run_calibration_siteres.sbatch</td>
+</tr>
+<tr class="even">
+<td align="left">selection of the pathological sites</td>
+<td
+align="left">4.qtl_mapping_betabinomial/9.qq_exclude_pathological.R</td>
+<td align="left">– (light)</td>
+</tr>
+<tr class="odd">
+<td align="left">U/C-aliasing site list</td>
+<td align="left">4.qtl_mapping_betabinomial/9.qq_exclude_pathological.R
+(+ .traw allele check)</td>
+<td align="left">– (light)</td>
+</tr>
+<tr class="even">
+<td align="left">all precomputed tables behind this page</td>
+<td align="left">4.qtl_mapping_betabinomial/10.summary_page_data.R</td>
+<td align="left">run_summary_page_data.sbatch</td>
+</tr>
+<tr class="odd">
+<td align="left">this page</td>
+<td
+align="left">analysis/qtl_mapping_betabinomial_pathology_summary.Rmd</td>
+<td align="left">run_render_rmd.sbatch</td>
+</tr>
+</tbody>
+</table>
+<p>Related pages: <a
+href="qtl_mapping_betabinomial_diagnostic.html">top-hit diagnostic</a> ·
+<a href="qtl_mapping_betabinomial_why_same_tophits.html">why the same
+top hits</a> · <a
+href="qtl_mapping_summary_betabinomial.html">beta-binomial scan
+summary</a></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 8
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.0  
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.2.0  xfun_0.38         bslib_0.3.1       colorspace_2.0-3 
+ [5] vctrs_0.6.1       generics_0.1.3    htmltools_0.5.7   yaml_2.3.5       
+ [9] utf8_1.2.2        rlang_1.1.2       R.oo_1.24.0       jquerylib_0.1.4  
+[13] later_1.3.0       pillar_1.9.0      glue_1.6.2        withr_2.5.0      
+[17] R.utils_2.11.0    lifecycle_1.0.4   stringr_1.5.0     munsell_0.5.0    
+[21] gtable_0.3.0      R.methodsS3_1.8.1 evaluate_0.15     labeling_0.4.2   
+[25] knitr_1.42        callr_3.7.0       fastmap_1.1.0     httpuv_1.6.5     
+[29] ps_1.7.0          fansi_1.0.3       highr_0.9         Rcpp_1.0.11      
+[33] promises_1.2.0.1  scales_1.2.0      jsonlite_1.8.7    farver_2.1.0     
+[37] fs_1.5.2          digest_0.6.29     stringi_1.7.6     processx_3.5.3   
+[41] dplyr_1.1.2       getPass_0.2-2     rprojroot_2.0.3   grid_4.2.0       
+[45] cli_3.6.2         tools_4.2.0       magrittr_2.0.3    sass_0.4.1       
+[49] tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3   rmarkdown_2.21   
+[53] httr_1.4.5        rstudioapi_0.14   R6_2.5.1          git2r_0.30.1     
+[57] compiler_4.2.0   </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

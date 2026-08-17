@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-08-14" />
+
+<title>Beta-binomial: why do permuted and real data return the same top hits?</title>
+
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Beta-binomial: why do permuted and real
+data return the same top hits?</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-08-14</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-08-14
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree057f47488e42072579c5db23cd7a14c36f7d0845targetblank057f474a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/057f47488e42072579c5db23cd7a14c36f7d0845" target="_blank">057f474</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree057f47488e42072579c5db23cd7a14c36f7d0845targetblank057f474a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/057f47488e42072579c5db23cd7a14c36f7d0845" target="_blank">057f474</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/qtl_mapping_betabinomial_why_same_tophits.Rmd
+
+Unstaged changes:
+    Deleted:    render_binomial_updated_52688698.out
+    Deleted:    render_qtl_summary_52179078.out
+    Deleted:    render_qtl_summary_52179478.out
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2) })
+
+knitr::opts_chunk$set(
+  echo = TRUE, warning = FALSE, message = FALSE,
+  fig.align = &quot;center&quot;, fig.width = 13, fig.height = 15
+)
+
+PROJECT_DIR &lt;- &quot;/project/xinhe/xsun/pumseq&quot;
+BASE   &lt;- file.path(PROJECT_DIR, &quot;pumseq_processed/psi_qtl&quot;)
+BBR    &lt;- file.path(BASE, &quot;qtl_betabinomial/lrt_results_merged&quot;)
+CALIB  &lt;- file.path(BASE, &quot;qtl_betabinomial/lrt_calibration&quot;)
+COUNTS &lt;- file.path(BASE, &quot;phenotype/fold5_union/counts&quot;)
+PSAM   &lt;- file.path(BASE, &quot;genotype/plink2/pumseq_genotype.hg38.chr1-22.psam&quot;)
+
+WINDOW_KB &lt;- 5
+NPCS      &lt;- 3
+N_TOP     &lt;- 20
+SEED      &lt;- 2026     # for the random-site comparison set
+
+SEQ_BLUE  &lt;- c(&quot;#cde2fb&quot;, &quot;#9ec5f4&quot;, &quot;#6da7ec&quot;, &quot;#3987e5&quot;,
+               &quot;#256abf&quot;, &quot;#184f95&quot;, &quot;#0d366b&quot;)
+DEPTH_BRK &lt;- c(10, 100, 1000, 10000)
+GRP_COL   &lt;- c(`top 20 hits` = &quot;#e34948&quot;, `random 20 sites` = &quot;#2a78d6&quot;)</code></pre>
+<div id="the-question" class="section level1">
+<h1>The question</h1>
+<p>In the <a href="qtl_mapping_betabinomial_diagnostic.html">top-hit
+diagnostic</a> we found that <strong>19 of the 20 top sites under a
+random permutation are the same sites as the real top 20</strong>, and
+that none of them share a lead SNP. That means the site gets selected
+for reasons that have nothing to do with genotype — permuting the
+phenotype does not dislodge it.</p>
+<p>This page asks what is different about those sites. We start with the
+simplest question: <strong>how is %pU distributed at the top sites,
+compared with ordinary sites?</strong></p>
+<pre class="r"><code>C &lt;- fread(file.path(COUNTS, &quot;C_matrix.txt.gz&quot;))
+N &lt;- fread(file.path(COUNTS, &quot;N_matrix.txt.gz&quot;))
+go &lt;- fread(PSAM)[[2]]
+Cm &lt;- as.matrix(C[, ..go]); Nm &lt;- as.matrix(N[, ..go])
+sid_all &lt;- paste(C$ref, C$pos)
+
+res &lt;- fread(file.path(BBR, sprintf(&quot;scan_lrt_w%dkb_pc%d.txt.gz&quot;, WINDOW_KB, NPCS)))
+res[, sid := paste(ref, pos)]
+setorder(res, nominal_min_p)
+
+top_ids &lt;- res$sid[seq_len(N_TOP)]
+set.seed(SEED)
+rand_ids &lt;- sample(setdiff(res$sid, top_ids), N_TOP)   # random comparison set
+
+# long table: one row per (site, cell line)
+mk &lt;- function(ids, grp) rbindlist(lapply(seq_along(ids), function(k) {
+  i &lt;- match(ids[k], sid_all)
+  r &lt;- res[sid == ids[k]]
+  data.table(group = grp, ord = k, sid = ids[k],
+             # %.1f not %.0f for -log10(p): the random sites sit at 0.4-2,
+             # which %.0f would print as &quot;0&quot; / &quot;1&quot; / &quot;2&quot;.
+             lab = sprintf(&quot;%s%d chr%s:%.0f\n-log10(p)=%.1f | %s reads&quot;,
+                           if (grp == &quot;top 20 hits&quot;) &quot;#&quot; else &quot;R&quot;, k,
+                           r$ref, r$pos, -log10(max(r$nominal_min_p, 1e-300)),
+                           format(sum(Nm[i, ]), big.mark = &quot;,&quot;)),
+             pu = Cm[i, ] / Nm[i, ], n = Nm[i, ])
+}))
+dat &lt;- rbind(mk(top_ids, &quot;top 20 hits&quot;), mk(rand_ids, &quot;random 20 sites&quot;))
+dat &lt;- dat[is.finite(pu)]
+dat[, log_n := log10(pmax(n, 1))]
+dat[, group := factor(group, levels = names(GRP_COL))]</code></pre>
+</div>
+<div id="pu-per-cell-line-site-by-site" class="section level1">
+<h1>1. %pU per cell line, site by site</h1>
+<p>Each panel is one site. Bar height is a real count – how many of the
+50 cell lines fall in that %pU bin – and each bar is split by read
+depth, so you can see whether the cell lines in a bin are shallow or
+deep. The panel header gives that site’s <code>-log10(p)</code> and its
+total read count.</p>
+<p>The two groups are shown as separate figures so they can be read on
+their own terms; note the y-axis is free per panel, since counts differ
+a lot between sites.</p>
+<pre class="r"><code>dat[, depth_bin := cut(n, breaks = c(-Inf, 10, 100, 1000, Inf),
+                       labels = c(&quot;&lt; 10&quot;, &quot;10-100&quot;, &quot;100-1,000&quot;, &quot;&gt; 1,000&quot;))]
+DEPTH_FILL &lt;- c(&quot;&lt; 10&quot; = &quot;#86b6ef&quot;, &quot;10-100&quot; = &quot;#2a78d6&quot;,
+                &quot;100-1,000&quot; = &quot;#184f95&quot;, &quot;&gt; 1,000&quot; = &quot;#0d366b&quot;)
+
+# One builder for both groups so the two figures stay directly comparable.
+plot_pu_hist &lt;- function(dd, title, subtitle) {
+  ggplot(dd, aes(x = pu, fill = depth_bin)) +
+    geom_histogram(breaks = seq(0, 1, by = 0.05), colour = &quot;white&quot;,
+                   linewidth = 0.15) +
+    scale_fill_manual(values = DEPTH_FILL, drop = FALSE,
+                      name = &quot;read depth of the cell line&quot;,
+                      guide = guide_legend(nrow = 1,
+                                           override.aes = list(colour = NA))) +
+    scale_x_continuous(limits = c(-0.03, 1.03), breaks = c(0, 0.5, 1)) +
+    facet_wrap(~ lab, ncol = 5, scales = &quot;free_y&quot;) +
+    labs(x = &quot;%pU in one cell line&quot;,
+         y = &quot;number of cell lines (out of 50)&quot;,
+         title = title, subtitle = subtitle) +
+    theme_bw(base_size = 11) +
+    theme(legend.position = &quot;bottom&quot;, strip.text = element_text(size = 7),
+          panel.grid.minor = element_blank())
+}</code></pre>
+<div id="a.-the-20-top-hits" class="section level2">
+<h2>1a. The 20 top hits</h2>
+<pre class="r"><code>plot_pu_hist(dat[group == &quot;top 20 hits&quot;],
+  &quot;TOP 20 beta-binomial hits: how %pU is distributed across the 50 cell lines&quot;,
+  &quot;Bar height = how many cell lines fall in that %pU bin; fill = their read depth.&quot;)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_why_same_tophits.Rmd/hist-top20-1.png" width="1248" style="display: block; margin: auto;" /></p>
+</div>
+<div id="b.-20-random-sites-for-comparison" class="section level2">
+<h2>1b. 20 random sites, for comparison</h2>
+<pre class="r"><code>plot_pu_hist(dat[group == &quot;random 20 sites&quot;],
+  &quot;RANDOM 20 sites: how %pU is distributed across the 50 cell lines&quot;,
+  &quot;Same axes and bins as 1a. Drawn at random from the tested sites (excluding the top 20).&quot;)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_why_same_tophits.Rmd/hist-rand20-1.png" width="1248" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="pooled-distribution-of-pu" class="section level1">
+<h1>2. Pooled distribution of %pU</h1>
+<p>The same values, pooled within each group, so the overall shape is
+directly comparable.</p>
+<pre class="r"><code>ggplot(dat, aes(x = pu, fill = group)) +
+  geom_histogram(bins = 40, position = &quot;identity&quot;, alpha = 0.55, colour = NA) +
+  scale_fill_manual(values = GRP_COL, name = NULL) +
+  labs(x = &quot;%pU in one cell line&quot;, y = &quot;number of (site, cell line) pairs&quot;,
+       title = &quot;Pooled %pU distribution: top 20 hits vs 20 random sites&quot;) +
+  theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_why_same_tophits.Rmd/pooled-hist-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>shape &lt;- dat[, .(
+  `(site, cell line) pairs` = .N,
+  `median %pU`      = sprintf(&quot;%.3f&quot;, median(pu)),
+  `%pU &lt; 0.05`      = sprintf(&quot;%.1f%%&quot;, 100 * mean(pu &lt; 0.05)),
+  `%pU &gt; 0.95`      = sprintf(&quot;%.1f%%&quot;, 100 * mean(pu &gt; 0.95)),
+  `intermediate (0.05-0.95)` = sprintf(&quot;%.1f%%&quot;, 100 * mean(pu &gt;= 0.05 &amp; pu &lt;= 0.95)),
+  `median depth`    = round(as.numeric(median(n)))
+), by = group]
+knitr::kable(shape, caption = &quot;Shape of the %pU distribution, and depth, by group&quot;)</code></pre>
+<table>
+<caption>Shape of the %pU distribution, and depth, by group</caption>
+<colgroup>
+<col width="14%" />
+<col width="21%" />
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="22%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">group</th>
+<th align="right">(site, cell line) pairs</th>
+<th align="left">median %pU</th>
+<th align="left">%pU &lt; 0.05</th>
+<th align="left">%pU &gt; 0.95</th>
+<th align="left">intermediate (0.05-0.95)</th>
+<th align="right">median depth</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">top 20 hits</td>
+<td align="right">985</td>
+<td align="left">0.331</td>
+<td align="left">42.8%</td>
+<td align="left">15.3%</td>
+<td align="left">41.8%</td>
+<td align="right">191</td>
+</tr>
+<tr class="even">
+<td align="left">random 20 sites</td>
+<td align="right">953</td>
+<td align="left">0.002</td>
+<td align="left">58.7%</td>
+<td align="left">4.0%</td>
+<td align="left">37.4%</td>
+<td align="right">13</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="per-site-spread-of-pu" class="section level1">
+<h1>3. Per-site spread of %pU</h1>
+<p>If the top sites simply had more between-cell-line variability in
+%pU, that would be an obvious candidate explanation. This compares the
+per-site spread (standard deviation and interquartile range of %pU
+across cell lines) between the two groups.</p>
+<pre class="r"><code># as.numeric() on the medians: median() of an INTEGER vector returns integer
+# when the group size is odd and double when it is even, so the column type
+# flips between sites and data.table refuses to rbind the groups.
+per_site &lt;- dat[, .(sd_pu = sd(pu), iqr_pu = IQR(pu),
+                    med_depth = as.numeric(median(n)),
+                    tot_depth = as.numeric(sum(n))), by = .(group, sid)]
+knitr::kable(per_site[, .(
+  sites = .N,
+  `median SD of %pU`   = sprintf(&quot;%.3f&quot;, median(sd_pu)),
+  `median IQR of %pU`  = sprintf(&quot;%.3f&quot;, median(iqr_pu)),
+  `median depth per cell line` = round(as.numeric(median(med_depth))),
+  `median total depth` = format(round(as.numeric(median(tot_depth))), big.mark = &quot;,&quot;)
+), by = group], caption = &quot;Per-site spread of %pU, and depth, by group&quot;)</code></pre>
+<table>
+<caption>Per-site spread of %pU, and depth, by group</caption>
+<colgroup>
+<col width="15%" />
+<col width="5%" />
+<col width="16%" />
+<col width="17%" />
+<col width="26%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">group</th>
+<th align="right">sites</th>
+<th align="left">median SD of %pU</th>
+<th align="left">median IQR of %pU</th>
+<th align="right">median depth per cell line</th>
+<th align="left">median total depth</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">top 20 hits</td>
+<td align="right">20</td>
+<td align="left">0.324</td>
+<td align="left">0.496</td>
+<td align="right">206</td>
+<td align="left">15,323</td>
+</tr>
+<tr class="even">
+<td align="left">random 20 sites</td>
+<td align="right">20</td>
+<td align="left">0.106</td>
+<td align="left">0.077</td>
+<td align="right">14</td>
+<td align="left">854</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>ggplot(melt(per_site, id.vars = c(&quot;group&quot;, &quot;sid&quot;),
+            measure.vars = c(&quot;sd_pu&quot;, &quot;iqr_pu&quot;)),
+       aes(x = group, y = value, fill = group)) +
+  geom_boxplot(width = 0.5, outlier.size = 0.8, alpha = 0.8) +
+  facet_wrap(~ variable, scales = &quot;free_y&quot;,
+             labeller = as_labeller(c(sd_pu = &quot;SD of %pU across cell lines&quot;,
+                                      iqr_pu = &quot;IQR of %pU across cell lines&quot;))) +
+  scale_fill_manual(values = GRP_COL, guide = &quot;none&quot;) +
+  labs(x = NULL, y = NULL, title = &quot;Per-site variability in %pU&quot;) +
+  theme_bw(base_size = 12)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_why_same_tophits.Rmd/spread-1.png" width="1248" style="display: block; margin: auto;" /></p>
+</div>
+<div id="depth-for-reference" class="section level1">
+<h1>4. Depth, for reference</h1>
+<p>Depth is the variable that separated these groups in the earlier
+diagnostic, shown here on the same footing as the %pU summaries
+above.</p>
+<pre class="r"><code>ggplot(per_site, aes(x = group, y = tot_depth, fill = group)) +
+  geom_boxplot(width = 0.5, outlier.size = 0.8, alpha = 0.8) +
+  scale_y_log10(labels = scales::comma) +
+  scale_fill_manual(values = GRP_COL, guide = &quot;none&quot;) +
+  labs(x = NULL, y = &quot;total reads at the site (log scale)&quot;,
+       title = &quot;Total sequencing depth per site&quot;) +
+  theme_bw(base_size = 12)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_why_same_tophits.Rmd/depth-box-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 8
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.0  
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.2.0  xfun_0.38         bslib_0.3.1       colorspace_2.0-3 
+ [5] vctrs_0.6.1       generics_0.1.3    htmltools_0.5.7   yaml_2.3.5       
+ [9] utf8_1.2.2        rlang_1.1.2       R.oo_1.24.0       jquerylib_0.1.4  
+[13] later_1.3.0       pillar_1.9.0      glue_1.6.2        withr_2.5.0      
+[17] R.utils_2.11.0    lifecycle_1.0.4   stringr_1.5.0     munsell_0.5.0    
+[21] gtable_0.3.0      R.methodsS3_1.8.1 evaluate_0.15     labeling_0.4.2   
+[25] knitr_1.42        callr_3.7.0       fastmap_1.1.0     httpuv_1.6.5     
+[29] ps_1.7.0          fansi_1.0.3       highr_0.9         Rcpp_1.0.11      
+[33] promises_1.2.0.1  scales_1.2.0      jsonlite_1.8.7    farver_2.1.0     
+[37] fs_1.5.2          digest_0.6.29     stringi_1.7.6     processx_3.5.3   
+[41] dplyr_1.1.2       getPass_0.2-2     rprojroot_2.0.3   grid_4.2.0       
+[45] cli_3.6.2         tools_4.2.0       magrittr_2.0.3    sass_0.4.1       
+[49] tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3   rmarkdown_2.21   
+[53] httr_1.4.5        rstudioapi_0.14   R6_2.5.1          git2r_0.30.1     
+[57] compiler_4.2.0   </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
