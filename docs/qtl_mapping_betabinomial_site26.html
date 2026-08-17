@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree7179db5fcb2f3e620bf5135bbce2d5fad001c08btargetblank7179db5a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree9f6d867c65d63d37c3e8ded0b42e456a07cc637atargetblank9f6d867a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/7179db5fcb2f3e620bf5135bbce2d5fad001c08b" target="_blank">7179db5</a>
+<a href="https://github.com/xsun1229/pumseq/tree/9f6d867c65d63d37c3e8ded0b42e456a07cc637a" target="_blank">9f6d867</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree7179db5fcb2f3e620bf5135bbce2d5fad001c08btargetblank7179db5a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree9f6d867c65d63d37c3e8ded0b42e456a07cc637atargetblank9f6d867a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/7179db5fcb2f3e620bf5135bbce2d5fad001c08b" target="_blank">7179db5</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/9f6d867c65d63d37c3e8ded0b42e456a07cc637a" target="_blank">9f6d867</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -620,6 +620,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/9f6d867c65d63d37c3e8ded0b42e456a07cc637a/analysis/qtl_mapping_betabinomial_site26.Rmd" target="_blank">9f6d867</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/9f6d867c65d63d37c3e8ded0b42e456a07cc637a/docs/qtl_mapping_betabinomial_site26.html" target="_blank">9f6d867</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -831,13 +865,14 @@ removing them does to calibration.</p>
 <li><strong>14 of the 26 carry a U↔︎C sequence variant on the pU base
 itself</strong>, which makes the measured “%pU” partly a read-out of
 genotype instead of modification (§2.2).</li>
-<li><strong>4 more have no variant called</strong> at the base. Only one
-of those four has the heterozygote band a U↔︎C variant requires; the
-other three show a two-level split that aliasing does not explain, and
-are <strong>unexplained</strong> (§2.3).</li>
 <li><strong>8 are a different problem</strong>: sites with almost no
 modification where a single cell line supplies nearly all converted
-reads (§2.4).</li>
+reads (§2.3).</li>
+<li><strong>4 have no variant called</strong> at the base and fit
+neither mechanism cleanly. Only one of the four has the heterozygote
+band a U↔︎C variant requires; the other three show a two-level split
+that aliasing does not explain, so they are <strong>unexplained</strong>
+(§2.4).</li>
 <li>Removing the 26 collapses the QQ tail from 289 to 40; removing every
 U/C site instead is what fixes λ (§3).</li>
 </ul>
@@ -928,6 +963,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/9f6d867c65d63d37c3e8ded0b42e456a07cc637a/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec1-fig-1.png" target="_blank">9f6d867</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/7179db5fcb2f3e620bf5135bbce2d5fad001c08b/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec1-fig-1.png" target="_blank">7179db5</a>
 </td>
 <td>
@@ -966,20 +1012,20 @@ XSun
   `lead cis-SNP` = lead_snp,
   `its distance` = sprintf(&quot;%+d bp&quot;, lead_dist),
   mechanism = c(`Mechanism A: U/C variant on the pU base` = &quot;A: U/C variant on the base&quot;,
-                `Mechanism A: same shape, no variant called` = &quot;unexplained (see 2.3)&quot;,
+                `Mechanism A: same shape, no variant called` = &quot;unexplained (see 2.4)&quot;,
                 `Mechanism B: one cell line dominates` = &quot;B: one cell line dominates&quot;)[group]
   )][order(-`-log10p`)],
   caption = paste(&quot;All 26. &#39;top cell-line share&#39; is the largest fraction of the&quot;,
                   &quot;site&#39;s converted reads coming from one cell line.&quot;,
                   &quot;The four marked &#39;unexplained&#39; have no variant called on the pU&quot;,
                   &quot;base and, with one exception, lack the heterozygote band that&quot;,
-                  &quot;aliasing would produce -- see 2.3.&quot;))</code></pre>
+                  &quot;aliasing would produce -- see 2.4.&quot;))</code></pre>
 <table style="width:100%;">
 <caption>All 26. ‘top cell-line share’ is the largest fraction of the
 site’s converted reads coming from one cell line. The four marked
 ‘unexplained’ have no variant called on the pU base and, with one
 exception, lack the heterozygote band that aliasing would produce – see
-2.3.</caption>
+2.4.</caption>
 <colgroup>
 <col width="13%" />
 <col width="5%" />
@@ -1101,7 +1147,7 @@ exception, lack the heterozygote band that aliasing would produce – see
 <td align="right">0.07</td>
 <td align="left">14:22550059:C:G</td>
 <td align="left">-1917 bp</td>
-<td align="left">unexplained (see 2.3)</td>
+<td align="left">unexplained (see 2.4)</td>
 </tr>
 <tr class="odd">
 <td align="left">chr19:7,698,817</td>
@@ -1131,7 +1177,7 @@ exception, lack the heterozygote band that aliasing would produce – see
 <td align="right">0.14</td>
 <td align="left">6:32661941:G:A</td>
 <td align="left">-3052 bp</td>
-<td align="left">unexplained (see 2.3)</td>
+<td align="left">unexplained (see 2.4)</td>
 </tr>
 <tr class="even">
 <td align="left">chr3:37,277,733</td>
@@ -1141,7 +1187,7 @@ exception, lack the heterozygote band that aliasing would produce – see
 <td align="right">0.11</td>
 <td align="left">3:37275552:T:C</td>
 <td align="left">-2181 bp</td>
-<td align="left">unexplained (see 2.3)</td>
+<td align="left">unexplained (see 2.4)</td>
 </tr>
 <tr class="odd">
 <td align="left">chr12:56,664,365</td>
@@ -1191,7 +1237,7 @@ exception, lack the heterozygote band that aliasing would produce – see
 <td align="right">0.23</td>
 <td align="left">6:32740437:C:T</td>
 <td align="left">-4741 bp</td>
-<td align="left">unexplained (see 2.3)</td>
+<td align="left">unexplained (see 2.4)</td>
 </tr>
 <tr class="even">
 <td align="left">chr14:106,360,212</td>
@@ -1336,6 +1382,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/9f6d867c65d63d37c3e8ded0b42e456a07cc637a/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2a-depth-1.png" target="_blank">9f6d867</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/7179db5fcb2f3e620bf5135bbce2d5fad001c08b/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2a-depth-1.png" target="_blank">7179db5</a>
 </td>
 <td>
@@ -1398,6 +1455,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/9f6d867c65d63d37c3e8ded0b42e456a07cc637a/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2a-geno-1.png" target="_blank">9f6d867</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/7179db5fcb2f3e620bf5135bbce2d5fad001c08b/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2a-geno-1.png" target="_blank">7179db5</a>
 </td>
 <td>
@@ -1424,13 +1492,154 @@ XSun
 </div>
 </div>
 </div>
+<div
+id="mechanism-b-one-cell-line-supplies-nearly-all-the-converted-reads"
+class="section level2">
+<h2>2.3 Mechanism B: one cell line supplies nearly all the converted
+reads</h2>
+<p>These sites have essentially <strong>no modification</strong> —
+pooled %pU between 1.2% and 8.8%. Most cell lines report zero converted
+reads. Then one cell line reports a large %pU, and it alone accounts for
+up to 98% of every converted read at the site.</p>
+<pre class="r"><code>dC &lt;- attach_lab(GRP[3])
+plot_pu_depth(dC,
+  &quot;Mechanism B: a near-empty site plus one discordant cell line&quot;,
+  paste(&quot;A wall of cell lines at exactly 0%, and one or two lone dots to the&quot;,
+        &quot;right. Nothing here supports a genotype effect.&quot;))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_site26.Rmd/sec2c-depth-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-sec2c-depth-1">
+Past versions of sec2c-depth-1.png
+</button>
+</p>
+<div id="fig-sec2c-depth-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/9f6d867c65d63d37c3e8ded0b42e456a07cc637a/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2c-depth-1.png" target="_blank">9f6d867</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/7179db5fcb2f3e620bf5135bbce2d5fad001c08b/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2c-depth-1.png" target="_blank">7179db5</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/40364e80ad93fa2a0269a6040d9151b770b834a0/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2c-depth-1.png" target="_blank">40364e8</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>plot_pu_geno(dC,
+  &quot;Mechanism B: %pU against genotype at the lead cis-SNP&quot;,
+  paste(&quot;The apparent &#39;effect&#39; is one or two cell lines lifting a single genotype&quot;,
+        &quot;group off the floor -- not a shift of the group as a whole.&quot;))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_site26.Rmd/sec2c-geno-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-sec2c-geno-1">
+Past versions of sec2c-geno-1.png
+</button>
+</p>
+<div id="fig-sec2c-geno-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/9f6d867c65d63d37c3e8ded0b42e456a07cc637a/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2c-geno-1.png" target="_blank">9f6d867</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/7179db5fcb2f3e620bf5135bbce2d5fad001c08b/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2c-geno-1.png" target="_blank">7179db5</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/40364e80ad93fa2a0269a6040d9151b770b834a0/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2c-geno-1.png" target="_blank">40364e8</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
 <div id="four-sites-with-no-variant-called-mostly-unexplained"
 class="section level2">
-<h2>2.3 Four sites with no variant called — mostly unexplained</h2>
-<p>Four of the 26 have no variant called on the pU base. An earlier
-version of this page assigned them to mechanism A on the strength of
-their %pU shape. <strong>The plots below do not support that</strong>,
-so the counts are set out explicitly.</p>
+<h2>2.4 Four sites with no variant called — mostly unexplained</h2>
+<p>The remaining four of the 26 fit <strong>neither</strong> mechanism
+above. None has a variant called on the pU base, and none is driven by a
+single cell line. Their %pU is clustered enough to look superficially
+like mechanism A, which is tempting — but the counts below do not
+support that reading, so they are set out explicitly rather than
+asserted.</p>
 <p>A codominant U↔︎C variant makes a specific prediction: three levels,
 including a <strong>heterozygote band near 50%</strong>, because half of
 a heterozygote’s transcripts carry the C. That band is the signature,
@@ -1567,6 +1776,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/9f6d867c65d63d37c3e8ded0b42e456a07cc637a/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2b-1.png" target="_blank">9f6d867</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/7179db5fcb2f3e620bf5135bbce2d5fad001c08b/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2b-1.png" target="_blank">7179db5</a>
 </td>
 <td>
@@ -1620,6 +1840,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/9f6d867c65d63d37c3e8ded0b42e456a07cc637a/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2b-geno-1.png" target="_blank">9f6d867</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/7179db5fcb2f3e620bf5135bbce2d5fad001c08b/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2b-geno-1.png" target="_blank">7179db5</a>
 </td>
 <td>
@@ -1663,123 +1894,6 @@ record, <strong>6 of the 26 are in the MHC</strong> (chr6:28.5–33.4 Mb,
 ~0.16% of the genome), which is a strong enrichment and worth following
 up on its own terms.</p>
 </div>
-<div
-id="mechanism-b-one-cell-line-supplies-nearly-all-the-converted-reads"
-class="section level2">
-<h2>2.4 Mechanism B: one cell line supplies nearly all the converted
-reads</h2>
-<p>These sites have essentially <strong>no modification</strong> —
-pooled %pU between 1.2% and 8.8%. Most cell lines report zero converted
-reads. Then one cell line reports a large %pU, and it alone accounts for
-up to 98% of every converted read at the site.</p>
-<pre class="r"><code>dC &lt;- attach_lab(GRP[3])
-plot_pu_depth(dC,
-  &quot;Mechanism B: a near-empty site plus one discordant cell line&quot;,
-  paste(&quot;A wall of cell lines at exactly 0%, and one or two lone dots to the&quot;,
-        &quot;right. Nothing here supports a genotype effect.&quot;))</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_site26.Rmd/sec2c-depth-1.png" width="1056" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-sec2c-depth-1">
-Past versions of sec2c-depth-1.png
-</button>
-</p>
-<div id="fig-sec2c-depth-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/7179db5fcb2f3e620bf5135bbce2d5fad001c08b/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2c-depth-1.png" target="_blank">7179db5</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-08-17
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/40364e80ad93fa2a0269a6040d9151b770b834a0/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2c-depth-1.png" target="_blank">40364e8</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-08-17
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<pre class="r"><code>plot_pu_geno(dC,
-  &quot;Mechanism B: %pU against genotype at the lead cis-SNP&quot;,
-  paste(&quot;The apparent &#39;effect&#39; is one or two cell lines lifting a single genotype&quot;,
-        &quot;group off the floor -- not a shift of the group as a whole.&quot;))</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_site26.Rmd/sec2c-geno-1.png" width="1056" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-sec2c-geno-1">
-Past versions of sec2c-geno-1.png
-</button>
-</p>
-<div id="fig-sec2c-geno-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/7179db5fcb2f3e620bf5135bbce2d5fad001c08b/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2c-geno-1.png" target="_blank">7179db5</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-08-17
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/40364e80ad93fa2a0269a6040d9151b770b834a0/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2c-geno-1.png" target="_blank">40364e8</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-08-17
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
 <div id="for-comparison-what-ordinary-sites-look-like"
 class="section level2">
 <h2>2.5 For comparison: what ordinary sites look like</h2>
@@ -1816,6 +1930,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/9f6d867c65d63d37c3e8ded0b42e456a07cc637a/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2d-depth-1.png" target="_blank">9f6d867</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/7179db5fcb2f3e620bf5135bbce2d5fad001c08b/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2d-depth-1.png" target="_blank">7179db5</a>
@@ -1868,6 +1993,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/9f6d867c65d63d37c3e8ded0b42e456a07cc637a/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2d-geno-1.png" target="_blank">9f6d867</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/7179db5fcb2f3e620bf5135bbce2d5fad001c08b/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2d-geno-1.png" target="_blank">7179db5</a>
@@ -1927,6 +2063,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/9f6d867c65d63d37c3e8ded0b42e456a07cc637a/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2e-depth-1.png" target="_blank">9f6d867</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/7179db5fcb2f3e620bf5135bbce2d5fad001c08b/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2e-depth-1.png" target="_blank">7179db5</a>
 </td>
 <td>
@@ -1977,6 +2124,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/9f6d867c65d63d37c3e8ded0b42e456a07cc637a/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2e-geno-1.png" target="_blank">9f6d867</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/7179db5fcb2f3e620bf5135bbce2d5fad001c08b/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec2e-geno-1.png" target="_blank">7179db5</a>
@@ -2050,6 +2208,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/9f6d867c65d63d37c3e8ded0b42e456a07cc637a/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec3-qq-1.png" target="_blank">9f6d867</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/7179db5fcb2f3e620bf5135bbce2d5fad001c08b/docs/figure/qtl_mapping_betabinomial_site26.Rmd/sec3-qq-1.png" target="_blank">7179db5</a>
@@ -2248,7 +2417,7 @@ is computed from the <em>median</em> statistic and 26 sites out of
 ~11,000 cannot shift a median.</p>
 <p><strong>Removing all U/C sites fixes λ.</strong> The opposite
 pattern: λ drops to 1.402, a much larger change, while the tail stays at
-179.8 — because the four sites with no variant call (§2.3) are not in
+179.8 — because the four sites with no variant call (§2.4) are not in
 the U/C list and are among the worst offenders.</p>
 <p>Neither exclusion alone does both. Worth noting for interpretation:
 the ~1,100 U/C sites that are <em>not</em> among the 26 are not a

@@ -116,13 +116,13 @@ knitr::kable(cnt, col.names = c("", "n"), caption = "Scale")
 - **`r sum(labs$group == GRP[1] )` of the 26 carry a U↔C sequence variant on the
   pU base itself**, which makes the measured "%pU" partly a read-out of genotype
   instead of modification (§2.2).
-- **`r sum(labs$group == GRP[2])` more have no variant called** at the base. Only
-  one of those four has the heterozygote band a U↔C variant requires; the other
-  three show a two-level split that aliasing does not explain, and are
-  **unexplained** (§2.3).
 - **`r sum(labs$group == GRP[3])` are a different problem**: sites with almost no
   modification where a single cell line supplies nearly all converted reads
-  (§2.4).
+  (§2.3).
+- **`r sum(labs$group == GRP[2])` have no variant called** at the base and fit
+  neither mechanism cleanly. Only one of the four has the heterozygote band a
+  U↔C variant requires; the other three show a two-level split that aliasing does
+  not explain, so they are **unexplained** (§2.4).
 - Removing the 26 collapses the QQ tail from
   `r round(lam[condition == "all sites" & dataset == "real"]$max_nlp, 0)` to
   `r round(lam[condition == "minus the 26 sites" & dataset == "real"]$max_nlp, 0)`;
@@ -188,14 +188,14 @@ knitr::kable(labs[is26 == TRUE, .(
   `lead cis-SNP` = lead_snp,
   `its distance` = sprintf("%+d bp", lead_dist),
   mechanism = c(`Mechanism A: U/C variant on the pU base` = "A: U/C variant on the base",
-                `Mechanism A: same shape, no variant called` = "unexplained (see 2.3)",
+                `Mechanism A: same shape, no variant called` = "unexplained (see 2.4)",
                 `Mechanism B: one cell line dominates` = "B: one cell line dominates")[group]
   )][order(-`-log10p`)],
   caption = paste("All 26. 'top cell-line share' is the largest fraction of the",
                   "site's converted reads coming from one cell line.",
                   "The four marked 'unexplained' have no variant called on the pU",
                   "base and, with one exception, lack the heterozygote band that",
-                  "aliasing would produce -- see 2.3."))
+                  "aliasing would produce -- see 2.4."))
 ```
 
 ## 2.2 Mechanism A: a U↔C variant on the pU base
@@ -256,11 +256,38 @@ plot_pu_geno(dA,
         "not interpretable."))
 ```
 
-## 2.3 Four sites with no variant called — mostly unexplained
+## 2.3 Mechanism B: one cell line supplies nearly all the converted reads
 
-Four of the 26 have no variant called on the pU base. An earlier version of this
-page assigned them to mechanism A on the strength of their %pU shape. **The plots
-below do not support that**, so the counts are set out explicitly.
+These sites have essentially **no modification** — pooled %pU between
+`r sprintf("%.1f%%", 100*min(labs[group == GRP[3]]$pooled_pu))` and
+`r sprintf("%.1f%%", 100*max(labs[group == GRP[3]]$pooled_pu))`. Most cell lines
+report zero converted reads. Then one cell line reports a large %pU, and it alone
+accounts for up to
+`r sprintf("%.0f%%", 100*max(labs[group == GRP[3]]$top_share, na.rm = TRUE))` of
+every converted read at the site.
+
+```{r sec2c-depth, fig.height=5}
+dC <- attach_lab(GRP[3])
+plot_pu_depth(dC,
+  "Mechanism B: a near-empty site plus one discordant cell line",
+  paste("A wall of cell lines at exactly 0%, and one or two lone dots to the",
+        "right. Nothing here supports a genotype effect."))
+```
+
+```{r sec2c-geno, fig.height=5.5}
+plot_pu_geno(dC,
+  "Mechanism B: %pU against genotype at the lead cis-SNP",
+  paste("The apparent 'effect' is one or two cell lines lifting a single genotype",
+        "group off the floor -- not a shift of the group as a whole."))
+```
+
+## 2.4 Four sites with no variant called — mostly unexplained
+
+The remaining four of the 26 fit **neither** mechanism above. None has a variant
+called on the pU base, and none is driven by a single cell line. Their %pU is
+clustered enough to look superficially like mechanism A, which is tempting — but
+the counts below do not support that reading, so they are set out explicitly
+rather than asserted.
 
 A codominant U↔C variant makes a specific prediction: three levels, including a
 **heterozygote band near 50%**, because half of a heterozygote's transcripts carry
@@ -328,31 +355,6 @@ would be unsurprising — but it is the wrong site that looks like aliasing, so 
 location is not evidence for it. For the record, **`r sum(labs[is26 == TRUE]$chr == "6")`
 of the 26 are in the MHC** (chr6:28.5–33.4 Mb, ~0.16% of the genome), which is a
 strong enrichment and worth following up on its own terms.
-
-## 2.4 Mechanism B: one cell line supplies nearly all the converted reads
-
-These sites have essentially **no modification** — pooled %pU between
-`r sprintf("%.1f%%", 100*min(labs[group == GRP[3]]$pooled_pu))` and
-`r sprintf("%.1f%%", 100*max(labs[group == GRP[3]]$pooled_pu))`. Most cell lines
-report zero converted reads. Then one cell line reports a large %pU, and it alone
-accounts for up to
-`r sprintf("%.0f%%", 100*max(labs[group == GRP[3]]$top_share, na.rm = TRUE))` of
-every converted read at the site.
-
-```{r sec2c-depth, fig.height=5}
-dC <- attach_lab(GRP[3])
-plot_pu_depth(dC,
-  "Mechanism B: a near-empty site plus one discordant cell line",
-  paste("A wall of cell lines at exactly 0%, and one or two lone dots to the",
-        "right. Nothing here supports a genotype effect."))
-```
-
-```{r sec2c-geno, fig.height=5.5}
-plot_pu_geno(dC,
-  "Mechanism B: %pU against genotype at the lead cis-SNP",
-  paste("The apparent 'effect' is one or two cell lines lifting a single genotype",
-        "group off the floor -- not a shift of the group as a whole."))
-```
 
 ## 2.5 For comparison: what ordinary sites look like
 
@@ -457,7 +459,7 @@ median.
 **Removing all U/C sites fixes λ.** The opposite pattern: λ drops to
 `r g("minus all U/C-aliasing sites", "lambda")`, a much larger change, while the
 tail stays at `r g("minus all U/C-aliasing sites", "max_nlp")` — because the four
-sites with no variant call (§2.3) are not in the U/C list and are among the worst
+sites with no variant call (§2.4) are not in the U/C list and are among the worst
 offenders.
 
 Neither exclusion alone does both. Worth noting for interpretation: the ~1,100
