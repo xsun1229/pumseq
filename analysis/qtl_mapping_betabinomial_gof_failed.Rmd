@@ -28,20 +28,10 @@ bs[, grp := factor(grp, levels = c("problematic", "matched control"))]
 ctrl <- bs[grp == "matched control"]
 ```
 
-# Why this page exists
+We test if Beta-Binomial is a good fit. If the data form discrete clusters of %pU levels, then Beta-Binomial may be a poor fit.
 
-The advisor's question was direct: *"test if Beta-Binomial is a good fit. If the
-data form discrete clusters of %pU levels, then Beta-Binomial may be a poor fit.
-Check the literature about how to do goodness-of-fit test of Beta-Binomial."*
+Two attempts were made and neither produced usable p-values. 
 
-Two attempts were made and **neither produced usable p-values**. This page records
-that, because the failure is informative in two ways: it says what not to try
-next, and its diagnostics are what led to the φ-boundary discovery that
-ultimately fixed the calibration (see
-[the strategy page](qtl_mapping_betabinomial_strategy.html)).
-
-The few conclusions that do survive are stated at the end, separated from the
-ones that do not.
 
 # 1. The literature does not offer a usable off-the-shelf test
 
