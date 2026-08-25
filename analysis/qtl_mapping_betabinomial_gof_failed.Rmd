@@ -48,9 +48,10 @@ knitr::kable(data.table(
 So the test had to be built from a general principle instead: **randomized
 quantile residuals** (Dunn & Smyth 1996). Ask the fitted model what percentile
 each cell line's observation sits at; under a correctly specified model those
-percentiles are uniform, so testing uniformity *is* the fit test. Randomization
-inside each integer's probability interval is what makes the percentiles
-continuous — without it a discrete CDF gives lumpy values that are not uniform
+percentiles are uniform, so testing uniformity *is* the fit test. (The
+percentiles are the PIT values `u`; the residual proper is `qnorm(u)` -- see the
+note in section 2.) Randomization inside each integer's probability interval is
+what makes the percentiles continuous — without it a discrete CDF gives lumpy values that are not uniform
 even under a true model.
 
 Four quantities were computed per site:
@@ -71,12 +72,109 @@ knitr::kable(data.table(
 
 # 2. Attempt 1 — nominal p-values. Conservative.
 
-Run on `fold5_union_noUCcalled` (U/C-variant sites already excluded), 11,006 of
-11,298 sites testable.
+Attempt 1 is one script doing **two separate jobs**: Part A produces the actual
+per-site result from the real data, and Part B audits whether those results can be
+trusted. Part A involves no simulation at all.
 
-The calibration check is the whole ballgame: simulate data **from** each fitted
-model — data that is beta-binomial by construction — and re-test. The p-values
-must come out uniform.
+## 2a. Method — Part A: the test itself (real data, every site)
+
+For one site, with 50 cell lines each having a converted count `y` out of a total
+`n`:
+
+1. **Fit the null model** — `logit(mu_i) = intercept + PC1 + PC2 + PC3`, one shared
+   phi. No SNP: the null is what the LRT's inflation traced to, and including a
+   SNP would mean choosing one of the site's 10-900 cis-SNPs, the best of which
+   would absorb the misfit we are looking for. So each cell line gets its own
+   `mu_i` (4 parameters generate all 50) and the site gets one `phi`.
+2. **The model now predicts a whole distribution per cell line**, e.g.
+   `BetaBinomial(n = 180, mu = 0.07, phi)` for a cell line with 180 reads.
+3. **Locate the observation in that prediction.** For an observed `y = 12`,
+   `F(11) = 0.399` and `F(12) = 0.509`, so `y = 12` occupies the percentile
+   *interval* [0.399, 0.509] -- the slice of probability the value 12 accounts for.
+4. **Draw uniformly inside that interval** -> `u = 0.428`. This randomisation is
+   what makes the percentiles continuous; without it every observation of 12
+   returns exactly 0.509 and the percentiles could not be uniform even under a
+   perfect model.
+5. **Collect the 50 percentiles.** Under a correct model they are Uniform(0,1).
+6. **KS-test them against Uniform(0,1)** -> one p-value for the site.
+7. **Repeat 3-6 five times** with different jitter, take the median, so one
+   unlucky draw cannot decide a site.
+
+Run over `fold5_union_noUCcalled`: 11,006 of 11,298 sites testable (the other 292
+have fewer than 10 covered cell lines or the fit failed). That is
+**55,030 KS tests producing 11,006 p-values.**
+
+## 2b. Result — Part A
+
+```{r a1-dist, fig.height=4}
+d0 <- gof[!is.na(p_ks)]
+ggplot(d0, aes(p_ks)) +
+  geom_histogram(breaks = seq(0, 1, 0.05), fill = "#3987e5", colour = "white",
+                 linewidth = 0.2) +
+  geom_hline(yintercept = nrow(d0) / 20, linetype = "dashed", colour = "#e34948") +
+  annotate("text", x = 0.02, y = nrow(d0) / 20, hjust = 0, vjust = -0.6,
+           label = "uniform expectation", colour = "#e34948", size = 3.4) +
+  labs(x = "p_ks (real data, one value per site)", y = "sites",
+       title = sprintf("Part A: the %s per-site p-values", format(nrow(d0), big.mark = ",")),
+       subtitle = sprintf("median %.3f; %d sites reach q_ks < 0.05 after BH correction. Skewed high -- which section 2d explains.",
+                          median(d0$p_ks), sum(d0$q_ks < 0.05, na.rm = TRUE))) +
+  theme_bw(base_size = 12)
+```
+
+```{r a1-counts}
+knitr::kable(data.table(
+  quantity = c("sites in the phenotype", "testable (>=10 covered cell lines, fit converged)",
+               "p_ks values produced", "KS tests run (5 jitter draws each)",
+               "sites with q_ks < 0.05 (BH)", "sites with q_dip < 0.05 (BH)",
+               "sites preferring K >= 2 components"),
+  n = c("11,298", format(nrow(gof), big.mark = ","), format(nrow(gof), big.mark = ","),
+        format(nrow(gof) * 5, big.mark = ","),
+        sum(gof$q_ks < 0.05, na.rm = TRUE), sum(gof$q_dip < 0.05, na.rm = TRUE),
+        sum(gof$best_K >= 2, na.rm = TRUE))),
+  caption = "Part A output. The 21 is a FLOOR, not a rate -- see 2d.")
+```
+
+```{r a1-res}
+knitr::kable(gof[, .(sites = .N,
+  `median p_ks` = signif(median(p_ks, na.rm = TRUE), 3),
+  `frac q_ks<0.05` = sprintf("%.1f%%", 100 * mean(q_ks < 0.05, na.rm = TRUE)),
+  `frac q_sw<0.05` = sprintf("%.1f%%", 100 * mean(q_sw < 0.05, na.rm = TRUE)),
+  `frac q_dip<0.05` = sprintf("%.1f%%", 100 * mean(q_dip < 0.05, na.rm = TRUE))),
+  by = class], caption = "Part A by site class -- read as lower bounds, not rates")
+```
+
+## 2c. Method — Part B: the audit (simulated data)
+
+Part A step 5 claims that a correct model gives uniform percentiles. But `mu` and
+`phi` were estimated from the same 50 observations, which may break that. Part A
+cannot tell you -- you need data where the model is true by construction:
+
+```r
+f    <- fit_bb_mle(y, n, X)                        # 1. fit the REAL data
+ysim <- rbetabinom.ab(n, shape1 = a, shape2 = b)   # 2. simulate from its parameters
+f2   <- fit_bb_mle(ysim, n, X)                     # 3. RE-FIT the simulated data
+u    <- rqr_u(ysim, n, f2$mu0, f2$phi)             # 4. PERCENTILES under the re-fit
+ks.test(u, "punif")$p.value                        # 5. are they uniform?
+```
+
+400 sites x 5 replicates = ~1,896 p-values, which **must** be uniform.
+
+A note on naming, since it is a common trip-up. `u` holds the **percentiles**
+(the probability-integral-transform values), which are Uniform(0,1) under a
+correct model. The *residual* proper is `z = qnorm(u)`, which is N(0,1) under a
+correct model — that is what Dunn & Smyth call the randomized quantile residual,
+and it is what Shapiro-Wilk is given. The two carry the same information in
+different coordinates:
+
+| object | scale | null distribution | test used |
+|---|---|---|---|
+| `u` | (0, 1) | Uniform(0, 1) | KS (primary) |
+| `z = qnorm(u)` | (-Inf, Inf) | N(0, 1) | Shapiro-Wilk (secondary) |
+
+Note that the re-fit is already present at this stage — that matters for reading
+attempt 2 below.
+
+## 2d. Result — Part B: the audit fails
 
 ```{r cal1, fig.height=4}
 d1 <- data.table(p = bp1)
@@ -99,34 +197,55 @@ a KS test of these against uniform gives p = `r sprintf("%.3g", suppressWarnings
 
 **Cause.** Randomized quantile residuals are exactly uniform when the parameters
 are *known*. Ours are estimated from the same ~50 observations (4 coefficients
-plus φ), so the fitted model sits closer to the data than the truth would, the
-residuals are under-dispersed, and the KS p-value inflates. Dunn & Smyth's
-"exactly normal" carries the caveat "apart from sampling variability in the
-estimated parameters" — at n = 50 with 5 parameters that caveat dominates.
+plus φ), so the fitted model sits closer to the data than the truth would and the
+residuals are under-dispersed. The failure is therefore in the **reference
+distribution**: the asymptotic KS null does not apply to residuals built from
+estimated parameters at this sample size. Dunn & Smyth's "exactly normal" carries
+the caveat "apart from sampling variability in the estimated parameters" — at
+n = 50 with 5 parameters that caveat dominates.
 
-A conservative test still has one use: anything it *does* flag is real. On that
-basis the problematic sites were enriched — but the measured rate is a lower
-bound, so the enrichment cannot be quantified.
-
-```{r a1-res}
-knitr::kable(gof[, .(sites = .N,
-  `median p_ks` = signif(median(p_ks, na.rm = TRUE), 3),
-  `frac q_ks<0.05` = sprintf("%.1f%%", 100 * mean(q_ks < 0.05, na.rm = TRUE)),
-  `frac q_sw<0.05` = sprintf("%.1f%%", 100 * mean(q_sw < 0.05, na.rm = TRUE)),
-  `frac q_dip<0.05` = sprintf("%.1f%%", 100 * mean(q_dip < 0.05, na.rm = TRUE))),
-  by = class], caption = "Attempt 1 results -- read as lower bounds, not rates")
-```
+**Consequence for section 2b.** Every number in Part A's result is now a *floor*.
+A conservative test still has one use — anything it *does* flag is real, so the
+21 sites at q_ks < 0.05 are genuine misfits and the enrichment in the problematic
+class is real in direction. But the rates cannot be quantified, and a site passing
+the test cannot be called well-fitted. That is what makes attempt 1 unusable as a
+per-site verdict, and it is what attempt 2 tried to repair.
 
 # 3. Attempt 2 — parametric bootstrap. Anti-conservative, and it lost sites.
 
-The fix for an estimation-induced bias is to put the estimation into the null:
-for each site, simulate B = 500 datasets from its own fit, **refit each one**, and
-compare the observed KS statistic to that site's own null. Refitting every
-replicate should make the conservatism cancel.
+## 3a. Method
 
-Run on the 17 still-problematic sites plus 10 matched controls each (matched on
-covered cell lines, total depth and pooled %pU). The controls are the calibration
-check — being ordinary sites, their `p_boot` must be uniform.
+The simulate-and-refit machinery was already in place; what was wrong was the
+**reference distribution**. So attempt 2 changes only that — the null is
+*generated* rather than looked up:
+
+1. **Fit the real data**, and compute `D_obs` — the KS **statistic**, not its
+   p-value. The theoretical p-value is discarded entirely.
+2. **500 times:** simulate from those parameters, **re-fit**, compute `D_sim`.
+   `D` is averaged over 3 jitter draws each time.
+3. **Ask how extreme `D_obs` is** among those 500:
+
+$$p_{\text{boot}} = \frac{1 + \#\{D_{\text{sim}} \ge D_{\text{obs}}\}}{B + 1}$$
+
+   The `1 +` counts the observed statistic as one of its own null draws, so the
+   smallest reportable p-value is 1/501 rather than 0. This is self-calibrating by
+   construction: anything that biases `D` -- estimating 5 parameters from 50
+   points, coarse discreteness -- biases `D_obs` and every `D_sim` alike and
+   cancels.
+
+To be explicit about the difference, because it is easy to misread: **both
+attempts fit the real data, simulate from it, and re-fit.** Attempt 1 used those
+simulations only to *audit* a nominal p-value; attempt 2 uses them to *build* the
+p-value.
+
+**Scope:** 500 refits per site is ~500x the per-site cost of attempt 1, so this
+ran on 172 sites, not 11,006 — the 17 still-problematic ones plus 10 matched
+controls each, matched on covered cell lines, total depth and pooled %pU. (Total
+runtime was therefore *lower* than attempt 1: 74 s against 12 min 20 s.) The
+controls are the calibration check — being ordinary sites, their `p_boot` must be
+uniform.
+
+## 3b. Result
 
 ```{r cal2, fig.height=4}
 ggplot(ctrl, aes(p_boot)) +
@@ -153,6 +272,11 @@ knitr::kable(data.table(
 
 So attempt 1 was conservative at 0.012 and attempt 2 is anti-conservative at
 `r sprintf("%.3f", mean(ctrl$p_boot < 0.05))`. Neither is usable.
+
+Attempt 2 failing is the more surprising of the two: an empirical p-value built
+from a site's own null *should* be calibrated whatever the estimation effect. The
+reason it is not turns out to be a defect in how failures were handled, not in
+the bootstrap principle.
 
 ## Why the bootstrap overcorrected: refits fail, and selectively
 
