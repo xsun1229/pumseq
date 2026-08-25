@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-08-24" />
+
+<title>Beta-binomial pU-QTL: a goodness-of-fit test that did not work (and what it revealed)</title>
+
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Beta-binomial pU-QTL: a goodness-of-fit
+test that did not work (and what it revealed)</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-08-24</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-08-24
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreefa594973c1ef4d60d25aad95eaa8ff493e56d434targetblankfa59497a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/fa594973c1ef4d60d25aad95eaa8ff493e56d434" target="_blank">fa59497</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreefa594973c1ef4d60d25aad95eaa8ff493e56d434targetblankfa59497a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/fa594973c1ef4d60d25aad95eaa8ff493e56d434" target="_blank">fa59497</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/qtl_mapping_betabinomial_calibration_noUC.Rmd
+    Untracked:  analysis/qtl_mapping_betabinomial_calibration_noUCcalled.Rmd
+    Untracked:  analysis/qtl_mapping_betabinomial_gof_failed.Rmd
+    Untracked:  analysis/qtl_mapping_betabinomial_strategy.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = &quot;center&quot;, fig.width = 11)
+
+PSI &lt;- &quot;/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl&quot;
+G   &lt;- file.path(PSI, &quot;qtl_betabinomial/goodness_of_fit&quot;)
+
+gof  &lt;- fread(file.path(G, &quot;site_goodness_of_fit_noUCcalled.txt.gz&quot;))
+bp1  &lt;- fread(file.path(G, &quot;calibration_bootstrap_p_noUCcalled.txt.gz&quot;))$bootstrap_p_ks
+bs   &lt;- fread(file.path(G, &quot;gof_bootstrap_sites.txt.gz&quot;))
+feat &lt;- fread(file.path(G, &quot;site_features_noUCcalled.txt.gz&quot;))
+crit &lt;- fread(file.path(G, &quot;filter_criteria_comparison.txt&quot;))
+
+gof[, class := factor(class, levels = c(&quot;still problematic after filtering&quot;, &quot;rest&quot;))]
+bs[, grp := factor(grp, levels = c(&quot;problematic&quot;, &quot;matched control&quot;))]
+ctrl &lt;- bs[grp == &quot;matched control&quot;]</code></pre>
+<div id="why-this-page-exists" class="section level1">
+<h1>Why this page exists</h1>
+<p>The advisor’s question was direct: <em>“test if Beta-Binomial is a
+good fit. If the data form discrete clusters of %pU levels, then
+Beta-Binomial may be a poor fit. Check the literature about how to do
+goodness-of-fit test of Beta-Binomial.”</em></p>
+<p>Two attempts were made and <strong>neither produced usable
+p-values</strong>. This page records that, because the failure is
+informative in two ways: it says what not to try next, and its
+diagnostics are what led to the φ-boundary discovery that ultimately
+fixed the calibration (see <a
+href="qtl_mapping_betabinomial_strategy.html">the strategy
+page</a>).</p>
+<p>The few conclusions that do survive are stated at the end, separated
+from the ones that do not.</p>
+</div>
+<div id="the-literature-does-not-offer-a-usable-off-the-shelf-test"
+class="section level1">
+<h1>1. The literature does not offer a usable off-the-shelf test</h1>
+<pre class="r"><code>knitr::kable(data.table(
+  test = c(&quot;Tarone (1979) Z&quot;, &quot;Brooks et al. (1997)&quot;, &quot;both of the above&quot;),
+  problem = c(
+    &quot;tests binomial vs beta-binomial, i.e. whether overdispersion exists at all -- the wrong direction. It would confirm the beta-binomial beats the binomial, which we already assume.&quot;,
+    &quot;is a genuine beta-binomial GOF test, but Garren, Smith &amp; Piegorsch (Biometrics 2000; 56:947-950) showed it cannot distinguish the beta-binomial from &#39;some severely non-beta-binomial models&#39; -- exactly our alternative.&quot;,
+    &quot;assume homogeneous data: one mu shared by all observations. Our model has covariates (intercept + 3 M-value PCs), so mu differs per cell line.&quot;)),
+  caption = &quot;Why the classical tests were not used&quot;)</code></pre>
+<table>
+<caption>Why the classical tests were not used</caption>
+<colgroup>
+<col width="8%" />
+<col width="91%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">test</th>
+<th align="left">problem</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Tarone (1979) Z</td>
+<td align="left">tests binomial vs beta-binomial, i.e. whether
+overdispersion exists at all – the wrong direction. It would confirm the
+beta-binomial beats the binomial, which we already assume.</td>
+</tr>
+<tr class="even">
+<td align="left">Brooks et al. (1997)</td>
+<td align="left">is a genuine beta-binomial GOF test, but Garren, Smith
+&amp; Piegorsch (Biometrics 2000; 56:947-950) showed it cannot
+distinguish the beta-binomial from ‘some severely non-beta-binomial
+models’ – exactly our alternative.</td>
+</tr>
+<tr class="odd">
+<td align="left">both of the above</td>
+<td align="left">assume homogeneous data: one mu shared by all
+observations. Our model has covariates (intercept + 3 M-value PCs), so
+mu differs per cell line.</td>
+</tr>
+</tbody>
+</table>
+<p>So the test had to be built from a general principle instead:
+<strong>randomized quantile residuals</strong> (Dunn &amp; Smyth 1996).
+Ask the fitted model what percentile each cell line’s observation sits
+at; under a correctly specified model those percentiles are uniform, so
+testing uniformity <em>is</em> the fit test. Randomization inside each
+integer’s probability interval is what makes the percentiles continuous
+— without it a discrete CDF gives lumpy values that are not uniform even
+under a true model.</p>
+<p>Four quantities were computed per site:</p>
+<pre class="r"><code>knitr::kable(data.table(
+  output = c(&quot;p_ks&quot;, &quot;p_sw&quot;, &quot;p_dip&quot;, &quot;best_K&quot;),
+  question = c(&quot;does the model fit? (KS of percentiles vs uniform -- PRIMARY)&quot;,
+               &quot;same, shape-sensitive (Shapiro-Wilk on qnorm(u) -- secondary)&quot;,
+               &quot;is there more than one cluster? (Hartigan dip test, ignores the model)&quot;,
+               &quot;how many clusters? (beta-binomial mixture BIC over K = 1, 2, 3)&quot;),
+  note = c(&quot;chosen as primary because its null is fully specified -- nothing can absorb a misfit&quot;,
+           &quot;location- and scale-invariant, so BLIND to residuals that are normal but too wide, i.e. to dispersion misfit&quot;,
+           &quot;answers &#39;more than one&#39;, not &#39;how many&#39;&quot;,
+           &quot;the interpretable number: K=3 is the 0/1/2 genotype signature&quot;)),
+  caption = &quot;The four per-site outputs&quot;)</code></pre>
+<table>
+<caption>The four per-site outputs</caption>
+<colgroup>
+<col width="3%" />
+<col width="37%" />
+<col width="58%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">output</th>
+<th align="left">question</th>
+<th align="left">note</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">p_ks</td>
+<td align="left">does the model fit? (KS of percentiles vs uniform –
+PRIMARY)</td>
+<td align="left">chosen as primary because its null is fully specified –
+nothing can absorb a misfit</td>
+</tr>
+<tr class="even">
+<td align="left">p_sw</td>
+<td align="left">same, shape-sensitive (Shapiro-Wilk on qnorm(u) –
+secondary)</td>
+<td align="left">location- and scale-invariant, so BLIND to residuals
+that are normal but too wide, i.e. to dispersion misfit</td>
+</tr>
+<tr class="odd">
+<td align="left">p_dip</td>
+<td align="left">is there more than one cluster? (Hartigan dip test,
+ignores the model)</td>
+<td align="left">answers ‘more than one’, not ‘how many’</td>
+</tr>
+<tr class="even">
+<td align="left">best_K</td>
+<td align="left">how many clusters? (beta-binomial mixture BIC over K =
+1, 2, 3)</td>
+<td align="left">the interpretable number: K=3 is the 0/1/2 genotype
+signature</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="attempt-1-nominal-p-values.-conservative."
+class="section level1">
+<h1>2. Attempt 1 — nominal p-values. Conservative.</h1>
+<p>Run on <code>fold5_union_noUCcalled</code> (U/C-variant sites already
+excluded), 11,006 of 11,298 sites testable.</p>
+<p>The calibration check is the whole ballgame: simulate data
+<strong>from</strong> each fitted model — data that is beta-binomial by
+construction — and re-test. The p-values must come out uniform.</p>
+<pre class="r"><code>d1 &lt;- data.table(p = bp1)
+ggplot(d1, aes(p)) +
+  geom_histogram(breaks = seq(0, 1, 0.05), fill = &quot;#3987e5&quot;, colour = &quot;white&quot;,
+                 linewidth = 0.2) +
+  geom_hline(yintercept = length(bp1) / 20, linetype = &quot;dashed&quot;, colour = &quot;#e34948&quot;) +
+  annotate(&quot;text&quot;, x = 0.02, y = length(bp1) / 20, hjust = 0, vjust = -0.6,
+           label = &quot;uniform expectation&quot;, colour = &quot;#e34948&quot;, size = 3.4) +
+  labs(x = &quot;nominal KS p-value on data simulated from the fitted model&quot;,
+       y = &quot;replicates&quot;,
+       title = &quot;Attempt 1 calibration: p-values pile up at the TOP, not uniform&quot;,
+       subtitle = sprintf(&quot;n = %s;  frac(p&lt;0.05) = %.3f against a target of 0.05  -&gt;  the test is CONSERVATIVE&quot;,
+                          format(length(bp1), big.mark = &quot;,&quot;), mean(bp1 &lt; 0.05))) +
+  theme_bw(base_size = 12)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_gof_failed.Rmd/cal1-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p><code>frac(p&lt;0.05) = 0.012</code> where 0.05 is required, and a KS
+test of these against uniform gives p = 0.</p>
+<p><strong>Cause.</strong> Randomized quantile residuals are exactly
+uniform when the parameters are <em>known</em>. Ours are estimated from
+the same ~50 observations (4 coefficients plus φ), so the fitted model
+sits closer to the data than the truth would, the residuals are
+under-dispersed, and the KS p-value inflates. Dunn &amp; Smyth’s
+“exactly normal” carries the caveat “apart from sampling variability in
+the estimated parameters” — at n = 50 with 5 parameters that caveat
+dominates.</p>
+<p>A conservative test still has one use: anything it <em>does</em> flag
+is real. On that basis the problematic sites were enriched — but the
+measured rate is a lower bound, so the enrichment cannot be
+quantified.</p>
+<pre class="r"><code>knitr::kable(gof[, .(sites = .N,
+  `median p_ks` = signif(median(p_ks, na.rm = TRUE), 3),
+  `frac q_ks&lt;0.05` = sprintf(&quot;%.1f%%&quot;, 100 * mean(q_ks &lt; 0.05, na.rm = TRUE)),
+  `frac q_sw&lt;0.05` = sprintf(&quot;%.1f%%&quot;, 100 * mean(q_sw &lt; 0.05, na.rm = TRUE)),
+  `frac q_dip&lt;0.05` = sprintf(&quot;%.1f%%&quot;, 100 * mean(q_dip &lt; 0.05, na.rm = TRUE))),
+  by = class], caption = &quot;Attempt 1 results -- read as lower bounds, not rates&quot;)</code></pre>
+<table>
+<caption>Attempt 1 results – read as lower bounds, not rates</caption>
+<colgroup>
+<col width="34%" />
+<col width="6%" />
+<col width="12%" />
+<col width="15%" />
+<col width="15%" />
+<col width="16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">class</th>
+<th align="right">sites</th>
+<th align="right">median p_ks</th>
+<th align="left">frac q_ks&lt;0.05</th>
+<th align="left">frac q_sw&lt;0.05</th>
+<th align="left">frac q_dip&lt;0.05</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">rest</td>
+<td align="right">10989</td>
+<td align="right">0.654</td>
+<td align="left">0.2%</td>
+<td align="left">1.0%</td>
+<td align="left">5.4%</td>
+</tr>
+<tr class="even">
+<td align="left">still problematic after filtering</td>
+<td align="right">17</td>
+<td align="right">0.407</td>
+<td align="left">5.9%</td>
+<td align="left">11.8%</td>
+<td align="left">17.6%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div
+id="attempt-2-parametric-bootstrap.-anti-conservative-and-it-lost-sites."
+class="section level1">
+<h1>3. Attempt 2 — parametric bootstrap. Anti-conservative, and it lost
+sites.</h1>
+<p>The fix for an estimation-induced bias is to put the estimation into
+the null: for each site, simulate B = 500 datasets from its own fit,
+<strong>refit each one</strong>, and compare the observed KS statistic
+to that site’s own null. Refitting every replicate should make the
+conservatism cancel.</p>
+<p>Run on the 17 still-problematic sites plus 10 matched controls each
+(matched on covered cell lines, total depth and pooled %pU). The
+controls are the calibration check — being ordinary sites, their
+<code>p_boot</code> must be uniform.</p>
+<pre class="r"><code>ggplot(ctrl, aes(p_boot)) +
+  geom_histogram(breaks = seq(0, 1, 0.05), fill = &quot;#3987e5&quot;, colour = &quot;white&quot;,
+                 linewidth = 0.2) +
+  geom_hline(yintercept = nrow(ctrl) / 20, linetype = &quot;dashed&quot;, colour = &quot;#e34948&quot;) +
+  annotate(&quot;text&quot;, x = 0.55, y = nrow(ctrl) / 20, hjust = 0, vjust = -0.6,
+           label = &quot;uniform expectation&quot;, colour = &quot;#e34948&quot;, size = 3.4) +
+  labs(x = &quot;bootstrap p-value at MATCHED CONTROL sites&quot;, y = &quot;sites&quot;,
+       title = &quot;Attempt 2 calibration: now the p-values pile up at the BOTTOM&quot;,
+       subtitle = sprintf(&quot;n = %d;  frac(p&lt;0.05) = %.3f against a target of 0.05  -&gt;  the test is ANTI-CONSERVATIVE&quot;,
+                          nrow(ctrl), mean(ctrl$p_boot &lt; 0.05))) +
+  theme_bw(base_size = 12)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_gof_failed.Rmd/cal2-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>knitr::kable(data.table(
+  quantile = c(&quot;5%&quot;, &quot;10%&quot;, &quot;25%&quot;, &quot;50%&quot;, &quot;75%&quot;, &quot;90%&quot;, &quot;95%&quot;),
+  observed = round(quantile(ctrl$p_boot, c(.05, .1, .25, .5, .75, .9, .95)), 3),
+  `expected if uniform` = c(0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95)),
+  row.names = FALSE,
+  caption = &quot;Control p_boot against the uniform it should follow -- skewed across the whole range, not just the tail&quot;)</code></pre>
+<table>
+<caption>Control p_boot against the uniform it should follow – skewed
+across the whole range, not just the tail</caption>
+<thead>
+<tr class="header">
+<th align="left">quantile</th>
+<th align="right">observed</th>
+<th align="right">expected if uniform</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">5%</td>
+<td align="right">0.024</td>
+<td align="right">0.05</td>
+</tr>
+<tr class="even">
+<td align="left">10%</td>
+<td align="right">0.047</td>
+<td align="right">0.10</td>
+</tr>
+<tr class="odd">
+<td align="left">25%</td>
+<td align="right">0.180</td>
+<td align="right">0.25</td>
+</tr>
+<tr class="even">
+<td align="left">50%</td>
+<td align="right">0.419</td>
+<td align="right">0.50</td>
+</tr>
+<tr class="odd">
+<td align="left">75%</td>
+<td align="right">0.720</td>
+<td align="right">0.75</td>
+</tr>
+<tr class="even">
+<td align="left">90%</td>
+<td align="right">0.858</td>
+<td align="right">0.90</td>
+</tr>
+<tr class="odd">
+<td align="left">95%</td>
+<td align="right">0.925</td>
+<td align="right">0.95</td>
+</tr>
+</tbody>
+</table>
+<p>So attempt 1 was conservative at 0.012 and attempt 2 is
+anti-conservative at 0.121. Neither is usable.</p>
+<div id="why-the-bootstrap-overcorrected-refits-fail-and-selectively"
+class="section level2">
+<h2>Why the bootstrap overcorrected: refits fail, and selectively</h2>
+<pre class="r"><code>ggplot(bs, aes(grp, n_sim_ok, fill = grp)) +
+  geom_boxplot(width = 0.5, alpha = 0.85, outlier.size = 1) +
+  geom_hline(yintercept = 500, linetype = &quot;dashed&quot;, colour = &quot;grey40&quot;) +
+  annotate(&quot;text&quot;, x = 2.35, y = 500, hjust = 1, vjust = 1.6, size = 3.4,
+           colour = &quot;grey30&quot;, label = &quot;all 500 fitted&quot;) +
+  scale_fill_manual(values = c(problematic = &quot;#e34948&quot;,
+                               `matched control` = &quot;#3987e5&quot;), guide = &quot;none&quot;) +
+  labs(x = NULL, y = &quot;replicates refitted (of 500)&quot;,
+       title = &quot;The bootstrap null is truncated, and only at the problematic sites&quot;,
+       subtitle = &quot;Replicates that fail to refit produce no KS statistic and silently drop out of the null.&quot;) +
+  theme_bw(base_size = 12)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_gof_failed.Rmd/refit-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>knitr::kable(bs[, .(sites = .N,
+  `median refits ok (of 500)` = as.numeric(median(n_sim_ok)),
+  `min` = min(n_sim_ok),
+  `sites below 450/500` = sum(n_sim_ok &lt; 450)), by = grp],
+  caption = &quot;Every problematic site loses a fifth to nearly half of its null replicates; controls lose almost none.&quot;)</code></pre>
+<table>
+<caption>Every problematic site loses a fifth to nearly half of its null
+replicates; controls lose almost none.</caption>
+<colgroup>
+<col width="22%" />
+<col width="8%" />
+<col width="36%" />
+<col width="5%" />
+<col width="27%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">grp</th>
+<th align="right">sites</th>
+<th align="right">median refits ok (of 500)</th>
+<th align="right">min</th>
+<th align="right">sites below 450/500</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">matched control</td>
+<td align="right">149</td>
+<td align="right">500</td>
+<td align="right">269</td>
+<td align="right">12</td>
+</tr>
+<tr class="even">
+<td align="left">problematic</td>
+<td align="right">9</td>
+<td align="right">385</td>
+<td align="right">275</td>
+<td align="right">9</td>
+</tr>
+</tbody>
+</table>
+<p>If the replicates that fail are the ones that would have produced
+<em>large</em> KS statistics, the null is cut off at the top and the
+observed statistic looks falsely extreme. That is the mechanism, and it
+also explains a second problem:</p>
+<p><strong>8 of the 17 problematic sites produced no result at
+all</strong>, because more than half their replicates failed, tripping
+the script’s own guard. The comparison therefore ran on 9 of 17, and the
+8 excluded are plausibly the worst ones — so any enrichment estimate
+from the survivors is biased by an unknown amount.</p>
+<pre class="r"><code>knitr::kable(bs[grp == &quot;problematic&quot;][order(p_boot), .(
+  site = sid, ig_mhc, n_cl, pooled = round(pooled, 3),
+  D_obs = round(D_obs, 3), p_boot = signif(p_boot, 3),
+  q_boot = signif(q_boot, 3), p_nominal = signif(p_ks_nominal, 2), best_K)],
+  caption = paste(&quot;The&quot;, nrow(bs[grp == &quot;problematic&quot;]), &quot;problematic sites that completed.&quot;,
+                  &quot;After BH correction nothing reaches q &lt; 0.05.&quot;))</code></pre>
+<table style="width:100%;">
+<caption>The 9 problematic sites that completed. After BH correction
+nothing reaches q &lt; 0.05.</caption>
+<colgroup>
+<col width="18%" />
+<col width="10%" />
+<col width="7%" />
+<col width="10%" />
+<col width="8%" />
+<col width="11%" />
+<col width="10%" />
+<col width="14%" />
+<col width="10%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="left">ig_mhc</th>
+<th align="right">n_cl</th>
+<th align="right">pooled</th>
+<th align="right">D_obs</th>
+<th align="right">p_boot</th>
+<th align="right">q_boot</th>
+<th align="right">p_nominal</th>
+<th align="right">best_K</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">3 37277733</td>
+<td align="left">FALSE</td>
+<td align="right">50</td>
+<td align="right">0.534</td>
+<td align="right">0.271</td>
+<td align="right">0.00223</td>
+<td align="right">0.078</td>
+<td align="right">8.8e-04</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">14 22551976</td>
+<td align="left">FALSE</td>
+<td align="right">50</td>
+<td align="right">0.416</td>
+<td align="right">0.308</td>
+<td align="right">0.00246</td>
+<td align="right">0.078</td>
+<td align="right">3.3e-05</td>
+<td align="right">3</td>
+</tr>
+<tr class="odd">
+<td align="left">6 29943223</td>
+<td align="left">TRUE</td>
+<td align="right">44</td>
+<td align="right">0.579</td>
+<td align="right">0.228</td>
+<td align="right">0.00247</td>
+<td align="right">0.078</td>
+<td align="right">9.8e-03</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">14 106627394</td>
+<td align="left">TRUE</td>
+<td align="right">35</td>
+<td align="right">0.275</td>
+<td align="right">0.174</td>
+<td align="right">0.01550</td>
+<td align="right">0.246</td>
+<td align="right">2.0e-01</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">14 106639262</td>
+<td align="left">TRUE</td>
+<td align="right">41</td>
+<td align="right">0.069</td>
+<td align="right">0.159</td>
+<td align="right">0.05030</td>
+<td align="right">0.346</td>
+<td align="right">3.7e-01</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">2 89245076</td>
+<td align="left">TRUE</td>
+<td align="right">38</td>
+<td align="right">0.049</td>
+<td align="right">0.151</td>
+<td align="right">0.11600</td>
+<td align="right">0.568</td>
+<td align="right">5.0e-01</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">14 106410705</td>
+<td align="left">TRUE</td>
+<td align="right">39</td>
+<td align="right">0.376</td>
+<td align="right">0.143</td>
+<td align="right">0.27200</td>
+<td align="right">0.693</td>
+<td align="right">4.1e-01</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">14 106714819</td>
+<td align="left">TRUE</td>
+<td align="right">46</td>
+<td align="right">0.031</td>
+<td align="right">0.117</td>
+<td align="right">0.50700</td>
+<td align="right">0.839</td>
+<td align="right">3.0e-01</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">14 106537954</td>
+<td align="left">TRUE</td>
+<td align="right">37</td>
+<td align="right">0.020</td>
+<td align="right">0.113</td>
+<td align="right">0.82600</td>
+<td align="right">0.942</td>
+<td align="right">7.3e-01</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="what-survives-and-what-does-not" class="section level1">
+<h1>4. What survives, and what does not</h1>
+<div id="survives" class="section level2">
+<h2>Survives</h2>
+<p><strong>Three sites genuinely misfit.</strong> They separate by a
+wide margin under every version of the test, have the largest KS
+statistics in the set, and are the only ones needing more than one
+mixture component:</p>
+<pre class="r"><code>knitr::kable(gof[sid %chin% c(&quot;3 37277733&quot;, &quot;14 22551976&quot;, &quot;6 29943223&quot;),
+  .(site = sid, p_ks = signif(p_ks, 2), p_sw = signif(p_sw, 2),
+    p_dip = signif(p_dip, 2), best_K, phi = signif(phi, 3))][order(p_ks)],
+  caption = &quot;The three sites where the beta-binomial demonstrably does not describe the data&quot;)</code></pre>
+<table>
+<caption>The three sites where the beta-binomial demonstrably does not
+describe the data</caption>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="right">p_ks</th>
+<th align="right">p_sw</th>
+<th align="right">p_dip</th>
+<th align="right">best_K</th>
+<th align="right">phi</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">14 22551976</td>
+<td align="right">3.3e-05</td>
+<td align="right">2.0e-06</td>
+<td align="right">3.1e-05</td>
+<td align="right">3</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">3 37277733</td>
+<td align="right">8.8e-04</td>
+<td align="right">1.3e-05</td>
+<td align="right">0.0e+00</td>
+<td align="right">2</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">6 29943223</td>
+<td align="right">9.8e-03</td>
+<td align="right">8.9e-03</td>
+<td align="right">0.0e+00</td>
+<td align="right">2</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+<p>For these, the advisor’s hypothesis is confirmed: the %pU values form
+discrete clusters and the model cannot represent them.</p>
+<p><strong>But clustering is not the general explanation.</strong> Of
+the 17 problematic sites, most need only one mixture component — no
+clustering at all:</p>
+<pre class="r"><code>knitr::kable(dcast(gof[!is.na(best_K), .N, by = .(class, best_K)],
+                   class ~ best_K, value.var = &quot;N&quot;, fill = 0),
+  caption = &quot;Mixture components preferred by BIC. K=1 means no clustering.&quot;)</code></pre>
+<table>
+<caption>Mixture components preferred by BIC. K=1 means no
+clustering.</caption>
+<thead>
+<tr class="header">
+<th align="left">class</th>
+<th align="right">1</th>
+<th align="right">2</th>
+<th align="right">3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">still problematic after filtering</td>
+<td align="right">13</td>
+<td align="right">3</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">rest</td>
+<td align="right">10663</td>
+<td align="right">258</td>
+<td align="right">68</td>
+</tr>
+</tbody>
+</table>
+<p>13 of the 17 problematic sites have K = 1. Genome-wide only 3.0% of
+sites prefer K ≥ 2, so multimodality is uncommon and is not what makes
+these sites misbehave.</p>
+</div>
+<div id="does-not-survive" class="section level2">
+<h2>Does not survive</h2>
+<pre class="r"><code>knitr::kable(gof[, .(sites = .N,
+  `frac q_ks&lt;0.05` = sprintf(&quot;%.1f%%&quot;, 100 * mean(q_ks &lt; 0.05, na.rm = TRUE)),
+  `median best_K` = median(best_K, na.rm = TRUE)), by = ig_mhc],
+  caption = &quot;Prediction that failed: GOF failure was expected to concentrate in the Ig/MHC loci. It does not.&quot;)</code></pre>
+<table>
+<caption>Prediction that failed: GOF failure was expected to concentrate
+in the Ig/MHC loci. It does not.</caption>
+<thead>
+<tr class="header">
+<th align="left">ig_mhc</th>
+<th align="right">sites</th>
+<th align="left">frac q_ks&lt;0.05</th>
+<th align="right">median best_K</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">FALSE</td>
+<td align="right">10413</td>
+<td align="left">0.2%</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">TRUE</td>
+<td align="right">593</td>
+<td align="left">0.2%</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+<p>Two predictions made before running were wrong. <strong>GOF failure
+does not concentrate in immunoglobulin or MHC loci</strong> — the
+failure rate is 0.2% inside and outside alike, even though 13 of the 17
+problematic sites sit in those regions. And <strong>clustering was
+expected to explain the problematic sites as a group</strong>; it
+explains three of them.</p>
+<p>Any statement of the form “<em>X</em>% of sites fail the fit test” is
+also not supported, in either direction, because neither attempt was
+calibrated.</p>
+</div>
+</div>
+<div id="what-the-failure-led-to" class="section level1">
+<h1>5. What the failure led to</h1>
+<p>The refit-failure diagnostic above turned out to be the useful
+result. Read as a question it is: <em>if the world worked the way this
+site’s fitted model says, could I recover that model from fresh
+data?</em> Ordinary sites: yes, every time. Problematic sites: no, a
+fifth to nearly half the time.</p>
+<p>That pointed at the fitted parameters being degenerate, and checking
+them found it directly — <strong>every problematic site had the
+overdispersion parameter φ pinned to its boundary</strong>:</p>
+<pre class="r"><code>knitr::kable(feat[is.finite(phi), .(
+  sites = .N,
+  `median phi` = signif(median(phi), 3),
+  `frac phi &gt; 0.99` = sprintf(&quot;%.3f&quot;, mean(phi &gt; 0.99)),
+  `median refit failure rate` = round(median(refit_fail, na.rm = TRUE), 3)),
+  by = .(was_problematic = problematic)],
+  caption = &quot;phi is bounded to (0,1); phi -&gt; 1 collapses the beta prior, so the fit is degenerate.&quot;)</code></pre>
+<table>
+<caption>phi is bounded to (0,1); phi -&gt; 1 collapses the beta prior,
+so the fit is degenerate.</caption>
+<colgroup>
+<col width="21%" />
+<col width="8%" />
+<col width="14%" />
+<col width="21%" />
+<col width="34%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">was_problematic</th>
+<th align="right">sites</th>
+<th align="right">median phi</th>
+<th align="left">frac phi &gt; 0.99</th>
+<th align="right">median refit failure rate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">FALSE</td>
+<td align="right">10989</td>
+<td align="right">0.000644</td>
+<td align="left">0.002</td>
+<td align="right">0.0</td>
+</tr>
+<tr class="even">
+<td align="left">TRUE</td>
+<td align="right">17</td>
+<td align="right">1.000000</td>
+<td align="left">1.000</td>
+<td align="right">0.4</td>
+</tr>
+</tbody>
+</table>
+<p>φ &gt; 0.99 turned out to be a far better criterion than anything the
+GOF test offered, and removing those 48 sites eliminated the remaining
+problematic sites entirely. The comparison against the other
+candidates:</p>
+<pre class="r"><code>knitr::kable(crit[order(-caught, sites_removed)], row.names = FALSE,
+  caption = &quot;Candidate filters. phi&gt;0.99 is not in this table because it was found afterwards: it catches 17 of 17 for ~44 sites removed (0.4%).&quot;)</code></pre>
+<table>
+<caption>Candidate filters. phi&gt;0.99 is not in this table because it
+was found afterwards: it catches 17 of 17 for ~44 sites removed
+(0.4%).</caption>
+<colgroup>
+<col width="32%" />
+<col width="7%" />
+<col width="3%" />
+<col width="13%" />
+<col width="15%" />
+<col width="11%" />
+<col width="16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">criterion</th>
+<th align="right">caught</th>
+<th align="right">of</th>
+<th align="left">sensitivity</th>
+<th align="right">sites_removed</th>
+<th align="left">pct_of_all</th>
+<th align="right">cost_per_catch</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">refit_fail&gt;=0.10 OR best_K&gt;=2</td>
+<td align="right">17</td>
+<td align="right">17</td>
+<td align="left">100%</td>
+<td align="right">1858</td>
+<td align="left">16.9%</td>
+<td align="right">109.3</td>
+</tr>
+<tr class="even">
+<td align="left">refit_fail &gt;= 0.10</td>
+<td align="right">16</td>
+<td align="right">17</td>
+<td align="left">94%</td>
+<td align="right">1545</td>
+<td align="left">14.0%</td>
+<td align="right">96.6</td>
+</tr>
+<tr class="odd">
+<td align="left">refit_fail&gt;=0.10 OR ig_mhc</td>
+<td align="right">16</td>
+<td align="right">17</td>
+<td align="left">94%</td>
+<td align="right">2004</td>
+<td align="left">18.2%</td>
+<td align="right">125.2</td>
+</tr>
+<tr class="even">
+<td align="left">refit_fail &gt;= 0.20</td>
+<td align="right">14</td>
+<td align="right">17</td>
+<td align="left">82%</td>
+<td align="right">1105</td>
+<td align="left">10.0%</td>
+<td align="right">78.9</td>
+</tr>
+<tr class="odd">
+<td align="left">top_share &gt;= 0.30</td>
+<td align="right">14</td>
+<td align="right">17</td>
+<td align="left">82%</td>
+<td align="right">2231</td>
+<td align="left">20.3%</td>
+<td align="right">159.4</td>
+</tr>
+<tr class="even">
+<td align="left">in IGH/IGK/IGL/MHC</td>
+<td align="right">13</td>
+<td align="right">17</td>
+<td align="left">76%</td>
+<td align="right">593</td>
+<td align="left">5.4%</td>
+<td align="right">45.6</td>
+</tr>
+<tr class="odd">
+<td align="left">refit_fail &gt;= 0.30</td>
+<td align="right">12</td>
+<td align="right">17</td>
+<td align="left">71%</td>
+<td align="right">848</td>
+<td align="left">7.7%</td>
+<td align="right">70.7</td>
+</tr>
+<tr class="even">
+<td align="left">top_share &gt;= 0.50</td>
+<td align="right">11</td>
+<td align="right">17</td>
+<td align="left">65%</td>
+<td align="right">1294</td>
+<td align="left">11.8%</td>
+<td align="right">117.6</td>
+</tr>
+<tr class="odd">
+<td align="left">best_K &gt;= 2</td>
+<td align="right">4</td>
+<td align="right">17</td>
+<td align="left">24%</td>
+<td align="right">330</td>
+<td align="left">3.0%</td>
+<td align="right">82.5</td>
+</tr>
+<tr class="even">
+<td align="left">p_dip &lt; 0.05</td>
+<td align="right">3</td>
+<td align="right">17</td>
+<td align="left">18%</td>
+<td align="right">1719</td>
+<td align="left">15.6%</td>
+<td align="right">573.0</td>
+</tr>
+<tr class="odd">
+<td align="left">max_abs_b &gt;= 10</td>
+<td align="right">0</td>
+<td align="right">17</td>
+<td align="left">0%</td>
+<td align="right">61</td>
+<td align="left">0.6%</td>
+<td align="right">61.0</td>
+</tr>
+<tr class="even">
+<td align="left">max_abs_b &gt;= 5</td>
+<td align="right">0</td>
+<td align="right">17</td>
+<td align="left">0%</td>
+<td align="right">770</td>
+<td align="left">7.0%</td>
+<td align="right">770.0</td>
+</tr>
+</tbody>
+</table>
+<p>So the honest summary of this work: <strong>the goodness-of-fit test
+failed, and its diagnostics found the actual bug.</strong> The problem
+at those sites was never that the beta-binomial family is wrong for this
+data — it is that at those sites the model was never successfully
+fitted, and the LRT was computed from a boundary solution.</p>
+</div>
+<div id="what-would-be-needed-to-make-the-test-work"
+class="section level1">
+<h1>6. What would be needed to make the test work</h1>
+<ul>
+<li><strong>Treat failed refits as extreme rather than dropping
+them.</strong> A replicate that cannot be fitted is evidence of poor
+fit, not missing data. This removes the truncation bias directly and
+would let all 17 sites report. Most promising fix, small change.</li>
+<li><strong>Or fix β and φ at the observed estimates</strong> instead of
+refitting, which avoids failures but reintroduces the attempt-1
+conservatism.</li>
+<li><strong>Or use many more replicates with a bias correction</strong>,
+which needs a characterisation of the estimation effect at n = 50 that
+we do not have.</li>
+</ul>
+<p>None of this is currently a priority: with the φ filter in place
+there are no problematic sites left to explain, so a working GOF test
+would be confirmatory rather than diagnostic.</p>
+</div>
+<div id="provenance" class="section level1">
+<h1>Provenance</h1>
+<pre class="r"><code>knitr::kable(fread(file.path(G, &quot;runinfo_noUCcalled.txt&quot;)), caption = &quot;Attempt 1 parameters&quot;)</code></pre>
+<table>
+<caption>Attempt 1 parameters</caption>
+<thead>
+<tr class="header">
+<th align="left">parameter</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">phenotype</td>
+<td align="left">fold5_union_noUCcalled</td>
+</tr>
+<tr class="even">
+<td align="left">npcs</td>
+<td align="left">3</td>
+</tr>
+<tr class="odd">
+<td align="left">n_randomizations</td>
+<td align="left">5</td>
+</tr>
+<tr class="even">
+<td align="left">min_cell_lines</td>
+<td align="left">10</td>
+</tr>
+<tr class="odd">
+<td align="left">kmax</td>
+<td align="left">3</td>
+</tr>
+<tr class="even">
+<td align="left">boot_sites</td>
+<td align="left">400</td>
+</tr>
+<tr class="odd">
+<td align="left">boot_reps</td>
+<td align="left">5</td>
+</tr>
+<tr class="even">
+<td align="left">primary_test</td>
+<td align="left">KS of randomized quantile residuals vs U(0,1)</td>
+</tr>
+<tr class="odd">
+<td align="left">secondary</td>
+<td align="left">Shapiro-Wilk on qnorm(u)</td>
+</tr>
+<tr class="even">
+<td align="left">modality</td>
+<td align="left">Hartigan dip test; beta-binomial mixture BIC
+K=1..3</td>
+</tr>
+<tr class="odd">
+<td align="left">script</td>
+<td align="left">14.betabin_goodness_of_fit.R</td>
+</tr>
+<tr class="even">
+<td align="left">date</td>
+<td align="left">2026-08-24 13:16:41</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(fread(file.path(G, &quot;gof_bootstrap_runinfo.txt&quot;)), caption = &quot;Attempt 2 parameters&quot;)</code></pre>
+<table>
+<caption>Attempt 2 parameters</caption>
+<colgroup>
+<col width="23%" />
+<col width="76%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">parameter</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">phenotype</td>
+<td align="left">fold5_union_noUCcalled</td>
+</tr>
+<tr class="even">
+<td align="left">B</td>
+<td align="left">500</td>
+</tr>
+<tr class="odd">
+<td align="left">n_rand_per_D</td>
+<td align="left">3</td>
+</tr>
+<tr class="even">
+<td align="left">controls_per_site</td>
+<td align="left">10</td>
+</tr>
+<tr class="odd">
+<td align="left">min_cell_lines</td>
+<td align="left">10</td>
+</tr>
+<tr class="even">
+<td align="left">seed</td>
+<td align="left">20260824</td>
+</tr>
+<tr class="odd">
+<td align="left">statistic</td>
+<td align="left">KS D of randomized quantile residuals (averaged over
+draws)</td>
+</tr>
+<tr class="even">
+<td align="left">null</td>
+<td align="left">parametric bootstrap WITH refitting</td>
+</tr>
+<tr class="odd">
+<td align="left">script</td>
+<td align="left">16.gof_bootstrap_pvalues.R</td>
+</tr>
+<tr class="even">
+<td align="left">date</td>
+<td align="left">2026-08-24 13:44:13</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(data.table(
+  step = c(&quot;attempt 1: nominal p-values&quot;, &quot;attempt 2: parametric bootstrap&quot;,
+           &quot;candidate filter comparison&quot;, &quot;phi filter, iterated&quot;, &quot;this page&quot;),
+  script = c(&quot;14.betabin_goodness_of_fit.R&quot;, &quot;16.gof_bootstrap_pvalues.R&quot;,
+             &quot;17.problematic_site_filter.R&quot;, &quot;18.phi_filter_iteration.R&quot;,
+             &quot;analysis/qtl_mapping_betabinomial_gof_failed.Rmd&quot;)),
+  caption = &quot;Scripts&quot;)</code></pre>
+<table>
+<caption>Scripts</caption>
+<colgroup>
+<col width="39%" />
+<col width="60%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">step</th>
+<th align="left">script</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">attempt 1: nominal p-values</td>
+<td align="left">14.betabin_goodness_of_fit.R</td>
+</tr>
+<tr class="even">
+<td align="left">attempt 2: parametric bootstrap</td>
+<td align="left">16.gof_bootstrap_pvalues.R</td>
+</tr>
+<tr class="odd">
+<td align="left">candidate filter comparison</td>
+<td align="left">17.problematic_site_filter.R</td>
+</tr>
+<tr class="even">
+<td align="left">phi filter, iterated</td>
+<td align="left">18.phi_filter_iteration.R</td>
+</tr>
+<tr class="odd">
+<td align="left">this page</td>
+<td align="left">analysis/qtl_mapping_betabinomial_gof_failed.Rmd</td>
+</tr>
+</tbody>
+</table>
+<p>Related: <a href="qtl_mapping_betabinomial_strategy.html">the current
+strategy and its calibration</a> · <a
+href="qtl_mapping_betabinomial_site26.html">the 26 problematic
+sites</a></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 8
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.0  
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.2.0  xfun_0.38         bslib_0.3.1       colorspace_2.0-3 
+ [5] vctrs_0.6.1       generics_0.1.3    htmltools_0.5.7   yaml_2.3.5       
+ [9] utf8_1.2.2        rlang_1.1.2       R.oo_1.24.0       jquerylib_0.1.4  
+[13] later_1.3.0       pillar_1.9.0      glue_1.6.2        withr_2.5.0      
+[17] R.utils_2.11.0    lifecycle_1.0.4   stringr_1.5.0     munsell_0.5.0    
+[21] gtable_0.3.0      R.methodsS3_1.8.1 evaluate_0.15     labeling_0.4.2   
+[25] knitr_1.42        callr_3.7.0       fastmap_1.1.0     httpuv_1.6.5     
+[29] ps_1.7.0          fansi_1.0.3       highr_0.9         Rcpp_1.0.11      
+[33] promises_1.2.0.1  scales_1.2.0      jsonlite_1.8.7    farver_2.1.0     
+[37] fs_1.5.2          digest_0.6.29     stringi_1.7.6     processx_3.5.3   
+[41] dplyr_1.1.2       getPass_0.2-2     rprojroot_2.0.3   grid_4.2.0       
+[45] cli_3.6.2         tools_4.2.0       magrittr_2.0.3    sass_0.4.1       
+[49] tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3   rmarkdown_2.21   
+[53] httr_1.4.5        rstudioapi_0.14   R6_2.5.1          git2r_0.30.1     
+[57] compiler_4.2.0   </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

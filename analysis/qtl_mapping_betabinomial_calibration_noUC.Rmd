@@ -1,0 +1,228 @@
+---
+title: "Beta-binomial pU-QTL: calibration after removing the U/C-aliasing sites"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = "center", fig.width = 11)
+
+PSI <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl"
+DAT <- file.path(PSI, "qtl_betabinomial/calibration_noUC_page_data")
+
+qq   <- fread(file.path(DAT, "qq_before_after.tsv.gz"))
+lam  <- fread(file.path(DAT, "lambda_tail.tsv"))
+pan  <- fread(file.path(DAT, "site3_panels.tsv"))
+labs <- fread(file.path(DAT, "site3_labels.tsv"))
+exc  <- fread(file.path(DAT, "exclusion_summary.tsv"))
+info <- fread(file.path(DAT, "runinfo.tsv"))
+gv <- function(k) info[parameter == k]$value
+
+RUN_LV <- c("all sites (before)", "U/C sites removed (after)")
+qq[,  run := factor(run, levels = RUN_LV)]
+lam[, run := factor(run, levels = RUN_LV)]
+ORD <- c("real", paste0("perm", 1:5))
+qq[,  dataset := factor(dataset, levels = ORD)]
+lam[, dataset := factor(dataset, levels = ORD)]
+COLS <- c(real = "#e34948", perm1 = "#9ec5f4", perm2 = "#6da7ec",
+          perm3 = "#3987e5", perm4 = "#256abf", perm5 = "#0d366b")
+lv <- function(r, d, col) lam[run == r & dataset == d][[col]]
+```
+
+# Summary
+
+The [U/C-aliasing investigation](qtl_mapping_betabinomial_site26.html) found that
+a large share of pU sites carry a U↔C sequence variant on the modified base
+itself, which turns the measured "%pU" into a partial read-out of genotype. Those
+sites were then identified by **direct measurement** rather than annotation: in
+untreated RNA no chemical conversion occurs, so any C observed at a pU base is
+inherited.
+
+This page reruns the calibration on the filtered phenotype and asks whether that
+fixed the problem.
+
+**It largely did.**
+
+```{r headline}
+knitr::kable(data.table(
+  quantity = c("sites tested", "real-data lambda",
+               "permutation lambda (range)",
+               "sites still extreme under permutation"),
+  before = c(format(as.integer(gv("sites_before")), big.mark = ","),
+             sprintf("%.3f", lv(RUN_LV[1], "real", "lambda")),
+             sprintf("%.3f - %.3f",
+                     min(lam[run == RUN_LV[1] & dataset != "real"]$lambda),
+                     max(lam[run == RUN_LV[1] & dataset != "real"]$lambda)),
+             gv("problematic_before")),
+  after  = c(format(as.integer(gv("sites_after")), big.mark = ","),
+             sprintf("%.3f", lv(RUN_LV[2], "real", "lambda")),
+             sprintf("%.3f - %.3f",
+                     min(lam[run == RUN_LV[2] & dataset != "real"]$lambda),
+                     max(lam[run == RUN_LV[2] & dataset != "real"]$lambda)),
+             gv("problematic_after"))),
+  caption = "Calibration before and after excluding the U/C-aliasing sites")
+```
+
+The permutation λ values now sit at
+`r sprintf("%.2f-%.2f", min(lam[run == RUN_LV[2] & dataset != "real"]$lambda), max(lam[run == RUN_LV[2] & dataset != "real"]$lambda))`,
+which is what correct calibration looks like — under permutation there is no
+genotype–phenotype relationship, so λ should be 1. The real-data λ of
+**`r sprintf("%.3f", lv(RUN_LV[2], "real", "lambda"))`** is the mild inflation one
+expects from genuine cis signal, rather than the **`r sprintf("%.3f", lv(RUN_LV[1], "real", "lambda"))`**
+seen before, which was artefact.
+
+# 1. What was excluded
+
+A site was dropped if **either** criterion held: an untreated C fraction too high
+to be explained by conversion (measured aliasing), **or** a called U/C variant on
+the pU base (annotation). Neither criterion alone is sufficient.
+
+```{r exclusion}
+knitr::kable(exc, caption = paste("Why each excluded site was dropped.",
+  "'measured only' are sites where NO variant was ever called -- invisible to",
+  "annotation, and the reason measuring beats looking up."))
+```
+
+Note also that the filtered phenotype carries its **own recomputed covariate
+PCs**. The original PCs were derived from all sites, ~18% of which are genotype
+read-outs, so they partly encoded population structure rather than technical
+variation. PC2 and PC3 moved substantially (|r| ≈ 0.84 between old and new), and
+those are active covariates in this k=3 model.
+
+# 2. Calibration before and after
+
+Each panel shows the real scan in red and the five phenotype permutations in
+blue. The permutation series is the diagnostic: with the phenotype shuffled
+there is nothing to find, so those points should lie on the dashed line.
+
+```{r qq, fig.height=5.6}
+ggplot(qq, aes(expected, observed, colour = dataset)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey45") +
+  geom_point(size = 0.6, alpha = 0.75) +
+  scale_colour_manual(values = COLS, name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
+  facet_wrap(~ run, scales = "free_y") +
+  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
+       title = "Beta-binomial LRT calibration, before and after the U/C filter",
+       subtitle = paste("Note the free y-axis: the left panel reaches ~",
+                        round(lv(RUN_LV[1], "real", "max_nlp")),
+                        "and the right panel ~",
+                        round(lv(RUN_LV[2], "real", "max_nlp")), "on -log10(p).")) +
+  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+```
+
+```{r lam-tab}
+w <- dcast(lam, dataset ~ run, value.var = "lambda")
+setcolorder(w, c("dataset", RUN_LV))
+knitr::kable(w[order(factor(dataset, levels = ORD))], digits = 3,
+             caption = "lambda, the median-based inflation factor")
+
+t <- dcast(lam, dataset ~ run, value.var = "max_nlp")
+setcolorder(t, c("dataset", RUN_LV))
+knitr::kable(t[order(factor(dataset, levels = ORD))], digits = 1,
+             caption = "Largest observed -log10(p) -- the QQ tail height")
+```
+
+Both quantities improved, which is worth stressing because they had previously
+moved independently: earlier, removing a curated list of 26 sites collapsed the
+tail but barely touched λ, while removing the U/C sites moved λ but left the
+tail. Filtering by **measured** aliasing — which catches uncalled variants the
+annotation missed — fixes both at once.
+
+# 3. The sites that are still problematic
+
+`r gv("problematic_after")` sites still return an extreme p-value under
+permutation, down from `r gv("problematic_before")`. Removing even these moves λ
+by less than 0.001, so they no longer distort the bulk of the distribution.
+
+```{r site3-tab}
+knitr::kable(labs[order(-real_nlp)][, .(
+  site = sprintf("chr%s:%s", chr, format(pos, big.mark = ",", trim = TRUE)),
+  `real -log10p` = real_nlp,
+  `permutation range` = sprintf("%.1f - %.1f", perm_min, perm_max),
+  `in the original 26?` = ifelse(was_in_original_26, "yes", "no -- newly flagged"),
+  `cell lines` = n_cl, depth = total_depth,
+  `pooled %pU` = round(pooled_pu, 3),
+  `top cell-line share` = round(top_cellline_share, 2),
+  `untreated C frac` = round(untreated_ratio_max, 4))],
+  caption = paste("All", nrow(labs), "sites that remain extreme under permutation."))
+```
+
+Three things stand out.
+
+**They are not aliasing.** Untreated C fractions are ~0.01, so the filter was
+right to keep them — there is no inherited C at these bases.
+
+**They are the single-cell-line concentration pattern.** One or two cell lines
+carry nearly all the converted reads while the rest sit at zero. At
+chr14:106,470,411 a **single** cell line supplies 100% of them, across only 15
+covered cell lines.
+
+**Two of the three were not problematic before.** They are newly flagged, and the
+likely reason is that the covariate PCs changed when they were recomputed on the
+filtered sites, altering the null fit. The problematic-site set is therefore not
+a fixed property of the data — it moves with the model.
+
+```{r site3-fig, fig.height=3.6}
+lb <- labs[order(-real_nlp)]
+lab_of <- setNames(sprintf("chr%s:%s\n-log10p=%.0f | top line=%.0f%% | %d cell lines",
+                           lb$chr, format(lb$pos, big.mark = ",", trim = TRUE),
+                           lb$real_nlp, 100 * lb$top_cellline_share, lb$n_cl), lb$sid)
+d <- copy(pan); d[, lab := factor(lab_of[sid], levels = lab_of)]
+ggplot(d, aes(pu, pmax(n, 1))) +
+  geom_vline(xintercept = c(0, 0.5, 1), colour = "grey88", linewidth = 0.4) +
+  geom_point(colour = "#256abf", alpha = 0.75, size = 2) +
+  scale_x_continuous(limits = c(-0.04, 1.04), breaks = c(0, 0.5, 1),
+                     labels = c("0", "50", "100")) +
+  scale_y_log10(labels = scales::comma) +
+  facet_wrap(~ lab, nrow = 1) +
+  labs(x = "%pU in one cell line", y = "read depth (log scale)",
+       title = "The remaining problematic sites: a wall at zero plus one or two outliers",
+       subtitle = "Each dot is one cell line. No discrete 0/50/100% banding -- this is concentration, not aliasing.") +
+  theme_bw(base_size = 11) +
+  theme(strip.text = element_text(size = 8), panel.grid.minor = element_blank())
+```
+
+# 4. What is still open
+
+- **A concentration filter.** All three survivors share one signature: a single
+  cell line supplying most or all of the converted reads. A cap on that share
+  would remove them, and it is computable for any site without genotype or
+  untreated data. It has not been applied here.
+- **Is the beta-binomial itself at fault?** With aliasing excluded as the
+  explanation, these three sites are the natural test set for a goodness-of-fit
+  test of the beta-binomial — the question of whether the model can represent a
+  phenotype shaped like this at all. That test is written but has not been run.
+- **The discovery scan has not been rerun.** This page covers calibration only.
+  The scan on the filtered phenotype was submitted and then deliberately
+  cancelled to focus on calibration first, so there is no updated discovery count
+  yet. Note that excluding `r format(as.integer(gv("sites_before")) - as.integer(gv("sites_after")), big.mark = ",")`
+  sites also changes the multiple-testing correction, so the new count will not
+  simply be the old one minus the excluded hits.
+
+# Reproducing this page
+
+```{r prov}
+knitr::kable(info, caption = "Parameters")
+knitr::kable(data.table(
+  step = c("untreated (pooled input) count matrices",
+           "U/C-filtered phenotype + recomputed PCs",
+           "site-resolved calibration on the filtered phenotype",
+           "extraction of the remaining problematic sites",
+           "precompute for this page", "this page"),
+  script = c("12.untreated_counts_matrix.R", "13.filtered_phenotype.R",
+             "8.calibration_site_resolved.R --pheno fold5_union_noUC",
+             "9.qq_exclude_pathological.R --stem calib_siteres_w5kb_pc3_noUC",
+             "15.calibration_noUC_page_data.R",
+             "analysis/qtl_mapping_betabinomial_calibration_noUC.Rmd")),
+  caption = "Provenance. Both scan scripts take --pheno so the original fold5_union results are never overwritten.")
+```
+
+Related: [the 26 problematic sites](qtl_mapping_betabinomial_site26.html) ·
+[full pathology write-up](qtl_mapping_betabinomial_pathology_summary.html)

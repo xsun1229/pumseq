@@ -1,0 +1,324 @@
+---
+title: "Beta-binomial pU-QTL: a goodness-of-fit test that did not work (and what it revealed)"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = "center", fig.width = 11)
+
+PSI <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl"
+G   <- file.path(PSI, "qtl_betabinomial/goodness_of_fit")
+
+gof  <- fread(file.path(G, "site_goodness_of_fit_noUCcalled.txt.gz"))
+bp1  <- fread(file.path(G, "calibration_bootstrap_p_noUCcalled.txt.gz"))$bootstrap_p_ks
+bs   <- fread(file.path(G, "gof_bootstrap_sites.txt.gz"))
+feat <- fread(file.path(G, "site_features_noUCcalled.txt.gz"))
+crit <- fread(file.path(G, "filter_criteria_comparison.txt"))
+
+gof[, class := factor(class, levels = c("still problematic after filtering", "rest"))]
+bs[, grp := factor(grp, levels = c("problematic", "matched control"))]
+ctrl <- bs[grp == "matched control"]
+```
+
+# Why this page exists
+
+The advisor's question was direct: *"test if Beta-Binomial is a good fit. If the
+data form discrete clusters of %pU levels, then Beta-Binomial may be a poor fit.
+Check the literature about how to do goodness-of-fit test of Beta-Binomial."*
+
+Two attempts were made and **neither produced usable p-values**. This page records
+that, because the failure is informative in two ways: it says what not to try
+next, and its diagnostics are what led to the φ-boundary discovery that
+ultimately fixed the calibration (see
+[the strategy page](qtl_mapping_betabinomial_strategy.html)).
+
+The few conclusions that do survive are stated at the end, separated from the
+ones that do not.
+
+# 1. The literature does not offer a usable off-the-shelf test
+
+```{r lit}
+knitr::kable(data.table(
+  test = c("Tarone (1979) Z", "Brooks et al. (1997)", "both of the above"),
+  problem = c(
+    "tests binomial vs beta-binomial, i.e. whether overdispersion exists at all -- the wrong direction. It would confirm the beta-binomial beats the binomial, which we already assume.",
+    "is a genuine beta-binomial GOF test, but Garren, Smith & Piegorsch (Biometrics 2000; 56:947-950) showed it cannot distinguish the beta-binomial from 'some severely non-beta-binomial models' -- exactly our alternative.",
+    "assume homogeneous data: one mu shared by all observations. Our model has covariates (intercept + 3 M-value PCs), so mu differs per cell line.")),
+  caption = "Why the classical tests were not used")
+```
+
+So the test had to be built from a general principle instead: **randomized
+quantile residuals** (Dunn & Smyth 1996). Ask the fitted model what percentile
+each cell line's observation sits at; under a correctly specified model those
+percentiles are uniform, so testing uniformity *is* the fit test. Randomization
+inside each integer's probability interval is what makes the percentiles
+continuous — without it a discrete CDF gives lumpy values that are not uniform
+even under a true model.
+
+Four quantities were computed per site:
+
+```{r what}
+knitr::kable(data.table(
+  output = c("p_ks", "p_sw", "p_dip", "best_K"),
+  question = c("does the model fit? (KS of percentiles vs uniform -- PRIMARY)",
+               "same, shape-sensitive (Shapiro-Wilk on qnorm(u) -- secondary)",
+               "is there more than one cluster? (Hartigan dip test, ignores the model)",
+               "how many clusters? (beta-binomial mixture BIC over K = 1, 2, 3)"),
+  note = c("chosen as primary because its null is fully specified -- nothing can absorb a misfit",
+           "location- and scale-invariant, so BLIND to residuals that are normal but too wide, i.e. to dispersion misfit",
+           "answers 'more than one', not 'how many'",
+           "the interpretable number: K=3 is the 0/1/2 genotype signature")),
+  caption = "The four per-site outputs")
+```
+
+# 2. Attempt 1 — nominal p-values. Conservative.
+
+Run on `fold5_union_noUCcalled` (U/C-variant sites already excluded), 11,006 of
+11,298 sites testable.
+
+The calibration check is the whole ballgame: simulate data **from** each fitted
+model — data that is beta-binomial by construction — and re-test. The p-values
+must come out uniform.
+
+```{r cal1, fig.height=4}
+d1 <- data.table(p = bp1)
+ggplot(d1, aes(p)) +
+  geom_histogram(breaks = seq(0, 1, 0.05), fill = "#3987e5", colour = "white",
+                 linewidth = 0.2) +
+  geom_hline(yintercept = length(bp1) / 20, linetype = "dashed", colour = "#e34948") +
+  annotate("text", x = 0.02, y = length(bp1) / 20, hjust = 0, vjust = -0.6,
+           label = "uniform expectation", colour = "#e34948", size = 3.4) +
+  labs(x = "nominal KS p-value on data simulated from the fitted model",
+       y = "replicates",
+       title = "Attempt 1 calibration: p-values pile up at the TOP, not uniform",
+       subtitle = sprintf("n = %s;  frac(p<0.05) = %.3f against a target of 0.05  ->  the test is CONSERVATIVE",
+                          format(length(bp1), big.mark = ","), mean(bp1 < 0.05))) +
+  theme_bw(base_size = 12)
+```
+
+`frac(p<0.05) = `r sprintf("%.3f", mean(bp1 < 0.05))`` where 0.05 is required, and
+a KS test of these against uniform gives p = `r sprintf("%.3g", suppressWarnings(ks.test(bp1, "punif")$p.value))`.
+
+**Cause.** Randomized quantile residuals are exactly uniform when the parameters
+are *known*. Ours are estimated from the same ~50 observations (4 coefficients
+plus φ), so the fitted model sits closer to the data than the truth would, the
+residuals are under-dispersed, and the KS p-value inflates. Dunn & Smyth's
+"exactly normal" carries the caveat "apart from sampling variability in the
+estimated parameters" — at n = 50 with 5 parameters that caveat dominates.
+
+A conservative test still has one use: anything it *does* flag is real. On that
+basis the problematic sites were enriched — but the measured rate is a lower
+bound, so the enrichment cannot be quantified.
+
+```{r a1-res}
+knitr::kable(gof[, .(sites = .N,
+  `median p_ks` = signif(median(p_ks, na.rm = TRUE), 3),
+  `frac q_ks<0.05` = sprintf("%.1f%%", 100 * mean(q_ks < 0.05, na.rm = TRUE)),
+  `frac q_sw<0.05` = sprintf("%.1f%%", 100 * mean(q_sw < 0.05, na.rm = TRUE)),
+  `frac q_dip<0.05` = sprintf("%.1f%%", 100 * mean(q_dip < 0.05, na.rm = TRUE))),
+  by = class], caption = "Attempt 1 results -- read as lower bounds, not rates")
+```
+
+# 3. Attempt 2 — parametric bootstrap. Anti-conservative, and it lost sites.
+
+The fix for an estimation-induced bias is to put the estimation into the null:
+for each site, simulate B = 500 datasets from its own fit, **refit each one**, and
+compare the observed KS statistic to that site's own null. Refitting every
+replicate should make the conservatism cancel.
+
+Run on the 17 still-problematic sites plus 10 matched controls each (matched on
+covered cell lines, total depth and pooled %pU). The controls are the calibration
+check — being ordinary sites, their `p_boot` must be uniform.
+
+```{r cal2, fig.height=4}
+ggplot(ctrl, aes(p_boot)) +
+  geom_histogram(breaks = seq(0, 1, 0.05), fill = "#3987e5", colour = "white",
+                 linewidth = 0.2) +
+  geom_hline(yintercept = nrow(ctrl) / 20, linetype = "dashed", colour = "#e34948") +
+  annotate("text", x = 0.55, y = nrow(ctrl) / 20, hjust = 0, vjust = -0.6,
+           label = "uniform expectation", colour = "#e34948", size = 3.4) +
+  labs(x = "bootstrap p-value at MATCHED CONTROL sites", y = "sites",
+       title = "Attempt 2 calibration: now the p-values pile up at the BOTTOM",
+       subtitle = sprintf("n = %d;  frac(p<0.05) = %.3f against a target of 0.05  ->  the test is ANTI-CONSERVATIVE",
+                          nrow(ctrl), mean(ctrl$p_boot < 0.05))) +
+  theme_bw(base_size = 12)
+```
+
+```{r cal2-tab}
+knitr::kable(data.table(
+  quantile = c("5%", "10%", "25%", "50%", "75%", "90%", "95%"),
+  observed = round(quantile(ctrl$p_boot, c(.05, .1, .25, .5, .75, .9, .95)), 3),
+  `expected if uniform` = c(0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95)),
+  row.names = FALSE,
+  caption = "Control p_boot against the uniform it should follow -- skewed across the whole range, not just the tail")
+```
+
+So attempt 1 was conservative at 0.012 and attempt 2 is anti-conservative at
+`r sprintf("%.3f", mean(ctrl$p_boot < 0.05))`. Neither is usable.
+
+## Why the bootstrap overcorrected: refits fail, and selectively
+
+```{r refit, fig.height=4.6}
+ggplot(bs, aes(grp, n_sim_ok, fill = grp)) +
+  geom_boxplot(width = 0.5, alpha = 0.85, outlier.size = 1) +
+  geom_hline(yintercept = 500, linetype = "dashed", colour = "grey40") +
+  annotate("text", x = 2.35, y = 500, hjust = 1, vjust = 1.6, size = 3.4,
+           colour = "grey30", label = "all 500 fitted") +
+  scale_fill_manual(values = c(problematic = "#e34948",
+                               `matched control` = "#3987e5"), guide = "none") +
+  labs(x = NULL, y = "replicates refitted (of 500)",
+       title = "The bootstrap null is truncated, and only at the problematic sites",
+       subtitle = "Replicates that fail to refit produce no KS statistic and silently drop out of the null.") +
+  theme_bw(base_size = 12)
+```
+
+```{r refit-tab}
+knitr::kable(bs[, .(sites = .N,
+  `median refits ok (of 500)` = as.numeric(median(n_sim_ok)),
+  `min` = min(n_sim_ok),
+  `sites below 450/500` = sum(n_sim_ok < 450)), by = grp],
+  caption = "Every problematic site loses a fifth to nearly half of its null replicates; controls lose almost none.")
+```
+
+If the replicates that fail are the ones that would have produced *large* KS
+statistics, the null is cut off at the top and the observed statistic looks
+falsely extreme. That is the mechanism, and it also explains a second problem:
+
+**8 of the 17 problematic sites produced no result at all**, because more than
+half their replicates failed, tripping the script's own guard. The comparison
+therefore ran on 9 of 17, and the 8 excluded are plausibly the worst ones — so
+any enrichment estimate from the survivors is biased by an unknown amount.
+
+```{r dropped}
+knitr::kable(bs[grp == "problematic"][order(p_boot), .(
+  site = sid, ig_mhc, n_cl, pooled = round(pooled, 3),
+  D_obs = round(D_obs, 3), p_boot = signif(p_boot, 3),
+  q_boot = signif(q_boot, 3), p_nominal = signif(p_ks_nominal, 2), best_K)],
+  caption = paste("The", nrow(bs[grp == "problematic"]), "problematic sites that completed.",
+                  "After BH correction nothing reaches q < 0.05."))
+```
+
+# 4. What survives, and what does not
+
+## Survives
+
+**Three sites genuinely misfit.** They separate by a wide margin under every
+version of the test, have the largest KS statistics in the set, and are the only
+ones needing more than one mixture component:
+
+```{r survive}
+knitr::kable(gof[sid %chin% c("3 37277733", "14 22551976", "6 29943223"),
+  .(site = sid, p_ks = signif(p_ks, 2), p_sw = signif(p_sw, 2),
+    p_dip = signif(p_dip, 2), best_K, phi = signif(phi, 3))][order(p_ks)],
+  caption = "The three sites where the beta-binomial demonstrably does not describe the data")
+```
+
+For these, the advisor's hypothesis is confirmed: the %pU values form discrete
+clusters and the model cannot represent them.
+
+**But clustering is not the general explanation.** Of the 17 problematic sites,
+most need only one mixture component — no clustering at all:
+
+```{r bestk}
+knitr::kable(dcast(gof[!is.na(best_K), .N, by = .(class, best_K)],
+                   class ~ best_K, value.var = "N", fill = 0),
+  caption = "Mixture components preferred by BIC. K=1 means no clustering.")
+```
+
+`r sum(gof[class != "rest" & best_K == 1]$best_K == 1)` of the
+`r nrow(gof[class != "rest"])` problematic sites have K = 1. Genome-wide only
+`r sprintf("%.1f%%", 100*mean(gof$best_K >= 2, na.rm = TRUE))` of sites prefer
+K ≥ 2, so multimodality is uncommon and is not what makes these sites misbehave.
+
+## Does not survive
+
+```{r wrong}
+knitr::kable(gof[, .(sites = .N,
+  `frac q_ks<0.05` = sprintf("%.1f%%", 100 * mean(q_ks < 0.05, na.rm = TRUE)),
+  `median best_K` = median(best_K, na.rm = TRUE)), by = ig_mhc],
+  caption = "Prediction that failed: GOF failure was expected to concentrate in the Ig/MHC loci. It does not.")
+```
+
+Two predictions made before running were wrong. **GOF failure does not
+concentrate in immunoglobulin or MHC loci** — the failure rate is 0.2% inside and
+outside alike, even though 13 of the 17 problematic sites sit in those regions.
+And **clustering was expected to explain the problematic sites as a group**; it
+explains three of them.
+
+Any statement of the form "*X*% of sites fail the fit test" is also not supported,
+in either direction, because neither attempt was calibrated.
+
+# 5. What the failure led to
+
+The refit-failure diagnostic above turned out to be the useful result. Read as a
+question it is: *if the world worked the way this site's fitted model says, could
+I recover that model from fresh data?* Ordinary sites: yes, every time.
+Problematic sites: no, a fifth to nearly half the time.
+
+That pointed at the fitted parameters being degenerate, and checking them found
+it directly — **every problematic site had the overdispersion parameter φ pinned
+to its boundary**:
+
+```{r phi}
+knitr::kable(feat[is.finite(phi), .(
+  sites = .N,
+  `median phi` = signif(median(phi), 3),
+  `frac phi > 0.99` = sprintf("%.3f", mean(phi > 0.99)),
+  `median refit failure rate` = round(median(refit_fail, na.rm = TRUE), 3)),
+  by = .(was_problematic = problematic)],
+  caption = "phi is bounded to (0,1); phi -> 1 collapses the beta prior, so the fit is degenerate.")
+```
+
+φ > 0.99 turned out to be a far better criterion than anything the GOF test
+offered, and removing those 48 sites eliminated the remaining problematic sites
+entirely. The comparison against the other candidates:
+
+```{r crit}
+knitr::kable(crit[order(-caught, sites_removed)], row.names = FALSE,
+  caption = "Candidate filters. phi>0.99 is not in this table because it was found afterwards: it catches 17 of 17 for ~44 sites removed (0.4%).")
+```
+
+So the honest summary of this work: **the goodness-of-fit test failed, and its
+diagnostics found the actual bug.** The problem at those sites was never that the
+beta-binomial family is wrong for this data — it is that at those sites the model
+was never successfully fitted, and the LRT was computed from a boundary solution.
+
+# 6. What would be needed to make the test work
+
+- **Treat failed refits as extreme rather than dropping them.** A replicate that
+  cannot be fitted is evidence of poor fit, not missing data. This removes the
+  truncation bias directly and would let all 17 sites report. Most promising fix,
+  small change.
+- **Or fix β and φ at the observed estimates** instead of refitting, which avoids
+  failures but reintroduces the attempt-1 conservatism.
+- **Or use many more replicates with a bias correction**, which needs a
+  characterisation of the estimation effect at n = 50 that we do not have.
+
+None of this is currently a priority: with the φ filter in place there are no
+problematic sites left to explain, so a working GOF test would be confirmatory
+rather than diagnostic.
+
+# Provenance
+
+```{r prov}
+knitr::kable(fread(file.path(G, "runinfo_noUCcalled.txt")), caption = "Attempt 1 parameters")
+knitr::kable(fread(file.path(G, "gof_bootstrap_runinfo.txt")), caption = "Attempt 2 parameters")
+knitr::kable(data.table(
+  step = c("attempt 1: nominal p-values", "attempt 2: parametric bootstrap",
+           "candidate filter comparison", "phi filter, iterated", "this page"),
+  script = c("14.betabin_goodness_of_fit.R", "16.gof_bootstrap_pvalues.R",
+             "17.problematic_site_filter.R", "18.phi_filter_iteration.R",
+             "analysis/qtl_mapping_betabinomial_gof_failed.Rmd")),
+  caption = "Scripts")
+```
+
+Related: [the current strategy and its calibration](qtl_mapping_betabinomial_strategy.html) ·
+[the 26 problematic sites](qtl_mapping_betabinomial_site26.html)

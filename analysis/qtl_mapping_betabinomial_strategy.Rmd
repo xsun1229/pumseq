@@ -1,0 +1,314 @@
+---
+title: "Beta-binomial pU-QTL: the current filtering strategy and its calibration"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = "center", fig.width = 11)
+
+PSI <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl"
+DAT <- file.path(PSI, "qtl_betabinomial/strategy_page_data")
+
+qq   <- fread(file.path(DAT, "qq_all_runs.tsv.gz"))
+lam  <- fread(file.path(DAT, "lambda_all_runs.tsv"))
+phid <- fread(file.path(DAT, "phi_distribution.tsv"))
+phis <- fread(file.path(DAT, "phi_per_site.tsv.gz"))
+iter <- fread(file.path(DAT, "phi_iteration.tsv"))
+excl <- fread(file.path(DAT, "exclusion_steps.tsv"))
+info <- fread(file.path(DAT, "runinfo.tsv"))
+gv <- function(k) info[parameter == k]$value
+
+RUN_LV <- c("1. all sites", "2. minus U/C-variant sites",
+            "3. minus U/C + phi-boundary sites")
+ORD <- c("real", paste0("perm", 1:5))
+qq[,  run := factor(run, levels = RUN_LV)][, dataset := factor(dataset, levels = ORD)]
+lam[, run := factor(run, levels = RUN_LV)][, dataset := factor(dataset, levels = ORD)]
+COLS <- c(real = "#e34948", perm1 = "#9ec5f4", perm2 = "#6da7ec",
+          perm3 = "#3987e5", perm4 = "#256abf", perm5 = "#0d366b")
+lv <- function(r, d, col) lam[run == r & dataset == d][[col]]
+FINAL <- RUN_LV[3]
+```
+
+# The strategy in one table
+
+Two filters are applied to the phenotype before mapping. Neither is a curated
+list of bad sites: both are rules computable from a single site's own data, so
+they apply unchanged to any future dataset.
+
+```{r strategy}
+knitr::kable(data.table(
+  step = c("start", "1. U/C-variant sites", "2. phi-boundary fits", "final"),
+  what = c("all called pU sites",
+           "a U/C variant is CALLED on the pU base, so %pU partly reports genotype",
+           "the fitted overdispersion phi lands on its boundary (phi > 0.99), i.e. the fit is degenerate",
+           "used for all QTL mapping"),
+  removed = c("--", format(as.integer(gv("excluded_UC")), big.mark = ","),
+              gv("excluded_phi"), "--"),
+  sites_left = c(format(as.integer(gv("sites_start")), big.mark = ","),
+                 format(as.integer(gv("sites_start")) - as.integer(gv("excluded_UC")), big.mark = ","),
+                 format(as.integer(gv("sites_final")), big.mark = ","),
+                 format(as.integer(gv("sites_final")), big.mark = ","))),
+  caption = sprintf("Phenotype: %s. Covariate PCs are recomputed on the retained sites at each step.", gv("final_phenotype")))
+```
+
+And the effect on calibration, which is the point of the whole exercise:
+
+```{r headline}
+knitr::kable(data.table(
+  run = RUN_LV,
+  `real lambda` = vapply(RUN_LV, lv, numeric(1), d = "real", col = "lambda"),
+  `permutation lambda (range)` = vapply(RUN_LV, function(r)
+    sprintf("%.3f - %.3f", min(lam[run == r & dataset != "real"]$lambda),
+            max(lam[run == r & dataset != "real"]$lambda)), character(1)),
+  `real tail` = round(vapply(RUN_LV, lv, numeric(1), d = "real", col = "max_nlp"), 1),
+  `worst permuted tail` = round(vapply(RUN_LV, function(r)
+    max(lam[run == r & dataset != "real"]$max_nlp), numeric(1)), 1),
+  `problematic sites` = vapply(RUN_LV, function(r)
+    lam[run == r][1]$n_problematic, integer(1))),
+  row.names = FALSE, digits = 3,
+  caption = "Under permutation there is no genotype-phenotype relationship, so those rows are the diagnostic: lambda should be 1 and the tail near 0.")
+```
+
+**`r lam[run == FINAL][1]$n_problematic` sites remain problematic** after both
+filters, down from `r lam[run == RUN_LV[1]][1]$n_problematic`. Permutation λ sits
+at `r sprintf("%.2f-%.2f", min(lam[run == FINAL & dataset != "real"]$lambda), max(lam[run == FINAL & dataset != "real"]$lambda))`,
+which is what correct calibration looks like, and the real-data λ of
+**`r sprintf("%.3f", lv(FINAL, "real", "lambda"))`** is the mild inflation
+expected from genuine cis signal — not the
+`r sprintf("%.3f", lv(RUN_LV[1], "real", "lambda"))` seen before any filtering,
+which was artefact.
+
+# 1. Calibration QQ plots
+
+Each panel is one filtering stage. **Red is the real scan; the five blues are
+independent phenotype permutations.** The permutation series carries the
+information: shuffling the phenotype destroys any genotype–phenotype
+relationship, so those points must lie on the dashed line. Where they rise above
+it, the test is manufacturing signal out of nothing.
+
+```{r qq-facets, fig.height=4.8}
+ggplot(qq, aes(expected, observed, colour = dataset)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey45") +
+  geom_point(size = 0.55, alpha = 0.75) +
+  scale_colour_manual(values = COLS, name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
+  facet_wrap(~ run, nrow = 1, scales = "free_y") +
+  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
+       title = "Beta-binomial LRT calibration at each filtering stage",
+       subtitle = "Note the free y-axis -- the left panel reaches ~290, the right ~28. The blues are what matter.") +
+  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+```
+
+## The final calibration on its own
+
+The same data as the right-hand panel above, at full size, since this is the
+plot that describes the analysis actually being used.
+
+```{r qq-final, fig.height=6}
+ggplot(qq[run == FINAL], aes(expected, observed, colour = dataset)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey40") +
+  geom_point(size = 1.1, alpha = 0.8) +
+  scale_colour_manual(values = COLS, name = NULL,
+                      labels = c("real data", paste("permutation", 1:5))) +
+  guides(colour = guide_legend(override.aes = list(size = 3, alpha = 1), nrow = 1)) +
+  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
+       title = sprintf("Calibration after both filters (%s sites tested)",
+                       format(lam[run == FINAL & dataset == "real"]$n_sites, big.mark = ",")),
+       subtitle = paste0("real lambda = ", sprintf("%.3f", lv(FINAL, "real", "lambda")),
+                         "; permutations ",
+                         sprintf("%.3f-%.3f", min(lam[run == FINAL & dataset != "real"]$lambda),
+                                 max(lam[run == FINAL & dataset != "real"]$lambda)),
+                         ". The permutation series sit close to, though slightly above, the diagonal",
+                         " -- consistent with lambda just over 1 -- and one reaches ~12 in the far tail.",
+                         " The real series separates from all five.")) +
+  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+```
+
+The gap between the red series and the blue ones **is** the signal, and this is
+the first time in this project the plot has looked like a working cis-QTL scan.
+
+Two honest qualifications, both visible in the figure. The permutation series run
+slightly *above* the diagonal rather than on it, which is what λ of 1.02–1.06
+means — a small residual inflation that the filters did not remove. And one
+permutation point still reaches ≈12 in the far tail: a single site can produce an
+extreme p-value from shuffled data, it simply does not also do so in the real
+data, which is why it is not counted as problematic.
+
+```{r lam-tab}
+w <- dcast(lam, dataset ~ run, value.var = "lambda")
+setcolorder(w, c("dataset", RUN_LV))
+knitr::kable(w[order(factor(dataset, levels = ORD))], digits = 3,
+             caption = "lambda by dataset and stage")
+t <- dcast(lam, dataset ~ run, value.var = "max_nlp")
+setcolorder(t, c("dataset", RUN_LV))
+knitr::kable(t[order(factor(dataset, levels = ORD))], digits = 1,
+             caption = "Largest observed -log10(p): the QQ tail height")
+```
+
+# 2. Filter 1 — U/C-variant sites
+
+Pseudouridine is a modified uridine and the assay reads the base at that
+position: a modified U is called **C**, an unmodified U is called **T**. So if a
+common sequence variant changes that same base from U to C, an inherited C is
+indistinguishable from a modification, and the measured "%pU" becomes partly a
+read-out of genotype.
+
+This was established by measurement rather than inference. Each cell line has
+untreated `input_pool` libraries where no chemical conversion occurs, so any C
+seen there is inherited. At sites with a called U/C variant the untreated C
+fraction is ~1.0; elsewhere the median is 0.0004.
+
+**`r format(as.integer(gv("excluded_UC")), big.mark = ",")` sites are excluded**
+on the basis of a called U/C variant on the pU base.
+
+> A broader version of this filter also drops sites where the untreated controls
+> *measure* inherited C although no variant was called (~1,170 more). It gives a
+> better-looking result but removes more than intended, so it is not used here.
+> See the [companion page](qtl_mapping_betabinomial_calibration_noUC.html).
+
+# 3. Filter 2 — degenerate fits (phi on the boundary)
+
+This step is not about the phenotype at all. φ is the beta-binomial's
+overdispersion parameter, bounded to (0, 1). As φ → 1 the beta prior collapses
+(`k = (1-φ)/φ → 0`) and the model degenerates, so a fit that lands there has not
+really been fitted.
+
+```{r phi-dist, fig.height=4.2}
+p <- copy(phis)[is.finite(phi)]
+ggplot(p, aes(pmax(phi, 1e-6), fill = problematic)) +
+  geom_histogram(bins = 60, position = "identity", alpha = 0.75, colour = NA) +
+  geom_vline(xintercept = 0.99, linetype = "dashed", colour = "grey25") +
+  annotate("text", x = 0.99, y = Inf, hjust = 1.05, vjust = 1.6, size = 3.2,
+           label = "phi = 0.99 ") +
+  scale_x_log10() + scale_y_sqrt() +
+  scale_fill_manual(values = c(`FALSE` = "#3987e5", `TRUE` = "#e34948"),
+                    labels = c("ordinary site", "was problematic under permutation"),
+                    name = NULL) +
+  labs(x = "fitted overdispersion phi (log scale)", y = "sites (sqrt scale)",
+       title = "phi spans its whole range; the problematic sites sit at the very top of it",
+       subtitle = paste("phi is broadly and multi-modally distributed from 1e-6 to 1 -- there is NO clean gap.",
+                        "\nWhat is clean is the discrimination: every site still problematic after filter 1",
+                        "has phi > 0.99, and only 0.4% of all sites do.")) +
+  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+```
+
+The distribution is not neatly bimodal — φ occupies its entire range with
+several modes, so 0.99 is a cut in the extreme tail rather than a gap between two
+clean populations. What *is* clean is the discrimination:
+
+```{r phi-tab}
+knitr::kable(phis[is.finite(phi), .(
+  sites = .N,
+  `median phi` = signif(median(phi), 3),
+  `frac phi > 0.99` = sprintf("%.3f", mean(phi > 0.99)),
+  `median refit failure rate` = round(median(refit_fail, na.rm = TRUE), 3)),
+  by = .(was_problematic = problematic)],
+  caption = paste("The MEDIAN ordinary site sits four orders of magnitude from the",
+                  "boundary, but the distribution is broad, so this contrast is",
+                  "between typical values rather than between separated clusters.",
+                  "'refit failure rate' is the fraction of datasets simulated from a",
+                  "site's own fit that then cannot be refitted -- a direct measure of",
+                  "how unstable the fit is."))
+```
+
+Two things make this a fitter correctness issue rather than a tuned threshold:
+
+**`betabin_lib.R` already rejects boundary fits for the other parameters** — it
+guards against μ hitting 0 or 1 and against runaway coefficients
+(`MAX_ABS_COEF`). φ was simply omitted from that set. The right long-term home
+for this rule is inside `fit_bb_mle`, not a site exclusion list.
+
+**Data simulated from these fits often cannot be refitted at all.** Simulate 30
+datasets from a site's own fitted model and try to recover it: ordinary sites
+succeed every time, boundary sites fail 20–45% of the time. If a model cannot be
+recovered from data it generated itself, nothing computed from it is trustworthy.
+
+## Does the filter converge?
+
+Removing sites changes the site set, so the covariate PCs must be recomputed —
+which changes every site's fit, which can push new sites onto the boundary. The
+filter therefore has to be iterated to a fixed point rather than applied once.
+
+```{r phi-iter}
+knitr::kable(iter, digits = 5,
+  caption = paste("Each round drops the flagged sites, recomputes the PCs, refits",
+                  "everything, and looks for new boundary fits."))
+```
+
+It converges after `r max(iter$round)` rounds at
+**`r max(iter$n_dropped_total)` sites**. Applying the filter once would have
+caught `r iter$n_new_flagged[1]` and missed
+`r max(iter$n_dropped_total) - iter$n_new_flagged[1]`.
+
+φ itself is stable for the sites that are kept (correlation 0.9986 between the
+first and last round, with only 0.11% of sites moving by more than 0.01), which
+is why convergence is quick — the PCs enter the model through μ, while φ is
+driven mostly by a site's own scatter.
+
+# 4. What each exclusion reason contributed
+
+```{r excl}
+knitr::kable(excl, caption = "Breakdown of the final exclusion manifest")
+```
+
+The two filters do not overlap: `r format(as.integer(gv("excluded_UC")), big.mark = ",")`
++ `r gv("excluded_phi")` = `r format(as.integer(gv("excluded_UC")) + as.integer(gv("excluded_phi")), big.mark = ",")`
+exactly. They are catching genuinely different problems — a contaminated
+phenotype versus a degenerate fit.
+
+# Caveats and what is not done
+
+- **The discovery scan has not been rerun on this phenotype.** This page is
+  calibration only, so there is no updated hit list. Note that excluding
+  `r format(as.integer(gv("excluded_UC")) + as.integer(gv("excluded_phi")), big.mark = ",")`
+  sites also changes the multiple-testing correction, so the new count will not
+  be the old one minus the excluded hits.
+- **The φ guard lives in a filter script, not in the fitter.** Until it is moved
+  into `fit_bb_mle`, any analysis that bypasses this phenotype can reproduce the
+  problem.
+- **"Sites tested" is smaller than "sites in the phenotype"** — `r format(as.integer(gv("sites_final")), big.mark = ",")`
+  retained but `r format(lam[run == FINAL & dataset == "real"]$n_sites, big.mark = ",")`
+  tested, the rest having no cis-SNP at MAF ≥ 0.05 within ±5 kb or failing to
+  fit. The two numbers are not interchangeable.
+- **A goodness-of-fit test was run separately** and found that only a minority of
+  the previously-problematic sites showed genuine distributional misfit; most had
+  no multimodality at all. Its own calibration check failed in both directions
+  (conservative with nominal p-values, anti-conservative with a bootstrap), so
+  those p-values should be read as indicative only.
+- **The real-data λ of `r sprintf("%.3f", lv(FINAL, "real", "lambda"))`** is
+  assumed to reflect genuine cis signal. That is an interpretation, not a
+  measurement — a residual artefact affecting many sites weakly would look the
+  same.
+
+# Reproducing this page
+
+```{r prov}
+knitr::kable(info, caption = "Parameters")
+knitr::kable(data.table(
+  step = c("untreated (pooled input) count matrices",
+           "U/C + phi filtered phenotype, PCs recomputed",
+           "phi filter iterated to convergence",
+           "site-resolved calibration (real + 5 permutations)",
+           "extraction of remaining problematic sites",
+           "precompute for this page", "this page"),
+  script = c("12.untreated_counts_matrix.R",
+             "13.filtered_phenotype.R --criterion called --exclude-list <phi sites>",
+             "18.phi_filter_iteration.R",
+             "8.calibration_site_resolved.R --pheno fold5_union_noUCcalled_noPhi",
+             "9.qq_exclude_pathological.R --stem calib_siteres_w5kb_pc3_noUCcalled_noPhi",
+             "19.strategy_page_data.R",
+             "analysis/qtl_mapping_betabinomial_strategy.Rmd")),
+  caption = "Provenance. Both scan scripts take --pheno / --stem so earlier results are never overwritten.")
+```
+
+Related: [the 26 problematic sites](qtl_mapping_betabinomial_site26.html) ·
+[calibration after the U/C filter](qtl_mapping_betabinomial_calibration_noUCcalled.html) ·
+[full pathology write-up](qtl_mapping_betabinomial_pathology_summary.html)
