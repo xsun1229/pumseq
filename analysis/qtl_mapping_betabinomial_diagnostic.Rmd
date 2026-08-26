@@ -144,7 +144,7 @@ Gall <- t(as.matrix(traw[, ..samp])); gid <- traw$SNP
 # permutation replicate (they are meant to be compared side by side, so they
 # must not drift apart).
 #
-# Depth encoding, revised twice after advisor feedback:
+# Depth encoding, revised twice:
 #   v1 linear dot size    -> unreadable (depth spans ~4 orders of magnitude,
 #                            so the legend degenerated to 0 / 5000 / 10000).
 #   v2 log10 dot size     -> still hard to judge; size is a weak perceptual

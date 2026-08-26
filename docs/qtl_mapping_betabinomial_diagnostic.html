@@ -11,7 +11,7 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-08-11" />
+<meta name="date" content="2026-08-25" />
 
 <title>QTL mapping: beta-binomial top-hit diagnostic</title>
 
@@ -374,7 +374,7 @@ div.tocify {
 <h1 class="title toc-ignore">QTL mapping: beta-binomial top-hit
 diagnostic</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-08-11</h4>
+<h4 class="date">2026-08-25</h4>
 
 </div>
 
@@ -403,7 +403,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-08-11
+<strong>Last updated:</strong> 2026-08-25
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreec93e1881cd70e7860630d2985ba042a2f566b12dtargetblankc93e188a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree1cb1d5d4dc629f07a48368baba2f826a8c38874atargetblank1cb1d5da">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/c93e1881cd70e7860630d2985ba042a2f566b12d" target="_blank">c93e188</a>
+<a href="https://github.com/xsun1229/pumseq/tree/1cb1d5d4dc629f07a48368baba2f826a8c38874a" target="_blank">1cb1d5d</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreec93e1881cd70e7860630d2985ba042a2f566b12dtargetblankc93e188a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree1cb1d5d4dc629f07a48368baba2f826a8c38874atargetblank1cb1d5da"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/c93e1881cd70e7860630d2985ba042a2f566b12d" target="_blank">c93e188</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/1cb1d5d4dc629f07a48368baba2f826a8c38874a" target="_blank">1cb1d5d</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -574,6 +574,8 @@ Ignored files:
 
 Unstaged changes:
     Modified:   analysis/qtl_mapping_betabinomial_diagnostic.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_gof_failed.Rmd
+    Modified:   analysis/qtl_mapping_score_vs_lrt.Rmd
 
 </code></pre>
 <p>
@@ -620,6 +622,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/057f47488e42072579c5db23cd7a14c36f7d0845/analysis/qtl_mapping_betabinomial_diagnostic.Rmd" target="_blank">057f474</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-11
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/057f47488e42072579c5db23cd7a14c36f7d0845/docs/qtl_mapping_betabinomial_diagnostic.html" target="_blank">057f474</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-11
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1326,7 +1362,7 @@ Gall &lt;- t(as.matrix(traw[, ..samp])); gid &lt;- traw$SNP
 # permutation replicate (they are meant to be compared side by side, so they
 # must not drift apart).
 #
-# Depth encoding, revised twice after advisor feedback:
+# Depth encoding, revised twice:
 #   v1 linear dot size    -&gt; unreadable (depth spans ~4 orders of magnitude,
 #                            so the legend degenerated to 0 / 5000 / 10000).
 #   v2 log10 dot size     -&gt; still hard to judge; size is a weak perceptual

@@ -17,9 +17,9 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
 
 # Motivation
 
-The advisor's question: *"I am not familiar with the statistical test used
-here [the score test]. You can probably still use LRT, but then you'll need
-to include a 'nuisance' parameter — the extent of overdispersion."*
+*"I am not familiar with the statistical test used here [the score test]. You
+can probably still use LRT, but then you'll need to include a 'nuisance'
+parameter — the extent of overdispersion."*
 
 Both the [binomial](qtl_mapping_binomial_model.html) and
 [beta-binomial](qtl_mapping_betabinomial_model.html) pU-QTL models test

@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree98956cc98c068821981d40b7e0a22ae07ae96625targetblank98956cca">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree1cb1d5d4dc629f07a48368baba2f826a8c38874atargetblank1cb1d5da">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/98956cc98c068821981d40b7e0a22ae07ae96625" target="_blank">98956cc</a>
+<a href="https://github.com/xsun1229/pumseq/tree/1cb1d5d4dc629f07a48368baba2f826a8c38874a" target="_blank">1cb1d5d</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree98956cc98c068821981d40b7e0a22ae07ae96625targetblank98956cca"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree1cb1d5d4dc629f07a48368baba2f826a8c38874atargetblank1cb1d5da"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/98956cc98c068821981d40b7e0a22ae07ae96625" target="_blank">98956cc</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/1cb1d5d4dc629f07a48368baba2f826a8c38874a" target="_blank">1cb1d5d</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -573,7 +573,9 @@ Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Unstaged changes:
+    Modified:   analysis/qtl_mapping_betabinomial_diagnostic.Rmd
     Modified:   analysis/qtl_mapping_betabinomial_gof_failed.Rmd
+    Modified:   analysis/qtl_mapping_score_vs_lrt.Rmd
 
 </code></pre>
 <p>
@@ -620,6 +622,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/1cb1d5d4dc629f07a48368baba2f826a8c38874a/analysis/qtl_mapping_betabinomial_gof_failed.Rmd" target="_blank">1cb1d5d</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-25
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/1cb1d5d4dc629f07a48368baba2f826a8c38874a/docs/qtl_mapping_betabinomial_gof_failed.html" target="_blank">1cb1d5d</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-25
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -867,6 +903,43 @@ ggplot(d0, aes(p_ks)) +
                           median(d0$p_ks), sum(d0$q_ks &lt; 0.05, na.rm = TRUE))) +
   theme_bw(base_size = 12)</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_gof_failed.Rmd/a1-dist-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-a1-dist-1">
+Past versions of a1-dist-1.png
+</button>
+</p>
+<div id="fig-a1-dist-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/1cb1d5d4dc629f07a48368baba2f826a8c38874a/docs/figure/qtl_mapping_betabinomial_gof_failed.Rmd/a1-dist-1.png" target="_blank">1cb1d5d</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-25
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>knitr::kable(data.table(
   quantity = c(&quot;sites in the phenotype&quot;, &quot;testable (&gt;=10 covered cell lines, fit converged)&quot;,
                &quot;p_ks values produced&quot;, &quot;KS tests run (5 jitter draws each)&quot;,
@@ -1478,522 +1551,91 @@ nothing reaches q &lt; 0.05.</caption>
 </tr>
 </tbody>
 </table>
-</div>
-</div>
-<div id="what-survives-and-what-does-not" class="section level1">
-<h1>4. What survives, and what does not</h1>
-<div id="survives" class="section level2">
-<h2>Survives</h2>
-<p><strong>Three sites genuinely misfit.</strong> They separate by a
-wide margin under every version of the test, have the largest KS
-statistics in the set, and are the only ones needing more than one
-mixture component:</p>
-<pre class="r"><code>knitr::kable(gof[sid %chin% c(&quot;3 37277733&quot;, &quot;14 22551976&quot;, &quot;6 29943223&quot;),
-  .(site = sid, p_ks = signif(p_ks, 2), p_sw = signif(p_sw, 2),
-    p_dip = signif(p_dip, 2), best_K, phi = signif(phi, 3))][order(p_ks)],
-  caption = &quot;The three sites where the beta-binomial demonstrably does not describe the data&quot;)</code></pre>
-<table>
-<caption>The three sites where the beta-binomial demonstrably does not
-describe the data</caption>
-<thead>
-<tr class="header">
-<th align="left">site</th>
-<th align="right">p_ks</th>
-<th align="right">p_sw</th>
-<th align="right">p_dip</th>
-<th align="right">best_K</th>
-<th align="right">phi</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">14 22551976</td>
-<td align="right">3.3e-05</td>
-<td align="right">2.0e-06</td>
-<td align="right">3.1e-05</td>
-<td align="right">3</td>
-<td align="right">1</td>
-</tr>
-<tr class="even">
-<td align="left">3 37277733</td>
-<td align="right">8.8e-04</td>
-<td align="right">1.3e-05</td>
-<td align="right">0.0e+00</td>
-<td align="right">2</td>
-<td align="right">1</td>
-</tr>
-<tr class="odd">
-<td align="left">6 29943223</td>
-<td align="right">9.8e-03</td>
-<td align="right">8.9e-03</td>
-<td align="right">0.0e+00</td>
-<td align="right">2</td>
-<td align="right">1</td>
-</tr>
-</tbody>
-</table>
-<p>For these, the advisor’s hypothesis is confirmed: the %pU values form
-discrete clusters and the model cannot represent them.</p>
-<p><strong>But clustering is not the general explanation.</strong> Of
-the 17 problematic sites, most need only one mixture component — no
-clustering at all:</p>
-<pre class="r"><code>knitr::kable(dcast(gof[!is.na(best_K), .N, by = .(class, best_K)],
-                   class ~ best_K, value.var = &quot;N&quot;, fill = 0),
-  caption = &quot;Mixture components preferred by BIC. K=1 means no clustering.&quot;)</code></pre>
-<table>
-<caption>Mixture components preferred by BIC. K=1 means no
-clustering.</caption>
-<thead>
-<tr class="header">
-<th align="left">class</th>
-<th align="right">1</th>
-<th align="right">2</th>
-<th align="right">3</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">still problematic after filtering</td>
-<td align="right">13</td>
-<td align="right">3</td>
-<td align="right">1</td>
-</tr>
-<tr class="even">
-<td align="left">rest</td>
-<td align="right">10663</td>
-<td align="right">258</td>
-<td align="right">68</td>
-</tr>
-</tbody>
-</table>
-<p>13 of the 17 problematic sites have K = 1. Genome-wide only 3.0% of
-sites prefer K ≥ 2, so multimodality is uncommon and is not what makes
-these sites misbehave.</p>
-</div>
-<div id="does-not-survive" class="section level2">
-<h2>Does not survive</h2>
-<pre class="r"><code>knitr::kable(gof[, .(sites = .N,
-  `frac q_ks&lt;0.05` = sprintf(&quot;%.1f%%&quot;, 100 * mean(q_ks &lt; 0.05, na.rm = TRUE)),
-  `median best_K` = median(best_K, na.rm = TRUE)), by = ig_mhc],
-  caption = &quot;Prediction that failed: GOF failure was expected to concentrate in the Ig/MHC loci. It does not.&quot;)</code></pre>
-<table>
-<caption>Prediction that failed: GOF failure was expected to concentrate
-in the Ig/MHC loci. It does not.</caption>
-<thead>
-<tr class="header">
-<th align="left">ig_mhc</th>
-<th align="right">sites</th>
-<th align="left">frac q_ks&lt;0.05</th>
-<th align="right">median best_K</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">FALSE</td>
-<td align="right">10413</td>
-<td align="left">0.2%</td>
-<td align="right">1</td>
-</tr>
-<tr class="even">
-<td align="left">TRUE</td>
-<td align="right">593</td>
-<td align="left">0.2%</td>
-<td align="right">1</td>
-</tr>
-</tbody>
-</table>
-<p>Two predictions made before running were wrong. <strong>GOF failure
-does not concentrate in immunoglobulin or MHC loci</strong> — the
-failure rate is 0.2% inside and outside alike, even though 13 of the 17
-problematic sites sit in those regions. And <strong>clustering was
-expected to explain the problematic sites as a group</strong>; it
-explains three of them.</p>
-<p>Any statement of the form “<em>X</em>% of sites fail the fit test” is
-also not supported, in either direction, because neither attempt was
-calibrated.</p>
-</div>
-</div>
-<div id="what-the-failure-led-to" class="section level1">
-<h1>5. What the failure led to</h1>
-<p>The refit-failure diagnostic above turned out to be the useful
-result. Read as a question it is: <em>if the world worked the way this
-site’s fitted model says, could I recover that model from fresh
-data?</em> Ordinary sites: yes, every time. Problematic sites: no, a
-fifth to nearly half the time.</p>
-<p>That pointed at the fitted parameters being degenerate, and checking
-them found it directly — <strong>every problematic site had the
-overdispersion parameter φ pinned to its boundary</strong>:</p>
-<pre class="r"><code>knitr::kable(feat[is.finite(phi), .(
-  sites = .N,
-  `median phi` = signif(median(phi), 3),
-  `frac phi &gt; 0.99` = sprintf(&quot;%.3f&quot;, mean(phi &gt; 0.99)),
-  `median refit failure rate` = round(median(refit_fail, na.rm = TRUE), 3)),
-  by = .(was_problematic = problematic)],
-  caption = &quot;phi is bounded to (0,1); phi -&gt; 1 collapses the beta prior, so the fit is degenerate.&quot;)</code></pre>
-<table>
-<caption>phi is bounded to (0,1); phi -&gt; 1 collapses the beta prior,
-so the fit is degenerate.</caption>
-<colgroup>
-<col width="21%" />
-<col width="8%" />
-<col width="14%" />
-<col width="21%" />
-<col width="34%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">was_problematic</th>
-<th align="right">sites</th>
-<th align="right">median phi</th>
-<th align="left">frac phi &gt; 0.99</th>
-<th align="right">median refit failure rate</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">FALSE</td>
-<td align="right">10989</td>
-<td align="right">0.000644</td>
-<td align="left">0.002</td>
-<td align="right">0.0</td>
-</tr>
-<tr class="even">
-<td align="left">TRUE</td>
-<td align="right">17</td>
-<td align="right">1.000000</td>
-<td align="left">1.000</td>
-<td align="right">0.4</td>
-</tr>
-</tbody>
-</table>
-<p>φ &gt; 0.99 turned out to be a far better criterion than anything the
-GOF test offered, and removing those 48 sites eliminated the remaining
-problematic sites entirely. The comparison against the other
-candidates:</p>
-<pre class="r"><code>knitr::kable(crit[order(-caught, sites_removed)], row.names = FALSE,
-  caption = &quot;Candidate filters. phi&gt;0.99 is not in this table because it was found afterwards: it catches 17 of 17 for ~44 sites removed (0.4%).&quot;)</code></pre>
-<table>
-<caption>Candidate filters. phi&gt;0.99 is not in this table because it
-was found afterwards: it catches 17 of 17 for ~44 sites removed
-(0.4%).</caption>
-<colgroup>
-<col width="32%" />
-<col width="7%" />
-<col width="3%" />
-<col width="13%" />
-<col width="15%" />
-<col width="11%" />
-<col width="16%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">criterion</th>
-<th align="right">caught</th>
-<th align="right">of</th>
-<th align="left">sensitivity</th>
-<th align="right">sites_removed</th>
-<th align="left">pct_of_all</th>
-<th align="right">cost_per_catch</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">refit_fail&gt;=0.10 OR best_K&gt;=2</td>
-<td align="right">17</td>
-<td align="right">17</td>
-<td align="left">100%</td>
-<td align="right">1858</td>
-<td align="left">16.9%</td>
-<td align="right">109.3</td>
-</tr>
-<tr class="even">
-<td align="left">refit_fail &gt;= 0.10</td>
-<td align="right">16</td>
-<td align="right">17</td>
-<td align="left">94%</td>
-<td align="right">1545</td>
-<td align="left">14.0%</td>
-<td align="right">96.6</td>
-</tr>
-<tr class="odd">
-<td align="left">refit_fail&gt;=0.10 OR ig_mhc</td>
-<td align="right">16</td>
-<td align="right">17</td>
-<td align="left">94%</td>
-<td align="right">2004</td>
-<td align="left">18.2%</td>
-<td align="right">125.2</td>
-</tr>
-<tr class="even">
-<td align="left">refit_fail &gt;= 0.20</td>
-<td align="right">14</td>
-<td align="right">17</td>
-<td align="left">82%</td>
-<td align="right">1105</td>
-<td align="left">10.0%</td>
-<td align="right">78.9</td>
-</tr>
-<tr class="odd">
-<td align="left">top_share &gt;= 0.30</td>
-<td align="right">14</td>
-<td align="right">17</td>
-<td align="left">82%</td>
-<td align="right">2231</td>
-<td align="left">20.3%</td>
-<td align="right">159.4</td>
-</tr>
-<tr class="even">
-<td align="left">in IGH/IGK/IGL/MHC</td>
-<td align="right">13</td>
-<td align="right">17</td>
-<td align="left">76%</td>
-<td align="right">593</td>
-<td align="left">5.4%</td>
-<td align="right">45.6</td>
-</tr>
-<tr class="odd">
-<td align="left">refit_fail &gt;= 0.30</td>
-<td align="right">12</td>
-<td align="right">17</td>
-<td align="left">71%</td>
-<td align="right">848</td>
-<td align="left">7.7%</td>
-<td align="right">70.7</td>
-</tr>
-<tr class="even">
-<td align="left">top_share &gt;= 0.50</td>
-<td align="right">11</td>
-<td align="right">17</td>
-<td align="left">65%</td>
-<td align="right">1294</td>
-<td align="left">11.8%</td>
-<td align="right">117.6</td>
-</tr>
-<tr class="odd">
-<td align="left">best_K &gt;= 2</td>
-<td align="right">4</td>
-<td align="right">17</td>
-<td align="left">24%</td>
-<td align="right">330</td>
-<td align="left">3.0%</td>
-<td align="right">82.5</td>
-</tr>
-<tr class="even">
-<td align="left">p_dip &lt; 0.05</td>
-<td align="right">3</td>
-<td align="right">17</td>
-<td align="left">18%</td>
-<td align="right">1719</td>
-<td align="left">15.6%</td>
-<td align="right">573.0</td>
-</tr>
-<tr class="odd">
-<td align="left">max_abs_b &gt;= 10</td>
-<td align="right">0</td>
-<td align="right">17</td>
-<td align="left">0%</td>
-<td align="right">61</td>
-<td align="left">0.6%</td>
-<td align="right">61.0</td>
-</tr>
-<tr class="even">
-<td align="left">max_abs_b &gt;= 5</td>
-<td align="right">0</td>
-<td align="right">17</td>
-<td align="left">0%</td>
-<td align="right">770</td>
-<td align="left">7.0%</td>
-<td align="right">770.0</td>
-</tr>
-</tbody>
-</table>
-<p>So the honest summary of this work: <strong>the goodness-of-fit test
-failed, and its diagnostics found the actual bug.</strong> The problem
-at those sites was never that the beta-binomial family is wrong for this
-data — it is that at those sites the model was never successfully
-fitted, and the LRT was computed from a boundary solution.</p>
-</div>
-<div id="what-would-be-needed-to-make-the-test-work"
-class="section level1">
-<h1>6. What would be needed to make the test work</h1>
-<ul>
-<li><strong>Treat failed refits as extreme rather than dropping
-them.</strong> A replicate that cannot be fitted is evidence of poor
-fit, not missing data. This removes the truncation bias directly and
-would let all 17 sites report. Most promising fix, small change.</li>
-<li><strong>Or fix β and φ at the observed estimates</strong> instead of
-refitting, which avoids failures but reintroduces the attempt-1
-conservatism.</li>
-<li><strong>Or use many more replicates with a bias correction</strong>,
-which needs a characterisation of the estimation effect at n = 50 that
-we do not have.</li>
-</ul>
-<p>None of this is currently a priority: with the φ filter in place
-there are no problematic sites left to explain, so a working GOF test
-would be confirmatory rather than diagnostic.</p>
-</div>
-<div id="provenance" class="section level1">
-<h1>Provenance</h1>
-<pre class="r"><code>knitr::kable(fread(file.path(G, &quot;runinfo_noUCcalled.txt&quot;)), caption = &quot;Attempt 1 parameters&quot;)</code></pre>
-<table>
-<caption>Attempt 1 parameters</caption>
-<thead>
-<tr class="header">
-<th align="left">parameter</th>
-<th align="left">value</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">phenotype</td>
-<td align="left">fold5_union_noUCcalled</td>
-</tr>
-<tr class="even">
-<td align="left">npcs</td>
-<td align="left">3</td>
-</tr>
-<tr class="odd">
-<td align="left">n_randomizations</td>
-<td align="left">5</td>
-</tr>
-<tr class="even">
-<td align="left">min_cell_lines</td>
-<td align="left">10</td>
-</tr>
-<tr class="odd">
-<td align="left">kmax</td>
-<td align="left">3</td>
-</tr>
-<tr class="even">
-<td align="left">boot_sites</td>
-<td align="left">400</td>
-</tr>
-<tr class="odd">
-<td align="left">boot_reps</td>
-<td align="left">5</td>
-</tr>
-<tr class="even">
-<td align="left">primary_test</td>
-<td align="left">KS of randomized quantile residuals vs U(0,1)</td>
-</tr>
-<tr class="odd">
-<td align="left">secondary</td>
-<td align="left">Shapiro-Wilk on qnorm(u)</td>
-</tr>
-<tr class="even">
-<td align="left">modality</td>
-<td align="left">Hartigan dip test; beta-binomial mixture BIC
-K=1..3</td>
-</tr>
-<tr class="odd">
-<td align="left">script</td>
-<td align="left">14.betabin_goodness_of_fit.R</td>
-</tr>
-<tr class="even">
-<td align="left">date</td>
-<td align="left">2026-08-24 13:16:41</td>
-</tr>
-</tbody>
-</table>
-<pre class="r"><code>knitr::kable(fread(file.path(G, &quot;gof_bootstrap_runinfo.txt&quot;)), caption = &quot;Attempt 2 parameters&quot;)</code></pre>
-<table>
-<caption>Attempt 2 parameters</caption>
-<colgroup>
-<col width="23%" />
-<col width="76%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">parameter</th>
-<th align="left">value</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">phenotype</td>
-<td align="left">fold5_union_noUCcalled</td>
-</tr>
-<tr class="even">
-<td align="left">B</td>
-<td align="left">500</td>
-</tr>
-<tr class="odd">
-<td align="left">n_rand_per_D</td>
-<td align="left">3</td>
-</tr>
-<tr class="even">
-<td align="left">controls_per_site</td>
-<td align="left">10</td>
-</tr>
-<tr class="odd">
-<td align="left">min_cell_lines</td>
-<td align="left">10</td>
-</tr>
-<tr class="even">
-<td align="left">seed</td>
-<td align="left">20260824</td>
-</tr>
-<tr class="odd">
-<td align="left">statistic</td>
-<td align="left">KS D of randomized quantile residuals (averaged over
-draws)</td>
-</tr>
-<tr class="even">
-<td align="left">null</td>
-<td align="left">parametric bootstrap WITH refitting</td>
-</tr>
-<tr class="odd">
-<td align="left">script</td>
-<td align="left">16.gof_bootstrap_pvalues.R</td>
-</tr>
-<tr class="even">
-<td align="left">date</td>
-<td align="left">2026-08-24 13:44:13</td>
-</tr>
-</tbody>
-</table>
-<pre class="r"><code>knitr::kable(data.table(
-  step = c(&quot;attempt 1: nominal p-values&quot;, &quot;attempt 2: parametric bootstrap&quot;,
-           &quot;candidate filter comparison&quot;, &quot;phi filter, iterated&quot;, &quot;this page&quot;),
-  script = c(&quot;14.betabin_goodness_of_fit.R&quot;, &quot;16.gof_bootstrap_pvalues.R&quot;,
-             &quot;17.problematic_site_filter.R&quot;, &quot;18.phi_filter_iteration.R&quot;,
-             &quot;analysis/qtl_mapping_betabinomial_gof_failed.Rmd&quot;)),
-  caption = &quot;Scripts&quot;)</code></pre>
-<table>
-<caption>Scripts</caption>
-<colgroup>
-<col width="39%" />
-<col width="60%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">step</th>
-<th align="left">script</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">attempt 1: nominal p-values</td>
-<td align="left">14.betabin_goodness_of_fit.R</td>
-</tr>
-<tr class="even">
-<td align="left">attempt 2: parametric bootstrap</td>
-<td align="left">16.gof_bootstrap_pvalues.R</td>
-</tr>
-<tr class="odd">
-<td align="left">candidate filter comparison</td>
-<td align="left">17.problematic_site_filter.R</td>
-</tr>
-<tr class="even">
-<td align="left">phi filter, iterated</td>
-<td align="left">18.phi_filter_iteration.R</td>
-</tr>
-<tr class="odd">
-<td align="left">this page</td>
-<td align="left">analysis/qtl_mapping_betabinomial_gof_failed.Rmd</td>
-</tr>
-</tbody>
-</table>
+<!-- HIDDEN 2026-08-25: sections 4-6 and Provenance parked at the user's
+     request so the page shows only attempts 1 and 2. To restore, delete
+     this comment wrapper and the eval=FALSE, include=FALSE on the chunks
+     survive / bestk / wrong / phi / crit / prov.
+
+# 4. What survives, and what does not
+
+## Survives
+
+**Three sites genuinely misfit.** They separate by a wide margin under every
+version of the test, have the largest KS statistics in the set, and are the only
+ones needing more than one mixture component:
+
+
+
+For these the data do form discrete clusters of %pU levels, and the model cannot
+represent them.
+
+**But clustering is not the general explanation.** Of the 17 problematic sites,
+most need only one mixture component — no clustering at all:
+
+
+
+13 of the
+17 problematic sites have K = 1. Genome-wide only
+3.0% of sites prefer
+K ≥ 2, so multimodality is uncommon and is not what makes these sites misbehave.
+
+## Does not survive
+
+
+
+Two predictions made before running were wrong. **GOF failure does not
+concentrate in immunoglobulin or MHC loci** — the failure rate is 0.2% inside and
+outside alike, even though 13 of the 17 problematic sites sit in those regions.
+And **clustering was expected to explain the problematic sites as a group**; it
+explains three of them.
+
+Any statement of the form "*X*% of sites fail the fit test" is also not supported,
+in either direction, because neither attempt was calibrated.
+
+# 5. What the failure led to
+
+The refit-failure diagnostic above turned out to be the useful result. Read as a
+question it is: *if the world worked the way this site's fitted model says, could
+I recover that model from fresh data?* Ordinary sites: yes, every time.
+Problematic sites: no, a fifth to nearly half the time.
+
+That pointed at the fitted parameters being degenerate, and checking them found
+it directly — **every problematic site had the overdispersion parameter φ pinned
+to its boundary**:
+
+
+
+φ > 0.99 turned out to be a far better criterion than anything the GOF test
+offered, and removing those 48 sites eliminated the remaining problematic sites
+entirely. The comparison against the other candidates:
+
+
+
+So the honest summary of this work: **the goodness-of-fit test failed, and its
+diagnostics found the actual bug.** The problem at those sites was never that the
+beta-binomial family is wrong for this data — it is that at those sites the model
+was never successfully fitted, and the LRT was computed from a boundary solution.
+
+# 6. What would be needed to make the test work
+
+- **Treat failed refits as extreme rather than dropping them.** A replicate that
+  cannot be fitted is evidence of poor fit, not missing data. This removes the
+  truncation bias directly and would let all 17 sites report. Most promising fix,
+  small change.
+- **Or fix β and φ at the observed estimates** instead of refitting, which avoids
+  failures but reintroduces the attempt-1 conservatism.
+- **Or use many more replicates with a bias correction**, which needs a
+  characterisation of the estimation effect at n = 50 that we do not have.
+
+None of this is currently a priority: with the φ filter in place there are no
+problematic sites left to explain, so a working GOF test would be confirmatory
+rather than diagnostic.
+
+# Provenance
+
+
+
+-->
 <p>Related: <a href="qtl_mapping_betabinomial_strategy.html">the current
 strategy and its calibration</a> · <a
 href="qtl_mapping_betabinomial_site26.html">the 26 problematic
@@ -2039,6 +1681,7 @@ loaded via a namespace (and not attached):
 [49] tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3   rmarkdown_2.21   
 [53] httr_1.4.5        rstudioapi_0.14   R6_2.5.1          git2r_0.30.1     
 [57] compiler_4.2.0   </code></pre>
+</div>
 </div>
 </div>
 

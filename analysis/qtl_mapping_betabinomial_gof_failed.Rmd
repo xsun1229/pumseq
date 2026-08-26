@@ -320,6 +320,11 @@ knitr::kable(bs[grp == "problematic"][order(p_boot), .(
                   "After BH correction nothing reaches q < 0.05."))
 ```
 
+<!-- HIDDEN 2026-08-25: sections 4-6 and Provenance parked at the user's
+     request so the page shows only attempts 1 and 2. To restore, delete
+     this comment wrapper and the eval=FALSE, include=FALSE on the chunks
+     survive / bestk / wrong / phi / crit / prov.
+
 # 4. What survives, and what does not
 
 ## Survives
@@ -328,20 +333,20 @@ knitr::kable(bs[grp == "problematic"][order(p_boot), .(
 version of the test, have the largest KS statistics in the set, and are the only
 ones needing more than one mixture component:
 
-```{r survive}
+```{r survive, eval=FALSE, include=FALSE}
 knitr::kable(gof[sid %chin% c("3 37277733", "14 22551976", "6 29943223"),
   .(site = sid, p_ks = signif(p_ks, 2), p_sw = signif(p_sw, 2),
     p_dip = signif(p_dip, 2), best_K, phi = signif(phi, 3))][order(p_ks)],
   caption = "The three sites where the beta-binomial demonstrably does not describe the data")
 ```
 
-For these, the advisor's hypothesis is confirmed: the %pU values form discrete
-clusters and the model cannot represent them.
+For these the data do form discrete clusters of %pU levels, and the model cannot
+represent them.
 
 **But clustering is not the general explanation.** Of the 17 problematic sites,
 most need only one mixture component — no clustering at all:
 
-```{r bestk}
+```{r bestk, eval=FALSE, include=FALSE}
 knitr::kable(dcast(gof[!is.na(best_K), .N, by = .(class, best_K)],
                    class ~ best_K, value.var = "N", fill = 0),
   caption = "Mixture components preferred by BIC. K=1 means no clustering.")
@@ -354,7 +359,7 @@ K ≥ 2, so multimodality is uncommon and is not what makes these sites misbehav
 
 ## Does not survive
 
-```{r wrong}
+```{r wrong, eval=FALSE, include=FALSE}
 knitr::kable(gof[, .(sites = .N,
   `frac q_ks<0.05` = sprintf("%.1f%%", 100 * mean(q_ks < 0.05, na.rm = TRUE)),
   `median best_K` = median(best_K, na.rm = TRUE)), by = ig_mhc],
@@ -381,7 +386,7 @@ That pointed at the fitted parameters being degenerate, and checking them found
 it directly — **every problematic site had the overdispersion parameter φ pinned
 to its boundary**:
 
-```{r phi}
+```{r phi, eval=FALSE, include=FALSE}
 knitr::kable(feat[is.finite(phi), .(
   sites = .N,
   `median phi` = signif(median(phi), 3),
@@ -395,7 +400,7 @@ knitr::kable(feat[is.finite(phi), .(
 offered, and removing those 48 sites eliminated the remaining problematic sites
 entirely. The comparison against the other candidates:
 
-```{r crit}
+```{r crit, eval=FALSE, include=FALSE}
 knitr::kable(crit[order(-caught, sites_removed)], row.names = FALSE,
   caption = "Candidate filters. phi>0.99 is not in this table because it was found afterwards: it catches 17 of 17 for ~44 sites removed (0.4%).")
 ```
@@ -422,7 +427,7 @@ rather than diagnostic.
 
 # Provenance
 
-```{r prov}
+```{r prov, eval=FALSE, include=FALSE}
 knitr::kable(fread(file.path(G, "runinfo_noUCcalled.txt")), caption = "Attempt 1 parameters")
 knitr::kable(fread(file.path(G, "gof_bootstrap_runinfo.txt")), caption = "Attempt 2 parameters")
 knitr::kable(data.table(
@@ -433,6 +438,8 @@ knitr::kable(data.table(
              "analysis/qtl_mapping_betabinomial_gof_failed.Rmd")),
   caption = "Scripts")
 ```
+
+-->
 
 Related: [the current strategy and its calibration](qtl_mapping_betabinomial_strategy.html) ·
 [the 26 problematic sites](qtl_mapping_betabinomial_site26.html)
