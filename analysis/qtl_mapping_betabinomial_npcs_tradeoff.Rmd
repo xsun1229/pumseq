@@ -1,0 +1,390 @@
+---
+title: "Beta-binomial pU-QTL: how many covariate PCs?"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = "center", fig.width = 10)
+
+PSI  <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl"
+D    <- file.path(PSI, "qtl_betabinomial/phi_vs_npcs")
+G    <- file.path(PSI, "qtl_betabinomial/goodness_of_fit")
+FIG  <- file.path(PSI, "qtl_betabinomial/figures_npcs")
+SUF  <- "_auto_noUCcalled"            # the autosome-only sweep (chr1-22)
+
+# sid contains a space ("3 37277733"), so the separator must be given explicitly
+fit  <- fread(file.path(D, paste0("phi_by_npcs", SUF, ".txt.gz")), sep = "\t")
+ov   <- fread(file.path(D, paste0("phi_set_overlap", SUF, ".txt")), sep = "\t")
+stab <- fread(file.path(D, paste0("phi_stability_kept_sites", SUF, ".txt")), sep = "\t")
+info <- fread(file.path(D, paste0("runinfo", SUF, ".txt")), sep = "\t")
+gv   <- function(k) info[parameter == k]$value
+
+KS   <- c(3, 5, 7, 10, 15, 20)         # the k values with a calibration run
+
+# per-k iterated phi exclusion list. readLines, not fread: sid contains a space.
+# k = 3 keeps the untagged name for back-compat inside 18.phi_filter_iteration.R.
+list_for <- function(k) file.path(G, sprintf("phi_filter_dropped_sites%s%s.txt", SUF,
+                                            if (k == 3) "" else sprintf("_pc%d", k)))
+nexcl <- vapply(KS, function(k) {
+  f <- list_for(k)
+  if (!file.exists(f)) return(NA_integer_)
+  length(setdiff(trimws(readLines(f)), c("", "sid")))
+}, integer(1))
+names(nexcl) <- KS
+iter3 <- fread(file.path(G, paste0("phi_filter_iteration_history", SUF, ".txt")), sep = "\t")
+
+# calibration: each k on its OWN phi-filtered phenotype
+lam <- fread(file.path(FIG, "lambda_by_npcs_auto_filtered.tsv"), sep = "\t")
+qqd <- fread(file.path(FIG, "qq_thinned_filtered.tsv.gz"), sep = "\t")
+cal <- merge(lam[dataset != "real", .(perm_lo = min(lambda), perm_hi = max(lambda),
+                                      perm_mid = median(lambda),
+                                      worst_perm_tail = max(max_nlp)), by = npcs],
+             lam[dataset == "real", .(npcs, real_lambda = lambda,
+                                      real_tail = max_nlp, sites = n_sites,
+                                      n_pvalues = n_pvalues)],
+             by = "npcs")[order(npcs)]
+cal[, phi_excluded := nexcl[as.character(npcs)]]
+
+ORD  <- c("real", paste0("perm", 1:5))
+COLS <- c(real = "#e34948", perm1 = "#9ec5f4", perm2 = "#6da7ec",
+          perm3 = "#3987e5", perm4 = "#256abf", perm5 = "#0d366b")
+NTOT    <- fit[npcs == 3, .N]        # sites with >=10 covered cell lines
+PHI_CUT <- 0.99
+PHI_EPS <- 1e-6                      # the numerical floor inside fit_bb_mle
+```
+
+Everything on this page is restricted to **chr1–22**, with the covariate PCs
+recomputed on chr1–22 only. Phenotype **`r gv("phenotype")`**
+(`r format(as.integer(gv("n_sites")), big.mark = ",")` sites ×
+`r gv("n_cell_lines")` cell lines) — U/C-variant sites already excluded.
+
+# 1. The problem: fits that land on the φ boundary
+
+φ is the beta-binomial's overdispersion parameter. Here it is the intracluster
+correlation,
+
+$$\varphi = \frac{1}{a + b + 1}, \qquad
+  \mathrm{Var}[y] = n\,\mu(1-\mu)\bigl[1 + (n-1)\varphi\bigr]$$
+
+so it is bounded to (0, 1) by construction. **φ → 1 means `a + b → 0`, where the
+beta prior collapses onto point masses at 0 and 1** — the model asserting that
+every cell line's true rate is exactly 0 or exactly 1. A fit that lands there has
+not really been fitted, and any LRT computed from it is computed from a boundary
+solution.
+
+This is what the pU-QTL calibration work traced its remaining miscalibration to:
+every site still returning an extreme p-value *under permutation* had φ pinned
+above 0.99, while only a fraction of a percent of all sites do — see
+[the filtering strategy](qtl_mapping_betabinomial_strategy.html). The scan
+therefore excludes those sites.
+
+But the null model is
+
+$$\mathrm{logit}(\mu_i) = \beta_0 + \beta_1 \mathrm{PC1} + \dots + \beta_k \mathrm{PC}k$$
+
+so **k enters the fit directly.** More PCs give $\mu_i$ more freedom to track each
+cell line, so scatter that φ currently absorbs could instead be explained by the
+mean structure. That raises the question this page answers: how does the φ problem
+behave across k, and which k should the scan use?
+
+**Window size does not enter.** φ comes from the *null* fit, which contains no
+genotype at all; the window only decides which cis-SNPs are tested afterwards.
+Every site's null fit is bit-for-bit identical at 5 kb and at 100 kb.
+
+# 2. φ estimated across many PC settings
+
+Null fits only — no genotype, so this is cheap (all seven values of k in under a
+minute).
+`r format(as.integer(gv("n_sites")) - NTOT, big.mark = ",")` sites have fewer
+than `r gv("min_cell_lines")` covered cell lines and are unfittable at any k;
+they are excluded throughout, leaving **`r format(NTOT, big.mark = ",")`** sites,
+constant across k.
+
+```{r tab2}
+knitr::kable(ov[order(npcs), .(
+  `k (PCs)`      = npcs,
+  `total sites`  = format(NTOT, big.mark = ","),
+  `fittable`     = format(n_fitted, big.mark = ","),
+  `unfittable`   = format(n_failed, big.mark = ","),
+  `phi > 0.99`   = n_flagged,
+  `UNUSABLE (unfittable + phi>0.99)` = format(n_unusable, big.mark = ","),
+  `unusable %`   = sprintf("%.1f%%", 100 * n_unusable / NTOT))],
+  caption = "'unfittable' means fit_bb_mle() returned NULL -- the fit was attempted and rejected -- NOT missing data; cell lines with zero depth are dropped before fitting. A site is equally lost to the scan whether it is unfittable or phi-degenerate, so the UNUSABLE column is the one to read.")
+```
+
+```{r tradeoff, fig.height=5.4}
+m <- rbindlist(list(
+  ov[, .(npcs, quantity = "sites with phi > 0.99\n(boundary-degenerate fit)", n = n_flagged)],
+  ov[, .(npcs, quantity = "sites that cannot be fitted at all\n(fit_bb_mle returns NULL)", n = n_failed)]))
+m[, quantity := factor(quantity, levels = unique(quantity))]
+
+ggplot(m, aes(npcs, n)) +
+  geom_line(colour = "grey55", linewidth = 0.6) +
+  geom_point(colour = "#0d366b", size = 3) +
+  geom_text(aes(label = sprintf("%s\n(%.1f%%)", format(n, big.mark = ","), 100 * n / NTOT)),
+            vjust = -0.55, size = 3.0, lineheight = 0.9) +
+  scale_x_continuous(breaks = sort(unique(m$npcs))) +
+  scale_y_continuous(expand = expansion(mult = c(0.08, 0.34))) +
+  facet_wrap(~ quantity, nrow = 1, scales = "free_y") +
+  labs(x = "number of covariate PCs in the null model (k)", y = "sites",
+       title = "More PCs remove the phi-boundary fits by destroying the fit entirely",
+       subtitle = sprintf("Percentages are of the %s sites with >= %s covered cell lines.\nNOTE THE FREE y-AXES: the left panel tops out at %d, the right at %s.",
+                          format(NTOT, big.mark = ","), gv("min_cell_lines"),
+                          max(ov$n_flagged), format(max(ov$n_failed), big.mark = ","))) +
+  theme_bw(base_size = 12) + theme(strip.text = element_text(size = 10.5))
+```
+
+The φ > 0.99 count falls to zero as k rises — but not because those sites became
+well-behaved. They stop producing a fit at all. Unfittable sites go from
+`r format(ov[npcs == 3]$n_failed, big.mark = ",")` at k = 3 to
+`r format(ov[npcs == 20]$n_failed, big.mark = ",")` at k = 20, so the total
+unusable count is a **U-shape with its minimum at
+k = `r ov[which.min(n_unusable)]$npcs`** — the setting already in use. The
+mechanism is sample size: there are `r gv("n_cell_lines")` cell lines, so k = 20
+means estimating 22 parameters from `r gv("n_cell_lines")` observations.
+
+**A zero in the φ > 0.99 column is therefore not good news, and it is not the
+whole story either** — §4 shows the degeneracy reappearing at the opposite end of
+φ's range.
+
+# 3. Calibration after excluding the problematic sites
+
+Each k here gets **its own** exclusion list: φ > 0.99 iterated to a fixed point at
+that k, with the PCs recomputed each round, then the phenotype rebuilt and the PCs
+recomputed again on what remains. So the comparison is not confounded by a list
+derived at some other k.
+
+```{r nexcl}
+knitr::kable(data.table(`k (PCs)` = KS, `sites excluded by the phi filter at this k` = as.integer(nexcl)),
+  caption = "The filter is a genuine intervention only at low k. At k >= 10 it removes nothing -- those sites have already been lost to fit failure rather than cured, so the k >= 10 panels below are NOT 'cleaned up' versions.")
+```
+
+**Read the permutation λ.** Shuffling the phenotype destroys any
+genotype–phenotype relationship, so permutation λ must be 1 *whatever k is*.
+Real-data λ cannot settle the question, because it cannot separate "more signal"
+from "more inflation".
+
+```{r cal-tab}
+knitr::kable(cal[, .(
+  `k (PCs)`             = npcs,
+  `phi excluded`        = phi_excluded,
+  `permutation lambda`  = sprintf("%.3f - %.3f", perm_lo, perm_hi),
+  `real lambda`         = round(real_lambda, 3),
+  `sites tested`        = format(sites, big.mark = ","),
+  `p-values`            = format(n_pvalues, big.mark = ","),
+  `real tail`           = round(real_tail, 1),
+  `worst permuted tail` = round(worst_perm_tail, 1))],
+  caption = "Site-resolved calibration, real scan plus 5 phenotype permutations at each k, +/-5 kb windows.")
+```
+
+```{r cal-fig, fig.height=7.6}
+g1 <- ggplot(cal, aes(npcs)) +
+  geom_hline(yintercept = 1, linetype = "dashed", colour = "#e34948") +
+  annotate("text", x = max(cal$npcs), y = 1, label = "perfect calibration ",
+           hjust = 1, vjust = -0.6, colour = "#e34948", size = 3.3) +
+  geom_ribbon(aes(ymin = perm_lo, ymax = perm_hi), fill = "#3987e5", alpha = 0.25) +
+  geom_line(aes(y = perm_mid), colour = "#0d366b", linewidth = 0.7) +
+  geom_point(aes(y = perm_mid), colour = "#0d366b", size = 2.6) +
+  geom_text(aes(y = perm_hi, label = sprintf("%.2f", perm_mid)), vjust = -0.9,
+            size = 3.2, colour = "#0d366b") +
+  scale_x_continuous(breaks = cal$npcs) +
+  scale_y_continuous(expand = expansion(mult = c(0.06, 0.18))) +
+  labs(x = NULL, y = expression(permutation~lambda),
+       title = "Calibration degrades monotonically as PCs are added",
+       subtitle = "Band = range over the 5 permutations, line = median. This must be 1.") +
+  theme_bw(base_size = 12)
+
+g2 <- ggplot(cal, aes(npcs, sites)) +
+  geom_line(colour = "#7a4b8f", linewidth = 0.7) +
+  geom_point(colour = "#7a4b8f", size = 2.6) +
+  geom_text(aes(label = format(sites, big.mark = ",")), vjust = -1.0, size = 3.2,
+            colour = "#7a4b8f") +
+  scale_x_continuous(breaks = cal$npcs) +
+  scale_y_continuous(expand = expansion(mult = c(0.08, 0.18))) +
+  labs(x = "number of covariate PCs (k)", y = "sites tested",
+       subtitle = "...and it costs sites: more PCs means more fits rejected outright.") +
+  theme_bw(base_size = 12)
+
+gridExtra::grid.arrange(g1, g2, ncol = 1, heights = c(1.3, 1))
+```
+
+Permutation λ rises from
+**`r sprintf("%.3f-%.3f", cal[npcs==3]$perm_lo, cal[npcs==3]$perm_hi)`** at k = 3
+to **`r sprintf("%.3f-%.3f", cal[npcs==20]$perm_lo, cal[npcs==20]$perm_hi)`** at
+k = 20, monotonically and with no local optimum — **k = 5 is already worse than
+k = 3**, so there is no headroom to buy. No k on this grid beats the setting in
+use.
+
+## The QQ plots
+
+```{r qq, fig.height=8.6, fig.width=13}
+q <- copy(qqd)[npcs %in% KS]
+q[, dataset := factor(dataset, levels = ORD)]
+sub <- cal[, .(npcs, lab = sprintf("k = %d PCs\nreal %.3f | perm %.3f-%.3f",
+                                   npcs, real_lambda, perm_lo, perm_hi))]
+q <- merge(q, sub, by = "npcs")
+q[, panel := factor(lab, levels = sub[order(npcs)]$lab)]
+
+ggplot(q, aes(expected, observed, colour = dataset)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey45") +
+  geom_point(size = 0.5, alpha = 0.8) +
+  scale_colour_manual(values = COLS, name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.8, alpha = 1), nrow = 1)) +
+  facet_wrap(~ panel, nrow = 2) +
+  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
+       title = "Calibration QQ after per-k phi filtering (autosomes only)",
+       subtitle = paste("Red = real scan, blues = 5 phenotype permutations.",
+                        "READ THE BLUES: with the phenotype shuffled there is no signal,",
+                        "\nso they must lie on the dashed line. Axes shared across panels.")) +
+  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+```
+
+```{r qq-zoom, fig.height=8.6, fig.width=13}
+YMAX <- 20
+ggplot(q, aes(expected, observed, colour = dataset)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey45") +
+  geom_point(size = 0.5, alpha = 0.8) +
+  scale_colour_manual(values = COLS, name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.8, alpha = 1), nrow = 1)) +
+  facet_wrap(~ panel, nrow = 2) +
+  coord_cartesian(ylim = c(0, YMAX)) +
+  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
+       title = sprintf("Same data, y clipped at %d to show the bulk", YMAX),
+       subtitle = paste("At k = 3 the permutations stay near the diagonal through the bulk.",
+                        "As k rises the WHOLE permutation curve lifts off it --",
+                        "\ninflation with no signal to explain it, on every surviving site at once.",
+                        "Clipped points are outside the view, not deleted.")) +
+  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+```
+
+**Why high k can look better and is not.** The real-data QQ tail height is
+*erratic* across k — `r paste(sprintf("%.0f", cal$real_tail), collapse = " / ")`
+for k = `r paste(cal$npcs, collapse = " / ")` — because it depends on whether a
+given k happens to leave its worst sites fittable. At k = 15 every dataset,
+including all five permutations, hits the −log₁₀p = 300 numerical clamp. So tail
+height is **not** a usable criterion for choosing k. Permutation λ is smooth and
+monotone over the same range, and it is the one to use.
+
+A handful of catastrophic sites can be identified and excluded. Diffuse inflation
+spread over every surviving site cannot be, and it corrupts every FDR threshold.
+
+One bookkeeping note so the counts reconcile: the §2 sweep does a **single pass**
+at each k, while the exclusion lists in this section are **iterated**. At k = 3
+that is `r iter3[round == 0]$n_new_flagged` sites in round 0 and
+`r max(iter3$n_dropped_total)` after `r sum(iter3$n_new_flagged > 0)` rounds that
+flagged anything, because removing sites changes the PCs, which changes every
+remaining fit.
+
+# 4. Where the dispersion goes
+
+Both ends of φ's range are degenerate: φ → 1 collapses the beta prior onto point
+masses at 0 and 1, and φ → 0 reduces the model to a plain binomial. `fit_bb_mle`
+floors φ at `PHI_EPS` = 1e-6 to keep the likelihood finite.
+
+Watching the whole distribution, rather than just the upper tail, shows that
+adding PCs does not remove the degeneracy — it **migrates to the other boundary**:
+
+```{r phidist, fig.height=6.6}
+d <- fit[ok == TRUE]
+d[, kf := factor(npcs, levels = sort(unique(npcs)),
+                 labels = paste0("k = ", sort(unique(npcs)), " PCs"))]
+lab <- d[, .(txt = sprintf("at the 1e-6 floor: %.1f%%\nphi > 0.99: %.2f%%",
+                           100 * mean(phi <= 1.01 * PHI_EPS), 100 * mean(phi > PHI_CUT))),
+         by = kf]
+
+ggplot(d, aes(pmax(phi, PHI_EPS))) +
+  geom_histogram(bins = 60, fill = "#3987e5", colour = NA) +
+  geom_vline(xintercept = PHI_CUT, linetype = "dashed", colour = "#e34948") +
+  geom_vline(xintercept = PHI_EPS, linetype = "dashed", colour = "grey30") +
+  geom_text(data = lab, aes(x = 3e-6, y = Inf, label = txt), hjust = 0, vjust = 1.25,
+            size = 2.8, lineheight = 0.95, inherit.aes = FALSE) +
+  scale_x_log10() + facet_wrap(~ kf, ncol = 3) +
+  labs(x = "fitted phi (log scale); grey dashed = 1e-6 floor, red dashed = 0.99",
+       y = "sites",
+       title = "Adding PCs does not cure the degeneracy -- it migrates to the opposite boundary",
+       subtitle = paste("At high k the typical site is pinned at the phi = 0 floor: the model has collapsed to a binomial,",
+                        "\nbecause the PCs have absorbed the dispersion into the mean structure.",
+                        "The y-axis is SHARED across panels.")) +
+  theme_bw(base_size = 12)
+```
+
+```{r bothends}
+knitr::kable(d[, .(
+  `sites fitted`              = format(.N, big.mark = ","),
+  `median phi`                = signif(median(phi), 3),
+  `at the phi=0 floor (1e-6)` = sprintf("%.1f%%", 100 * mean(phi <= 1.01 * PHI_EPS)),
+  `phi > 0.99`                = sprintf("%.2f%%", 100 * mean(phi > PHI_CUT))),
+  by = .(`k (PCs)` = npcs)][order(`k (PCs)`)],
+  caption = "Both boundaries matter, which is why 'phi > 0.99 = 0' at high k is not evidence of a healthier fit.")
+```
+
+At k = 20,
+**`r sprintf("%.1f%%", 100 * mean(d[npcs == 20]$phi <= 1.01 * PHI_EPS))` of the
+sites that do fit sit on the φ = 0 floor.** Combined with the
+`r sprintf("%.1f%%", 100 * ov[npcs == 20]$n_failed / NTOT)` that fail outright,
+almost nothing at k = 20 is being estimated properly.
+
+This also changes what the eventual fix should look like: **the guard belongs
+inside `fit_bb_mle`, and it must be two-sided**, covering φ → 0 as well as
+φ → 1. `betabin_lib.R` already rejects boundary values for μ and for the
+coefficients (`MAX_ABS_COEF`) — φ was simply omitted from that set, and an
+exclusion list derived at one k is a stopgap for something that should be caught
+at fit time at every k.
+
+# 5. φ is not stable across k, even for the sites we keep
+
+The exclusion list could be well-behaved while every *retained* site's φ moves,
+which would matter for the LRT regardless of the filter. It does move:
+
+```{r stab}
+knitr::kable(stab[, .(pair, correlation = round(cor, 4),
+                      `max |difference|` = round(max_abs_diff, 4),
+                      `frac moving > 0.01` = sprintf("%.1f%%", 100 * frac_moving_gt_0.01))],
+  caption = "phi among RETAINED sites, between pairs of k. Compare with the iterated filter at fixed k, where recomputing the SAME number of PCs on a changed site set leaves phi almost fixed (correlation 0.999+).")
+```
+
+Changing the *number* of PCs is a much larger perturbation than recomputing the
+same number on a slightly different site set. **A scan at a different k is a
+genuinely different model, not a small perturbation of this one** — which is why
+the exclusion list has to be re-derived per k, as it was in §3, and why it should
+not be carried across configs.
+
+# Conclusion
+
+**Keep k = 3.** Three independent lines of evidence agree:
+
+- it minimises unusable sites (§2), with the total a U-shape whose minimum is k = 3;
+- it is the best-calibrated point on the grid (§3), and calibration degrades
+  monotonically upward with no local optimum, so k = 5 is already worse;
+- at higher k the model is not merely worse-calibrated but structurally
+  degenerate, with most fits collapsing to the binomial limit (§4).
+
+The φ > 0.99 exclusion list is valid **at k = 3** and should be re-derived if k
+ever changes. The durable fix is a two-sided φ guard inside `fit_bb_mle`.
+
+# Caveats
+
+- **Which rejection exit fires is not instrumented.** "Unfittable" means
+  `fit_bb_mle` returned `NULL`; its four exits (no starting values,
+  non-convergence, μ boundary guard, coefficient guard) are not distinguished.
+  Overfitting makes the μ and coefficient guards likely at high k, but
+  non-convergence would look identical here. Stated as inference, not measurement.
+- **Only the k values shown were tested.** k = 3 is the best of
+  {`r paste(sort(unique(fit$npcs)), collapse = ", ")`}, not a fitted optimum;
+  nothing here explores k = 1, 2 or 4.
+- **The φ filter is a no-op at k ≥ 10**, so those panels in §3 are not "cleaned"
+  versions of the same analysis. The comparison across k is honest about
+  calibration but is not a like-for-like test of the filter.
+- **φ here is not a "common" φ.** φ = 1/(a+b+1) ∈ (0,1), matching `aod`'s φ and
+  VGAM's `rho`, not a precision parameter on (0, ∞).
+
+Related: [the current strategy and its calibration](qtl_mapping_betabinomial_strategy.html) ·
+[the goodness-of-fit attempts](qtl_mapping_betabinomial_gof_failed.html)

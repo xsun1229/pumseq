@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-08-29" />
+
+<title>Beta-binomial pU-QTL: how many covariate PCs?</title>
+
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Beta-binomial pU-QTL: how many covariate
+PCs?</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-08-29</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-08-29
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee8440070ec5698282e03147894902d9738d6827etargetblanke844007a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/e8440070ec5698282e03147894902d9738d6827e" target="_blank">e844007</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee8440070ec5698282e03147894902d9738d6827etargetblanke844007a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/e8440070ec5698282e03147894902d9738d6827e" target="_blank">e844007</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/qtl_mapping_betabinomial_npcs_tradeoff.Rmd
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = &quot;center&quot;, fig.width = 10)
+
+PSI  &lt;- &quot;/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl&quot;
+D    &lt;- file.path(PSI, &quot;qtl_betabinomial/phi_vs_npcs&quot;)
+G    &lt;- file.path(PSI, &quot;qtl_betabinomial/goodness_of_fit&quot;)
+FIG  &lt;- file.path(PSI, &quot;qtl_betabinomial/figures_npcs&quot;)
+SUF  &lt;- &quot;_auto_noUCcalled&quot;            # the autosome-only sweep (chr1-22)
+
+# sid contains a space (&quot;3 37277733&quot;), so the separator must be given explicitly
+fit  &lt;- fread(file.path(D, paste0(&quot;phi_by_npcs&quot;, SUF, &quot;.txt.gz&quot;)), sep = &quot;\t&quot;)
+ov   &lt;- fread(file.path(D, paste0(&quot;phi_set_overlap&quot;, SUF, &quot;.txt&quot;)), sep = &quot;\t&quot;)
+stab &lt;- fread(file.path(D, paste0(&quot;phi_stability_kept_sites&quot;, SUF, &quot;.txt&quot;)), sep = &quot;\t&quot;)
+info &lt;- fread(file.path(D, paste0(&quot;runinfo&quot;, SUF, &quot;.txt&quot;)), sep = &quot;\t&quot;)
+gv   &lt;- function(k) info[parameter == k]$value
+
+KS   &lt;- c(3, 5, 7, 10, 15, 20)         # the k values with a calibration run
+
+# per-k iterated phi exclusion list. readLines, not fread: sid contains a space.
+# k = 3 keeps the untagged name for back-compat inside 18.phi_filter_iteration.R.
+list_for &lt;- function(k) file.path(G, sprintf(&quot;phi_filter_dropped_sites%s%s.txt&quot;, SUF,
+                                            if (k == 3) &quot;&quot; else sprintf(&quot;_pc%d&quot;, k)))
+nexcl &lt;- vapply(KS, function(k) {
+  f &lt;- list_for(k)
+  if (!file.exists(f)) return(NA_integer_)
+  length(setdiff(trimws(readLines(f)), c(&quot;&quot;, &quot;sid&quot;)))
+}, integer(1))
+names(nexcl) &lt;- KS
+iter3 &lt;- fread(file.path(G, paste0(&quot;phi_filter_iteration_history&quot;, SUF, &quot;.txt&quot;)), sep = &quot;\t&quot;)
+
+# calibration: each k on its OWN phi-filtered phenotype
+lam &lt;- fread(file.path(FIG, &quot;lambda_by_npcs_auto_filtered.tsv&quot;), sep = &quot;\t&quot;)
+qqd &lt;- fread(file.path(FIG, &quot;qq_thinned_filtered.tsv.gz&quot;), sep = &quot;\t&quot;)
+cal &lt;- merge(lam[dataset != &quot;real&quot;, .(perm_lo = min(lambda), perm_hi = max(lambda),
+                                      perm_mid = median(lambda),
+                                      worst_perm_tail = max(max_nlp)), by = npcs],
+             lam[dataset == &quot;real&quot;, .(npcs, real_lambda = lambda,
+                                      real_tail = max_nlp, sites = n_sites,
+                                      n_pvalues = n_pvalues)],
+             by = &quot;npcs&quot;)[order(npcs)]
+cal[, phi_excluded := nexcl[as.character(npcs)]]
+
+ORD  &lt;- c(&quot;real&quot;, paste0(&quot;perm&quot;, 1:5))
+COLS &lt;- c(real = &quot;#e34948&quot;, perm1 = &quot;#9ec5f4&quot;, perm2 = &quot;#6da7ec&quot;,
+          perm3 = &quot;#3987e5&quot;, perm4 = &quot;#256abf&quot;, perm5 = &quot;#0d366b&quot;)
+NTOT    &lt;- fit[npcs == 3, .N]        # sites with &gt;=10 covered cell lines
+PHI_CUT &lt;- 0.99
+PHI_EPS &lt;- 1e-6                      # the numerical floor inside fit_bb_mle</code></pre>
+<p>Everything on this page is restricted to <strong>chr1–22</strong>,
+with the covariate PCs recomputed on chr1–22 only. Phenotype
+<strong>fold5_union_auto_noUCcalled</strong> (10,738 sites × 50 cell
+lines) — U/C-variant sites already excluded.</p>
+<div id="the-problem-fits-that-land-on-the-φ-boundary"
+class="section level1">
+<h1>1. The problem: fits that land on the φ boundary</h1>
+<p>φ is the beta-binomial’s overdispersion parameter. Here it is the
+intracluster correlation,</p>
+<p><span class="math display">\[\varphi = \frac{1}{a + b + 1}, \qquad
+  \mathrm{Var}[y] = n\,\mu(1-\mu)\bigl[1 +
+(n-1)\varphi\bigr]\]</span></p>
+<p>so it is bounded to (0, 1) by construction. <strong>φ → 1 means
+<code>a + b → 0</code>, where the beta prior collapses onto point masses
+at 0 and 1</strong> — the model asserting that every cell line’s true
+rate is exactly 0 or exactly 1. A fit that lands there has not really
+been fitted, and any LRT computed from it is computed from a boundary
+solution.</p>
+<p>This is what the pU-QTL calibration work traced its remaining
+miscalibration to: every site still returning an extreme p-value
+<em>under permutation</em> had φ pinned above 0.99, while only a
+fraction of a percent of all sites do — see <a
+href="qtl_mapping_betabinomial_strategy.html">the filtering
+strategy</a>. The scan therefore excludes those sites.</p>
+<p>But the null model is</p>
+<p><span class="math display">\[\mathrm{logit}(\mu_i) = \beta_0 +
+\beta_1 \mathrm{PC1} + \dots + \beta_k \mathrm{PC}k\]</span></p>
+<p>so <strong>k enters the fit directly.</strong> More PCs give <span
+class="math inline">\(\mu_i\)</span> more freedom to track each cell
+line, so scatter that φ currently absorbs could instead be explained by
+the mean structure. That raises the question this page answers: how does
+the φ problem behave across k, and which k should the scan use?</p>
+<p><strong>Window size does not enter.</strong> φ comes from the
+<em>null</em> fit, which contains no genotype at all; the window only
+decides which cis-SNPs are tested afterwards. Every site’s null fit is
+bit-for-bit identical at 5 kb and at 100 kb.</p>
+</div>
+<div id="φ-estimated-across-many-pc-settings" class="section level1">
+<h1>2. φ estimated across many PC settings</h1>
+<p>Null fits only — no genotype, so this is cheap (all seven values of k
+in under a minute). 13 sites have fewer than 10 covered cell lines and
+are unfittable at any k; they are excluded throughout, leaving
+<strong>10,725</strong> sites, constant across k.</p>
+<pre class="r"><code>knitr::kable(ov[order(npcs), .(
+  `k (PCs)`      = npcs,
+  `total sites`  = format(NTOT, big.mark = &quot;,&quot;),
+  `fittable`     = format(n_fitted, big.mark = &quot;,&quot;),
+  `unfittable`   = format(n_failed, big.mark = &quot;,&quot;),
+  `phi &gt; 0.99`   = n_flagged,
+  `UNUSABLE (unfittable + phi&gt;0.99)` = format(n_unusable, big.mark = &quot;,&quot;),
+  `unusable %`   = sprintf(&quot;%.1f%%&quot;, 100 * n_unusable / NTOT))],
+  caption = &quot;&#39;unfittable&#39; means fit_bb_mle() returned NULL -- the fit was attempted and rejected -- NOT missing data; cell lines with zero depth are dropped before fitting. A site is equally lost to the scan whether it is unfittable or phi-degenerate, so the UNUSABLE column is the one to read.&quot;)</code></pre>
+<table>
+<caption>‘unfittable’ means fit_bb_mle() returned NULL – the fit was
+attempted and rejected – NOT missing data; cell lines with zero depth
+are dropped before fitting. A site is equally lost to the scan whether
+it is unfittable or phi-degenerate, so the UNUSABLE column is the one to
+read.</caption>
+<colgroup>
+<col width="8%" />
+<col width="12%" />
+<col width="9%" />
+<col width="11%" />
+<col width="11%" />
+<col width="34%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">k (PCs)</th>
+<th align="left">total sites</th>
+<th align="left">fittable</th>
+<th align="left">unfittable</th>
+<th align="right">phi &gt; 0.99</th>
+<th align="left">UNUSABLE (unfittable + phi&gt;0.99)</th>
+<th align="left">unusable %</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="left">10,725</td>
+<td align="left">9,228</td>
+<td align="left">1,497</td>
+<td align="right">119</td>
+<td align="left">1,616</td>
+<td align="left">15.1%</td>
+</tr>
+<tr class="even">
+<td align="right">3</td>
+<td align="left">10,725</td>
+<td align="left">10,454</td>
+<td align="left">271</td>
+<td align="right">22</td>
+<td align="left">293</td>
+<td align="left">2.7%</td>
+</tr>
+<tr class="odd">
+<td align="right">5</td>
+<td align="left">10,725</td>
+<td align="left">9,969</td>
+<td align="left">756</td>
+<td align="right">5</td>
+<td align="left">761</td>
+<td align="left">7.1%</td>
+</tr>
+<tr class="even">
+<td align="right">7</td>
+<td align="left">10,725</td>
+<td align="left">9,490</td>
+<td align="left">1,235</td>
+<td align="right">1</td>
+<td align="left">1,236</td>
+<td align="left">11.5%</td>
+</tr>
+<tr class="odd">
+<td align="right">10</td>
+<td align="left">10,725</td>
+<td align="left">8,777</td>
+<td align="left">1,948</td>
+<td align="right">0</td>
+<td align="left">1,948</td>
+<td align="left">18.2%</td>
+</tr>
+<tr class="even">
+<td align="right">15</td>
+<td align="left">10,725</td>
+<td align="left">7,665</td>
+<td align="left">3,060</td>
+<td align="right">0</td>
+<td align="left">3,060</td>
+<td align="left">28.5%</td>
+</tr>
+<tr class="odd">
+<td align="right">20</td>
+<td align="left">10,725</td>
+<td align="left">6,559</td>
+<td align="left">4,166</td>
+<td align="right">0</td>
+<td align="left">4,166</td>
+<td align="left">38.8%</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>m &lt;- rbindlist(list(
+  ov[, .(npcs, quantity = &quot;sites with phi &gt; 0.99\n(boundary-degenerate fit)&quot;, n = n_flagged)],
+  ov[, .(npcs, quantity = &quot;sites that cannot be fitted at all\n(fit_bb_mle returns NULL)&quot;, n = n_failed)]))
+m[, quantity := factor(quantity, levels = unique(quantity))]
+
+ggplot(m, aes(npcs, n)) +
+  geom_line(colour = &quot;grey55&quot;, linewidth = 0.6) +
+  geom_point(colour = &quot;#0d366b&quot;, size = 3) +
+  geom_text(aes(label = sprintf(&quot;%s\n(%.1f%%)&quot;, format(n, big.mark = &quot;,&quot;), 100 * n / NTOT)),
+            vjust = -0.55, size = 3.0, lineheight = 0.9) +
+  scale_x_continuous(breaks = sort(unique(m$npcs))) +
+  scale_y_continuous(expand = expansion(mult = c(0.08, 0.34))) +
+  facet_wrap(~ quantity, nrow = 1, scales = &quot;free_y&quot;) +
+  labs(x = &quot;number of covariate PCs in the null model (k)&quot;, y = &quot;sites&quot;,
+       title = &quot;More PCs remove the phi-boundary fits by destroying the fit entirely&quot;,
+       subtitle = sprintf(&quot;Percentages are of the %s sites with &gt;= %s covered cell lines.\nNOTE THE FREE y-AXES: the left panel tops out at %d, the right at %s.&quot;,
+                          format(NTOT, big.mark = &quot;,&quot;), gv(&quot;min_cell_lines&quot;),
+                          max(ov$n_flagged), format(max(ov$n_failed), big.mark = &quot;,&quot;))) +
+  theme_bw(base_size = 12) + theme(strip.text = element_text(size = 10.5))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_npcs_tradeoff.Rmd/tradeoff-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>The φ &gt; 0.99 count falls to zero as k rises — but not because
+those sites became well-behaved. They stop producing a fit at all.
+Unfittable sites go from 271 at k = 3 to 4,166 at k = 20, so the total
+unusable count is a <strong>U-shape with its minimum at k = 3</strong> —
+the setting already in use. The mechanism is sample size: there are 50
+cell lines, so k = 20 means estimating 22 parameters from 50
+observations.</p>
+<p><strong>A zero in the φ &gt; 0.99 column is therefore not good news,
+and it is not the whole story either</strong> — §4 shows the degeneracy
+reappearing at the opposite end of φ’s range.</p>
+</div>
+<div id="calibration-after-excluding-the-problematic-sites"
+class="section level1">
+<h1>3. Calibration after excluding the problematic sites</h1>
+<p>Each k here gets <strong>its own</strong> exclusion list: φ &gt; 0.99
+iterated to a fixed point at that k, with the PCs recomputed each round,
+then the phenotype rebuilt and the PCs recomputed again on what remains.
+So the comparison is not confounded by a list derived at some other
+k.</p>
+<pre class="r"><code>knitr::kable(data.table(`k (PCs)` = KS, `sites excluded by the phi filter at this k` = as.integer(nexcl)),
+  caption = &quot;The filter is a genuine intervention only at low k. At k &gt;= 10 it removes nothing -- those sites have already been lost to fit failure rather than cured, so the k &gt;= 10 panels below are NOT &#39;cleaned up&#39; versions.&quot;)</code></pre>
+<table>
+<caption>The filter is a genuine intervention only at low k. At k &gt;=
+10 it removes nothing – those sites have already been lost to fit
+failure rather than cured, so the k &gt;= 10 panels below are NOT
+‘cleaned up’ versions.</caption>
+<thead>
+<tr class="header">
+<th align="right">k (PCs)</th>
+<th align="right">sites excluded by the phi filter at this k</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">33</td>
+</tr>
+<tr class="even">
+<td align="right">5</td>
+<td align="right">6</td>
+</tr>
+<tr class="odd">
+<td align="right">7</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="right">10</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="right">15</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="right">20</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Read the permutation λ.</strong> Shuffling the phenotype
+destroys any genotype–phenotype relationship, so permutation λ must be 1
+<em>whatever k is</em>. Real-data λ cannot settle the question, because
+it cannot separate “more signal” from “more inflation”.</p>
+<pre class="r"><code>knitr::kable(cal[, .(
+  `k (PCs)`             = npcs,
+  `phi excluded`        = phi_excluded,
+  `permutation lambda`  = sprintf(&quot;%.3f - %.3f&quot;, perm_lo, perm_hi),
+  `real lambda`         = round(real_lambda, 3),
+  `sites tested`        = format(sites, big.mark = &quot;,&quot;),
+  `p-values`            = format(n_pvalues, big.mark = &quot;,&quot;),
+  `real tail`           = round(real_tail, 1),
+  `worst permuted tail` = round(worst_perm_tail, 1))],
+  caption = &quot;Site-resolved calibration, real scan plus 5 phenotype permutations at each k, +/-5 kb windows.&quot;)</code></pre>
+<table>
+<caption>Site-resolved calibration, real scan plus 5 phenotype
+permutations at each k, +/-5 kb windows.</caption>
+<colgroup>
+<col width="7%" />
+<col width="12%" />
+<col width="18%" />
+<col width="11%" />
+<col width="12%" />
+<col width="8%" />
+<col width="9%" />
+<col width="19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">k (PCs)</th>
+<th align="right">phi excluded</th>
+<th align="left">permutation lambda</th>
+<th align="right">real lambda</th>
+<th align="left">sites tested</th>
+<th align="left">p-values</th>
+<th align="right">real tail</th>
+<th align="right">worst permuted tail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">33</td>
+<td align="left">1.027 - 1.060</td>
+<td align="right">1.387</td>
+<td align="left">9,953</td>
+<td align="left">289,843</td>
+<td align="right">43.5</td>
+<td align="right">42.5</td>
+</tr>
+<tr class="even">
+<td align="right">5</td>
+<td align="right">6</td>
+<td align="left">1.078 - 1.143</td>
+<td align="right">1.485</td>
+<td align="left">9,513</td>
+<td align="left">283,226</td>
+<td align="right">29.1</td>
+<td align="right">17.6</td>
+</tr>
+<tr class="odd">
+<td align="right">7</td>
+<td align="right">1</td>
+<td align="left">1.128 - 1.184</td>
+<td align="right">1.524</td>
+<td align="left">9,081</td>
+<td align="left">273,936</td>
+<td align="right">32.6</td>
+<td align="right">17.7</td>
+</tr>
+<tr class="even">
+<td align="right">10</td>
+<td align="right">0</td>
+<td align="left">1.201 - 1.268</td>
+<td align="right">1.634</td>
+<td align="left">8,397</td>
+<td align="left">259,210</td>
+<td align="right">33.0</td>
+<td align="right">12.5</td>
+</tr>
+<tr class="odd">
+<td align="right">15</td>
+<td align="right">0</td>
+<td align="left">1.337 - 1.390</td>
+<td align="right">1.711</td>
+<td align="left">7,338</td>
+<td align="left">223,117</td>
+<td align="right">300.0</td>
+<td align="right">300.0</td>
+</tr>
+<tr class="even">
+<td align="right">20</td>
+<td align="right">0</td>
+<td align="left">1.443 - 1.526</td>
+<td align="right">1.769</td>
+<td align="left">6,266</td>
+<td align="left">190,599</td>
+<td align="right">35.4</td>
+<td align="right">18.5</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>g1 &lt;- ggplot(cal, aes(npcs)) +
+  geom_hline(yintercept = 1, linetype = &quot;dashed&quot;, colour = &quot;#e34948&quot;) +
+  annotate(&quot;text&quot;, x = max(cal$npcs), y = 1, label = &quot;perfect calibration &quot;,
+           hjust = 1, vjust = -0.6, colour = &quot;#e34948&quot;, size = 3.3) +
+  geom_ribbon(aes(ymin = perm_lo, ymax = perm_hi), fill = &quot;#3987e5&quot;, alpha = 0.25) +
+  geom_line(aes(y = perm_mid), colour = &quot;#0d366b&quot;, linewidth = 0.7) +
+  geom_point(aes(y = perm_mid), colour = &quot;#0d366b&quot;, size = 2.6) +
+  geom_text(aes(y = perm_hi, label = sprintf(&quot;%.2f&quot;, perm_mid)), vjust = -0.9,
+            size = 3.2, colour = &quot;#0d366b&quot;) +
+  scale_x_continuous(breaks = cal$npcs) +
+  scale_y_continuous(expand = expansion(mult = c(0.06, 0.18))) +
+  labs(x = NULL, y = expression(permutation~lambda),
+       title = &quot;Calibration degrades monotonically as PCs are added&quot;,
+       subtitle = &quot;Band = range over the 5 permutations, line = median. This must be 1.&quot;) +
+  theme_bw(base_size = 12)
+
+g2 &lt;- ggplot(cal, aes(npcs, sites)) +
+  geom_line(colour = &quot;#7a4b8f&quot;, linewidth = 0.7) +
+  geom_point(colour = &quot;#7a4b8f&quot;, size = 2.6) +
+  geom_text(aes(label = format(sites, big.mark = &quot;,&quot;)), vjust = -1.0, size = 3.2,
+            colour = &quot;#7a4b8f&quot;) +
+  scale_x_continuous(breaks = cal$npcs) +
+  scale_y_continuous(expand = expansion(mult = c(0.08, 0.18))) +
+  labs(x = &quot;number of covariate PCs (k)&quot;, y = &quot;sites tested&quot;,
+       subtitle = &quot;...and it costs sites: more PCs means more fits rejected outright.&quot;) +
+  theme_bw(base_size = 12)
+
+gridExtra::grid.arrange(g1, g2, ncol = 1, heights = c(1.3, 1))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_npcs_tradeoff.Rmd/cal-fig-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>Permutation λ rises from <strong>1.027-1.060</strong> at k = 3 to
+<strong>1.443-1.526</strong> at k = 20, monotonically and with no local
+optimum — <strong>k = 5 is already worse than k = 3</strong>, so there
+is no headroom to buy. No k on this grid beats the setting in use.</p>
+<div id="the-qq-plots" class="section level2">
+<h2>The QQ plots</h2>
+<pre class="r"><code>q &lt;- copy(qqd)[npcs %in% KS]
+q[, dataset := factor(dataset, levels = ORD)]
+sub &lt;- cal[, .(npcs, lab = sprintf(&quot;k = %d PCs\nreal %.3f | perm %.3f-%.3f&quot;,
+                                   npcs, real_lambda, perm_lo, perm_hi))]
+q &lt;- merge(q, sub, by = &quot;npcs&quot;)
+q[, panel := factor(lab, levels = sub[order(npcs)]$lab)]
+
+ggplot(q, aes(expected, observed, colour = dataset)) +
+  geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, colour = &quot;grey45&quot;) +
+  geom_point(size = 0.5, alpha = 0.8) +
+  scale_colour_manual(values = COLS, name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.8, alpha = 1), nrow = 1)) +
+  facet_wrap(~ panel, nrow = 2) +
+  labs(x = expression(-log[10](&quot;expected p&quot;)), y = expression(-log[10](&quot;observed p&quot;)),
+       title = &quot;Calibration QQ after per-k phi filtering (autosomes only)&quot;,
+       subtitle = paste(&quot;Red = real scan, blues = 5 phenotype permutations.&quot;,
+                        &quot;READ THE BLUES: with the phenotype shuffled there is no signal,&quot;,
+                        &quot;\nso they must lie on the dashed line. Axes shared across panels.&quot;)) +
+  theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_npcs_tradeoff.Rmd/qq-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>YMAX &lt;- 20
+ggplot(q, aes(expected, observed, colour = dataset)) +
+  geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, colour = &quot;grey45&quot;) +
+  geom_point(size = 0.5, alpha = 0.8) +
+  scale_colour_manual(values = COLS, name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.8, alpha = 1), nrow = 1)) +
+  facet_wrap(~ panel, nrow = 2) +
+  coord_cartesian(ylim = c(0, YMAX)) +
+  labs(x = expression(-log[10](&quot;expected p&quot;)), y = expression(-log[10](&quot;observed p&quot;)),
+       title = sprintf(&quot;Same data, y clipped at %d to show the bulk&quot;, YMAX),
+       subtitle = paste(&quot;At k = 3 the permutations stay near the diagonal through the bulk.&quot;,
+                        &quot;As k rises the WHOLE permutation curve lifts off it --&quot;,
+                        &quot;\ninflation with no signal to explain it, on every surviving site at once.&quot;,
+                        &quot;Clipped points are outside the view, not deleted.&quot;)) +
+  theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_npcs_tradeoff.Rmd/qq-zoom-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p><strong>Why high k can look better and is not.</strong> The real-data
+QQ tail height is <em>erratic</em> across k — 43 / 29 / 33 / 33 / 300 /
+35 for k = 3 / 5 / 7 / 10 / 15 / 20 — because it depends on whether a
+given k happens to leave its worst sites fittable. At k = 15 every
+dataset, including all five permutations, hits the −log₁₀p = 300
+numerical clamp. So tail height is <strong>not</strong> a usable
+criterion for choosing k. Permutation λ is smooth and monotone over the
+same range, and it is the one to use.</p>
+<p>A handful of catastrophic sites can be identified and excluded.
+Diffuse inflation spread over every surviving site cannot be, and it
+corrupts every FDR threshold.</p>
+<p>One bookkeeping note so the counts reconcile: the §2 sweep does a
+<strong>single pass</strong> at each k, while the exclusion lists in
+this section are <strong>iterated</strong>. At k = 3 that is 22 sites in
+round 0 and 33 after 5 rounds that flagged anything, because removing
+sites changes the PCs, which changes every remaining fit.</p>
+</div>
+</div>
+<div id="where-the-dispersion-goes" class="section level1">
+<h1>4. Where the dispersion goes</h1>
+<p>Both ends of φ’s range are degenerate: φ → 1 collapses the beta prior
+onto point masses at 0 and 1, and φ → 0 reduces the model to a plain
+binomial. <code>fit_bb_mle</code> floors φ at <code>PHI_EPS</code> =
+1e-6 to keep the likelihood finite.</p>
+<p>Watching the whole distribution, rather than just the upper tail,
+shows that adding PCs does not remove the degeneracy — it
+<strong>migrates to the other boundary</strong>:</p>
+<pre class="r"><code>d &lt;- fit[ok == TRUE]
+d[, kf := factor(npcs, levels = sort(unique(npcs)),
+                 labels = paste0(&quot;k = &quot;, sort(unique(npcs)), &quot; PCs&quot;))]
+lab &lt;- d[, .(txt = sprintf(&quot;at the 1e-6 floor: %.1f%%\nphi &gt; 0.99: %.2f%%&quot;,
+                           100 * mean(phi &lt;= 1.01 * PHI_EPS), 100 * mean(phi &gt; PHI_CUT))),
+         by = kf]
+
+ggplot(d, aes(pmax(phi, PHI_EPS))) +
+  geom_histogram(bins = 60, fill = &quot;#3987e5&quot;, colour = NA) +
+  geom_vline(xintercept = PHI_CUT, linetype = &quot;dashed&quot;, colour = &quot;#e34948&quot;) +
+  geom_vline(xintercept = PHI_EPS, linetype = &quot;dashed&quot;, colour = &quot;grey30&quot;) +
+  geom_text(data = lab, aes(x = 3e-6, y = Inf, label = txt), hjust = 0, vjust = 1.25,
+            size = 2.8, lineheight = 0.95, inherit.aes = FALSE) +
+  scale_x_log10() + facet_wrap(~ kf, ncol = 3) +
+  labs(x = &quot;fitted phi (log scale); grey dashed = 1e-6 floor, red dashed = 0.99&quot;,
+       y = &quot;sites&quot;,
+       title = &quot;Adding PCs does not cure the degeneracy -- it migrates to the opposite boundary&quot;,
+       subtitle = paste(&quot;At high k the typical site is pinned at the phi = 0 floor: the model has collapsed to a binomial,&quot;,
+                        &quot;\nbecause the PCs have absorbed the dispersion into the mean structure.&quot;,
+                        &quot;The y-axis is SHARED across panels.&quot;)) +
+  theme_bw(base_size = 12)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_npcs_tradeoff.Rmd/phidist-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>knitr::kable(d[, .(
+  `sites fitted`              = format(.N, big.mark = &quot;,&quot;),
+  `median phi`                = signif(median(phi), 3),
+  `at the phi=0 floor (1e-6)` = sprintf(&quot;%.1f%%&quot;, 100 * mean(phi &lt;= 1.01 * PHI_EPS)),
+  `phi &gt; 0.99`                = sprintf(&quot;%.2f%%&quot;, 100 * mean(phi &gt; PHI_CUT))),
+  by = .(`k (PCs)` = npcs)][order(`k (PCs)`)],
+  caption = &quot;Both boundaries matter, which is why &#39;phi &gt; 0.99 = 0&#39; at high k is not evidence of a healthier fit.&quot;)</code></pre>
+<table>
+<caption>Both boundaries matter, which is why ‘phi &gt; 0.99 = 0’ at
+high k is not evidence of a healthier fit.</caption>
+<colgroup>
+<col width="11%" />
+<col width="18%" />
+<col width="15%" />
+<col width="37%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">k (PCs)</th>
+<th align="left">sites fitted</th>
+<th align="right">median phi</th>
+<th align="left">at the phi=0 floor (1e-6)</th>
+<th align="left">phi &gt; 0.99</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="left">9,228</td>
+<td align="right">1.40e-02</td>
+<td align="left">0.0%</td>
+<td align="left">1.29%</td>
+</tr>
+<tr class="even">
+<td align="right">3</td>
+<td align="left">10,454</td>
+<td align="right">4.34e-04</td>
+<td align="left">0.0%</td>
+<td align="left">0.21%</td>
+</tr>
+<tr class="odd">
+<td align="right">5</td>
+<td align="left">9,969</td>
+<td align="right">3.23e-05</td>
+<td align="left">0.0%</td>
+<td align="left">0.05%</td>
+</tr>
+<tr class="even">
+<td align="right">7</td>
+<td align="left">9,490</td>
+<td align="right">6.50e-06</td>
+<td align="left">0.1%</td>
+<td align="left">0.01%</td>
+</tr>
+<tr class="odd">
+<td align="right">10</td>
+<td align="left">8,777</td>
+<td align="right">1.50e-06</td>
+<td align="left">0.6%</td>
+<td align="left">0.00%</td>
+</tr>
+<tr class="even">
+<td align="right">15</td>
+<td align="left">7,665</td>
+<td align="right">1.00e-06</td>
+<td align="left">13.6%</td>
+<td align="left">0.00%</td>
+</tr>
+<tr class="odd">
+<td align="right">20</td>
+<td align="left">6,559</td>
+<td align="right">1.00e-06</td>
+<td align="left">88.6%</td>
+<td align="left">0.00%</td>
+</tr>
+</tbody>
+</table>
+<p>At k = 20, <strong>88.6% of the sites that do fit sit on the φ = 0
+floor.</strong> Combined with the 38.8% that fail outright, almost
+nothing at k = 20 is being estimated properly.</p>
+<p>This also changes what the eventual fix should look like: <strong>the
+guard belongs inside <code>fit_bb_mle</code>, and it must be
+two-sided</strong>, covering φ → 0 as well as φ → 1.
+<code>betabin_lib.R</code> already rejects boundary values for μ and for
+the coefficients (<code>MAX_ABS_COEF</code>) — φ was simply omitted from
+that set, and an exclusion list derived at one k is a stopgap for
+something that should be caught at fit time at every k.</p>
+</div>
+<div id="φ-is-not-stable-across-k-even-for-the-sites-we-keep"
+class="section level1">
+<h1>5. φ is not stable across k, even for the sites we keep</h1>
+<p>The exclusion list could be well-behaved while every
+<em>retained</em> site’s φ moves, which would matter for the LRT
+regardless of the filter. It does move:</p>
+<pre class="r"><code>knitr::kable(stab[, .(pair, correlation = round(cor, 4),
+                      `max |difference|` = round(max_abs_diff, 4),
+                      `frac moving &gt; 0.01` = sprintf(&quot;%.1f%%&quot;, 100 * frac_moving_gt_0.01))],
+  caption = &quot;phi among RETAINED sites, between pairs of k. Compare with the iterated filter at fixed k, where recomputing the SAME number of PCs on a changed site set leaves phi almost fixed (correlation 0.999+).&quot;)</code></pre>
+<table>
+<caption>phi among RETAINED sites, between pairs of k. Compare with the
+iterated filter at fixed k, where recomputing the SAME number of PCs on
+a changed site set leaves phi almost fixed (correlation
+0.999+).</caption>
+<colgroup>
+<col width="15%" />
+<col width="17%" />
+<col width="39%" />
+<col width="27%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">pair</th>
+<th align="right">correlation</th>
+<th align="right">max |difference|</th>
+<th align="left">frac moving &gt; 0.01</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">k0 vs k3</td>
+<td align="right">0.9417</td>
+<td align="right">1.0000</td>
+<td align="left">34.0%</td>
+</tr>
+<tr class="even">
+<td align="left">k0 vs k5</td>
+<td align="right">0.8705</td>
+<td align="right">1.0000</td>
+<td align="left">42.1%</td>
+</tr>
+<tr class="odd">
+<td align="left">k0 vs k7</td>
+<td align="right">0.8476</td>
+<td align="right">1.0000</td>
+<td align="left">46.7%</td>
+</tr>
+<tr class="even">
+<td align="left">k0 vs k10</td>
+<td align="right">0.8263</td>
+<td align="right">1.0000</td>
+<td align="left">48.6%</td>
+</tr>
+<tr class="odd">
+<td align="left">k0 vs k15</td>
+<td align="right">0.7219</td>
+<td align="right">1.0000</td>
+<td align="left">47.6%</td>
+</tr>
+<tr class="even">
+<td align="left">k0 vs k20</td>
+<td align="right">0.6875</td>
+<td align="right">1.0000</td>
+<td align="left">46.7%</td>
+</tr>
+<tr class="odd">
+<td align="left">k3 vs k5</td>
+<td align="right">0.9269</td>
+<td align="right">0.7835</td>
+<td align="left">15.9%</td>
+</tr>
+<tr class="even">
+<td align="left">k3 vs k7</td>
+<td align="right">0.9015</td>
+<td align="right">0.8010</td>
+<td align="left">22.8%</td>
+</tr>
+<tr class="odd">
+<td align="left">k3 vs k10</td>
+<td align="right">0.8612</td>
+<td align="right">0.7000</td>
+<td align="left">27.1%</td>
+</tr>
+<tr class="even">
+<td align="left">k3 vs k15</td>
+<td align="right">0.7808</td>
+<td align="right">0.7244</td>
+<td align="left">27.9%</td>
+</tr>
+<tr class="odd">
+<td align="left">k3 vs k20</td>
+<td align="right">0.7221</td>
+<td align="right">0.6974</td>
+<td align="left">27.3%</td>
+</tr>
+<tr class="even">
+<td align="left">k5 vs k7</td>
+<td align="right">0.9581</td>
+<td align="right">0.8257</td>
+<td align="left">11.6%</td>
+</tr>
+<tr class="odd">
+<td align="left">k5 vs k10</td>
+<td align="right">0.9015</td>
+<td align="right">0.6600</td>
+<td align="left">18.2%</td>
+</tr>
+<tr class="even">
+<td align="left">k5 vs k15</td>
+<td align="right">0.8228</td>
+<td align="right">0.5695</td>
+<td align="left">20.0%</td>
+</tr>
+<tr class="odd">
+<td align="left">k5 vs k20</td>
+<td align="right">0.7468</td>
+<td align="right">0.6741</td>
+<td align="left">20.0%</td>
+</tr>
+<tr class="even">
+<td align="left">k7 vs k10</td>
+<td align="right">0.9319</td>
+<td align="right">0.6656</td>
+<td align="left">12.1%</td>
+</tr>
+<tr class="odd">
+<td align="left">k7 vs k15</td>
+<td align="right">0.8461</td>
+<td align="right">0.6656</td>
+<td align="left">15.4%</td>
+</tr>
+<tr class="even">
+<td align="left">k7 vs k20</td>
+<td align="right">0.7648</td>
+<td align="right">0.6369</td>
+<td align="left">15.6%</td>
+</tr>
+<tr class="odd">
+<td align="left">k10 vs k15</td>
+<td align="right">0.9120</td>
+<td align="right">0.5443</td>
+<td align="left">9.1%</td>
+</tr>
+<tr class="even">
+<td align="left">k10 vs k20</td>
+<td align="right">0.8272</td>
+<td align="right">0.5652</td>
+<td align="left">10.4%</td>
+</tr>
+<tr class="odd">
+<td align="left">k15 vs k20</td>
+<td align="right">0.9001</td>
+<td align="right">0.5030</td>
+<td align="left">5.1%</td>
+</tr>
+</tbody>
+</table>
+<p>Changing the <em>number</em> of PCs is a much larger perturbation
+than recomputing the same number on a slightly different site set.
+<strong>A scan at a different k is a genuinely different model, not a
+small perturbation of this one</strong> — which is why the exclusion
+list has to be re-derived per k, as it was in §3, and why it should not
+be carried across configs.</p>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p><strong>Keep k = 3.</strong> Three independent lines of evidence
+agree:</p>
+<ul>
+<li>it minimises unusable sites (§2), with the total a U-shape whose
+minimum is k = 3;</li>
+<li>it is the best-calibrated point on the grid (§3), and calibration
+degrades monotonically upward with no local optimum, so k = 5 is already
+worse;</li>
+<li>at higher k the model is not merely worse-calibrated but
+structurally degenerate, with most fits collapsing to the binomial limit
+(§4).</li>
+</ul>
+<p>The φ &gt; 0.99 exclusion list is valid <strong>at k = 3</strong> and
+should be re-derived if k ever changes. The durable fix is a two-sided φ
+guard inside <code>fit_bb_mle</code>.</p>
+</div>
+<div id="caveats" class="section level1">
+<h1>Caveats</h1>
+<ul>
+<li><strong>Which rejection exit fires is not instrumented.</strong>
+“Unfittable” means <code>fit_bb_mle</code> returned <code>NULL</code>;
+its four exits (no starting values, non-convergence, μ boundary guard,
+coefficient guard) are not distinguished. Overfitting makes the μ and
+coefficient guards likely at high k, but non-convergence would look
+identical here. Stated as inference, not measurement.</li>
+<li><strong>Only the k values shown were tested.</strong> k = 3 is the
+best of {0, 3, 5, 7, 10, 15, 20}, not a fitted optimum; nothing here
+explores k = 1, 2 or 4.</li>
+<li><strong>The φ filter is a no-op at k ≥ 10</strong>, so those panels
+in §3 are not “cleaned” versions of the same analysis. The comparison
+across k is honest about calibration but is not a like-for-like test of
+the filter.</li>
+<li><strong>φ here is not a “common” φ.</strong> φ = 1/(a+b+1) ∈ (0,1),
+matching <code>aod</code>’s φ and VGAM’s <code>rho</code>, not a
+precision parameter on (0, ∞).</li>
+</ul>
+<p>Related: <a href="qtl_mapping_betabinomial_strategy.html">the current
+strategy and its calibration</a> · <a
+href="qtl_mapping_betabinomial_gof_failed.html">the goodness-of-fit
+attempts</a></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Red Hat Enterprise Linux 8.10 (Ootpa)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
+
+locale:
+ [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
+ [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
+ [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
+[10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.0  
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.2.0  xfun_0.38         bslib_0.3.1       colorspace_2.0-3 
+ [5] vctrs_0.6.1       generics_0.1.3    htmltools_0.5.7   yaml_2.3.5       
+ [9] utf8_1.2.2        rlang_1.1.2       R.oo_1.24.0       jquerylib_0.1.4  
+[13] later_1.3.0       pillar_1.9.0      glue_1.6.2        withr_2.5.0      
+[17] R.utils_2.11.0    lifecycle_1.0.4   stringr_1.5.0     munsell_0.5.0    
+[21] gtable_0.3.0      R.methodsS3_1.8.1 evaluate_0.15     labeling_0.4.2   
+[25] knitr_1.42        callr_3.7.0       fastmap_1.1.0     httpuv_1.6.5     
+[29] ps_1.7.0          fansi_1.0.3       highr_0.9         Rcpp_1.0.11      
+[33] promises_1.2.0.1  scales_1.2.0      jsonlite_1.8.7    farver_2.1.0     
+[37] fs_1.5.2          gridExtra_2.3     digest_0.6.29     stringi_1.7.6    
+[41] processx_3.5.3    dplyr_1.1.2       getPass_0.2-2     rprojroot_2.0.3  
+[45] grid_4.2.0        cli_3.6.2         tools_4.2.0       magrittr_2.0.3   
+[49] sass_0.4.1        tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3  
+[53] rmarkdown_2.21    httr_1.4.5        rstudioapi_0.14   R6_2.5.1         
+[57] git2r_0.30.1      compiler_4.2.0   </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

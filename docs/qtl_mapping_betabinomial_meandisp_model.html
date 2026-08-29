@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-08-29" />
+
+<title>pU-QTL mapping — beta-binomial model (mean–dispersion form)</title>
+
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">pU-QTL mapping — beta-binomial model
+(mean–dispersion form)</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-08-29</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-08-29
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee8440070ec5698282e03147894902d9738d6827etargetblanke844007a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/e8440070ec5698282e03147894902d9738d6827e" target="_blank">e844007</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee8440070ec5698282e03147894902d9738d6827etargetblanke844007a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/e8440070ec5698282e03147894902d9738d6827e" target="_blank">e844007</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/qtl_mapping_betabinomial_meandisp_model.Rmd
+    Untracked:  analysis/qtl_mapping_betabinomial_npcs_tradeoff.Rmd
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = &quot;center&quot;, fig.width = 10)
+
+PSI &lt;- &quot;/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl&quot;
+PC  &lt;- file.path(PSI, &quot;qtl_betabinomial/prior_pi_cases&quot;)
+D   &lt;- file.path(PSI, &quot;qtl_betabinomial/phi_vs_npcs&quot;)
+
+par_cases &lt;- fread(file.path(PC, &quot;case_params.tsv&quot;), sep = &quot;\t&quot;)
+draws     &lt;- fread(file.path(PC, &quot;prior_draws.tsv.gz&quot;), sep = &quot;\t&quot;)
+obs       &lt;- fread(file.path(PC, &quot;observed.tsv&quot;), sep = &quot;\t&quot;)
+sweep     &lt;- fread(file.path(D, &quot;phi_by_npcs_auto_noUCcalled.txt.gz&quot;), sep = &quot;\t&quot;)
+PHI_EPS   &lt;- 1e-6</code></pre>
+<div id="overview" class="section level1">
+<h1>Overview</h1>
+<p>This page restates the beta-binomial pU-QTL model in
+<strong>mean–dispersion form</strong>. The likelihood is unchanged —
+this is the same model as on the <a
+href="qtl_mapping_betabinomial_model.html">original model page</a>, and
+no result changes numerically. What changes is that the <strong>prior on
+the latent modification rate is written explicitly</strong>, which makes
+it something you can plot and inspect per site. That turned out to
+matter: the diagnostic in §4 is only obvious in this
+parameterization.</p>
+<p>Because it is the same model, results are <strong>not</strong> kept
+in a separate tree — there is no “old” versus “new” set of numbers to
+keep apart. <code>fit_bb_mle</code> has always computed <span
+class="math inline">\(\varphi = 1/(\alpha+\beta+1)\)</span> internally;
+what was missing was writing it out.</p>
+</div>
+<div id="the-model" class="section level1">
+<h1>The model</h1>
+<p>For one pU site, let cell line <span class="math inline">\(i\)</span>
+have <span class="math inline">\(y_i\)</span> converted reads out of
+<span class="math inline">\(n_i\)</span> total. The modification rate is
+itself a random quantity <span class="math inline">\(p_i\)</span>, drawn
+from a Beta prior whose <strong>mean</strong> is modelled and whose
+<strong>dispersion</strong> is shared:</p>
+<p><span class="math display">\[
+y_i \mid p_i \sim \text{Binomial}(n_i,\, p_i), \qquad
+p_i \sim \text{Beta}(\mu_i,\, \varphi)
+\]</span></p>
+<p><span class="math display">\[
+\text{logit}(\mu_i) = \beta_0 + \beta_g G_i + z_i^\top \gamma
+\]</span></p>
+<p>where <span class="math inline">\(\text{Beta}(\mu, \varphi)\)</span>
+denotes the Beta distribution reparameterized by its mean and
+dispersion,</p>
+<p><span class="math display">\[
+\alpha_i = \mu_i \frac{1-\varphi}{\varphi}, \qquad
+\beta_i = (1-\mu_i)\frac{1-\varphi}{\varphi}, \qquad
+\varphi = \frac{1}{\alpha_i + \beta_i + 1}
+\]</span></p>
+<p>Marginalising over <span class="math inline">\(p_i\)</span> gives the
+beta-binomial for <span class="math inline">\(y_i\)</span>, with</p>
+<p><span class="math display">\[
+E[y_i] = n_i\mu_i, \qquad
+\text{Var}(y_i) = n_i\mu_i(1-\mu_i)\bigl[1 + (n_i-1)\varphi\bigr]
+\]</span></p>
+<div id="reading-the-parameters" class="section level2">
+<h2>Reading the parameters</h2>
+<p><strong><span class="math inline">\(\mu_i\)</span> is the expected
+modification rate</strong> for cell line <span
+class="math inline">\(i\)</span> — the thing the regression models. It
+varies across cell lines through genotype <span
+class="math inline">\(G_i\)</span> and the covariates <span
+class="math inline">\(z_i\)</span>.</p>
+<p><strong><span class="math inline">\(\varphi \in (0,1)\)</span> is the
+over-dispersion</strong>, the intra-class correlation: how much the
+<span class="math inline">\(n_i\)</span> reads at one cell line behave
+like correlated rather than independent trials. <span
+class="math inline">\(\varphi \to 0\)</span> recovers the binomial
+exactly. The bracketed term is a variance inflation factor of the same
+form as the design effect in clustered data.</p>
+<p><strong><span class="math inline">\(\alpha_i + \beta_i\)</span> does
+not depend on <span class="math inline">\(i\)</span>.</strong> It equals
+<span class="math inline">\((1-\varphi)/\varphi\)</span>, one scalar per
+site. So <span class="math inline">\(\alpha_i\)</span> and <span
+class="math inline">\(\beta_i\)</span> individually vary with <span
+class="math inline">\(\mu_i\)</span> but their sum is fixed — which is
+exactly what makes a single <span class="math inline">\(\varphi\)</span>
+well defined. This is a modelling <em>assumption</em>: all cell lines at
+a site share one dispersion.</p>
+<p><strong>Everything is per site.</strong> <span
+class="math inline">\(\beta_0\)</span>, <span
+class="math inline">\(\beta_g\)</span>, <span
+class="math inline">\(\gamma\)</span> and <span
+class="math inline">\(\varphi\)</span> are all estimated separately at
+each site; only <span class="math inline">\(z_i\)</span> is shared.
+Written with both indices, for site <span
+class="math inline">\(j\)</span>:</p>
+<p><span class="math display">\[
+p_{ij} \sim \text{Beta}(\mu_{ij}, \varphi_j), \qquad
+\text{logit}(\mu_{ij}) = \beta_{0j} + \beta_{gj}G_{ij} +
+z_i^\top\gamma_j
+\]</span></p>
+</div>
+<div id="relation-to-other-parameterizations" class="section level2">
+<h2>Relation to other parameterizations</h2>
+<pre class="r"><code>knitr::kable(data.table(
+  source = c(&quot;this page / `aod` / VGAM&#39;s `rho`&quot;,
+             &quot;Robinson, *Understanding beta binomial regression*&quot;,
+             &quot;Ferrari &amp; Cribari-Neto / `betareg`&quot;),
+  symbol = c(&quot;phi&quot;, &quot;sigma&quot;, &quot;phi (precision)&quot;),
+  definition = c(&quot;1/(alpha+beta+1)&quot;, &quot;1/(alpha+beta)&quot;, &quot;alpha+beta&quot;),
+  range = c(&quot;(0, 1)&quot;, &quot;(0, Inf)&quot;, &quot;(0, Inf)&quot;),
+  direction = c(&quot;larger = MORE dispersion&quot;, &quot;larger = MORE dispersion&quot;,
+                &quot;larger = LESS dispersion&quot;)),
+  caption = &quot;Three conventions in circulation. Ours and Robinson&#39;s are monotone transforms of each other (phi = sigma/(1+sigma)) and point the same way. The betareg convention is INVERTED, so &#39;phi = 0.99&#39; means nearly no dispersion there and near-total degeneracy here -- always state which is meant.&quot;)</code></pre>
+<table>
+<caption>Three conventions in circulation. Ours and Robinson’s are
+monotone transforms of each other (phi = sigma/(1+sigma)) and point the
+same way. The betareg convention is INVERTED, so ‘phi = 0.99’ means
+nearly no dispersion there and near-total degeneracy here – always state
+which is meant.</caption>
+<colgroup>
+<col width="43%" />
+<col width="13%" />
+<col width="14%" />
+<col width="7%" />
+<col width="21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">source</th>
+<th align="left">symbol</th>
+<th align="left">definition</th>
+<th align="left">range</th>
+<th align="left">direction</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">this page / <code>aod</code> / VGAM’s
+<code>rho</code></td>
+<td align="left">phi</td>
+<td align="left">1/(alpha+beta+1)</td>
+<td align="left">(0, 1)</td>
+<td align="left">larger = MORE dispersion</td>
+</tr>
+<tr class="even">
+<td align="left">Robinson, <em>Understanding beta binomial
+regression</em></td>
+<td align="left">sigma</td>
+<td align="left">1/(alpha+beta)</td>
+<td align="left">(0, Inf)</td>
+<td align="left">larger = MORE dispersion</td>
+</tr>
+<tr class="odd">
+<td align="left">Ferrari &amp; Cribari-Neto / <code>betareg</code></td>
+<td align="left">phi (precision)</td>
+<td align="left">alpha+beta</td>
+<td align="left">(0, Inf)</td>
+<td align="left">larger = LESS dispersion</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="fitting" class="section level1">
+<h1>Fitting</h1>
+<p><code>fit_bb_mle()</code> maximises the exact beta-binomial
+log-likelihood jointly over <span class="math inline">\((\beta_0,
+\beta_g, \gamma, \varphi)\)</span> by <code>optim</code> with an
+analytic gradient:</p>
+<pre class="r"><code>negll &lt;- function(theta) {
+  b   &lt;- theta[1:q]
+  phi &lt;- PHI_EPS + (1 - 2 * PHI_EPS) * plogis(theta[q + 1])   # keeps phi in (0,1)
+  mu  &lt;- plogis(as.numeric(X %*% b))
+  k   &lt;- (1 - phi) / phi;  a &lt;- mu * k;  bb &lt;- (1 - mu) * k
+  -sum(lbeta(y + a, n - y + bb) - lbeta(a, bb))
+}</code></pre>
+<p><span class="math inline">\(\varphi\)</span> is optimised on a logit
+scale so it cannot leave <span class="math inline">\((0,1)\)</span>,
+with a floor <code>PHI_EPS = 1e-6</code> away from <span
+class="math inline">\(\varphi = 0\)</span>, where <span
+class="math inline">\(k = (1-\varphi)/\varphi \to \infty\)</span>
+degenerates the likelihood. The constant <span
+class="math inline">\(\log\binom{n_i}{y_i}\)</span> is dropped inside
+the objective (it cancels in the LRT) and added back to the returned
+log-likelihood.</p>
+<p>A fit is <strong>rejected</strong> (returns <code>NULL</code>) if the
+optimiser fails to converge, if any <span
+class="math inline">\(\mu_i\)</span> reaches 0 or 1, or if any
+coefficient exceeds <code>MAX_ABS_COEF</code>. Note what is <em>not</em>
+in that list: <span class="math inline">\(\varphi\)</span> at its
+boundary. See §4.</p>
+</div>
+<div id="qtl-mapping-the-lrt" class="section level1">
+<h1>QTL mapping: the LRT</h1>
+<p>Per (site, cis-SNP) pair, test <span class="math inline">\(H_0:
+\beta_g = 0\)</span>:</p>
+<p><span class="math display">\[
+\Lambda = 2\bigl(\hat\ell_{\text{full}} - \hat\ell_{\text{null}}\bigr)
+\;\overset{H_0}{\sim}\; \chi^2_1
+\]</span></p>
+<pre class="r"><code>nf_null &lt;- fit_bb_mle(y, n, X)              # beta_0, gamma, phi
+nf_full &lt;- fit_bb_mle(y, n, cbind(X, g))    # + beta_g
+stat    &lt;- max(2 * (nf_full$loglik - nf_null$loglik), 0)
+p_snp   &lt;- pchisq(stat, df = 1, lower.tail = FALSE)</code></pre>
+<p><span class="math inline">\(\varphi\)</span> is a <strong>nuisance
+parameter re-estimated on both sides</strong> — the null and full models
+are separate fits, each with its own <span
+class="math inline">\(\hat\varphi\)</span>. That is what makes the 1-df
+reference legitimate: the two models differ by exactly one parameter,
+<span class="math inline">\(\beta_g\)</span>.</p>
+</div>
+<div id="what-the-fitted-prior-looks-like-and-why-it-matters"
+class="section level1">
+<h1>4. What the fitted prior looks like — and why it matters</h1>
+<p>This is the payoff of the explicit parameterization. Under the null
+(<span class="math inline">\(\beta_g = 0\)</span>) the fitted model
+states a full prior distribution for each cell line’s latent rate, <span
+class="math inline">\(p_i \sim \text{Beta}(\mu_i, \varphi)\)</span>, and
+that distribution can be drawn.</p>
+<p>Because the covariates are retained, <span
+class="math inline">\(\mu_i\)</span> varies across cell lines, so there
+is not one prior curve but one per cell line. What is plotted below is
+the <strong>marginal</strong> prior, pooling draws over cell lines; the
+<span class="math inline">\(\mu_i\)</span> range is printed so the
+spread is visible (it is narrow — the PC coefficients are small relative
+to the intercept).</p>
+<pre class="r"><code>d &lt;- copy(draws)
+lab &lt;- par_cases[, .(sid, group,
+  # %.6f not %.4g: the latter renders 0.999999 as &quot;1&quot;, which reads as
+  # exactly 1 rather than as the numerical cap.
+  txt = sprintf(&quot;chr%s\nphi = %.6f   alpha+beta = %.3g\nP(p&lt;0.01)=%.3f  P(p&gt;0.99)=%.3f&quot;,
+                sid, phi, alpha_plus_beta, P_below_0.01, P_above_0.99))]
+d &lt;- merge(d, lab, by = c(&quot;sid&quot;, &quot;group&quot;))
+d[, panel := factor(txt, levels = lab$txt)]
+
+ggplot(d, aes(p, fill = group)) +
+  geom_histogram(breaks = seq(0, 1, 0.02), colour = NA) +
+  scale_fill_manual(values = c(`phi-boundary (phi &gt; 0.99)` = &quot;#e34948&quot;,
+                               `well-behaved control` = &quot;#3987e5&quot;), name = NULL) +
+  facet_wrap(~ panel, ncol = 3, scales = &quot;free_y&quot;) +
+  labs(x = expression(&quot;draws from the fitted prior on&quot;~p[i]), y = &quot;count&quot;,
+       title = &quot;Fitted prior on the latent rate, at four phi-boundary sites and two controls&quot;,
+       subtitle = paste(&quot;Controls give a proper unimodal prior concentrated near mu.&quot;,
+                        &quot;The phi-boundary sites give a TWO-POINT prior at 0 and 1:&quot;,
+                        &quot;\nthe model has concluded every cell line is either fully modified or not at all.&quot;,
+                        &quot;Free y-axes.&quot;)) +
+  theme_bw(base_size = 11) + theme(legend.position = &quot;bottom&quot;,
+                                   strip.text = element_text(size = 8.2))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_meandisp_model.Rmd/priors-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>knitr::kable(par_cases[, .(
+  site = paste0(&quot;chr&quot;, sid), group, n_cl,
+  phi = sprintf(&quot;%.6f&quot;, phi),
+  `alpha+beta` = signif(alpha_plus_beta, 3),
+  `sigma (Robinson)` = signif(sigma_robinson, 3),
+  `mu_i range` = sprintf(&quot;%.3f - %.3f&quot;, mu_min, mu_max),
+  `P(p&lt;0.01)` = round(P_below_0.01, 3),
+  `P(p&gt;0.99)` = round(P_above_0.99, 3),
+  `prior SD` = round(prior_sd_median, 3))],
+  caption = &quot;At every phi-boundary site the two tail masses sum to 1.000 -- the prior has no interior mass at all -- and the prior SD is ~0.49, the maximum attainable on (0,1). The controls sit at 0.005-0.007.&quot;)</code></pre>
+<table style="width:100%;">
+<caption>At every phi-boundary site the two tail masses sum to 1.000 –
+the prior has no interior mass at all – and the prior SD is ~0.49, the
+maximum attainable on (0,1). The controls sit at 0.005-0.007.</caption>
+<colgroup>
+<col width="11%" />
+<col width="20%" />
+<col width="3%" />
+<col width="7%" />
+<col width="8%" />
+<col width="13%" />
+<col width="11%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="left">group</th>
+<th align="right">n_cl</th>
+<th align="left">phi</th>
+<th align="right">alpha+beta</th>
+<th align="right">sigma (Robinson)</th>
+<th align="left">mu_i range</th>
+<th align="right">P(p&lt;0.01)</th>
+<th align="right">P(p&gt;0.99)</th>
+<th align="right">prior SD</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr3 37277733</td>
+<td align="left">phi-boundary (phi &gt; 0.99)</td>
+<td align="right">50</td>
+<td align="left">0.999999</td>
+<td align="right">1.00e-06</td>
+<td align="right">1.00e+06</td>
+<td align="left">0.349 - 0.496</td>
+<td align="right">0.600</td>
+<td align="right">0.400</td>
+<td align="right">0.488</td>
+</tr>
+<tr class="even">
+<td align="left">chr17 53106304</td>
+<td align="left">phi-boundary (phi &gt; 0.99)</td>
+<td align="right">50</td>
+<td align="left">0.999999</td>
+<td align="right">1.00e-06</td>
+<td align="right">1.00e+06</td>
+<td align="left">0.080 - 0.256</td>
+<td align="right">0.849</td>
+<td align="right">0.151</td>
+<td align="right">0.360</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2 88861305</td>
+<td align="left">phi-boundary (phi &gt; 0.99)</td>
+<td align="right">45</td>
+<td align="left">0.999999</td>
+<td align="right">1.00e-06</td>
+<td align="right">1.00e+06</td>
+<td align="left">0.001 - 0.120</td>
+<td align="right">0.979</td>
+<td align="right">0.021</td>
+<td align="right">0.122</td>
+</tr>
+<tr class="even">
+<td align="left">chr6 29943223</td>
+<td align="left">phi-boundary (phi &gt; 0.99)</td>
+<td align="right">44</td>
+<td align="left">0.999999</td>
+<td align="right">1.00e-06</td>
+<td align="right">1.00e+06</td>
+<td align="left">0.351 - 0.613</td>
+<td align="right">0.516</td>
+<td align="right">0.484</td>
+<td align="right">0.496</td>
+</tr>
+<tr class="odd">
+<td align="left">chr13 20783614</td>
+<td align="left">well-behaved control</td>
+<td align="right">50</td>
+<td align="left">0.000434</td>
+<td align="right">2.30e+03</td>
+<td align="right">4.35e-04</td>
+<td align="left">0.044 - 0.069</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">0.005</td>
+</tr>
+<tr class="even">
+<td align="left">chr1 91387455</td>
+<td align="left">well-behaved control</td>
+<td align="right">50</td>
+<td align="left">0.000433</td>
+<td align="right">2.31e+03</td>
+<td align="right">4.34e-04</td>
+<td align="left">0.828 - 0.906</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">0.007</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What this says.</strong> At a site with <span
+class="math inline">\(\varphi \to 1\)</span>, <span
+class="math inline">\(\alpha_i + \beta_i \to 0\)</span> and the Beta
+prior collapses onto point masses at 0 and 1. The model is asserting
+that each cell line’s true rate is <em>exactly</em> 0 or
+<em>exactly</em> 1 — no intermediate stoichiometry is possible. That is
+not a fitted dispersion, it is a degenerate solution, and any LRT
+computed against it is computed from a boundary.</p>
+<p>The <code>%pU</code> panels show why the optimiser goes there: at
+these sites the observed <code>%pU</code> values really do sit at 0 or
+~100 within each genotype class, so a two-point prior is the
+likelihood-maximising description. The LRT then reports an extreme
+p-value which is really a statement that the phenotype is bimodal, not
+that the SNP is associated.</p>
+<pre class="r"><code>knitr::kable(obs[!is.na(lead_snp), .(
+  site = paste0(&quot;chr&quot;, sid[1]), group = group[1],
+  `lead cis-SNP` = lead_snp[1],
+  `LRT p` = signif(lead_p[1], 3),
+  `cell lines` = .N,
+  `frac %pU = 0` = sprintf(&quot;%.2f&quot;, mean(pu == 0)),
+  `frac %pU &gt; 0.9` = sprintf(&quot;%.2f&quot;, mean(pu &gt; 0.9)),
+  # as.numeric: median() of an integer vector returns integer for odd-length
+  # groups and double for even-length ones, which breaks data.table&#39;s per-group
+  # type check.
+  `median depth` = as.numeric(median(n))), by = sid][, -1],
+  caption = &quot;The same sites, from the data side: at the phi-boundary sites most cell lines sit at exactly 0 or above 0.9, with little in between.&quot;)</code></pre>
+<table>
+<caption>The same sites, from the data side: at the phi-boundary sites
+most cell lines sit at exactly 0 or above 0.9, with little in
+between.</caption>
+<colgroup>
+<col width="12%" />
+<col width="22%" />
+<col width="13%" />
+<col width="7%" />
+<col width="9%" />
+<col width="11%" />
+<col width="12%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="left">group</th>
+<th align="left">lead cis-SNP</th>
+<th align="right">LRT p</th>
+<th align="right">cell lines</th>
+<th align="left">frac %pU = 0</th>
+<th align="left">frac %pU &gt; 0.9</th>
+<th align="right">median depth</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr3 37277733</td>
+<td align="left">phi-boundary (phi &gt; 0.99)</td>
+<td align="left">3:37275552:T:C</td>
+<td align="right">0.00e+00</td>
+<td align="right">50</td>
+<td align="left">0.38</td>
+<td align="left">0.14</td>
+<td align="right">76.0</td>
+</tr>
+<tr class="even">
+<td align="left">chr17 53106304</td>
+<td align="left">phi-boundary (phi &gt; 0.99)</td>
+<td align="left">17:53106127:C:T</td>
+<td align="right">0.00e+00</td>
+<td align="right">50</td>
+<td align="left">0.84</td>
+<td align="left">0.12</td>
+<td align="right">28.0</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2 88861305</td>
+<td align="left">phi-boundary (phi &gt; 0.99)</td>
+<td align="left">2:88866214:A:G</td>
+<td align="right">1.30e-06</td>
+<td align="right">45</td>
+<td align="left">0.98</td>
+<td align="left">0.02</td>
+<td align="right">12.0</td>
+</tr>
+<tr class="even">
+<td align="left">chr6 29943223</td>
+<td align="left">phi-boundary (phi &gt; 0.99)</td>
+<td align="left">6:29945891:T:G</td>
+<td align="right">0.00e+00</td>
+<td align="right">44</td>
+<td align="left">0.30</td>
+<td align="left">0.41</td>
+<td align="right">87.0</td>
+</tr>
+<tr class="odd">
+<td align="left">chr13 20783614</td>
+<td align="left">well-behaved control</td>
+<td align="left">13:20782309:C:T</td>
+<td align="right">5.64e-02</td>
+<td align="right">50</td>
+<td align="left">0.42</td>
+<td align="left">0.00</td>
+<td align="right">16.5</td>
+</tr>
+<tr class="even">
+<td align="left">chr1 91387455</td>
+<td align="left">well-behaved control</td>
+<td align="left">1:91387539:G:A</td>
+<td align="right">1.29e-02</td>
+<td align="right">50</td>
+<td align="left">0.00</td>
+<td align="left">0.22</td>
+<td align="right">28.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="the-dispersion-has-two-degenerate-boundaries"
+class="section level1">
+<h1>5. The dispersion has two degenerate boundaries</h1>
+<p><span class="math inline">\(\varphi\)</span> is bounded, and
+<strong>both</strong> ends are pathological:</p>
+<ul>
+<li><span class="math inline">\(\varphi \to 1\)</span>: <span
+class="math inline">\(\alpha+\beta \to 0\)</span>, prior collapses to
+point masses at 0 and 1 (§4).</li>
+<li><span class="math inline">\(\varphi \to 0\)</span>: <span
+class="math inline">\(\alpha+\beta \to \infty\)</span>, prior collapses
+onto <span class="math inline">\(\mu_i\)</span> and the model reduces to
+a plain binomial.</li>
+</ul>
+<p>Both are reachable in practice, and which one is hit depends on how
+many covariates the mean model carries:</p>
+<pre class="r"><code>s &lt;- sweep[ok == TRUE]
+knitr::kable(s[, .(
+  `sites fitted`              = format(.N, big.mark = &quot;,&quot;),
+  `median phi`                = signif(median(phi), 3),
+  `at the phi=0 floor (1e-6)` = sprintf(&quot;%.1f%%&quot;, 100 * mean(phi &lt;= 1.01 * PHI_EPS)),
+  `phi &gt; 0.99`                = sprintf(&quot;%.2f%%&quot;, 100 * mean(phi &gt; 0.99))),
+  by = .(`k (PCs)` = npcs)][order(`k (PCs)`)],
+  caption = &quot;Null fits across covariate counts, autosome-only phenotype. Adding PCs moves the degeneracy from the upper boundary to the LOWER one -- at k = 20 most fits have collapsed to the binomial limit.&quot;)</code></pre>
+<table>
+<caption>Null fits across covariate counts, autosome-only phenotype.
+Adding PCs moves the degeneracy from the upper boundary to the LOWER one
+– at k = 20 most fits have collapsed to the binomial limit.</caption>
+<colgroup>
+<col width="11%" />
+<col width="18%" />
+<col width="15%" />
+<col width="37%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">k (PCs)</th>
+<th align="left">sites fitted</th>
+<th align="right">median phi</th>
+<th align="left">at the phi=0 floor (1e-6)</th>
+<th align="left">phi &gt; 0.99</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="left">9,228</td>
+<td align="right">1.40e-02</td>
+<td align="left">0.0%</td>
+<td align="left">1.29%</td>
+</tr>
+<tr class="even">
+<td align="right">3</td>
+<td align="left">10,454</td>
+<td align="right">4.34e-04</td>
+<td align="left">0.0%</td>
+<td align="left">0.21%</td>
+</tr>
+<tr class="odd">
+<td align="right">5</td>
+<td align="left">9,969</td>
+<td align="right">3.23e-05</td>
+<td align="left">0.0%</td>
+<td align="left">0.05%</td>
+</tr>
+<tr class="even">
+<td align="right">7</td>
+<td align="left">9,490</td>
+<td align="right">6.50e-06</td>
+<td align="left">0.1%</td>
+<td align="left">0.01%</td>
+</tr>
+<tr class="odd">
+<td align="right">10</td>
+<td align="left">8,777</td>
+<td align="right">1.50e-06</td>
+<td align="left">0.6%</td>
+<td align="left">0.00%</td>
+</tr>
+<tr class="even">
+<td align="right">15</td>
+<td align="left">7,665</td>
+<td align="right">1.00e-06</td>
+<td align="left">13.6%</td>
+<td align="left">0.00%</td>
+</tr>
+<tr class="odd">
+<td align="right">20</td>
+<td align="left">6,559</td>
+<td align="right">1.00e-06</td>
+<td align="left">88.6%</td>
+<td align="left">0.00%</td>
+</tr>
+</tbody>
+</table>
+<p>Consequences for the pipeline, both documented on <a
+href="qtl_mapping_betabinomial_npcs_tradeoff.html">the covariate-count
+page</a>:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Sites at <span class="math inline">\(\varphi &gt;
+0.99\)</span> are excluded</strong> before mapping, because the LRT
+there is computed from a degenerate fit. The filter must be
+<em>iterated</em>, since removing sites changes the covariate PCs, which
+changes every remaining fit.</li>
+<li><strong>The eventual fix belongs inside
+<code>fit_bb_mle</code></strong>, alongside the existing <span
+class="math inline">\(\mu\)</span> and <code>MAX_ABS_COEF</code> guards,
+and it must be <strong>two-sided</strong> — the <span
+class="math inline">\(\varphi \to 0\)</span> boundary is the one that
+dominates at high <span class="math inline">\(k\)</span>.</li>
+</ol>
+</div>
+<div id="configuration-in-use" class="section level1">
+<h1>Configuration in use</h1>
+<pre class="r"><code>knitr::kable(data.table(
+  setting = c(&quot;sites&quot;, &quot;cell lines&quot;, &quot;covariates z&quot;, &quot;cis window&quot;, &quot;test&quot;,
+              &quot;phenotype&quot;, &quot;excluded: U/C-variant sites&quot;, &quot;excluded: phi-boundary sites&quot;,
+              &quot;chromosomes&quot;),
+  value = c(&quot;5-fold union (&gt;= 1 fold)&quot;, &quot;50 genotyped&quot;, &quot;3 M-value PCs&quot;,
+            &quot;+/- 5 kb, MAF &gt;= 0.05&quot;, &quot;LRT on beta_g, 1 df&quot;,
+            &quot;fold5_union_auto_noUCcalled_noPhi_pc3&quot;,
+            &quot;1,118 (a U/C variant is called on the pU base, so %pU partly reports genotype)&quot;,
+            &quot;33 (phi &gt; 0.99, iterated to a fixed point at k = 3)&quot;,
+            &quot;chr1-22 only; PCs recomputed on chr1-22&quot;)),
+  caption = &quot;k = 3 PCs was selected on calibration grounds -- permutation lambda degrades monotonically as PCs are added.&quot;)</code></pre>
+<table>
+<caption>k = 3 PCs was selected on calibration grounds – permutation
+lambda degrades monotonically as PCs are added.</caption>
+<colgroup>
+<col width="26%" />
+<col width="73%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">setting</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">sites</td>
+<td align="left">5-fold union (&gt;= 1 fold)</td>
+</tr>
+<tr class="even">
+<td align="left">cell lines</td>
+<td align="left">50 genotyped</td>
+</tr>
+<tr class="odd">
+<td align="left">covariates z</td>
+<td align="left">3 M-value PCs</td>
+</tr>
+<tr class="even">
+<td align="left">cis window</td>
+<td align="left">+/- 5 kb, MAF &gt;= 0.05</td>
+</tr>
+<tr class="odd">
+<td align="left">test</td>
+<td align="left">LRT on beta_g, 1 df</td>
+</tr>
+<tr class="even">
+<td align="left">phenotype</td>
+<td align="left">fold5_union_auto_noUCcalled_noPhi_pc3</td>
+</tr>
+<tr class="odd">
+<td align="left">excluded: U/C-variant sites</td>
+<td align="left">1,118 (a U/C variant is called on the pU base, so %pU
+partly reports genotype)</td>
+</tr>
+<tr class="even">
+<td align="left">excluded: phi-boundary sites</td>
+<td align="left">33 (phi &gt; 0.99, iterated to a fixed point at k =
+3)</td>
+</tr>
+<tr class="odd">
+<td align="left">chromosomes</td>
+<td align="left">chr1-22 only; PCs recomputed on chr1-22</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="data" class="section level1">
+<h1>Data</h1>
+<ul>
+<li><strong>Phenotype</strong>: per site, per cell line — converted
+reads <span class="math inline">\(C\)</span> (<span
+class="math inline">\(=y\)</span>) out of total depth <span
+class="math inline">\(N\)</span> (<span
+class="math inline">\(=C+T\)</span>). No transformation.</li>
+<li><strong>Genotypes</strong>: cis-SNPs within ±5 kb, MAF ≥ 0.05, from
+the 50 cell lines.</li>
+<li><strong>Covariates <span class="math inline">\(z\)</span></strong>:
+3 M-value phenotype PCs, recomputed on the retained sites whenever the
+site set changes (they derive from the phenotype itself).</li>
+</ul>
+<p>Related: <a
+href="qtl_mapping_betabinomial_npcs_tradeoff.html">covariate count and
+the φ boundary</a> · <a
+href="qtl_mapping_betabinomial_strategy.html">filtering strategy and
+calibration</a> · <a
+href="qtl_mapping_betabinomial_gof_failed.html">goodness-of-fit
+attempts</a> · <a href="qtl_mapping_betabinomial_model.html">original
+α/β write-up</a></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Red Hat Enterprise Linux 8.10 (Ootpa)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
+
+locale:
+ [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
+ [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
+ [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
+[10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.0  
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.2.0  xfun_0.38         bslib_0.3.1       colorspace_2.0-3 
+ [5] vctrs_0.6.1       generics_0.1.3    htmltools_0.5.7   yaml_2.3.5       
+ [9] utf8_1.2.2        rlang_1.1.2       R.oo_1.24.0       jquerylib_0.1.4  
+[13] later_1.3.0       pillar_1.9.0      glue_1.6.2        withr_2.5.0      
+[17] R.utils_2.11.0    lifecycle_1.0.4   stringr_1.5.0     munsell_0.5.0    
+[21] gtable_0.3.0      R.methodsS3_1.8.1 evaluate_0.15     labeling_0.4.2   
+[25] knitr_1.42        callr_3.7.0       fastmap_1.1.0     httpuv_1.6.5     
+[29] ps_1.7.0          fansi_1.0.3       highr_0.9         Rcpp_1.0.11      
+[33] promises_1.2.0.1  scales_1.2.0      jsonlite_1.8.7    farver_2.1.0     
+[37] fs_1.5.2          digest_0.6.29     stringi_1.7.6     processx_3.5.3   
+[41] dplyr_1.1.2       getPass_0.2-2     rprojroot_2.0.3   grid_4.2.0       
+[45] cli_3.6.2         tools_4.2.0       magrittr_2.0.3    sass_0.4.1       
+[49] tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3   rmarkdown_2.21   
+[53] httr_1.4.5        rstudioapi_0.14   R6_2.5.1          git2r_0.30.1     
+[57] compiler_4.2.0   </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

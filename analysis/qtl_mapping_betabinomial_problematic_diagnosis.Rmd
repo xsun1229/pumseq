@@ -1,0 +1,272 @@
+---
+title: "Beta-binomial pU-QTL: diagnosing the problematic sites (k = 3, ±5 kb, U/C sites removed)"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = "center", fig.width = 11)
+
+PSI  <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl"
+PC   <- file.path(PSI, "qtl_betabinomial/prior_pi_cases")
+DIAG <- file.path(PSI, "qtl_betabinomial/diagnostic_figures")
+
+par   <- fread(file.path(PC, "case_params_patho.tsv"), sep = "\t")
+bins  <- fread(file.path(PC, "prior_bins_patho.tsv"), sep = "\t")
+obs   <- fread(file.path(PC, "observed_patho.tsv"), sep = "\t")
+# sid contains a space, so the separator must be explicit
+pl    <- fread(file.path(DIAG, "pathological_sites_w5kb_pc3_auto_noUCcalled.txt"), sep = "\t")
+
+GRP <- c("problematic (significant in real AND permuted)", "matched control")
+for (d in list(par, bins, obs)) d[, group := factor(group, levels = GRP)]
+NPROB <- par[group == GRP[1], .N]
+NCTRL <- par[group == GRP[2], .N]
+PHI_CUT <- 0.99
+ord <- par[order(group, -phi)]$sid
+for (d in list(par, bins, obs)) d[, sidf := factor(sid, levels = ord)]
+```
+
+# 1. How many problematic sites, and what makes them problematic
+
+**Definition.** A site is *problematic* if it returns an extreme p-value in the
+**permuted** data as well as the real data. Permutation destroys any
+genotype–phenotype relationship, so a site that stays extreme there is not
+reporting association — it is reporting something about its own phenotype
+distribution that the test mistakes for signal. Selection is made on the
+permuted scans only, which keeps the look at the real data non-circular:
+
+- minimum p < 10⁻¹⁰ in at least one of the 5 permutations, **and**
+- real −log₁₀p > 10
+
+**Configuration.** ±5 kb windows, k = 3 covariate PCs, chr1–22 only, phenotype
+`fold5_union_auto_noUCcalled` — U/C-variant sites already excluded (1,118 of
+11,856), φ-boundary sites deliberately **retained** so they can be examined here.
+
+> **There are `r NPROB` problematic sites** out of 10,045 tested.
+
+`r NCTRL` well-behaved sites, matched on covered cell lines and pooled %pU, are
+carried through every panel below for contrast.
+
+```{r counts}
+knitr::kable(pl[, .(
+  site = paste0("chr", sub(" ", ":", sid)),
+  `real -log10 p` = round(real, 1),
+  `permuted, mean` = round(perm_mean, 1),
+  `permuted, sd` = round(perm_sd, 2),
+  `real minus worst permuted` = round(real_excess_over_perm_max, 2),
+  `covered cell lines` = NA_integer_,
+  `median depth` = median_depth_covered,
+  `pooled %pU` = round(100 * pooled_pu, 1))][
+    , `covered cell lines` := par$n_cl[match(pl$sid, par$sid)]][],
+  caption = "The signature: the real and permuted p-values are essentially identical. For 6 of the 9 the real scan is no more extreme than the WORST permutation (negative last column), i.e. shuffling the phenotype cost nothing at all.")
+```
+
+The last column is the point. If these were genuine associations, permuting the
+phenotype would destroy them and the real value would tower over the permuted
+ones. Instead the real and permuted values agree to within a fraction of a log
+unit, and for `r sum(pl$real_excess_over_perm_max < 0)` of the `r NPROB` sites
+the real scan is *less* extreme than the worst permutation.
+
+# 2. %pU by genotype at the lead cis-SNP
+
+```{r box, fig.height=7.6}
+o <- obs[!is.na(geno)]
+o[, gf := factor(geno, levels = c(0, 1, 2))]
+lab <- unique(o[, .(sidf, group, lead_snp, lead_p)])
+lab[, panel := sprintf("chr%s   %s\np = %.1e", sub(" ", ":", sidf), lead_snp, lead_p)]
+o <- merge(o, lab[, .(sidf, panel)], by = "sidf")
+o[, panel := factor(panel, levels = lab[order(match(sidf, ord))]$panel)]
+
+ggplot(o, aes(gf, 100 * pu)) +
+  geom_boxplot(width = 0.5, outlier.shape = NA, colour = "grey35") +
+  geom_jitter(aes(colour = log10(n)), width = 0.15, height = 0, size = 1.9) +
+  scale_colour_viridis_c(option = "D", name = "log10 read depth") +
+  facet_wrap(~ panel, ncol = 4, scales = "free_y") +
+  labs(x = "genotype (copies of the counted allele)", y = "%pU",
+       title = sprintf("%%pU by genotype at each site's lead cis-SNP (%d problematic + %d controls)",
+                       NPROB, NCTRL),
+       subtitle = paste("Dots are cell lines, coloured by read depth. Free y-axes.",
+                        "At most problematic sites the values are pressed against 0 and 100",
+                        "\nwith little in between -- the phenotype is bimodal rather than graded.")) +
+  theme_bw(base_size = 11) +
+  theme(legend.position = "bottom", strip.text = element_text(size = 7.6))
+```
+
+```{r shape}
+knitr::kable(obs[, .(
+  site = paste0("chr", sub(" ", ":", sid[1])),
+  group = as.character(group[1]),
+  `cell lines` = .N,
+  `frac %pU = 0` = sprintf("%.2f", mean(pu == 0)),
+  `frac %pU > 0.9` = sprintf("%.2f", mean(pu > 0.9)),
+  `frac in 0.1-0.9` = sprintf("%.2f", mean(pu >= 0.1 & pu <= 0.9)),
+  `median depth` = as.numeric(median(n))), by = sidf][
+    order(match(sidf, ord))][, -1],
+  caption = "The same thing numerically: how much of each site's %pU distribution sits at the extremes versus in the middle.")
+```
+
+# 3. Estimated φ
+
+```{r phi-tab}
+knitr::kable(par[order(match(sid, ord)), .(
+  site = paste0("chr", sub(" ", ":", sid)),
+  group = as.character(group),
+  `cell lines` = n_cl,
+  phi = sprintf("%.6f", phi),
+  `alpha+beta = (1-phi)/phi` = signif(alpha_plus_beta, 3),
+  `phi, intercept-only fit` = sprintf("%.6f", phi_intercept_only),
+  `pooled %pU` = round(100 * pooled_pu, 1))],
+  caption = "phi is the over-dispersion of the Beta prior, on (0,1). phi -> 1 means alpha+beta -> 0, where the prior collapses onto point masses at 0 and 1.")
+```
+
+```{r phi-fig, fig.height=4.2}
+ggplot(par, aes(reorder(paste0("chr", sub(" ", ":", sid)), phi), phi, fill = group)) +
+  geom_col(width = 0.68) +
+  geom_hline(yintercept = PHI_CUT, linetype = "dashed", colour = "grey25") +
+  annotate("text", x = 0.7, y = PHI_CUT, label = " phi = 0.99", hjust = 0, vjust = -0.6,
+           size = 3.2, colour = "grey25") +
+  scale_fill_manual(values = setNames(c("#e34948", "#3987e5"), GRP), name = NULL) +
+  coord_flip() +
+  labs(x = NULL, y = expression("fitted"~varphi),
+       title = sprintf("All %d problematic sites have phi pinned to its upper boundary", NPROB),
+       subtitle = sprintf("Every one sits at %.6f, the numerical cap in fit_bb_mle. Genome-wide only ~0.2%% of sites do.",
+                          max(par$phi))) +
+  theme_bw(base_size = 11) + theme(legend.position = "bottom")
+```
+
+**`r par[group == GRP[1] & phi > PHI_CUT, .N]` of `r NPROB` problematic sites have
+φ > 0.99** — in fact every one is at 0.999999, the numerical cap. This is not a
+threshold that was tuned to catch them; genome-wide only about 0.2% of sites
+reach it.
+
+Note the `intercept-only` column: at 3 of the sites φ is well below the boundary
+when the covariates are dropped (0.51, 0.86, 0.92), so at those the PCs are part
+of what drives the fit onto the boundary. At the other 6 it is at the cap either
+way.
+
+# 4. The fitted prior distribution of $p_i$
+
+$p_i$ is cell line $i$'s true modification rate. It is latent — never observed —
+but the fitted null model states its whole distribution, and that distribution is
+what is plotted. It is obtained from the fit in three steps:
+
+1. **The mean.** The fitted coefficients give
+   $\mathrm{logit}(\mu_i) = \hat\beta_0 + z_i^\top\hat\gamma$ (no genotype term,
+   since this is the null), so $\mu_i = \mathrm{logit}^{-1}(\cdot)$. Note
+   $\mu_i = E[p_i]$.
+2. **The shape parameters**, from that mean and the site's single fitted
+   $\hat\varphi$:
+   $$\alpha_i = \mu_i\frac{1-\hat\varphi}{\hat\varphi}, \qquad
+     \beta_i = (1-\mu_i)\frac{1-\hat\varphi}{\hat\varphi}$$
+3. **The distribution.** $p_i \sim \text{Beta}(\alpha_i, \beta_i)$, evaluated as
+   exact binned mass (a density curve is unusable: at $\hat\varphi \to 1$ it
+   diverges at 0 and 1):
+   $$P(a < p_i \le b) = F_{\text{Beta}}(b;\alpha_i,\beta_i) - F_{\text{Beta}}(a;\alpha_i,\beta_i)$$
+
+$\hat\varphi$ is one value per site and the covariates make $\mu_i$ differ only
+slightly between cell lines (range printed on each panel), so this is effectively
+one Beta per site. The ticks below each panel are the observed $y_i/n_i$, for
+reference.
+
+```{r prior, fig.height=7.6}
+# One Beta prior per site, from that site's phi and median mu -- computed here
+# straight from case_params, no simulation and no averaging over cell lines.
+NB  <- 50
+brk <- seq(0, 1, length.out = NB + 1)
+pri <- par[, {
+  ab <- (1 - phi) / phi
+  a  <- mu_median * ab;  b <- (1 - mu_median) * ab
+  .(bin_mid = (head(brk, -1) + tail(brk, -1)) / 2, mass = diff(pbeta(brk, a, b)))
+}, by = .(sid, group)]
+
+labp <- par[, .(sid, panel = sprintf("chr%s   phi = %.6f\nmu_i %.3f-%.3f   P(<.01)=%.2f  P(>.99)=%.2f",
+                                     sub(" ", ":", sid), phi, mu_min, mu_max,
+                                     P_below_0.01, P_above_0.99))]
+pri <- merge(pri, labp, by = "sid")
+pri[, panel := factor(panel, levels = labp[order(match(sid, ord))]$panel)]
+ob  <- merge(obs[, .(sid, pu)], labp, by = "sid")
+ob[, panel := factor(panel, levels = levels(pri$panel))]
+
+ggplot(pri, aes(bin_mid, mass)) +
+  geom_col(aes(fill = group), width = 1 / NB, colour = NA) +
+  geom_point(data = ob, aes(x = pu, y = -0.06), shape = 124, size = 2.2,
+             colour = "grey15", alpha = 0.7) +
+  scale_fill_manual(values = setNames(c("#e34948", "#3987e5"), GRP), name = NULL) +
+  facet_wrap(~ panel, ncol = 4) +
+  labs(x = expression(p[i]), y = "prior probability mass",
+       title = "Fitted prior on the latent rate, with the observed %pU beneath",
+       subtitle = paste("Bars: the site's Beta prior (exact, sums to 1). Ticks below zero: the observed %pU,",
+                        "one per cell line (these are y_i/n_i, so they carry sampling noise).",
+                        "\nEvery problematic site's prior puts ALL its mass at 0 and 1. At chr3:37277733, chr6:29943223 and",
+                        "\nchr17:36212383 well-covered cell lines nonetheless sit in the interior, where the prior gives ~zero mass.")) +
+  theme_bw(base_size = 11) +
+  theme(legend.position = "bottom", strip.text = element_text(size = 7.4))
+```
+
+```{r prior-tab}
+knitr::kable(par[order(match(sid, ord)), .(
+  site = paste0("chr", sub(" ", ":", sid)),
+  group = as.character(group),
+  alpha = signif(alpha_median, 3), beta = signif(beta_median, 3),
+  `mu_i range` = sprintf("%.3f - %.3f", mu_min, mu_max),
+  `P(p<0.01)` = round(P_below_0.01, 3),
+  `P(p>0.99)` = round(P_above_0.99, 3),
+  `both tails` = round(P_below_0.01 + P_above_0.99, 3),
+  `prior SD` = round(prior_sd_median, 3))],
+  caption = "At the problematic sites the two tail masses sum to 1.000 -- the prior has NO interior mass -- and the prior SD is ~0.35-0.50 against a maximum of 0.5 attainable on (0,1).")
+```
+
+**The two tail masses sum to 1.000 at every problematic site.** The fitted prior
+places no probability anywhere between 0.01 and 0.99: the model asserts that each
+cell line's true pU rate is either essentially 0 or essentially 1, with no
+intermediate stoichiometry possible.
+
+<!-- # 5. What this says -->
+
+<!-- Putting the three pieces together, the same story reads consistently from the -->
+<!-- data side and the model side: -->
+
+<!-- - **Data (§2)**: at these sites %pU is bimodal — cell lines sit at 0 or near 100 -->
+<!--   with little in between — rather than varying smoothly with genotype. -->
+<!-- - **Dispersion (§3)**: the fitter responds by driving φ to its upper boundary, -->
+<!--   all `r NPROB` of `r NPROB` sites, at the numerical cap. -->
+<!-- - **Prior (§4)**: at that boundary $\alpha+\beta \to 0$ and the Beta prior -->
+<!--   degenerates to point masses at 0 and 1, which is the likelihood-maximising -->
+<!--   description of a bimodal phenotype. -->
+
+<!-- An LRT computed against a degenerate null is not testing what it appears to test, -->
+<!-- which is why these sites stay extreme under permutation: the statistic is -->
+<!-- responding to the *shape* of the phenotype distribution, which shuffling does not -->
+<!-- change, rather than to any genotype–phenotype relationship. -->
+
+<!-- This is why the scan excludes them, and why the durable fix is a **two-sided φ -->
+<!-- guard inside `fit_bb_mle`** rather than a site exclusion list — see -->
+<!-- [the covariate-count page](qtl_mapping_betabinomial_npcs_tradeoff.html) and -->
+<!-- [the filtering strategy](qtl_mapping_betabinomial_strategy.html). -->
+
+<!-- # Caveats -->
+
+<!-- - **The controls are matched, not pristine.** They were chosen for similar -->
+<!--   coverage and pooled %pU, and one of them (`chr15:48430687`, φ = 0.165, -->
+<!--   α ≈ 0.037) is itself moderately dispersed with substantial mass near 0. It is a -->
+<!--   fair contrast for coverage but not an example of an ideal fit. -->
+<!-- - **`p_i` is latent.** These are the model's *prior* distributions, not estimates -->
+<!--   of any cell line's rate. The posterior would add the observed counts: -->
+<!--   $p_i \mid y_i \sim \text{Beta}(\alpha_i + y_i,\ \beta_i + n_i - y_i)$. -->
+<!-- - **One lead SNP per site**, chosen as the minimum-LRT cis-SNP within ±5 kb at -->
+<!--   MAF ≥ 0.05. At a site whose p-value is an artefact, "lead SNP" means the SNP -->
+<!--   that best fits the artefact, not a candidate causal variant. -->
+<!-- - **φ is on (0,1) here**, defined as $1/(\alpha+\beta+1)$ — matching `aod` and -->
+<!--   VGAM's `rho`, not the `betareg` precision convention, which runs the opposite -->
+<!--   way. -->
+
+<!-- Related: [beta-binomial model](qtl_mapping_betabinomial_model.html) · -->
+<!-- [covariate count and the φ boundary](qtl_mapping_betabinomial_npcs_tradeoff.html) · -->
+<!-- [filtering strategy and calibration](qtl_mapping_betabinomial_strategy.html) -->

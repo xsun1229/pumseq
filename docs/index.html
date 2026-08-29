@@ -310,7 +310,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-08-24
+<strong>Last updated:</strong> 2026-08-29
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -360,15 +360,15 @@ HTML.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreefa594973c1ef4d60d25aad95eaa8ff493e56d434targetblankfa59497a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee8440070ec5698282e03147894902d9738d6827etargetblanke844007a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/fa594973c1ef4d60d25aad95eaa8ff493e56d434" target="_blank">fa59497</a>
+<a href="https://github.com/xsun1229/pumseq/tree/e8440070ec5698282e03147894902d9738d6827e" target="_blank">e844007</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreefa594973c1ef4d60d25aad95eaa8ff493e56d434targetblankfa59497a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee8440070ec5698282e03147894902d9738d6827etargetblanke844007a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -378,7 +378,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/fa594973c1ef4d60d25aad95eaa8ff493e56d434" target="_blank">fa59497</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/e8440070ec5698282e03147894902d9738d6827e" target="_blank">e844007</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -396,13 +396,13 @@ Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Untracked files:
-    Untracked:  analysis/qtl_mapping_betabinomial_calibration_noUC.Rmd
-    Untracked:  analysis/qtl_mapping_betabinomial_calibration_noUCcalled.Rmd
-    Untracked:  analysis/qtl_mapping_betabinomial_gof_failed.Rmd
-    Untracked:  analysis/qtl_mapping_betabinomial_strategy.Rmd
+    Untracked:  analysis/qtl_mapping_betabinomial_meandisp_model.Rmd
+    Untracked:  analysis/qtl_mapping_betabinomial_npcs_tradeoff.Rmd
+    Untracked:  analysis/qtl_mapping_betabinomial_problematic_diagnosis.Rmd
 
 Unstaged changes:
     Modified:   analysis/index.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_model.Rmd
 
 </code></pre>
 <p>
@@ -447,6 +447,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/2bdf3080b1355adf364ca86cb13ea96b72393ca0/analysis/index.Rmd" target="_blank">2bdf308</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-25
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/2bdf3080b1355adf364ca86cb13ea96b72393ca0/docs/index.html" target="_blank">2bdf308</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-25
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1381,14 +1415,21 @@ reproducibility filtering of joint-pooled pU site calling</a></li>
 </div>
 <div id="qtl-mapping" class="section level1">
 <h1>QTL mapping</h1>
+<p>linear regression</p>
 <ul>
 <li><a href="qtl_mapping_summary_floor0_quantile.html">QTL mapping
 summary: Treated - input, floor0, quantile normalization, linear
 regression</a></li>
+</ul>
+<p>Binomial</p>
+<ul>
 <li><a href="qtl_mapping_binomial_model.html">Binomial GLM
 model</a></li>
 <li><a href="qtl_mapping_summary_binomial.html">QTL mapping summary:
 binomial GLM on the 5-fold union sites</a></li>
+</ul>
+<p>Beta Binomial</p>
+<ul>
 <li><a href="qtl_mapping_betabinomial_model.html">Beta Binomial GLM
 model</a></li>
 <li><a href="qtl_mapping_summary_betabinomial.html">QTL mapping summary:
@@ -1399,6 +1440,12 @@ top-hit diagnostic: genotype vs. %pU for the top 20 QTLs</a></li>
 strategy and its calibration (real + 5 permutations)</a></li>
 <li><a href="qtl_mapping_betabinomial_gof_failed.html">A goodness-of-fit
 test that did not work, and what it revealed</a></li>
+<li><a href="qtl_mapping_betabinomial_npcs_tradeoff.html">How many
+covariate PCs? The phi-boundary / fittability trade-off</a></li>
+<li><a
+href="qtl_mapping_betabinomial_problematic_diagnosis.html">Diagnosing
+the problematic sites: %pU by genotype, phi, and the fitted prior on
+p_i</a></li>
 </ul>
 </div>
 

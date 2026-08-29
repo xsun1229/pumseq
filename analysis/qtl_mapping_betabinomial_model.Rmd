@@ -28,14 +28,26 @@ cell lines**. Covariates: the same **M-value PCs** (below).
 # The model
 
 For a given pU site, let individual $i$ have $y_i$ converted reads out of
-$n_i$ total reads, but now allow the modification rate itself to vary around
-its mean $\mu_i$ (a Beta-distributed mixing probability):
+$n_i$ total reads. The modification rate is itself a random quantity $p_i$,
+drawn from a Beta prior whose **mean** is modelled and whose **dispersion** is
+shared across cell lines:
 
 $$
-p_i \sim \text{Beta}(\alpha_i, \beta_i), \qquad y_i \mid p_i \sim \text{Binomial}(n_i, p_i)
+y_i \mid p_i \sim \text{Binomial}(n_i,\, p_i), \qquad
+p_i \sim \text{Beta}(\mu_i,\, \phi)
 $$
 $$
-\text{logit}(\mu_i) = \beta_0 + \beta_g G_i + z_i^\top\gamma, \qquad
+\text{logit}(\mu_i) = \beta_0 + \beta_g G_i + z_i^\top\gamma
+$$
+
+Here $\text{Beta}(\mu, \phi)$ is the Beta distribution in **mean–dispersion**
+form: $\mu_i$ is the expected modification rate for cell line $i$, and $\phi$ is
+the over-dispersion. The conventional shape parameters are the derived
+quantities,
+
+$$
+\alpha_i = \mu_i\frac{1-\phi}{\phi}, \qquad
+\beta_i = (1-\mu_i)\frac{1-\phi}{\phi}, \qquad
 \mu_i = \frac{\alpha_i}{\alpha_i+\beta_i}, \qquad
 \phi = \frac{1}{\alpha_i+\beta_i+1}
 $$
@@ -56,6 +68,43 @@ $$
   as much as the binomial would assume, once $\phi>0$.
 - One $\phi$ per site (not per cell line, not per SNP) — a single dispersion
   shared across the site's 50 observations.
+
+## The latent rate $p_i$
+
+$p_i$ is the quantity the model is really about: cell line $i$'s **true**
+modification rate, as distinct from the observed fraction $y_i/n_i$. It is a
+latent variable, never estimated directly — the likelihood above is obtained by
+integrating it out — but the fitted model states its full distribution, and the
+Beta–Binomial conjugacy makes both the prior and the posterior closed form:
+
+$$
+\text{prior:}\quad p_i \sim \text{Beta}(\alpha_i,\, \beta_i), \qquad
+\text{posterior:}\quad p_i \mid y_i \sim \text{Beta}(\alpha_i + y_i,\; \beta_i + n_i - y_i)
+$$
+
+$$
+E[p_i \mid y_i] = \frac{\alpha_i + y_i}{\alpha_i + \beta_i + n_i}
+= w_i\cdot\frac{y_i}{n_i} + (1-w_i)\cdot\mu_i, \qquad
+w_i = \frac{n_i}{n_i + \frac{1-\phi}{\phi}}
+$$
+
+so the posterior mean is a shrinkage estimator interpolating between the cell
+line's observed fraction and the fitted mean, with the weight set by depth
+relative to $\alpha_i+\beta_i$.
+
+Two structural points follow from the parameterization:
+
+- **$\alpha_i + \beta_i$ does not depend on $i$.** It equals $(1-\phi)/\phi$,
+  one scalar per site. So $\alpha_i$ and $\beta_i$ individually vary with
+  $\mu_i$, but their sum is fixed — which is what makes a single $\phi$ well
+  defined, and is the assumption that all cell lines at a site share one
+  dispersion.
+- **Both ends of $\phi$'s range are degenerate.** $\phi \to 0$ sends
+  $\alpha_i+\beta_i \to \infty$, collapsing the prior onto $\mu_i$ and reducing
+  the model to a plain binomial. $\phi \to 1$ sends $\alpha_i+\beta_i \to 0$,
+  collapsing the prior onto point masses at 0 and 1 — the model asserting each
+  cell line is either fully modified or not at all. Neither is a meaningful
+  fitted dispersion.
 
 <!-- # Is the data overdispersed? -->
 
@@ -164,7 +213,7 @@ BH-FDR (and q-values) over the per-site adjusted p, same as the binomial.
 # Model fit across PC counts
 
 The joint MLE ($k$ PCs + intercept + $\phi$) is reliably fittable across the
-full swept range, $k\in\3,5,7,10,15,20\}$: ~7,600 of 12,416 sites fit at k=20 (vs.
+full swept range, $k\in\{3,5,7,10,15,20\}$: ~7,600 of 12,416 sites fit at k=20 (vs.
 the binomial's ~7,900 at the same k). See the [results
 page](qtl_mapping_summary_betabinomial.html) for the sites-fit table.
 

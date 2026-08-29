@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-08-29" />
+
+<title>Beta-binomial pU-QTL: diagnosing the problematic sites (k = 3, ±5 kb, U/C sites removed)</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Beta-binomial pU-QTL: diagnosing the
+problematic sites (k = 3, ±5 kb, U/C sites removed)</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-08-29</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-08-29
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee8440070ec5698282e03147894902d9738d6827etargetblanke844007a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/e8440070ec5698282e03147894902d9738d6827e" target="_blank">e844007</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee8440070ec5698282e03147894902d9738d6827etargetblanke844007a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/e8440070ec5698282e03147894902d9738d6827e" target="_blank">e844007</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/qtl_mapping_betabinomial_meandisp_model.Rmd
+    Untracked:  analysis/qtl_mapping_betabinomial_npcs_tradeoff.Rmd
+    Untracked:  analysis/qtl_mapping_betabinomial_problematic_diagnosis.Rmd
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_model.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = &quot;center&quot;, fig.width = 11)
+
+PSI  &lt;- &quot;/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl&quot;
+PC   &lt;- file.path(PSI, &quot;qtl_betabinomial/prior_pi_cases&quot;)
+DIAG &lt;- file.path(PSI, &quot;qtl_betabinomial/diagnostic_figures&quot;)
+
+par   &lt;- fread(file.path(PC, &quot;case_params_patho.tsv&quot;), sep = &quot;\t&quot;)
+bins  &lt;- fread(file.path(PC, &quot;prior_bins_patho.tsv&quot;), sep = &quot;\t&quot;)
+obs   &lt;- fread(file.path(PC, &quot;observed_patho.tsv&quot;), sep = &quot;\t&quot;)
+# sid contains a space, so the separator must be explicit
+pl    &lt;- fread(file.path(DIAG, &quot;pathological_sites_w5kb_pc3_auto_noUCcalled.txt&quot;), sep = &quot;\t&quot;)
+
+GRP &lt;- c(&quot;problematic (significant in real AND permuted)&quot;, &quot;matched control&quot;)
+for (d in list(par, bins, obs)) d[, group := factor(group, levels = GRP)]
+NPROB &lt;- par[group == GRP[1], .N]
+NCTRL &lt;- par[group == GRP[2], .N]
+PHI_CUT &lt;- 0.99
+ord &lt;- par[order(group, -phi)]$sid
+for (d in list(par, bins, obs)) d[, sidf := factor(sid, levels = ord)]</code></pre>
+<div id="how-many-problematic-sites-and-what-makes-them-problematic"
+class="section level1">
+<h1>1. How many problematic sites, and what makes them problematic</h1>
+<p><strong>Definition.</strong> A site is <em>problematic</em> if it
+returns an extreme p-value in the <strong>permuted</strong> data as well
+as the real data. Permutation destroys any genotype–phenotype
+relationship, so a site that stays extreme there is not reporting
+association — it is reporting something about its own phenotype
+distribution that the test mistakes for signal. Selection is made on the
+permuted scans only, which keeps the look at the real data
+non-circular:</p>
+<ul>
+<li>minimum p &lt; 10⁻¹⁰ in at least one of the 5 permutations,
+<strong>and</strong></li>
+<li>real −log₁₀p &gt; 10</li>
+</ul>
+<p><strong>Configuration.</strong> ±5 kb windows, k = 3 covariate PCs,
+chr1–22 only, phenotype <code>fold5_union_auto_noUCcalled</code> —
+U/C-variant sites already excluded (1,118 of 11,856), φ-boundary sites
+deliberately <strong>retained</strong> so they can be examined here.</p>
+<blockquote>
+<p><strong>There are 9 problematic sites</strong> out of 10,045
+tested.</p>
+</blockquote>
+<p>2 well-behaved sites, matched on covered cell lines and pooled %pU,
+are carried through every panel below for contrast.</p>
+<pre class="r"><code>knitr::kable(pl[, .(
+  site = paste0(&quot;chr&quot;, sub(&quot; &quot;, &quot;:&quot;, sid)),
+  `real -log10 p` = round(real, 1),
+  `permuted, mean` = round(perm_mean, 1),
+  `permuted, sd` = round(perm_sd, 2),
+  `real minus worst permuted` = round(real_excess_over_perm_max, 2),
+  `covered cell lines` = NA_integer_,
+  `median depth` = median_depth_covered,
+  `pooled %pU` = round(100 * pooled_pu, 1))][
+    , `covered cell lines` := par$n_cl[match(pl$sid, par$sid)]][],
+  caption = &quot;The signature: the real and permuted p-values are essentially identical. For 6 of the 9 the real scan is no more extreme than the WORST permutation (negative last column), i.e. shuffling the phenotype cost nothing at all.&quot;)</code></pre>
+<table style="width:100%;">
+<caption>The signature: the real and permuted p-values are essentially
+identical. For 6 of the 9 the real scan is no more extreme than the
+WORST permutation (negative last column), i.e. shuffling the phenotype
+cost nothing at all.</caption>
+<colgroup>
+<col width="12%" />
+<col width="11%" />
+<col width="11%" />
+<col width="10%" />
+<col width="20%" />
+<col width="14%" />
+<col width="10%" />
+<col width="8%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="right">real -log10 p</th>
+<th align="right">permuted, mean</th>
+<th align="right">permuted, sd</th>
+<th align="right">real minus worst permuted</th>
+<th align="right">covered cell lines</th>
+<th align="right">median depth</th>
+<th align="right">pooled %pU</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr3:37277733</td>
+<td align="right">141.3</td>
+<td align="right">141.6</td>
+<td align="right">0.64</td>
+<td align="right">-1.25</td>
+<td align="right">50</td>
+<td align="right">76</td>
+<td align="right">53.4</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:29943223</td>
+<td align="right">108.6</td>
+<td align="right">103.9</td>
+<td align="right">0.41</td>
+<td align="right">4.22</td>
+<td align="right">44</td>
+<td align="right">87</td>
+<td align="right">57.9</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:89085177</td>
+<td align="right">67.2</td>
+<td align="right">66.4</td>
+<td align="right">0.35</td>
+<td align="right">0.42</td>
+<td align="right">36</td>
+<td align="right">9</td>
+<td align="right">6.3</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106627394</td>
+<td align="right">64.1</td>
+<td align="right">64.5</td>
+<td align="right">0.51</td>
+<td align="right">-0.89</td>
+<td align="right">35</td>
+<td align="right">20</td>
+<td align="right">27.5</td>
+</tr>
+<tr class="odd">
+<td align="left">chr17:36212383</td>
+<td align="right">48.8</td>
+<td align="right">49.2</td>
+<td align="right">0.42</td>
+<td align="right">-0.97</td>
+<td align="right">48</td>
+<td align="right">65</td>
+<td align="right">8.4</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106639258</td>
+<td align="right">46.2</td>
+<td align="right">44.2</td>
+<td align="right">0.75</td>
+<td align="right">0.67</td>
+<td align="right">42</td>
+<td align="right">39</td>
+<td align="right">6.7</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:90039467</td>
+<td align="right">32.5</td>
+<td align="right">32.8</td>
+<td align="right">0.28</td>
+<td align="right">-0.59</td>
+<td align="right">41</td>
+<td align="right">40</td>
+<td align="right">4.5</td>
+</tr>
+<tr class="even">
+<td align="left">chr17:53106304</td>
+<td align="right">15.3</td>
+<td align="right">15.0</td>
+<td align="right">0.20</td>
+<td align="right">-0.03</td>
+<td align="right">50</td>
+<td align="right">28</td>
+<td align="right">7.0</td>
+</tr>
+<tr class="odd">
+<td align="left">chr6:32643315</td>
+<td align="right">12.6</td>
+<td align="right">12.2</td>
+<td align="right">0.57</td>
+<td align="right">-0.08</td>
+<td align="right">40</td>
+<td align="right">41</td>
+<td align="right">8.8</td>
+</tr>
+</tbody>
+</table>
+<p>The last column is the point. If these were genuine associations,
+permuting the phenotype would destroy them and the real value would
+tower over the permuted ones. Instead the real and permuted values agree
+to within a fraction of a log unit, and for 6 of the 9 sites the real
+scan is <em>less</em> extreme than the worst permutation.</p>
+</div>
+<div id="pu-by-genotype-at-the-lead-cis-snp" class="section level1">
+<h1>2. %pU by genotype at the lead cis-SNP</h1>
+<pre class="r"><code>o &lt;- obs[!is.na(geno)]
+o[, gf := factor(geno, levels = c(0, 1, 2))]
+lab &lt;- unique(o[, .(sidf, group, lead_snp, lead_p)])
+lab[, panel := sprintf(&quot;chr%s   %s\np = %.1e&quot;, sub(&quot; &quot;, &quot;:&quot;, sidf), lead_snp, lead_p)]
+o &lt;- merge(o, lab[, .(sidf, panel)], by = &quot;sidf&quot;)
+o[, panel := factor(panel, levels = lab[order(match(sidf, ord))]$panel)]
+
+ggplot(o, aes(gf, 100 * pu)) +
+  geom_boxplot(width = 0.5, outlier.shape = NA, colour = &quot;grey35&quot;) +
+  geom_jitter(aes(colour = log10(n)), width = 0.15, height = 0, size = 1.9) +
+  scale_colour_viridis_c(option = &quot;D&quot;, name = &quot;log10 read depth&quot;) +
+  facet_wrap(~ panel, ncol = 4, scales = &quot;free_y&quot;) +
+  labs(x = &quot;genotype (copies of the counted allele)&quot;, y = &quot;%pU&quot;,
+       title = sprintf(&quot;%%pU by genotype at each site&#39;s lead cis-SNP (%d problematic + %d controls)&quot;,
+                       NPROB, NCTRL),
+       subtitle = paste(&quot;Dots are cell lines, coloured by read depth. Free y-axes.&quot;,
+                        &quot;At most problematic sites the values are pressed against 0 and 100&quot;,
+                        &quot;\nwith little in between -- the phenotype is bimodal rather than graded.&quot;)) +
+  theme_bw(base_size = 11) +
+  theme(legend.position = &quot;bottom&quot;, strip.text = element_text(size = 7.6))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_problematic_diagnosis.Rmd/box-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>knitr::kable(obs[, .(
+  site = paste0(&quot;chr&quot;, sub(&quot; &quot;, &quot;:&quot;, sid[1])),
+  group = as.character(group[1]),
+  `cell lines` = .N,
+  `frac %pU = 0` = sprintf(&quot;%.2f&quot;, mean(pu == 0)),
+  `frac %pU &gt; 0.9` = sprintf(&quot;%.2f&quot;, mean(pu &gt; 0.9)),
+  `frac in 0.1-0.9` = sprintf(&quot;%.2f&quot;, mean(pu &gt;= 0.1 &amp; pu &lt;= 0.9)),
+  `median depth` = as.numeric(median(n))), by = sidf][
+    order(match(sidf, ord))][, -1],
+  caption = &quot;The same thing numerically: how much of each site&#39;s %pU distribution sits at the extremes versus in the middle.&quot;)</code></pre>
+<table style="width:100%;">
+<caption>The same thing numerically: how much of each site’s %pU
+distribution sits at the extremes versus in the middle.</caption>
+<colgroup>
+<col width="12%" />
+<col width="35%" />
+<col width="8%" />
+<col width="9%" />
+<col width="11%" />
+<col width="12%" />
+<col width="9%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="left">group</th>
+<th align="right">cell lines</th>
+<th align="left">frac %pU = 0</th>
+<th align="left">frac %pU &gt; 0.9</th>
+<th align="left">frac in 0.1-0.9</th>
+<th align="right">median depth</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr3:37277733</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">50</td>
+<td align="left">0.38</td>
+<td align="left">0.14</td>
+<td align="left">0.36</td>
+<td align="right">76.0</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:29943223</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">44</td>
+<td align="left">0.30</td>
+<td align="left">0.41</td>
+<td align="left">0.25</td>
+<td align="right">87.0</td>
+</tr>
+<tr class="odd">
+<td align="left">chr14:106627394</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">35</td>
+<td align="left">0.63</td>
+<td align="left">0.09</td>
+<td align="left">0.14</td>
+<td align="right">20.0</td>
+</tr>
+<tr class="even">
+<td align="left">chr2:90039467</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">41</td>
+<td align="left">0.85</td>
+<td align="left">0.02</td>
+<td align="left">0.05</td>
+<td align="right">40.0</td>
+</tr>
+<tr class="odd">
+<td align="left">chr17:36212383</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">48</td>
+<td align="left">0.81</td>
+<td align="left">0.00</td>
+<td align="left">0.12</td>
+<td align="right">65.0</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:32643315</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">40</td>
+<td align="left">0.93</td>
+<td align="left">0.03</td>
+<td align="left">0.03</td>
+<td align="right">41.0</td>
+</tr>
+<tr class="odd">
+<td align="left">chr17:53106304</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">50</td>
+<td align="left">0.84</td>
+<td align="left">0.12</td>
+<td align="left">0.02</td>
+<td align="right">28.0</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106639258</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">42</td>
+<td align="left">0.81</td>
+<td align="left">0.05</td>
+<td align="left">0.02</td>
+<td align="right">39.0</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:89085177</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">36</td>
+<td align="left">0.67</td>
+<td align="left">0.03</td>
+<td align="left">0.17</td>
+<td align="right">9.0</td>
+</tr>
+<tr class="even">
+<td align="left">chr15:48430687</td>
+<td align="left">matched control</td>
+<td align="right">42</td>
+<td align="left">0.86</td>
+<td align="left">0.00</td>
+<td align="left">0.12</td>
+<td align="right">3.0</td>
+</tr>
+<tr class="odd">
+<td align="left">chr15:24990706</td>
+<td align="left">matched control</td>
+<td align="right">42</td>
+<td align="left">0.79</td>
+<td align="left">0.00</td>
+<td align="left">0.21</td>
+<td align="right">2.5</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="estimated-φ" class="section level1">
+<h1>3. Estimated φ</h1>
+<pre class="r"><code>knitr::kable(par[order(match(sid, ord)), .(
+  site = paste0(&quot;chr&quot;, sub(&quot; &quot;, &quot;:&quot;, sid)),
+  group = as.character(group),
+  `cell lines` = n_cl,
+  phi = sprintf(&quot;%.6f&quot;, phi),
+  `alpha+beta = (1-phi)/phi` = signif(alpha_plus_beta, 3),
+  `phi, intercept-only fit` = sprintf(&quot;%.6f&quot;, phi_intercept_only),
+  `pooled %pU` = round(100 * pooled_pu, 1))],
+  caption = &quot;phi is the over-dispersion of the Beta prior, on (0,1). phi -&gt; 1 means alpha+beta -&gt; 0, where the prior collapses onto point masses at 0 and 1.&quot;)</code></pre>
+<table>
+<caption>phi is the over-dispersion of the Beta prior, on (0,1). phi
+-&gt; 1 means alpha+beta -&gt; 0, where the prior collapses onto point
+masses at 0 and 1.</caption>
+<colgroup>
+<col width="11%" />
+<col width="32%" />
+<col width="7%" />
+<col width="6%" />
+<col width="17%" />
+<col width="16%" />
+<col width="7%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="left">group</th>
+<th align="right">cell lines</th>
+<th align="left">phi</th>
+<th align="right">alpha+beta = (1-phi)/phi</th>
+<th align="left">phi, intercept-only fit</th>
+<th align="right">pooled %pU</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr3:37277733</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">50</td>
+<td align="left">0.999999</td>
+<td align="right">1.00e-06</td>
+<td align="left">0.999999</td>
+<td align="right">53.4</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:29943223</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">44</td>
+<td align="left">0.999999</td>
+<td align="right">1.00e-06</td>
+<td align="left">0.999999</td>
+<td align="right">57.9</td>
+</tr>
+<tr class="odd">
+<td align="left">chr14:106627394</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">35</td>
+<td align="left">0.999999</td>
+<td align="right">1.00e-06</td>
+<td align="left">0.999999</td>
+<td align="right">27.5</td>
+</tr>
+<tr class="even">
+<td align="left">chr2:90039467</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">41</td>
+<td align="left">0.999999</td>
+<td align="right">1.00e-06</td>
+<td align="left">0.999999</td>
+<td align="right">4.5</td>
+</tr>
+<tr class="odd">
+<td align="left">chr17:36212383</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">48</td>
+<td align="left">0.999999</td>
+<td align="right">1.00e-06</td>
+<td align="left">0.510371</td>
+<td align="right">8.4</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:32643315</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">40</td>
+<td align="left">0.999999</td>
+<td align="right">1.00e-06</td>
+<td align="left">0.859218</td>
+<td align="right">8.8</td>
+</tr>
+<tr class="odd">
+<td align="left">chr17:53106304</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">50</td>
+<td align="left">0.999999</td>
+<td align="right">1.00e-06</td>
+<td align="left">0.924642</td>
+<td align="right">7.0</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106639258</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">42</td>
+<td align="left">0.999999</td>
+<td align="right">1.00e-06</td>
+<td align="left">0.999999</td>
+<td align="right">6.7</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:89085177</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">36</td>
+<td align="left">0.999999</td>
+<td align="right">1.00e-06</td>
+<td align="left">0.999999</td>
+<td align="right">6.3</td>
+</tr>
+<tr class="even">
+<td align="left">chr15:48430687</td>
+<td align="left">matched control</td>
+<td align="right">42</td>
+<td align="left">0.164781</td>
+<td align="right">5.07e+00</td>
+<td align="left">0.297790</td>
+<td align="right">8.3</td>
+</tr>
+<tr class="odd">
+<td align="left">chr15:24990706</td>
+<td align="left">matched control</td>
+<td align="right">42</td>
+<td align="left">0.016818</td>
+<td align="right">5.85e+01</td>
+<td align="left">0.036466</td>
+<td align="right">8.4</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>ggplot(par, aes(reorder(paste0(&quot;chr&quot;, sub(&quot; &quot;, &quot;:&quot;, sid)), phi), phi, fill = group)) +
+  geom_col(width = 0.68) +
+  geom_hline(yintercept = PHI_CUT, linetype = &quot;dashed&quot;, colour = &quot;grey25&quot;) +
+  annotate(&quot;text&quot;, x = 0.7, y = PHI_CUT, label = &quot; phi = 0.99&quot;, hjust = 0, vjust = -0.6,
+           size = 3.2, colour = &quot;grey25&quot;) +
+  scale_fill_manual(values = setNames(c(&quot;#e34948&quot;, &quot;#3987e5&quot;), GRP), name = NULL) +
+  coord_flip() +
+  labs(x = NULL, y = expression(&quot;fitted&quot;~varphi),
+       title = sprintf(&quot;All %d problematic sites have phi pinned to its upper boundary&quot;, NPROB),
+       subtitle = sprintf(&quot;Every one sits at %.6f, the numerical cap in fit_bb_mle. Genome-wide only ~0.2%% of sites do.&quot;,
+                          max(par$phi))) +
+  theme_bw(base_size = 11) + theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_problematic_diagnosis.Rmd/phi-fig-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p><strong>9 of 9 problematic sites have φ &gt; 0.99</strong> — in fact
+every one is at 0.999999, the numerical cap. This is not a threshold
+that was tuned to catch them; genome-wide only about 0.2% of sites reach
+it.</p>
+<p>Note the <code>intercept-only</code> column: at 3 of the sites φ is
+well below the boundary when the covariates are dropped (0.51, 0.86,
+0.92), so at those the PCs are part of what drives the fit onto the
+boundary. At the other 6 it is at the cap either way.</p>
+</div>
+<div id="the-fitted-prior-distribution-of-p_i" class="section level1">
+<h1>4. The fitted prior distribution of <span
+class="math inline">\(p_i\)</span></h1>
+<p><span class="math inline">\(p_i\)</span> is cell line <span
+class="math inline">\(i\)</span>’s true modification rate. It is latent
+— never observed — but the fitted null model states its whole
+distribution, and that distribution is what is plotted. It is obtained
+from the fit in three steps:</p>
+<ol style="list-style-type: decimal">
+<li><strong>The mean.</strong> The fitted coefficients give <span
+class="math inline">\(\mathrm{logit}(\mu_i) = \hat\beta_0 +
+z_i^\top\hat\gamma\)</span> (no genotype term, since this is the null),
+so <span class="math inline">\(\mu_i =
+\mathrm{logit}^{-1}(\cdot)\)</span>. Note <span
+class="math inline">\(\mu_i = E[p_i]\)</span>.</li>
+<li><strong>The shape parameters</strong>, from that mean and the site’s
+single fitted <span class="math inline">\(\hat\varphi\)</span>: <span
+class="math display">\[\alpha_i =
+\mu_i\frac{1-\hat\varphi}{\hat\varphi}, \qquad
+  \beta_i = (1-\mu_i)\frac{1-\hat\varphi}{\hat\varphi}\]</span></li>
+<li><strong>The distribution.</strong> <span class="math inline">\(p_i
+\sim \text{Beta}(\alpha_i, \beta_i)\)</span>, evaluated as exact binned
+mass (a density curve is unusable: at <span
+class="math inline">\(\hat\varphi \to 1\)</span> it diverges at 0 and
+1): <span class="math display">\[P(a &lt; p_i \le b) =
+F_{\text{Beta}}(b;\alpha_i,\beta_i) -
+F_{\text{Beta}}(a;\alpha_i,\beta_i)\]</span></li>
+</ol>
+<p><span class="math inline">\(\hat\varphi\)</span> is one value per
+site and the covariates make <span class="math inline">\(\mu_i\)</span>
+differ only slightly between cell lines (range printed on each panel),
+so this is effectively one Beta per site. The ticks below each panel are
+the observed <span class="math inline">\(y_i/n_i\)</span>, for
+reference.</p>
+<pre class="r"><code># One Beta prior per site, from that site&#39;s phi and median mu -- computed here
+# straight from case_params, no simulation and no averaging over cell lines.
+NB  &lt;- 50
+brk &lt;- seq(0, 1, length.out = NB + 1)
+pri &lt;- par[, {
+  ab &lt;- (1 - phi) / phi
+  a  &lt;- mu_median * ab;  b &lt;- (1 - mu_median) * ab
+  .(bin_mid = (head(brk, -1) + tail(brk, -1)) / 2, mass = diff(pbeta(brk, a, b)))
+}, by = .(sid, group)]
+
+labp &lt;- par[, .(sid, panel = sprintf(&quot;chr%s   phi = %.6f\nmu_i %.3f-%.3f   P(&lt;.01)=%.2f  P(&gt;.99)=%.2f&quot;,
+                                     sub(&quot; &quot;, &quot;:&quot;, sid), phi, mu_min, mu_max,
+                                     P_below_0.01, P_above_0.99))]
+pri &lt;- merge(pri, labp, by = &quot;sid&quot;)
+pri[, panel := factor(panel, levels = labp[order(match(sid, ord))]$panel)]
+ob  &lt;- merge(obs[, .(sid, pu)], labp, by = &quot;sid&quot;)
+ob[, panel := factor(panel, levels = levels(pri$panel))]
+
+ggplot(pri, aes(bin_mid, mass)) +
+  geom_col(aes(fill = group), width = 1 / NB, colour = NA) +
+  geom_point(data = ob, aes(x = pu, y = -0.06), shape = 124, size = 2.2,
+             colour = &quot;grey15&quot;, alpha = 0.7) +
+  scale_fill_manual(values = setNames(c(&quot;#e34948&quot;, &quot;#3987e5&quot;), GRP), name = NULL) +
+  facet_wrap(~ panel, ncol = 4) +
+  labs(x = expression(p[i]), y = &quot;prior probability mass&quot;,
+       title = &quot;Fitted prior on the latent rate, with the observed %pU beneath&quot;,
+       subtitle = paste(&quot;Bars: the site&#39;s Beta prior (exact, sums to 1). Ticks below zero: the observed %pU,&quot;,
+                        &quot;one per cell line (these are y_i/n_i, so they carry sampling noise).&quot;,
+                        &quot;\nEvery problematic site&#39;s prior puts ALL its mass at 0 and 1. At chr3:37277733, chr6:29943223 and&quot;,
+                        &quot;\nchr17:36212383 well-covered cell lines nonetheless sit in the interior, where the prior gives ~zero mass.&quot;)) +
+  theme_bw(base_size = 11) +
+  theme(legend.position = &quot;bottom&quot;, strip.text = element_text(size = 7.4))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_problematic_diagnosis.Rmd/prior-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>knitr::kable(par[order(match(sid, ord)), .(
+  site = paste0(&quot;chr&quot;, sub(&quot; &quot;, &quot;:&quot;, sid)),
+  group = as.character(group),
+  alpha = signif(alpha_median, 3), beta = signif(beta_median, 3),
+  `mu_i range` = sprintf(&quot;%.3f - %.3f&quot;, mu_min, mu_max),
+  `P(p&lt;0.01)` = round(P_below_0.01, 3),
+  `P(p&gt;0.99)` = round(P_above_0.99, 3),
+  `both tails` = round(P_below_0.01 + P_above_0.99, 3),
+  `prior SD` = round(prior_sd_median, 3))],
+  caption = &quot;At the problematic sites the two tail masses sum to 1.000 -- the prior has NO interior mass -- and the prior SD is ~0.35-0.50 against a maximum of 0.5 attainable on (0,1).&quot;)</code></pre>
+<table>
+<caption>At the problematic sites the two tail masses sum to 1.000 – the
+prior has NO interior mass – and the prior SD is ~0.35-0.50 against a
+maximum of 0.5 attainable on (0,1).</caption>
+<colgroup>
+<col width="11%" />
+<col width="34%" />
+<col width="6%" />
+<col width="6%" />
+<col width="10%" />
+<col width="7%" />
+<col width="7%" />
+<col width="8%" />
+<col width="6%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="left">group</th>
+<th align="right">alpha</th>
+<th align="right">beta</th>
+<th align="left">mu_i range</th>
+<th align="right">P(p&lt;0.01)</th>
+<th align="right">P(p&gt;0.99)</th>
+<th align="right">both tails</th>
+<th align="right">prior SD</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr3:37277733</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">4.00e-07</td>
+<td align="right">6.00e-07</td>
+<td align="left">0.349 - 0.496</td>
+<td align="right">0.600</td>
+<td align="right">0.400</td>
+<td align="right">1.000</td>
+<td align="right">0.488</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:29943223</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">5.00e-07</td>
+<td align="right">5.00e-07</td>
+<td align="left">0.351 - 0.613</td>
+<td align="right">0.516</td>
+<td align="right">0.484</td>
+<td align="right">1.000</td>
+<td align="right">0.496</td>
+</tr>
+<tr class="odd">
+<td align="left">chr14:106627394</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">3.00e-07</td>
+<td align="right">7.00e-07</td>
+<td align="left">0.118 - 0.350</td>
+<td align="right">0.727</td>
+<td align="right">0.273</td>
+<td align="right">1.000</td>
+<td align="right">0.453</td>
+</tr>
+<tr class="even">
+<td align="left">chr2:90039467</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">1.00e-07</td>
+<td align="right">9.00e-07</td>
+<td align="left">0.008 - 0.314</td>
+<td align="right">0.879</td>
+<td align="right">0.121</td>
+<td align="right">1.000</td>
+<td align="right">0.314</td>
+</tr>
+<tr class="odd">
+<td align="left">chr17:36212383</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">2.00e-07</td>
+<td align="right">8.00e-07</td>
+<td align="left">0.114 - 0.207</td>
+<td align="right">0.843</td>
+<td align="right">0.157</td>
+<td align="right">1.000</td>
+<td align="right">0.363</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:32643315</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">1.00e-07</td>
+<td align="right">9.00e-07</td>
+<td align="left">0.007 - 0.242</td>
+<td align="right">0.931</td>
+<td align="right">0.069</td>
+<td align="right">1.000</td>
+<td align="right">0.227</td>
+</tr>
+<tr class="odd">
+<td align="left">chr17:53106304</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">2.00e-07</td>
+<td align="right">8.00e-07</td>
+<td align="left">0.080 - 0.256</td>
+<td align="right">0.849</td>
+<td align="right">0.151</td>
+<td align="right">1.000</td>
+<td align="right">0.360</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106639258</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">1.00e-07</td>
+<td align="right">9.00e-07</td>
+<td align="left">0.061 - 0.348</td>
+<td align="right">0.848</td>
+<td align="right">0.152</td>
+<td align="right">1.000</td>
+<td align="right">0.321</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:89085177</td>
+<td align="left">problematic (significant in real AND permuted)</td>
+<td align="right">2.00e-07</td>
+<td align="right">8.00e-07</td>
+<td align="left">0.123 - 0.481</td>
+<td align="right">0.763</td>
+<td align="right">0.237</td>
+<td align="right">1.000</td>
+<td align="right">0.397</td>
+</tr>
+<tr class="even">
+<td align="left">chr15:48430687</td>
+<td align="left">matched control</td>
+<td align="right">3.66e-02</td>
+<td align="right">5.03e+00</td>
+<td align="left">0.000 - 0.476</td>
+<td align="right">0.671</td>
+<td align="right">0.000</td>
+<td align="right">0.671</td>
+<td align="right">0.034</td>
+</tr>
+<tr class="odd">
+<td align="left">chr15:24990706</td>
+<td align="left">matched control</td>
+<td align="right">4.89e+00</td>
+<td align="right">5.36e+01</td>
+<td align="left">0.040 - 0.248</td>
+<td align="right">0.007</td>
+<td align="right">0.000</td>
+<td align="right">0.007</td>
+<td align="right">0.036</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The two tail masses sum to 1.000 at every problematic
+site.</strong> The fitted prior places no probability anywhere between
+0.01 and 0.99: the model asserts that each cell line’s true pU rate is
+either essentially 0 or essentially 1, with no intermediate
+stoichiometry possible.</p>
+<!-- # 5. What this says -->
+<!-- Putting the three pieces together, the same story reads consistently from the -->
+<!-- data side and the model side: -->
+<!-- - **Data (§2)**: at these sites %pU is bimodal — cell lines sit at 0 or near 100 -->
+<!--   with little in between — rather than varying smoothly with genotype. -->
+<!-- - **Dispersion (§3)**: the fitter responds by driving φ to its upper boundary, -->
+<!--   all 9 of 9 sites, at the numerical cap. -->
+<!-- - **Prior (§4)**: at that boundary $\alpha+\beta \to 0$ and the Beta prior -->
+<!--   degenerates to point masses at 0 and 1, which is the likelihood-maximising -->
+<!--   description of a bimodal phenotype. -->
+<!-- An LRT computed against a degenerate null is not testing what it appears to test, -->
+<!-- which is why these sites stay extreme under permutation: the statistic is -->
+<!-- responding to the *shape* of the phenotype distribution, which shuffling does not -->
+<!-- change, rather than to any genotype–phenotype relationship. -->
+<!-- This is why the scan excludes them, and why the durable fix is a **two-sided φ -->
+<!-- guard inside `fit_bb_mle`** rather than a site exclusion list — see -->
+<!-- [the covariate-count page](qtl_mapping_betabinomial_npcs_tradeoff.html) and -->
+<!-- [the filtering strategy](qtl_mapping_betabinomial_strategy.html). -->
+<!-- # Caveats -->
+<!-- - **The controls are matched, not pristine.** They were chosen for similar -->
+<!--   coverage and pooled %pU, and one of them (`chr15:48430687`, φ = 0.165, -->
+<!--   α ≈ 0.037) is itself moderately dispersed with substantial mass near 0. It is a -->
+<!--   fair contrast for coverage but not an example of an ideal fit. -->
+<!-- - **`p_i` is latent.** These are the model's *prior* distributions, not estimates -->
+<!--   of any cell line's rate. The posterior would add the observed counts: -->
+<!--   $p_i \mid y_i \sim \text{Beta}(\alpha_i + y_i,\ \beta_i + n_i - y_i)$. -->
+<!-- - **One lead SNP per site**, chosen as the minimum-LRT cis-SNP within ±5 kb at -->
+<!--   MAF ≥ 0.05. At a site whose p-value is an artefact, "lead SNP" means the SNP -->
+<!--   that best fits the artefact, not a candidate causal variant. -->
+<!-- - **φ is on (0,1) here**, defined as $1/(\alpha+\beta+1)$ — matching `aod` and -->
+<!--   VGAM's `rho`, not the `betareg` precision convention, which runs the opposite -->
+<!--   way. -->
+<!-- Related: [beta-binomial model](qtl_mapping_betabinomial_model.html) · -->
+<!-- [covariate count and the φ boundary](qtl_mapping_betabinomial_npcs_tradeoff.html) · -->
+<!-- [filtering strategy and calibration](qtl_mapping_betabinomial_strategy.html) -->
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 7 (Core)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el7-x86_64/lib/libopenblas_haswellp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_4.0.3     data.table_1.14.2
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.12        highr_0.9          RColorBrewer_1.1-3 pillar_1.9.0      
+ [5] compiler_4.2.0     bslib_0.3.1        later_1.3.0        jquerylib_0.1.4   
+ [9] git2r_0.30.1       workflowr_1.7.0    tools_4.2.0        digest_0.6.29     
+[13] viridisLite_0.4.0  gtable_0.3.6       jsonlite_1.8.0     evaluate_0.15     
+[17] lifecycle_1.0.4    tibble_3.2.1       pkgconfig_2.0.3    rlang_1.1.2       
+[21] cli_3.6.1          rstudioapi_0.13    yaml_2.3.5         xfun_0.41         
+[25] fastmap_1.1.0      withr_2.5.0        dplyr_1.1.4        stringr_1.5.1     
+[29] knitr_1.39         generics_0.1.4     fs_1.5.2           vctrs_0.6.5       
+[33] sass_0.4.1         tidyselect_1.2.0   rprojroot_2.0.3    grid_4.2.0        
+[37] glue_1.6.2         R6_2.5.1           fansi_1.0.3        rmarkdown_2.25    
+[41] farver_2.1.0       magrittr_2.0.3     scales_1.4.0       promises_1.2.0.1  
+[45] htmltools_0.5.2    dichromat_2.0-0.1  httpuv_1.6.5       labeling_0.4.2    
+[49] S7_0.2.0           utf8_1.2.2         stringi_1.7.6     </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

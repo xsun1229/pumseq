@@ -37,13 +37,24 @@ editor_options:
 
 # QTL mapping
 
+linear regression
+
 * [QTL mapping summary: Treated - input, floor0, quantile normalization, linear regression](qtl_mapping_summary_floor0_quantile.html)
+
+Binomial
+
 * [Binomial GLM model](qtl_mapping_binomial_model.html)
 * [QTL mapping summary: binomial GLM on the 5-fold union sites](qtl_mapping_summary_binomial.html)
+
+Beta Binomial
+
 * [Beta Binomial GLM model](qtl_mapping_betabinomial_model.html)
 * [QTL mapping summary: beta binomial GLM on the 5-fold union sites](qtl_mapping_summary_betabinomial.html)
 * [Beta-binomial top-hit diagnostic: genotype vs. %pU for the top 20 QTLs](qtl_mapping_betabinomial_diagnostic.html)
 * [Current filtering strategy and its calibration (real + 5 permutations)](qtl_mapping_betabinomial_strategy.html)
 * [A goodness-of-fit test that did not work, and what it revealed](qtl_mapping_betabinomial_gof_failed.html)
+* [How many covariate PCs? The phi-boundary / fittability trade-off](qtl_mapping_betabinomial_npcs_tradeoff.html)
+* [Diagnosing the problematic sites: %pU by genotype, phi, and the fitted prior on p_i](qtl_mapping_betabinomial_problematic_diagnosis.html)
+
 
 

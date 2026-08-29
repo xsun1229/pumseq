@@ -1,0 +1,300 @@
+---
+title: "pU-QTL mapping — beta-binomial model (mean–dispersion form)"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = "center", fig.width = 10)
+
+PSI <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl"
+PC  <- file.path(PSI, "qtl_betabinomial/prior_pi_cases")
+D   <- file.path(PSI, "qtl_betabinomial/phi_vs_npcs")
+
+par_cases <- fread(file.path(PC, "case_params.tsv"), sep = "\t")
+draws     <- fread(file.path(PC, "prior_draws.tsv.gz"), sep = "\t")
+obs       <- fread(file.path(PC, "observed.tsv"), sep = "\t")
+sweep     <- fread(file.path(D, "phi_by_npcs_auto_noUCcalled.txt.gz"), sep = "\t")
+PHI_EPS   <- 1e-6
+```
+
+# Overview
+
+This page restates the beta-binomial pU-QTL model in **mean–dispersion form**.
+The likelihood is unchanged — this is the same model as on the
+[original model page](qtl_mapping_betabinomial_model.html), and no result
+changes numerically. What changes is that the **prior on the latent modification
+rate is written explicitly**, which makes it something you can plot and inspect
+per site. That turned out to matter: the diagnostic in §4 is only obvious in this
+parameterization.
+
+Because it is the same model, results are **not** kept in a separate tree — there
+is no "old" versus "new" set of numbers to keep apart. `fit_bb_mle` has always
+computed $\varphi = 1/(\alpha+\beta+1)$ internally; what was missing was writing
+it out.
+
+# The model
+
+For one pU site, let cell line $i$ have $y_i$ converted reads out of $n_i$ total.
+The modification rate is itself a random quantity $p_i$, drawn from a Beta prior
+whose **mean** is modelled and whose **dispersion** is shared:
+
+$$
+y_i \mid p_i \sim \text{Binomial}(n_i,\, p_i), \qquad
+p_i \sim \text{Beta}(\mu_i,\, \varphi)
+$$
+
+$$
+\text{logit}(\mu_i) = \beta_0 + \beta_g G_i + z_i^\top \gamma
+$$
+
+where $\text{Beta}(\mu, \varphi)$ denotes the Beta distribution reparameterized
+by its mean and dispersion,
+
+$$
+\alpha_i = \mu_i \frac{1-\varphi}{\varphi}, \qquad
+\beta_i = (1-\mu_i)\frac{1-\varphi}{\varphi}, \qquad
+\varphi = \frac{1}{\alpha_i + \beta_i + 1}
+$$
+
+Marginalising over $p_i$ gives the beta-binomial for $y_i$, with
+
+$$
+E[y_i] = n_i\mu_i, \qquad
+\text{Var}(y_i) = n_i\mu_i(1-\mu_i)\bigl[1 + (n_i-1)\varphi\bigr]
+$$
+
+## Reading the parameters
+
+**$\mu_i$ is the expected modification rate** for cell line $i$ — the thing the
+regression models. It varies across cell lines through genotype $G_i$ and the
+covariates $z_i$.
+
+**$\varphi \in (0,1)$ is the over-dispersion**, the intra-class correlation: how
+much the $n_i$ reads at one cell line behave like correlated rather than
+independent trials. $\varphi \to 0$ recovers the binomial exactly. The bracketed
+term is a variance inflation factor of the same form as the design effect in
+clustered data.
+
+**$\alpha_i + \beta_i$ does not depend on $i$.** It equals $(1-\varphi)/\varphi$,
+one scalar per site. So $\alpha_i$ and $\beta_i$ individually vary with $\mu_i$
+but their sum is fixed — which is exactly what makes a single $\varphi$ well
+defined. This is a modelling *assumption*: all cell lines at a site share one
+dispersion.
+
+**Everything is per site.** $\beta_0$, $\beta_g$, $\gamma$ and $\varphi$ are all
+estimated separately at each site; only $z_i$ is shared. Written with both
+indices, for site $j$:
+
+$$
+p_{ij} \sim \text{Beta}(\mu_{ij}, \varphi_j), \qquad
+\text{logit}(\mu_{ij}) = \beta_{0j} + \beta_{gj}G_{ij} + z_i^\top\gamma_j
+$$
+
+## Relation to other parameterizations
+
+```{r params}
+knitr::kable(data.table(
+  source = c("this page / `aod` / VGAM's `rho`",
+             "Robinson, *Understanding beta binomial regression*",
+             "Ferrari & Cribari-Neto / `betareg`"),
+  symbol = c("phi", "sigma", "phi (precision)"),
+  definition = c("1/(alpha+beta+1)", "1/(alpha+beta)", "alpha+beta"),
+  range = c("(0, 1)", "(0, Inf)", "(0, Inf)"),
+  direction = c("larger = MORE dispersion", "larger = MORE dispersion",
+                "larger = LESS dispersion")),
+  caption = "Three conventions in circulation. Ours and Robinson's are monotone transforms of each other (phi = sigma/(1+sigma)) and point the same way. The betareg convention is INVERTED, so 'phi = 0.99' means nearly no dispersion there and near-total degeneracy here -- always state which is meant.")
+```
+
+# Fitting
+
+`fit_bb_mle()` maximises the exact beta-binomial log-likelihood jointly over
+$(\beta_0, \beta_g, \gamma, \varphi)$ by `optim` with an analytic gradient:
+
+```r
+negll <- function(theta) {
+  b   <- theta[1:q]
+  phi <- PHI_EPS + (1 - 2 * PHI_EPS) * plogis(theta[q + 1])   # keeps phi in (0,1)
+  mu  <- plogis(as.numeric(X %*% b))
+  k   <- (1 - phi) / phi;  a <- mu * k;  bb <- (1 - mu) * k
+  -sum(lbeta(y + a, n - y + bb) - lbeta(a, bb))
+}
+```
+
+$\varphi$ is optimised on a logit scale so it cannot leave $(0,1)$, with a floor
+`PHI_EPS = 1e-6` away from $\varphi = 0$, where $k = (1-\varphi)/\varphi \to
+\infty$ degenerates the likelihood. The constant $\log\binom{n_i}{y_i}$ is
+dropped inside the objective (it cancels in the LRT) and added back to the
+returned log-likelihood.
+
+A fit is **rejected** (returns `NULL`) if the optimiser fails to converge, if any
+$\mu_i$ reaches 0 or 1, or if any coefficient exceeds `MAX_ABS_COEF`. Note what
+is *not* in that list: $\varphi$ at its boundary. See §4.
+
+# QTL mapping: the LRT
+
+Per (site, cis-SNP) pair, test $H_0: \beta_g = 0$:
+
+$$
+\Lambda = 2\bigl(\hat\ell_{\text{full}} - \hat\ell_{\text{null}}\bigr)
+\;\overset{H_0}{\sim}\; \chi^2_1
+$$
+
+```r
+nf_null <- fit_bb_mle(y, n, X)              # beta_0, gamma, phi
+nf_full <- fit_bb_mle(y, n, cbind(X, g))    # + beta_g
+stat    <- max(2 * (nf_full$loglik - nf_null$loglik), 0)
+p_snp   <- pchisq(stat, df = 1, lower.tail = FALSE)
+```
+
+$\varphi$ is a **nuisance parameter re-estimated on both sides** — the null and
+full models are separate fits, each with its own $\hat\varphi$. That is what
+makes the 1-df reference legitimate: the two models differ by exactly one
+parameter, $\beta_g$.
+
+# 4. What the fitted prior looks like — and why it matters
+
+This is the payoff of the explicit parameterization. Under the null
+($\beta_g = 0$) the fitted model states a full prior distribution for each cell
+line's latent rate, $p_i \sim \text{Beta}(\mu_i, \varphi)$, and that distribution
+can be drawn.
+
+Because the covariates are retained, $\mu_i$ varies across cell lines, so there
+is not one prior curve but one per cell line. What is plotted below is the
+**marginal** prior, pooling draws over cell lines; the $\mu_i$ range is printed
+so the spread is visible (it is narrow — the PC coefficients are small relative
+to the intercept).
+
+```{r priors, fig.height=6.4}
+d <- copy(draws)
+lab <- par_cases[, .(sid, group,
+  # %.6f not %.4g: the latter renders 0.999999 as "1", which reads as
+  # exactly 1 rather than as the numerical cap.
+  txt = sprintf("chr%s\nphi = %.6f   alpha+beta = %.3g\nP(p<0.01)=%.3f  P(p>0.99)=%.3f",
+                sid, phi, alpha_plus_beta, P_below_0.01, P_above_0.99))]
+d <- merge(d, lab, by = c("sid", "group"))
+d[, panel := factor(txt, levels = lab$txt)]
+
+ggplot(d, aes(p, fill = group)) +
+  geom_histogram(breaks = seq(0, 1, 0.02), colour = NA) +
+  scale_fill_manual(values = c(`phi-boundary (phi > 0.99)` = "#e34948",
+                               `well-behaved control` = "#3987e5"), name = NULL) +
+  facet_wrap(~ panel, ncol = 3, scales = "free_y") +
+  labs(x = expression("draws from the fitted prior on"~p[i]), y = "count",
+       title = "Fitted prior on the latent rate, at four phi-boundary sites and two controls",
+       subtitle = paste("Controls give a proper unimodal prior concentrated near mu.",
+                        "The phi-boundary sites give a TWO-POINT prior at 0 and 1:",
+                        "\nthe model has concluded every cell line is either fully modified or not at all.",
+                        "Free y-axes.")) +
+  theme_bw(base_size = 11) + theme(legend.position = "bottom",
+                                   strip.text = element_text(size = 8.2))
+```
+
+```{r case-tab}
+knitr::kable(par_cases[, .(
+  site = paste0("chr", sid), group, n_cl,
+  phi = sprintf("%.6f", phi),
+  `alpha+beta` = signif(alpha_plus_beta, 3),
+  `sigma (Robinson)` = signif(sigma_robinson, 3),
+  `mu_i range` = sprintf("%.3f - %.3f", mu_min, mu_max),
+  `P(p<0.01)` = round(P_below_0.01, 3),
+  `P(p>0.99)` = round(P_above_0.99, 3),
+  `prior SD` = round(prior_sd_median, 3))],
+  caption = "At every phi-boundary site the two tail masses sum to 1.000 -- the prior has no interior mass at all -- and the prior SD is ~0.49, the maximum attainable on (0,1). The controls sit at 0.005-0.007.")
+```
+
+**What this says.** At a site with $\varphi \to 1$, $\alpha_i + \beta_i \to 0$
+and the Beta prior collapses onto point masses at 0 and 1. The model is asserting
+that each cell line's true rate is *exactly* 0 or *exactly* 1 — no intermediate
+stoichiometry is possible. That is not a fitted dispersion, it is a degenerate
+solution, and any LRT computed against it is computed from a boundary.
+
+The `%pU` panels show why the optimiser goes there: at these sites the observed
+`%pU` values really do sit at 0 or ~100 within each genotype class, so a
+two-point prior is the likelihood-maximising description. The LRT then reports an
+extreme p-value which is really a statement that the phenotype is bimodal, not
+that the SNP is associated.
+
+```{r obs-tab}
+knitr::kable(obs[!is.na(lead_snp), .(
+  site = paste0("chr", sid[1]), group = group[1],
+  `lead cis-SNP` = lead_snp[1],
+  `LRT p` = signif(lead_p[1], 3),
+  `cell lines` = .N,
+  `frac %pU = 0` = sprintf("%.2f", mean(pu == 0)),
+  `frac %pU > 0.9` = sprintf("%.2f", mean(pu > 0.9)),
+  # as.numeric: median() of an integer vector returns integer for odd-length
+  # groups and double for even-length ones, which breaks data.table's per-group
+  # type check.
+  `median depth` = as.numeric(median(n))), by = sid][, -1],
+  caption = "The same sites, from the data side: at the phi-boundary sites most cell lines sit at exactly 0 or above 0.9, with little in between.")
+```
+
+# 5. The dispersion has two degenerate boundaries
+
+$\varphi$ is bounded, and **both** ends are pathological:
+
+- $\varphi \to 1$: $\alpha+\beta \to 0$, prior collapses to point masses at 0 and
+  1 (§4).
+- $\varphi \to 0$: $\alpha+\beta \to \infty$, prior collapses onto $\mu_i$ and the
+  model reduces to a plain binomial.
+
+Both are reachable in practice, and which one is hit depends on how many
+covariates the mean model carries:
+
+```{r boundaries}
+s <- sweep[ok == TRUE]
+knitr::kable(s[, .(
+  `sites fitted`              = format(.N, big.mark = ","),
+  `median phi`                = signif(median(phi), 3),
+  `at the phi=0 floor (1e-6)` = sprintf("%.1f%%", 100 * mean(phi <= 1.01 * PHI_EPS)),
+  `phi > 0.99`                = sprintf("%.2f%%", 100 * mean(phi > 0.99))),
+  by = .(`k (PCs)` = npcs)][order(`k (PCs)`)],
+  caption = "Null fits across covariate counts, autosome-only phenotype. Adding PCs moves the degeneracy from the upper boundary to the LOWER one -- at k = 20 most fits have collapsed to the binomial limit.")
+```
+
+Consequences for the pipeline, both documented on
+[the covariate-count page](qtl_mapping_betabinomial_npcs_tradeoff.html):
+
+1. **Sites at $\varphi > 0.99$ are excluded** before mapping, because the LRT
+   there is computed from a degenerate fit. The filter must be *iterated*, since
+   removing sites changes the covariate PCs, which changes every remaining fit.
+2. **The eventual fix belongs inside `fit_bb_mle`**, alongside the existing $\mu$
+   and `MAX_ABS_COEF` guards, and it must be **two-sided** — the $\varphi \to 0$
+   boundary is the one that dominates at high $k$.
+
+# Configuration in use
+
+```{r config}
+knitr::kable(data.table(
+  setting = c("sites", "cell lines", "covariates z", "cis window", "test",
+              "phenotype", "excluded: U/C-variant sites", "excluded: phi-boundary sites",
+              "chromosomes"),
+  value = c("5-fold union (>= 1 fold)", "50 genotyped", "3 M-value PCs",
+            "+/- 5 kb, MAF >= 0.05", "LRT on beta_g, 1 df",
+            "fold5_union_auto_noUCcalled_noPhi_pc3",
+            "1,118 (a U/C variant is called on the pU base, so %pU partly reports genotype)",
+            "33 (phi > 0.99, iterated to a fixed point at k = 3)",
+            "chr1-22 only; PCs recomputed on chr1-22")),
+  caption = "k = 3 PCs was selected on calibration grounds -- permutation lambda degrades monotonically as PCs are added.")
+```
+
+# Data
+
+- **Phenotype**: per site, per cell line — converted reads $C$ ($=y$) out of
+  total depth $N$ ($=C+T$). No transformation.
+- **Genotypes**: cis-SNPs within ±5 kb, MAF ≥ 0.05, from the 50 cell lines.
+- **Covariates $z$**: 3 M-value phenotype PCs, recomputed on the retained sites
+  whenever the site set changes (they derive from the phenotype itself).
+
+Related: [covariate count and the φ boundary](qtl_mapping_betabinomial_npcs_tradeoff.html) ·
+[filtering strategy and calibration](qtl_mapping_betabinomial_strategy.html) ·
+[goodness-of-fit attempts](qtl_mapping_betabinomial_gof_failed.html) ·
+[original α/β write-up](qtl_mapping_betabinomial_model.html)
