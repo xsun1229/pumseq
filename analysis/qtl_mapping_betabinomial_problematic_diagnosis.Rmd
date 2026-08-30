@@ -119,12 +119,58 @@ knitr::kable(par[order(match(sid, ord)), .(
   site = paste0("chr", sub(" ", ":", sid)),
   group = as.character(group),
   `cell lines` = n_cl,
-  phi = sprintf("%.6f", phi),
-  `alpha+beta = (1-phi)/phi` = signif(alpha_plus_beta, 3),
-  `phi, intercept-only fit` = sprintf("%.6f", phi_intercept_only),
-  `pooled %pU` = round(100 * pooled_pu, 1))],
-  caption = "phi is the over-dispersion of the Beta prior, on (0,1). phi -> 1 means alpha+beta -> 0, where the prior collapses onto point masses at 0 and 1.")
+  `phi (real)` = sprintf("%.6f", phi),
+  `phi (perm 1)` = sprintf("%.6f", phi_perm1),
+  `phi (perm 2)` = sprintf("%.6f", phi_perm2),
+  `max |difference|` = signif(max_abs_phi_diff, 2),
+  `alpha+beta` = signif(alpha_plus_beta, 3),
+  `phi, intercept-only` = sprintf("%.6f", phi_intercept_only))],
+  caption = "phi under the real data and under the calibration's first two permutation orders. The three columns are IDENTICAL -- see below.")
 ```
+
+## φ is invariant under permutation, and that is the whole explanation
+
+The permutation columns above are not approximately equal, they are **equal**:
+the largest difference across all `r nrow(par)` sites and both permutations is
+`r sprintf("%.1g", max(par$max_abs_phi_diff))`, i.e. optimiser noise.
+
+This is forced, not coincidental. The calibration permutes the phenotype **and
+the covariates** by the same index while leaving genotype fixed
+(`y <- Cm[s, ord]; n <- Nm[s, ord]; Xcov_p <- Xcov[ord, ]`). The null
+log-likelihood is a product over cell lines of terms in $(y_i, n_i, z_i)$, so
+permuting all three together merely reorders the factors of a product:
+
+$$\ell_0(\hat\beta_0, \hat\gamma, \hat\varphi) = \sum_i \log f(y_i \mid n_i, z_i)
+\quad\text{is unchanged by any relabelling of } i$$
+
+So the MLE is unchanged, $\hat\varphi$ is unchanged, and the set of 50
+$(\mu_i, \alpha_i, \beta_i)$ is unchanged — only which cell line carries which
+value moves. **The degenerate null fit is mathematically immune to permutation.**
+
+### To be clear about what is and is not identical
+
+**Identical:** the null fit — $\hat\varphi$, $\hat\ell_0$, and the 50 Betas.
+
+**Not identical:** the LRT p-values. The *full* model contains genotype, which is
+**not** permuted, so only the full-model term moves:
+
+```{r perm-p}
+knitr::kable(pl[, .(
+  site = paste0("chr", sub(" ", ":", sid)),
+  `real -log10 p` = round(real, 2),
+  `perm 1` = round(perm1, 2), `perm 2` = round(perm2, 2),
+  spread = round(pmax(real, perm1, perm2) - pmin(real, perm1, perm2), 2))],
+  caption = "The p-values DO change under permutation -- just not meaningfully. A genuine QTL at -log10 p = 141 would collapse to about 2 when the phenotype is shuffled; these move by 1-5 out of 141.")
+```
+
+The mechanism follows. The statistic is
+$\Lambda = 2(\hat\ell_{\text{full}} - \hat\ell_0)$, and permutation freezes
+$\hat\ell_0$. It is free to change $\hat\ell_{\text{full}}$ — but the null is so
+poor (for `chr3:37277733`, $\hat\ell_0 = -478$, with a prior that contributes no
+regularisation at all) that **almost any** genotype vector buys a large
+improvement over it. Which genotype pairs with which phenotype barely matters. So
+$\Lambda$ is measuring how far a full model can climb above a broken null, not
+association — and shuffling the phenotype does not repair the null.
 
 ```{r phi-fig, fig.height=4.2}
 ggplot(par, aes(reorder(paste0("chr", sub(" ", ":", sid)), phi), phi, fill = group)) +
@@ -170,42 +216,51 @@ what is plotted. It is obtained from the fit in three steps:
    diverges at 0 and 1):
    $$P(a < p_i \le b) = F_{\text{Beta}}(b;\alpha_i,\beta_i) - F_{\text{Beta}}(a;\alpha_i,\beta_i)$$
 
-$\hat\varphi$ is one value per site and the covariates make $\mu_i$ differ only
-slightly between cell lines (range printed on each panel), so this is effectively
-one Beta per site. The ticks below each panel are the observed $y_i/n_i$, for
-reference.
+The same invariance applies here: refitting under permutations 1 and 2 leaves the
+binned prior mass unchanged to
+`r sprintf("%.1g", max(par$max_abs_prior_mass_diff))`, so the panels below are the
+permuted priors as well as the real ones — there is nothing separate to plot.
+
+**There are as many distributions as cell lines** — up to 50 per site, not one.
+They share $\alpha_i+\beta_i = (1-\hat\varphi)/\hat\varphi$, but $\mu_i$ splits
+that total differently for each, so each cell line gets its own Beta. The figure
+therefore draws **all of them**: one thin line per cell line, with the heavy line
+their average. The ticks below are the observed $y_i/n_i$, for reference.
 
 ```{r prior, fig.height=7.6}
-# One Beta prior per site, from that site's phi and median mu -- computed here
-# straight from case_params, no simulation and no averaging over cell lines.
+# One Beta PER CELL LINE: alpha_i = mu_i*(1-phi)/phi, beta_i = (1-mu_i)*(1-phi)/phi.
+# mu_i comes from observed.tsv (per cell line), phi from case_params (per site).
 NB  <- 50
 brk <- seq(0, 1, length.out = NB + 1)
-pri <- par[, {
+mid <- (head(brk, -1) + tail(brk, -1)) / 2
+
+cl_bins <- merge(obs[, .(sid, cell_line, mu)], par[, .(sid, group, phi)], by = "sid")
+cl_bins <- cl_bins[, {
   ab <- (1 - phi) / phi
-  a  <- mu_median * ab;  b <- (1 - mu_median) * ab
-  .(bin_mid = (head(brk, -1) + tail(brk, -1)) / 2, mass = diff(pbeta(brk, a, b)))
-}, by = .(sid, group)]
+  .(bin_mid = mid, mass = diff(pbeta(brk, mu * ab, (1 - mu) * ab)))
+}, by = .(sid, group, cell_line)]
+avg <- cl_bins[, .(mass = mean(mass)), by = .(sid, group, bin_mid)]
 
-labp <- par[, .(sid, panel = sprintf("chr%s   phi = %.6f\nmu_i %.3f-%.3f   P(<.01)=%.2f  P(>.99)=%.2f",
-                                     sub(" ", ":", sid), phi, mu_min, mu_max,
-                                     P_below_0.01, P_above_0.99))]
-pri <- merge(pri, labp, by = "sid")
-pri[, panel := factor(panel, levels = labp[order(match(sid, ord))]$panel)]
-ob  <- merge(obs[, .(sid, pu)], labp, by = "sid")
-ob[, panel := factor(panel, levels = levels(pri$panel))]
+labp <- par[, .(sid, panel = sprintf("chr%s   phi = %.6f   n = %d cell lines\nmu_i %.3f-%.3f",
+                                     sub(" ", ":", sid), phi, n_cl, mu_min, mu_max))]
+for (d in list(cl_bins, avg)) d[, panel := labp$panel[match(sid, labp$sid)]]
+LV <- labp[order(match(sid, ord))]$panel
+for (d in list(cl_bins, avg)) d[, panel := factor(panel, levels = LV)]
+ob <- obs[, .(sid, pu)][, panel := factor(labp$panel[match(sid, labp$sid)], levels = LV)]
 
-ggplot(pri, aes(bin_mid, mass)) +
-  geom_col(aes(fill = group), width = 1 / NB, colour = NA) +
-  geom_point(data = ob, aes(x = pu, y = -0.06), shape = 124, size = 2.2,
-             colour = "grey15", alpha = 0.7) +
-  scale_fill_manual(values = setNames(c("#e34948", "#3987e5"), GRP), name = NULL) +
+ggplot(cl_bins, aes(bin_mid, mass)) +
+  geom_line(aes(group = cell_line), colour = "grey55", linewidth = 0.18, alpha = 0.5) +
+  geom_line(data = avg, aes(colour = group), linewidth = 0.9) +
+  geom_point(data = ob, aes(x = pu, y = -0.06), shape = 124, size = 2, colour = "grey15",
+             alpha = 0.7) +
+  scale_colour_manual(values = setNames(c("#e34948", "#3987e5"), GRP), name = NULL) +
   facet_wrap(~ panel, ncol = 4) +
   labs(x = expression(p[i]), y = "prior probability mass",
-       title = "Fitted prior on the latent rate, with the observed %pU beneath",
-       subtitle = paste("Bars: the site's Beta prior (exact, sums to 1). Ticks below zero: the observed %pU,",
-                        "one per cell line (these are y_i/n_i, so they carry sampling noise).",
-                        "\nEvery problematic site's prior puts ALL its mass at 0 and 1. At chr3:37277733, chr6:29943223 and",
-                        "\nchr17:36212383 well-covered cell lines nonetheless sit in the interior, where the prior gives ~zero mass.")) +
+       title = "Fitted prior on the latent rate: one distribution per cell line",
+       subtitle = paste("Thin grey lines: each cell line's own Beta (up to 50 per site).",
+                        "Heavy line: their average.\nTicks: observed y_i/n_i.",
+                        "The cell lines share alpha+beta but differ in mu_i, so the curves differ --",
+                        "\nmarkedly so at chr15:48430687, where mu_i spans 0.000-0.476.")) +
   theme_bw(base_size = 11) +
   theme(legend.position = "bottom", strip.text = element_text(size = 7.4))
 ```
