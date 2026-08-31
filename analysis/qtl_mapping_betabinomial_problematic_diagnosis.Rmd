@@ -86,7 +86,7 @@ per-site mean `%pU` and cell-line count are identical across all three datasets.
 ```{r box, fig.height=8.4}
 g <- pgen[!is.na(geno)]
 g[, gf := factor(geno, levels = c(0, 1, 2))]
-g[, dataset := factor(dataset, levels = c("real", "paste", "perm1", "perm2")[c(1,3,4)])]
+g[, dataset := factor(dataset, levels = c("real", "perm1", "perm2"))]
 labg <- unique(pgen[, .(sid, group, lead_snp)])
 labg[, panel := sprintf("chr%s   %s", sub(" ", ":", sid), lead_snp)]
 g <- merge(g, labg[, .(sid, panel)], by = "sid")
@@ -101,8 +101,7 @@ ggplot(g, aes(gf, 100 * pu, fill = dataset)) +
   labs(x = "genotype (copies of the counted allele)", y = "%pU",
        title = "%pU by genotype: real vs two permutations",
        subtitle = paste("Genotype is FIXED; only the phenotype is shuffled. Where the real boxes separate by genotype",
-                        "
-and the permuted ones do not, there is real structure. Free y-axes.")) +
+                        "\nand the permuted ones do not, there is real structure. Free y-axes.")) +
   theme_bw(base_size = 11) +
   theme(legend.position = "bottom", strip.text = element_text(size = 7.4))
 ```
