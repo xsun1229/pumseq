@@ -92,16 +92,21 @@ labg[, panel := sprintf("chr%s   %s", sub(" ", ":", sid), lead_snp)]
 g <- merge(g, labg[, .(sid, panel)], by = "sid")
 g[, panel := factor(panel, levels = labg[order(match(sid, ord))]$panel)]
 
-ggplot(g, aes(gf, 100 * pu, fill = dataset)) +
-  geom_boxplot(width = 0.72, outlier.size = 0.6, colour = "grey30",
-               position = position_dodge(preserve = "single"), linewidth = 0.3) +
-  scale_fill_manual(values = c(real = "#e34948", perm1 = "#9ec5f4", perm2 = "#3987e5"),
-                    name = NULL) +
+# x = dataset (3 clusters), genotype dodged WITHIN each cluster, so the 0/1/2
+# trend can be compared across real vs permuted at a glance.
+ggplot(g, aes(dataset, 100 * pu, fill = gf)) +
+  geom_boxplot(width = 0.74, outlier.size = 0.6, colour = "grey30",
+               position = position_dodge(width = 0.8, preserve = "single"),
+               linewidth = 0.3) +
+  scale_fill_manual(values = c(`0` = "#fde0c5", `1` = "#f0a86a", `2` = "#c8622d"),
+                    name = "genotype (copies of the counted allele)") +
   facet_wrap(~ panel, ncol = 4, scales = "free_y") +
-  labs(x = "genotype (copies of the counted allele)", y = "%pU",
-       title = "%pU by genotype: real vs two permutations",
-       subtitle = paste("Genotype is FIXED; only the phenotype is shuffled. Where the real boxes separate by genotype",
-                        "\nand the permuted ones do not, there is real structure. Free y-axes.")) +
+  labs(x = NULL, y = "%pU",
+       title = "%pU by genotype, within real and two permutations",
+       subtitle = paste("Each cluster is one dataset; the three boxes inside it are genotypes 0/1/2.",
+                        "Genotype is FIXED and only the\nphenotype is shuffled, so a 0->1->2 trend inside the",
+                        "'real' cluster that vanishes in the permuted clusters is real structure.",
+                        "\nFree y-axes.")) +
   theme_bw(base_size = 11) +
   theme(legend.position = "bottom", strip.text = element_text(size = 7.4))
 ```

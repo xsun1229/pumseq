@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree96b89e784d716ea7bcf04f270a5aec167d95c417targetblank96b89e7a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreed9e3d5bccdeb9ec24a728613aee7cacababda5b5targetblankd9e3d5ba">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/96b89e784d716ea7bcf04f270a5aec167d95c417" target="_blank">96b89e7</a>
+<a href="https://github.com/xsun1229/pumseq/tree/d9e3d5bccdeb9ec24a728613aee7cacababda5b5" target="_blank">d9e3d5b</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree96b89e784d716ea7bcf04f270a5aec167d95c417targetblank96b89e7a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreed9e3d5bccdeb9ec24a728613aee7cacababda5b5targetblankd9e3d5ba"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/96b89e784d716ea7bcf04f270a5aec167d95c417" target="_blank">96b89e7</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/d9e3d5bccdeb9ec24a728613aee7cacababda5b5" target="_blank">d9e3d5b</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -621,6 +621,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/d9e3d5bccdeb9ec24a728613aee7cacababda5b5/analysis/qtl_mapping_betabinomial_problematic_diagnosis.Rmd" target="_blank">d9e3d5b</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-31
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/d9e3d5bccdeb9ec24a728613aee7cacababda5b5/docs/qtl_mapping_betabinomial_problematic_diagnosis.html" target="_blank">d9e3d5b</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-31
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -915,16 +949,21 @@ labg[, panel := sprintf(&quot;chr%s   %s&quot;, sub(&quot; &quot;, &quot;:&quot;
 g &lt;- merge(g, labg[, .(sid, panel)], by = &quot;sid&quot;)
 g[, panel := factor(panel, levels = labg[order(match(sid, ord))]$panel)]
 
-ggplot(g, aes(gf, 100 * pu, fill = dataset)) +
-  geom_boxplot(width = 0.72, outlier.size = 0.6, colour = &quot;grey30&quot;,
-               position = position_dodge(preserve = &quot;single&quot;), linewidth = 0.3) +
-  scale_fill_manual(values = c(real = &quot;#e34948&quot;, perm1 = &quot;#9ec5f4&quot;, perm2 = &quot;#3987e5&quot;),
-                    name = NULL) +
+# x = dataset (3 clusters), genotype dodged WITHIN each cluster, so the 0/1/2
+# trend can be compared across real vs permuted at a glance.
+ggplot(g, aes(dataset, 100 * pu, fill = gf)) +
+  geom_boxplot(width = 0.74, outlier.size = 0.6, colour = &quot;grey30&quot;,
+               position = position_dodge(width = 0.8, preserve = &quot;single&quot;),
+               linewidth = 0.3) +
+  scale_fill_manual(values = c(`0` = &quot;#fde0c5&quot;, `1` = &quot;#f0a86a&quot;, `2` = &quot;#c8622d&quot;),
+                    name = &quot;genotype (copies of the counted allele)&quot;) +
   facet_wrap(~ panel, ncol = 4, scales = &quot;free_y&quot;) +
-  labs(x = &quot;genotype (copies of the counted allele)&quot;, y = &quot;%pU&quot;,
-       title = &quot;%pU by genotype: real vs two permutations&quot;,
-       subtitle = paste(&quot;Genotype is FIXED; only the phenotype is shuffled. Where the real boxes separate by genotype&quot;,
-                        &quot;\nand the permuted ones do not, there is real structure. Free y-axes.&quot;)) +
+  labs(x = NULL, y = &quot;%pU&quot;,
+       title = &quot;%pU by genotype, within real and two permutations&quot;,
+       subtitle = paste(&quot;Each cluster is one dataset; the three boxes inside it are genotypes 0/1/2.&quot;,
+                        &quot;Genotype is FIXED and only the\nphenotype is shuffled, so a 0-&gt;1-&gt;2 trend inside the&quot;,
+                        &quot;&#39;real&#39; cluster that vanishes in the permuted clusters is real structure.&quot;,
+                        &quot;\nFree y-axes.&quot;)) +
   theme_bw(base_size = 11) +
   theme(legend.position = &quot;bottom&quot;, strip.text = element_text(size = 7.4))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_problematic_diagnosis.Rmd/box-1.png" width="1056" style="display: block; margin: auto;" /></p>
@@ -950,6 +989,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/d9e3d5bccdeb9ec24a728613aee7cacababda5b5/docs/figure/qtl_mapping_betabinomial_problematic_diagnosis.Rmd/box-1.png" target="_blank">d9e3d5b</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-31
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/cb878ca011b16ce030416c7f379594945c6d7c0b/docs/figure/qtl_mapping_betabinomial_problematic_diagnosis.Rmd/box-1.png" target="_blank">cb878ca</a>
