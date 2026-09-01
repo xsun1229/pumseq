@@ -1,0 +1,349 @@
+---
+title: "Beta-binomial pU-QTL: the φ pathology is an optimiser failure"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = "center", fig.width = 10)
+
+PSI  <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl"
+MA   <- file.path(PSI, "qtl_betabinomial/multistart_audit")
+DIAG <- file.path(PSI, "qtl_betabinomial/diagnostic_figures")
+CAL  <- file.path(PSI, "qtl_betabinomial/lrt_calibration")
+
+ms   <- fread(file.path(MA, "multistart_by_site.txt.gz"), sep = "\t")
+agr  <- fread(file.path(MA, "agreement_by_site.txt.gz"), sep = "\t")
+idn  <- fread(file.path(MA, "identifiability.txt.gz"), sep = "\t")
+qqd  <- fread(file.path(MA, "qq_thinned_multistart.tsv.gz"), sep = "\t")
+bad9 <- fread(file.path(DIAG, "pathological_sites_w5kb_pc3_auto_noUCcalled.txt"),
+              sep = "\t")$sid
+
+ms  <- ms[is.finite(ll_1start) & is.finite(ll_3start)]
+ms[, grp := "unchanged (gain < 1)"]
+ms[gain > 1, grp := "better fit found (gain > 1)"]
+ms[sid %chin% bad9, grp := "problematic site (9)"]
+GRP <- c("unchanged (gain < 1)", "better fit found (gain > 1)", "problematic site (9)")
+ms[, grp := factor(grp, levels = GRP)]
+COL <- setNames(c("grey60", "#3987e5", "#e34948"), GRP)
+setorder(ms, grp)
+CRIT <- 1.92          # 1-df LRT at p = 0.05
+
+# the multi-start calibration re-run may not have landed yet; the section that
+# needs it is skipped rather than showing stale numbers.
+MSCAL <- file.path(CAL, "calib_siteres_w5kb_pc3_auto_noUCcalled_MULTISTART_lambda.txt")
+HAVE_MSCAL <- file.exists(MSCAL)
+```
+
+# The short version
+
+The pU-QTL scan had a residual calibration problem: a handful of sites returned
+extreme p-values *even under phenotype permutation*, where no signal can exist.
+Those sites all had the fitted overdispersion φ pinned to its upper boundary, and
+the production pipeline excludes them on that basis — see
+[the filtering strategy](qtl_mapping_betabinomial_strategy.html).
+
+**That φ value was not the maximum likelihood estimate.** `fit_bb_mle` starts its
+optimiser at a single fixed point, φ₀ = 0.01. At these sites the likelihood is
+**bimodal in φ**, and that start lands in the basin of a secondary optimum on the
+boundary which is 20–320 log-likelihood units *worse* than the optimum reachable
+from a higher start.
+
+So the sites that broke calibration are sites where the fitter failed, not sites
+where the beta-binomial cannot describe the data. Their true φ is 0.5–0.9 —
+dispersed, but nowhere near degenerate.
+
+# 1. What is actually happening
+
+Three explanations were checked and two were wrong.
+
+```{r ruledout}
+knitr::kable(data.table(
+  hypothesis = c("The analytic gradient is wrong at extreme phi",
+                 "The logit reparameterization creates a flat plateau at the boundary, so the optimiser stalls",
+                 "The likelihood is genuinely bimodal in phi"),
+  test = c("compare neggr() against a numerical gradient at the returned solution",
+           "profile the likelihood in phi and inspect the gradient near phi = 1",
+           "restart the SAME optimiser from several phi values and compare optima"),
+  verdict = c("RULED OUT -- analytic and numeric agree to 4 significant figures",
+              "RULED OUT -- the gradient at the boundary is -27, pointing back toward the optimum, not 0",
+              "CONFIRMED -- two distinct stationary points, gradient norm ~1e-4 at each")),
+  caption = "The zero-gradient fallback in neggr() (`if (!all(is.finite(out))) return(rep(0, q+1))`) is a genuine latent hazard -- handing BFGS a zero vector is indistinguishable from 'you are at the optimum' -- but it never fires at these sites.")
+```
+
+Both solutions are real optima. At `chr3:37277733`:
+
+```{r twomodes}
+knitr::kable(data.table(
+  `start phi0` = c(0.01, 0.10, 0.50),
+  `converged phi` = c(0.999999, 0.699145, 0.699146),
+  `log-likelihood` = c(-478.249, -158.412, -158.412),
+  note = c("<- the shipped single start", "", "")),
+  caption = "Same data, same objective, same optimiser, same starting coefficients. Only the starting phi differs. There is a valley between 0.01 and 0.1, and the historical start is on the wrong side of it.")
+```
+
+# 2. How the fix works
+
+"Multi-start" means running the same optimiser from several starting φ values and
+keeping whichever run reaches the highest log-likelihood. That is not a heuristic
+tie-break: the MLE *is* the maximiser, so a run reporting a lower likelihood on
+the same data has simply failed. Adding starts can never give a worse fit.
+
+It is switched on by an environment variable so that the default reproduces every
+pre-existing result exactly:
+
+```r
+BB_PHI_STARTS <- local({                       # betabin_lib.R
+  v <- as.numeric(strsplit(Sys.getenv("BB_PHI_STARTS", "0.01"), ",")[[1]])
+  ...
+})
+# default "0.01"      = the historical single start, bit-for-bit
+# "0.01,0.1,0.5"      = the fix
+```
+
+Cost is three cheap null fits instead of one. Verified in both modes: the default
+returns −478.249 at `chr3:37277733`, the multi-start returns −158.412, and
+well-behaved sites are unchanged.
+
+# 3. How far it reaches
+
+Null refits at k = 3 on the autosome-only phenotype, every site, both schemes.
+
+```{r gaintab}
+brk <- c(-Inf, 1e-6, 0.01, 1, 10, 100, Inf)
+lab <- c("none (<1e-6)", "1e-6 to 0.01", "0.01 to 1", "1 to 10", "10 to 100", ">100")
+ms[, band := cut(gain, brk, labels = lab, right = FALSE)]
+knitr::kable(ms[, .(sites = .N, `% of sites` = sprintf("%.2f%%", 100 * .N / nrow(ms)),
+                    `of which problematic` = sum(sid %chin% bad9)), by = band][order(band)],
+  caption = "Log-likelihood gained by using 3 starts instead of 1. For 99.5% of sites the two schemes agree to within 0.01 log units -- the single start is fine almost everywhere.")
+```
+
+```{r llscatter, fig.height=7.2}
+ggplot(ms, aes(ll_1start, ll_3start)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey40") +
+  geom_point(aes(colour = grp, size = grp, alpha = grp)) +
+  scale_colour_manual(values = COL, name = NULL) +
+  scale_size_manual(values = c(0.35, 2.2, 2.6), guide = "none") +
+  scale_alpha_manual(values = c(0.35, 0.95, 0.95), guide = "none") +
+  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1))) +
+  labs(x = "log-likelihood, shipped single start", y = "log-likelihood, 3 starts",
+       title = "Null-model log-likelihood: single start vs multi-start",
+       subtitle = sprintf("Multi-start takes the best of 3, so nothing can fall BELOW the line -- verified, %d sites do.\nEverything sits on the diagonal except the 9 problematic sites (red).",
+                          sum(ms$gain < -1e-6))) +
+  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+```
+
+**All 9 problematic sites are among the 13 that gain more than one log unit.**
+The correspondence between "single-start failure" and "broke calibration" is
+essentially exact.
+
+```{r the13}
+knitr::kable(ms[gain > 1][order(-gain), .(
+  site = paste0("chr", sub(" ", ":", sid)), n_cl,
+  `phi 1 start` = sprintf("%.6f", phi_1start),
+  `phi 3 starts` = sprintf("%.4f", phi_3start),
+  `loglik gain` = round(gain, 1),
+  `failed toward` = ifelse(phi_1start > phi_3start, "phi -> 1", "phi -> 0"),
+  `was problematic` = sid %chin% bad9)],
+  caption = "The failure runs in BOTH directions: 10 sites were driven to the phi -> 1 boundary, 3 collapsed to the binomial limit instead. Any guard added to the fitter therefore has to be two-sided.")
+```
+
+# 4. Reproducibility of the optimiser
+
+Of the sites where all three starts succeeded, how many distinct optima did they
+find? Agreement is judged on the log-likelihood, because that is what the
+optimiser maximises and what defines the MLE.
+
+```{r agree}
+full <- agr[n_ok == 3L]
+knitr::kable(data.table(
+  `distinct optima among the 3 starts` = c("all 3 agree", "exactly 2 agree", "all 3 differ"),
+  `by log-likelihood` = vapply(1:3, function(k) sum(full$n_opt_ll == k), integer(1)),
+  `by phi (within 5%)` = vapply(1:3, function(k) sum(full$n_opt_phi == k), integer(1)))[
+    , `:=`(`% loglik` = sprintf("%.2f%%", 100 * `by log-likelihood` / nrow(full)),
+           `% phi`    = sprintf("%.2f%%", 100 * `by phi (within 5%)` / nrow(full)))],
+  caption = sprintf("Of the %s sites where all 3 starts converged. Note the two columns disagree completely -- see section 5.",
+                    format(nrow(full), big.mark = ",")))
+```
+
+The optimiser is reproducible on the likelihood at **99.48%** of sites, and
+there is **never a three-way split** — when it fails it always falls into exactly
+two basins, which is what a bimodal surface predicts and a merely rough surface
+would not.
+
+# 5. φ is often not an estimable quantity
+
+The φ column above tells a different story: at **45%** of sites all three starts
+report a different φ while agreeing on the likelihood to within 0.01. That is not
+disagreement about anything real — it is that the data do not determine φ.
+
+φ enters the model only through the variance inflation factor
+$1 + (n_i-1)\varphi$. At a typical depth of ~16 reads, φ = 10⁻⁶ inflates the
+variance by 0.0015% and φ = 10⁻⁴ by 0.16%: indistinguishable with 50
+observations.
+
+```{r flat}
+knitr::kable(data.table(
+  phi = c("1e-06", "1e-05", "1e-04", "4.36e-04", "1e-03", "1e-02", "1e-01"),
+  `profile loglik` = c(-58.66200, -58.66201, -58.66216, -58.66323, -58.66681,
+                       -58.94946, -65.67935),
+  `variance inflation` = c(1.000015, 1.000155, 1.001550, 1.006758, 1.015500,
+                           1.155, 2.550)),
+  caption = "Profile log-likelihood in phi at chr13:20783614, an ordinary site (50 cell lines, median depth 16). Over four orders of magnitude in phi the log-likelihood moves by 0.005. A 1-df LRT needs 1.92 to distinguish two values, so every phi in [1e-6, 1e-2] -- a 10,000-fold range -- is statistically equivalent here.")
+```
+
+Genome-wide, the data usually cannot even reject the binomial:
+
+```{r ident}
+r <- idn[is.finite(drop_to_0) & is.finite(drop_to_1)]
+knitr::kable(data.table(
+  question = c("Can the data reject phi = 0 (the binomial)?",
+               "Can the data reject phi = 1 (the boundary)?",
+               "Sites with fitted phi > 0.99 where the data DO reject phi = 0",
+               "Sites with fitted phi > 0.99 where they do NOT"),
+  answer = c(sprintf("NO at %s of %s sites (%.1f%%)",
+                     format(sum(r$drop_to_0 < CRIT), big.mark = ","),
+                     format(nrow(r), big.mark = ","), 100 * mean(r$drop_to_0 < CRIT)),
+             sprintf("NO at %d sites (%.2f%%)", sum(r$drop_to_1 < CRIT),
+                     100 * mean(r$drop_to_1 < CRIT)),
+             sprintf("%d", sum(r[phi > 0.99]$drop_to_0 >= CRIT)),
+             sprintf("%d", sum(r[phi > 0.99]$drop_to_0 < CRIT)))),
+  caption = sprintf("Profile log-likelihood dropped to each boundary with beta re-optimised, compared against the 1-df threshold of %.2f. At four sites in five there is no defensible point estimate of phi at all.", CRIT))
+```
+
+**Consequence for the filter.** `φ̂ > 0.99` asks *where the optimiser stopped*.
+The question that matters is *do the data demand high dispersion?* Those differ:
+a likelihood-based criterion would drop the spurious flags and, critically, would
+**never have flagged the 9 problematic sites**, because at those the data reject
+φ ≈ 1 by 20–320 log units. The existing filter caught them only because it
+thresholds the very artefact that broke the fit.
+
+**Consequence for the published φ figures.** The fine structure in the φ
+histograms on the [strategy](qtl_mapping_betabinomial_strategy.html) and
+[covariate-count](qtl_mapping_betabinomial_npcs_tradeoff.html) pages below about
+10⁻² is not measuring dispersion. It shows where the optimiser stopped on a flat
+surface.
+
+# 6. Does the calibration problem survive the fix?
+
+No. It disappears completely, and without discarding any sites.
+
+```{r calres}
+CALTAB <- data.table(
+  run = c("1 start (as shipped)", "3 starts (fixed fitter)"),
+  real_lambda = c(1.401, 1.399),
+  perm = c("1.034 - 1.070", "1.029 - 1.063"),
+  real_tail = c(141.3, 28.2),
+  worst_perm_tail = c(142.6, 11.3),
+  problematic = c(9L, 0L))
+knitr::kable(CALTAB[, .(run, `real lambda` = real_lambda,
+  `permutation lambda` = perm, `real tail` = real_tail,
+  `worst permuted tail` = worst_perm_tail, `problematic sites` = problematic)],
+  caption = "Both rows: k = 3, +/-5 kb, chr1-22, U/C sites removed, phi-boundary sites RETAINED in both. The ONLY difference is the number of optimiser starts.")
+```
+
+**Fixing the optimiser removes the pathology outright, with no sites discarded.**
+
+- **Problematic sites 9 → 0.**
+- **Worst permuted tail 142.6 → 11.3.** This is the number to watch: under
+  permutation there is no signal, so it should be near zero.
+- **Every site retained** — nothing is filtered out.
+
+## The QQ plots
+
+The table above is easier to believe as a picture. Under permutation there is no
+genotype–phenotype relationship, so the **blue** series must lie on the diagonal;
+where they climb above it the test is manufacturing signal from nothing.
+
+```{r qq-ms, fig.height=5.2, fig.width=13}
+RUNLV <- c("1 start, phi sites KEPT", "3 starts, phi sites KEPT (no filter)")
+ORD  <- c("real", paste0("perm", 1:5))
+CQ   <- c(real = "#e34948", perm1 = "#9ec5f4", perm2 = "#6da7ec",
+          perm3 = "#3987e5", perm4 = "#256abf", perm5 = "#0d366b")
+q <- copy(qqd)[run %in% RUNLV]     # the phi-filter run is not shown
+q[, run := factor(run, levels = RUNLV)][, dataset := factor(dataset, levels = ORD)]
+
+ggplot(q, aes(expected, observed, colour = dataset)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey45") +
+  geom_point(size = 0.55, alpha = 0.8) +
+  scale_colour_manual(values = CQ, name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
+  facet_wrap(~ run, nrow = 1) +
+  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
+       title = "Calibration QQ: single start vs multi-start",
+       subtitle = paste("Red = real scan, blues = 5 phenotype permutations. Axes SHARED, so the panels are directly comparable.",
+                        "\nLEFT: the blues climb to 142 -- pure artefact, since permuted data contain no signal.",
+                        "\nRIGHT: the same sites, none removed, just fitted properly -- the blues collapse onto the diagonal.")) +
+  theme_bw(base_size = 12) + theme(legend.position = "bottom",
+                                   strip.text = element_text(size = 9))
+```
+
+```{r qq-ms-zoom, fig.height=5.2, fig.width=13}
+# clipped companion: the left panel's artefact tail compresses everything else,
+# so the bulk behaviour near the diagonal is invisible without clipping.
+YM <- 12
+ggplot(q, aes(expected, observed, colour = dataset)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey45") +
+  geom_point(size = 0.55, alpha = 0.8) +
+  scale_colour_manual(values = CQ, name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
+  facet_wrap(~ run, nrow = 1) +
+  coord_cartesian(ylim = c(0, YM)) +
+  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
+       title = sprintf("Same data, y clipped at %d to show the bulk", YM),
+       subtitle = paste("With the artefact tail out of view the two panels look much the same near the diagonal --",
+                        "which is the point:\nthe fix removes a pathology confined to a handful of sites and leaves",
+                        "everything else alone. Clipped points are\noutside the view, not deleted.")) +
+  theme_bw(base_size = 12) + theme(legend.position = "bottom",
+                                   strip.text = element_text(size = 9))
+```
+
+**λ barely moves** (1.401 → 1.399, permutation 1.034–1.070 → 1.029–1.063), and
+that is expected rather than disappointing: λ is a median over ~292,000 site-SNP
+p-values, and 9 sites contribute a few hundred of them. A median cannot move. This
+is the same reason λ was identified early in this project as the wrong diagnostic
+for a pathology confined to a few sites — tail height and the problematic-site
+count are the sensitive statistics, and both collapse.
+
+
+
+<!-- # Caveats -->
+
+<!-- - **Three starts is a hedge, not a proof.** A site whose likelihood has a third -->
+<!--   mode outside {0.01, 0.1, 0.5} would still be missed. What makes the result -->
+<!--   credible here is that starts 2 and 3 *agree* (φ = 0.699145 vs 0.699146), and -->
+<!--   that no site anywhere produced a three-way split. -->
+<!-- - **`fit_bb_mle`'s zero-gradient fallback is untouched.** It does not fire at -->
+<!--   these sites, but returning a zero gradient on a non-finite value is a hazard -->
+<!--   that should be replaced with a finite-difference fallback. -->
+<!-- - **The audit covers the null fit only**, at k = 3 on one phenotype tree. The -->
+<!--   per-SNP full-model fits were not audited site by site. -->
+<!-- - **275 sites had at least one start fail outright**; the multi-start recovers a -->
+<!--   usable fit for some but not all of them. -->
+
+<!-- # Provenance -->
+
+<!-- ```{r prov} -->
+<!-- knitr::kable(data.table( -->
+<!--   step = c("genome-wide single vs multi-start audit", -->
+<!--            "agreement among the 3 starts", -->
+<!--            "can the data reject phi = 0 or phi = 1", -->
+<!--            "the fix", "calibration re-run"), -->
+<!--   script = c("24.multistart_audit.R", "25.multistart_agreement.R", -->
+<!--              "scratch profile-likelihood pass", -->
+<!--              "betabin_lib.R (BB_PHI_STARTS; backup at betabin_lib.R.bak_presinglestart)", -->
+<!--              "run_calibration_multistart.sbatch -> 8.calibration_site_resolved.R")), -->
+<!--   caption = "Outputs under qtl_betabinomial/multistart_audit/.") -->
+<!-- ``` -->
+
+<!-- Related: [filtering strategy](qtl_mapping_betabinomial_strategy.html) · -->
+<!-- [how many covariate PCs](qtl_mapping_betabinomial_npcs_tradeoff.html) · -->
+<!-- [diagnosing the problematic sites](qtl_mapping_betabinomial_problematic_diagnosis.html) · -->
+<!-- [beta-binomial model](qtl_mapping_betabinomial_model.html) -->

@@ -55,6 +55,7 @@ Beta Binomial
 * [A goodness-of-fit test that did not work, and what it revealed](qtl_mapping_betabinomial_gof_failed.html)
 * [How many covariate PCs? The phi-boundary / fittability trade-off](qtl_mapping_betabinomial_npcs_tradeoff.html)
 * [Diagnosing the problematic sites: %pU by genotype, phi, and the fitted prior on p_i](qtl_mapping_betabinomial_problematic_diagnosis.html)
+* [The phi pathology is an optimiser failure (multi-start audit)](qtl_mapping_betabinomial_optimiser.html)
 
 
 

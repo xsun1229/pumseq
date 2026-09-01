@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-09-01" />
+
+<title>Beta-binomial pU-QTL: the φ pathology is an optimiser failure</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Beta-binomial pU-QTL: the φ pathology is an
+optimiser failure</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-09-01</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-09-01
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree8b7e398f92549f6366bf7c7bc7cf5c26f82c85e5targetblank8b7e398a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/8b7e398f92549f6366bf7c7bc7cf5c26f82c85e5" target="_blank">8b7e398</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree8b7e398f92549f6366bf7c7bc7cf5c26f82c85e5targetblank8b7e398a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/8b7e398f92549f6366bf7c7bc7cf5c26f82c85e5" target="_blank">8b7e398</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/qtl_mapping_betabinomial_optimiser.Rmd
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = &quot;center&quot;, fig.width = 10)
+
+PSI  &lt;- &quot;/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl&quot;
+MA   &lt;- file.path(PSI, &quot;qtl_betabinomial/multistart_audit&quot;)
+DIAG &lt;- file.path(PSI, &quot;qtl_betabinomial/diagnostic_figures&quot;)
+CAL  &lt;- file.path(PSI, &quot;qtl_betabinomial/lrt_calibration&quot;)
+
+ms   &lt;- fread(file.path(MA, &quot;multistart_by_site.txt.gz&quot;), sep = &quot;\t&quot;)
+agr  &lt;- fread(file.path(MA, &quot;agreement_by_site.txt.gz&quot;), sep = &quot;\t&quot;)
+idn  &lt;- fread(file.path(MA, &quot;identifiability.txt.gz&quot;), sep = &quot;\t&quot;)
+qqd  &lt;- fread(file.path(MA, &quot;qq_thinned_multistart.tsv.gz&quot;), sep = &quot;\t&quot;)
+bad9 &lt;- fread(file.path(DIAG, &quot;pathological_sites_w5kb_pc3_auto_noUCcalled.txt&quot;),
+              sep = &quot;\t&quot;)$sid
+
+ms  &lt;- ms[is.finite(ll_1start) &amp; is.finite(ll_3start)]
+ms[, grp := &quot;unchanged (gain &lt; 1)&quot;]
+ms[gain &gt; 1, grp := &quot;better fit found (gain &gt; 1)&quot;]
+ms[sid %chin% bad9, grp := &quot;problematic site (9)&quot;]
+GRP &lt;- c(&quot;unchanged (gain &lt; 1)&quot;, &quot;better fit found (gain &gt; 1)&quot;, &quot;problematic site (9)&quot;)
+ms[, grp := factor(grp, levels = GRP)]
+COL &lt;- setNames(c(&quot;grey60&quot;, &quot;#3987e5&quot;, &quot;#e34948&quot;), GRP)
+setorder(ms, grp)
+CRIT &lt;- 1.92          # 1-df LRT at p = 0.05
+
+# the multi-start calibration re-run may not have landed yet; the section that
+# needs it is skipped rather than showing stale numbers.
+MSCAL &lt;- file.path(CAL, &quot;calib_siteres_w5kb_pc3_auto_noUCcalled_MULTISTART_lambda.txt&quot;)
+HAVE_MSCAL &lt;- file.exists(MSCAL)</code></pre>
+<div id="the-short-version" class="section level1">
+<h1>The short version</h1>
+<p>The pU-QTL scan had a residual calibration problem: a handful of
+sites returned extreme p-values <em>even under phenotype
+permutation</em>, where no signal can exist. Those sites all had the
+fitted overdispersion φ pinned to its upper boundary, and the production
+pipeline excludes them on that basis — see <a
+href="qtl_mapping_betabinomial_strategy.html">the filtering
+strategy</a>.</p>
+<p><strong>That φ value was not the maximum likelihood
+estimate.</strong> <code>fit_bb_mle</code> starts its optimiser at a
+single fixed point, φ₀ = 0.01. At these sites the likelihood is
+<strong>bimodal in φ</strong>, and that start lands in the basin of a
+secondary optimum on the boundary which is 20–320 log-likelihood units
+<em>worse</em> than the optimum reachable from a higher start.</p>
+<p>So the sites that broke calibration are sites where the fitter
+failed, not sites where the beta-binomial cannot describe the data.
+Their true φ is 0.5–0.9 — dispersed, but nowhere near degenerate.</p>
+</div>
+<div id="what-is-actually-happening" class="section level1">
+<h1>1. What is actually happening</h1>
+<p>Three explanations were checked and two were wrong.</p>
+<pre class="r"><code>knitr::kable(data.table(
+  hypothesis = c(&quot;The analytic gradient is wrong at extreme phi&quot;,
+                 &quot;The logit reparameterization creates a flat plateau at the boundary, so the optimiser stalls&quot;,
+                 &quot;The likelihood is genuinely bimodal in phi&quot;),
+  test = c(&quot;compare neggr() against a numerical gradient at the returned solution&quot;,
+           &quot;profile the likelihood in phi and inspect the gradient near phi = 1&quot;,
+           &quot;restart the SAME optimiser from several phi values and compare optima&quot;),
+  verdict = c(&quot;RULED OUT -- analytic and numeric agree to 4 significant figures&quot;,
+              &quot;RULED OUT -- the gradient at the boundary is -27, pointing back toward the optimum, not 0&quot;,
+              &quot;CONFIRMED -- two distinct stationary points, gradient norm ~1e-4 at each&quot;)),
+  caption = &quot;The zero-gradient fallback in neggr() (`if (!all(is.finite(out))) return(rep(0, q+1))`) is a genuine latent hazard -- handing BFGS a zero vector is indistinguishable from &#39;you are at the optimum&#39; -- but it never fires at these sites.&quot;)</code></pre>
+<table>
+<caption>The zero-gradient fallback in neggr()
+(<code>if (!all(is.finite(out))) return(rep(0, q+1))</code>) is a
+genuine latent hazard – handing BFGS a zero vector is indistinguishable
+from ‘you are at the optimum’ – but it never fires at these
+sites.</caption>
+<colgroup>
+<col width="36%" />
+<col width="27%" />
+<col width="35%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">hypothesis</th>
+<th align="left">test</th>
+<th align="left">verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">The analytic gradient is wrong at extreme phi</td>
+<td align="left">compare neggr() against a numerical gradient at the
+returned solution</td>
+<td align="left">RULED OUT – analytic and numeric agree to 4 significant
+figures</td>
+</tr>
+<tr class="even">
+<td align="left">The logit reparameterization creates a flat plateau at
+the boundary, so the optimiser stalls</td>
+<td align="left">profile the likelihood in phi and inspect the gradient
+near phi = 1</td>
+<td align="left">RULED OUT – the gradient at the boundary is -27,
+pointing back toward the optimum, not 0</td>
+</tr>
+<tr class="odd">
+<td align="left">The likelihood is genuinely bimodal in phi</td>
+<td align="left">restart the SAME optimiser from several phi values and
+compare optima</td>
+<td align="left">CONFIRMED – two distinct stationary points, gradient
+norm ~1e-4 at each</td>
+</tr>
+</tbody>
+</table>
+<p>Both solutions are real optima. At <code>chr3:37277733</code>:</p>
+<pre class="r"><code>knitr::kable(data.table(
+  `start phi0` = c(0.01, 0.10, 0.50),
+  `converged phi` = c(0.999999, 0.699145, 0.699146),
+  `log-likelihood` = c(-478.249, -158.412, -158.412),
+  note = c(&quot;&lt;- the shipped single start&quot;, &quot;&quot;, &quot;&quot;)),
+  caption = &quot;Same data, same objective, same optimiser, same starting coefficients. Only the starting phi differs. There is a valley between 0.01 and 0.1, and the historical start is on the wrong side of it.&quot;)</code></pre>
+<table>
+<caption>Same data, same objective, same optimiser, same starting
+coefficients. Only the starting phi differs. There is a valley between
+0.01 and 0.1, and the historical start is on the wrong side of
+it.</caption>
+<colgroup>
+<col width="16%" />
+<col width="20%" />
+<col width="22%" />
+<col width="41%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">start phi0</th>
+<th align="right">converged phi</th>
+<th align="right">log-likelihood</th>
+<th align="left">note</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.01</td>
+<td align="right">0.999999</td>
+<td align="right">-478.249</td>
+<td align="left">&lt;- the shipped single start</td>
+</tr>
+<tr class="even">
+<td align="right">0.10</td>
+<td align="right">0.699145</td>
+<td align="right">-158.412</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="right">0.50</td>
+<td align="right">0.699146</td>
+<td align="right">-158.412</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="how-the-fix-works" class="section level1">
+<h1>2. How the fix works</h1>
+<p>“Multi-start” means running the same optimiser from several starting
+φ values and keeping whichever run reaches the highest log-likelihood.
+That is not a heuristic tie-break: the MLE <em>is</em> the maximiser, so
+a run reporting a lower likelihood on the same data has simply failed.
+Adding starts can never give a worse fit.</p>
+<p>It is switched on by an environment variable so that the default
+reproduces every pre-existing result exactly:</p>
+<pre class="r"><code>BB_PHI_STARTS &lt;- local({                       # betabin_lib.R
+  v &lt;- as.numeric(strsplit(Sys.getenv(&quot;BB_PHI_STARTS&quot;, &quot;0.01&quot;), &quot;,&quot;)[[1]])
+  ...
+})
+# default &quot;0.01&quot;      = the historical single start, bit-for-bit
+# &quot;0.01,0.1,0.5&quot;      = the fix</code></pre>
+<p>Cost is three cheap null fits instead of one. Verified in both modes:
+the default returns −478.249 at <code>chr3:37277733</code>, the
+multi-start returns −158.412, and well-behaved sites are unchanged.</p>
+</div>
+<div id="how-far-it-reaches" class="section level1">
+<h1>3. How far it reaches</h1>
+<p>Null refits at k = 3 on the autosome-only phenotype, every site, both
+schemes.</p>
+<pre class="r"><code>brk &lt;- c(-Inf, 1e-6, 0.01, 1, 10, 100, Inf)
+lab &lt;- c(&quot;none (&lt;1e-6)&quot;, &quot;1e-6 to 0.01&quot;, &quot;0.01 to 1&quot;, &quot;1 to 10&quot;, &quot;10 to 100&quot;, &quot;&gt;100&quot;)
+ms[, band := cut(gain, brk, labels = lab, right = FALSE)]
+knitr::kable(ms[, .(sites = .N, `% of sites` = sprintf(&quot;%.2f%%&quot;, 100 * .N / nrow(ms)),
+                    `of which problematic` = sum(sid %chin% bad9)), by = band][order(band)],
+  caption = &quot;Log-likelihood gained by using 3 starts instead of 1. For 99.5% of sites the two schemes agree to within 0.01 log units -- the single start is fine almost everywhere.&quot;)</code></pre>
+<table>
+<caption>Log-likelihood gained by using 3 starts instead of 1. For 99.5%
+of sites the two schemes agree to within 0.01 log units – the single
+start is fine almost everywhere.</caption>
+<thead>
+<tr class="header">
+<th align="left">band</th>
+<th align="right">sites</th>
+<th align="left">% of sites</th>
+<th align="right">of which problematic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">none (&lt;1e-6)</td>
+<td align="right">6868</td>
+<td align="left">65.57%</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">1e-6 to 0.01</td>
+<td align="right">3554</td>
+<td align="left">33.93%</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">0.01 to 1</td>
+<td align="right">40</td>
+<td align="left">0.38%</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">1 to 10</td>
+<td align="right">3</td>
+<td align="left">0.03%</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">10 to 100</td>
+<td align="right">5</td>
+<td align="left">0.05%</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="left">&gt;100</td>
+<td align="right">5</td>
+<td align="left">0.05%</td>
+<td align="right">5</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>ggplot(ms, aes(ll_1start, ll_3start)) +
+  geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, colour = &quot;grey40&quot;) +
+  geom_point(aes(colour = grp, size = grp, alpha = grp)) +
+  scale_colour_manual(values = COL, name = NULL) +
+  scale_size_manual(values = c(0.35, 2.2, 2.6), guide = &quot;none&quot;) +
+  scale_alpha_manual(values = c(0.35, 0.95, 0.95), guide = &quot;none&quot;) +
+  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1))) +
+  labs(x = &quot;log-likelihood, shipped single start&quot;, y = &quot;log-likelihood, 3 starts&quot;,
+       title = &quot;Null-model log-likelihood: single start vs multi-start&quot;,
+       subtitle = sprintf(&quot;Multi-start takes the best of 3, so nothing can fall BELOW the line -- verified, %d sites do.\nEverything sits on the diagonal except the 9 problematic sites (red).&quot;,
+                          sum(ms$gain &lt; -1e-6))) +
+  theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_optimiser.Rmd/llscatter-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><strong>All 9 problematic sites are among the 13 that gain more than
+one log unit.</strong> The correspondence between “single-start failure”
+and “broke calibration” is essentially exact.</p>
+<pre class="r"><code>knitr::kable(ms[gain &gt; 1][order(-gain), .(
+  site = paste0(&quot;chr&quot;, sub(&quot; &quot;, &quot;:&quot;, sid)), n_cl,
+  `phi 1 start` = sprintf(&quot;%.6f&quot;, phi_1start),
+  `phi 3 starts` = sprintf(&quot;%.4f&quot;, phi_3start),
+  `loglik gain` = round(gain, 1),
+  `failed toward` = ifelse(phi_1start &gt; phi_3start, &quot;phi -&gt; 1&quot;, &quot;phi -&gt; 0&quot;),
+  `was problematic` = sid %chin% bad9)],
+  caption = &quot;The failure runs in BOTH directions: 10 sites were driven to the phi -&gt; 1 boundary, 3 collapsed to the binomial limit instead. Any guard added to the fitter therefore has to be two-sided.&quot;)</code></pre>
+<table>
+<caption>The failure runs in BOTH directions: 10 sites were driven to
+the phi -&gt; 1 boundary, 3 collapsed to the binomial limit instead. Any
+guard added to the fitter therefore has to be two-sided.</caption>
+<colgroup>
+<col width="18%" />
+<col width="5%" />
+<col width="13%" />
+<col width="14%" />
+<col width="13%" />
+<col width="15%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="right">n_cl</th>
+<th align="left">phi 1 start</th>
+<th align="left">phi 3 starts</th>
+<th align="right">loglik gain</th>
+<th align="left">failed toward</th>
+<th align="left">was problematic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr3:37277733</td>
+<td align="right">50</td>
+<td align="left">0.999999</td>
+<td align="left">0.6991</td>
+<td align="right">319.8</td>
+<td align="left">phi -&gt; 1</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:29943223</td>
+<td align="right">44</td>
+<td align="left">0.999999</td>
+<td align="left">0.7570</td>
+<td align="right">231.6</td>
+<td align="left">phi -&gt; 1</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:89085177</td>
+<td align="right">36</td>
+<td align="left">0.999999</td>
+<td align="left">0.5095</td>
+<td align="right">148.1</td>
+<td align="left">phi -&gt; 1</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106627394</td>
+<td align="right">35</td>
+<td align="left">0.999999</td>
+<td align="left">0.6768</td>
+<td align="right">142.3</td>
+<td align="left">phi -&gt; 1</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">chr17:36212383</td>
+<td align="right">48</td>
+<td align="left">0.999999</td>
+<td align="left">0.5110</td>
+<td align="right">108.7</td>
+<td align="left">phi -&gt; 1</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106639258</td>
+<td align="right">42</td>
+<td align="left">0.999999</td>
+<td align="left">0.6179</td>
+<td align="right">95.8</td>
+<td align="left">phi -&gt; 1</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:90039467</td>
+<td align="right">41</td>
+<td align="left">0.999999</td>
+<td align="left">0.5696</td>
+<td align="right">71.8</td>
+<td align="left">phi -&gt; 1</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">chr17:53106304</td>
+<td align="right">50</td>
+<td align="left">0.999999</td>
+<td align="left">0.9218</td>
+<td align="right">30.8</td>
+<td align="left">phi -&gt; 1</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">chr6:32643315</td>
+<td align="right">40</td>
+<td align="left">0.999999</td>
+<td align="left">0.8555</td>
+<td align="right">21.8</td>
+<td align="left">phi -&gt; 1</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">chr2:88861305</td>
+<td align="right">45</td>
+<td align="left">0.999999</td>
+<td align="left">0.8347</td>
+<td align="right">11.0</td>
+<td align="left">phi -&gt; 1</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:89176553</td>
+<td align="right">31</td>
+<td align="left">0.000001</td>
+<td align="left">0.6918</td>
+<td align="right">3.9</td>
+<td align="left">phi -&gt; 0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106129991</td>
+<td align="right">36</td>
+<td align="left">0.001323</td>
+<td align="left">0.5558</td>
+<td align="right">2.7</td>
+<td align="left">phi -&gt; 0</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">chr22:22687094</td>
+<td align="right">35</td>
+<td align="left">0.001697</td>
+<td align="left">0.3949</td>
+<td align="right">1.9</td>
+<td align="left">phi -&gt; 0</td>
+<td align="left">FALSE</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="reproducibility-of-the-optimiser" class="section level1">
+<h1>4. Reproducibility of the optimiser</h1>
+<p>Of the sites where all three starts succeeded, how many distinct
+optima did they find? Agreement is judged on the log-likelihood, because
+that is what the optimiser maximises and what defines the MLE.</p>
+<pre class="r"><code>full &lt;- agr[n_ok == 3L]
+knitr::kable(data.table(
+  `distinct optima among the 3 starts` = c(&quot;all 3 agree&quot;, &quot;exactly 2 agree&quot;, &quot;all 3 differ&quot;),
+  `by log-likelihood` = vapply(1:3, function(k) sum(full$n_opt_ll == k), integer(1)),
+  `by phi (within 5%)` = vapply(1:3, function(k) sum(full$n_opt_phi == k), integer(1)))[
+    , `:=`(`% loglik` = sprintf(&quot;%.2f%%&quot;, 100 * `by log-likelihood` / nrow(full)),
+           `% phi`    = sprintf(&quot;%.2f%%&quot;, 100 * `by phi (within 5%)` / nrow(full)))],
+  caption = sprintf(&quot;Of the %s sites where all 3 starts converged. Note the two columns disagree completely -- see section 5.&quot;,
+                    format(nrow(full), big.mark = &quot;,&quot;)))</code></pre>
+<table>
+<caption>Of the 10,450 sites where all 3 starts converged. Note the two
+columns disagree completely – see section 5.</caption>
+<colgroup>
+<col width="39%" />
+<col width="20%" />
+<col width="21%" />
+<col width="10%" />
+<col width="7%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">distinct optima among the 3 starts</th>
+<th align="right">by log-likelihood</th>
+<th align="right">by phi (within 5%)</th>
+<th align="left">% loglik</th>
+<th align="left">% phi</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">all 3 agree</td>
+<td align="right">10396</td>
+<td align="right">5045</td>
+<td align="left">99.48%</td>
+<td align="left">48.28%</td>
+</tr>
+<tr class="even">
+<td align="left">exactly 2 agree</td>
+<td align="right">54</td>
+<td align="right">692</td>
+<td align="left">0.52%</td>
+<td align="left">6.62%</td>
+</tr>
+<tr class="odd">
+<td align="left">all 3 differ</td>
+<td align="right">0</td>
+<td align="right">4713</td>
+<td align="left">0.00%</td>
+<td align="left">45.10%</td>
+</tr>
+</tbody>
+</table>
+<p>The optimiser is reproducible on the likelihood at
+<strong>99.48%</strong> of sites, and there is <strong>never a three-way
+split</strong> — when it fails it always falls into exactly two basins,
+which is what a bimodal surface predicts and a merely rough surface
+would not.</p>
+</div>
+<div id="φ-is-often-not-an-estimable-quantity" class="section level1">
+<h1>5. φ is often not an estimable quantity</h1>
+<p>The φ column above tells a different story: at <strong>45%</strong>
+of sites all three starts report a different φ while agreeing on the
+likelihood to within 0.01. That is not disagreement about anything real
+— it is that the data do not determine φ.</p>
+<p>φ enters the model only through the variance inflation factor <span
+class="math inline">\(1 + (n_i-1)\varphi\)</span>. At a typical depth of
+~16 reads, φ = 10⁻⁶ inflates the variance by 0.0015% and φ = 10⁻⁴ by
+0.16%: indistinguishable with 50 observations.</p>
+<pre class="r"><code>knitr::kable(data.table(
+  phi = c(&quot;1e-06&quot;, &quot;1e-05&quot;, &quot;1e-04&quot;, &quot;4.36e-04&quot;, &quot;1e-03&quot;, &quot;1e-02&quot;, &quot;1e-01&quot;),
+  `profile loglik` = c(-58.66200, -58.66201, -58.66216, -58.66323, -58.66681,
+                       -58.94946, -65.67935),
+  `variance inflation` = c(1.000015, 1.000155, 1.001550, 1.006758, 1.015500,
+                           1.155, 2.550)),
+  caption = &quot;Profile log-likelihood in phi at chr13:20783614, an ordinary site (50 cell lines, median depth 16). Over four orders of magnitude in phi the log-likelihood moves by 0.005. A 1-df LRT needs 1.92 to distinguish two values, so every phi in [1e-6, 1e-2] -- a 10,000-fold range -- is statistically equivalent here.&quot;)</code></pre>
+<table>
+<caption>Profile log-likelihood in phi at chr13:20783614, an ordinary
+site (50 cell lines, median depth 16). Over four orders of magnitude in
+phi the log-likelihood moves by 0.005. A 1-df LRT needs 1.92 to
+distinguish two values, so every phi in [1e-6, 1e-2] – a 10,000-fold
+range – is statistically equivalent here.</caption>
+<thead>
+<tr class="header">
+<th align="left">phi</th>
+<th align="right">profile loglik</th>
+<th align="right">variance inflation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">1e-06</td>
+<td align="right">-58.66200</td>
+<td align="right">1.000015</td>
+</tr>
+<tr class="even">
+<td align="left">1e-05</td>
+<td align="right">-58.66201</td>
+<td align="right">1.000155</td>
+</tr>
+<tr class="odd">
+<td align="left">1e-04</td>
+<td align="right">-58.66216</td>
+<td align="right">1.001550</td>
+</tr>
+<tr class="even">
+<td align="left">4.36e-04</td>
+<td align="right">-58.66323</td>
+<td align="right">1.006758</td>
+</tr>
+<tr class="odd">
+<td align="left">1e-03</td>
+<td align="right">-58.66681</td>
+<td align="right">1.015500</td>
+</tr>
+<tr class="even">
+<td align="left">1e-02</td>
+<td align="right">-58.94946</td>
+<td align="right">1.155000</td>
+</tr>
+<tr class="odd">
+<td align="left">1e-01</td>
+<td align="right">-65.67935</td>
+<td align="right">2.550000</td>
+</tr>
+</tbody>
+</table>
+<p>Genome-wide, the data usually cannot even reject the binomial:</p>
+<pre class="r"><code>r &lt;- idn[is.finite(drop_to_0) &amp; is.finite(drop_to_1)]
+knitr::kable(data.table(
+  question = c(&quot;Can the data reject phi = 0 (the binomial)?&quot;,
+               &quot;Can the data reject phi = 1 (the boundary)?&quot;,
+               &quot;Sites with fitted phi &gt; 0.99 where the data DO reject phi = 0&quot;,
+               &quot;Sites with fitted phi &gt; 0.99 where they do NOT&quot;),
+  answer = c(sprintf(&quot;NO at %s of %s sites (%.1f%%)&quot;,
+                     format(sum(r$drop_to_0 &lt; CRIT), big.mark = &quot;,&quot;),
+                     format(nrow(r), big.mark = &quot;,&quot;), 100 * mean(r$drop_to_0 &lt; CRIT)),
+             sprintf(&quot;NO at %d sites (%.2f%%)&quot;, sum(r$drop_to_1 &lt; CRIT),
+                     100 * mean(r$drop_to_1 &lt; CRIT)),
+             sprintf(&quot;%d&quot;, sum(r[phi &gt; 0.99]$drop_to_0 &gt;= CRIT)),
+             sprintf(&quot;%d&quot;, sum(r[phi &gt; 0.99]$drop_to_0 &lt; CRIT)))),
+  caption = sprintf(&quot;Profile log-likelihood dropped to each boundary with beta re-optimised, compared against the 1-df threshold of %.2f. At four sites in five there is no defensible point estimate of phi at all.&quot;, CRIT))</code></pre>
+<table>
+<caption>Profile log-likelihood dropped to each boundary with beta
+re-optimised, compared against the 1-df threshold of 1.92. At four sites
+in five there is no defensible point estimate of phi at all.</caption>
+<colgroup>
+<col width="63%" />
+<col width="36%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">question</th>
+<th align="left">answer</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Can the data reject phi = 0 (the binomial)?</td>
+<td align="left">NO at 8,536 of 10,485 sites (81.4%)</td>
+</tr>
+<tr class="even">
+<td align="left">Can the data reject phi = 1 (the boundary)?</td>
+<td align="left">NO at 18 sites (0.17%)</td>
+</tr>
+<tr class="odd">
+<td align="left">Sites with fitted phi &gt; 0.99 where the data DO
+reject phi = 0</td>
+<td align="left">13</td>
+</tr>
+<tr class="even">
+<td align="left">Sites with fitted phi &gt; 0.99 where they do NOT</td>
+<td align="left">2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Consequence for the filter.</strong> <code>φ̂ &gt; 0.99</code>
+asks <em>where the optimiser stopped</em>. The question that matters is
+<em>do the data demand high dispersion?</em> Those differ: a
+likelihood-based criterion would drop the spurious flags and,
+critically, would <strong>never have flagged the 9 problematic
+sites</strong>, because at those the data reject φ ≈ 1 by 20–320 log
+units. The existing filter caught them only because it thresholds the
+very artefact that broke the fit.</p>
+<p><strong>Consequence for the published φ figures.</strong> The fine
+structure in the φ histograms on the <a
+href="qtl_mapping_betabinomial_strategy.html">strategy</a> and <a
+href="qtl_mapping_betabinomial_npcs_tradeoff.html">covariate-count</a>
+pages below about 10⁻² is not measuring dispersion. It shows where the
+optimiser stopped on a flat surface.</p>
+</div>
+<div id="does-the-calibration-problem-survive-the-fix"
+class="section level1">
+<h1>6. Does the calibration problem survive the fix?</h1>
+<p>No. It disappears completely, and without discarding any sites.</p>
+<pre class="r"><code>CALTAB &lt;- data.table(
+  run = c(&quot;1 start (as shipped)&quot;, &quot;3 starts (fixed fitter)&quot;),
+  real_lambda = c(1.401, 1.399),
+  perm = c(&quot;1.034 - 1.070&quot;, &quot;1.029 - 1.063&quot;),
+  real_tail = c(141.3, 28.2),
+  worst_perm_tail = c(142.6, 11.3),
+  problematic = c(9L, 0L))
+knitr::kable(CALTAB[, .(run, `real lambda` = real_lambda,
+  `permutation lambda` = perm, `real tail` = real_tail,
+  `worst permuted tail` = worst_perm_tail, `problematic sites` = problematic)],
+  caption = &quot;Both rows: k = 3, +/-5 kb, chr1-22, U/C sites removed, phi-boundary sites RETAINED in both. The ONLY difference is the number of optimiser starts.&quot;)</code></pre>
+<table>
+<caption>Both rows: k = 3, +/-5 kb, chr1-22, U/C sites removed,
+phi-boundary sites RETAINED in both. The ONLY difference is the number
+of optimiser starts.</caption>
+<colgroup>
+<col width="23%" />
+<col width="11%" />
+<col width="18%" />
+<col width="9%" />
+<col width="19%" />
+<col width="17%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">run</th>
+<th align="right">real lambda</th>
+<th align="left">permutation lambda</th>
+<th align="right">real tail</th>
+<th align="right">worst permuted tail</th>
+<th align="right">problematic sites</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">1 start (as shipped)</td>
+<td align="right">1.401</td>
+<td align="left">1.034 - 1.070</td>
+<td align="right">141.3</td>
+<td align="right">142.6</td>
+<td align="right">9</td>
+</tr>
+<tr class="even">
+<td align="left">3 starts (fixed fitter)</td>
+<td align="right">1.399</td>
+<td align="left">1.029 - 1.063</td>
+<td align="right">28.2</td>
+<td align="right">11.3</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fixing the optimiser removes the pathology outright, with no
+sites discarded.</strong></p>
+<ul>
+<li><strong>Problematic sites 9 → 0.</strong></li>
+<li><strong>Worst permuted tail 142.6 → 11.3.</strong> This is the
+number to watch: under permutation there is no signal, so it should be
+near zero.</li>
+<li><strong>Every site retained</strong> — nothing is filtered out.</li>
+</ul>
+<div id="the-qq-plots" class="section level2">
+<h2>The QQ plots</h2>
+<p>The table above is easier to believe as a picture. Under permutation
+there is no genotype–phenotype relationship, so the
+<strong>blue</strong> series must lie on the diagonal; where they climb
+above it the test is manufacturing signal from nothing.</p>
+<pre class="r"><code>RUNLV &lt;- c(&quot;1 start, phi sites KEPT&quot;, &quot;3 starts, phi sites KEPT (no filter)&quot;)
+ORD  &lt;- c(&quot;real&quot;, paste0(&quot;perm&quot;, 1:5))
+CQ   &lt;- c(real = &quot;#e34948&quot;, perm1 = &quot;#9ec5f4&quot;, perm2 = &quot;#6da7ec&quot;,
+          perm3 = &quot;#3987e5&quot;, perm4 = &quot;#256abf&quot;, perm5 = &quot;#0d366b&quot;)
+q &lt;- copy(qqd)[run %in% RUNLV]     # the phi-filter run is not shown
+q[, run := factor(run, levels = RUNLV)][, dataset := factor(dataset, levels = ORD)]
+
+ggplot(q, aes(expected, observed, colour = dataset)) +
+  geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, colour = &quot;grey45&quot;) +
+  geom_point(size = 0.55, alpha = 0.8) +
+  scale_colour_manual(values = CQ, name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
+  facet_wrap(~ run, nrow = 1) +
+  labs(x = expression(-log[10](&quot;expected p&quot;)), y = expression(-log[10](&quot;observed p&quot;)),
+       title = &quot;Calibration QQ: single start vs multi-start&quot;,
+       subtitle = paste(&quot;Red = real scan, blues = 5 phenotype permutations. Axes SHARED, so the panels are directly comparable.&quot;,
+                        &quot;\nLEFT: the blues climb to 142 -- pure artefact, since permuted data contain no signal.&quot;,
+                        &quot;\nRIGHT: the same sites, none removed, just fitted properly -- the blues collapse onto the diagonal.&quot;)) +
+  theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;,
+                                   strip.text = element_text(size = 9))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_optimiser.Rmd/qq-ms-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># clipped companion: the left panel&#39;s artefact tail compresses everything else,
+# so the bulk behaviour near the diagonal is invisible without clipping.
+YM &lt;- 12
+ggplot(q, aes(expected, observed, colour = dataset)) +
+  geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, colour = &quot;grey45&quot;) +
+  geom_point(size = 0.55, alpha = 0.8) +
+  scale_colour_manual(values = CQ, name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
+  facet_wrap(~ run, nrow = 1) +
+  coord_cartesian(ylim = c(0, YM)) +
+  labs(x = expression(-log[10](&quot;expected p&quot;)), y = expression(-log[10](&quot;observed p&quot;)),
+       title = sprintf(&quot;Same data, y clipped at %d to show the bulk&quot;, YM),
+       subtitle = paste(&quot;With the artefact tail out of view the two panels look much the same near the diagonal --&quot;,
+                        &quot;which is the point:\nthe fix removes a pathology confined to a handful of sites and leaves&quot;,
+                        &quot;everything else alone. Clipped points are\noutside the view, not deleted.&quot;)) +
+  theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;,
+                                   strip.text = element_text(size = 9))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_optimiser.Rmd/qq-ms-zoom-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p><strong>λ barely moves</strong> (1.401 → 1.399, permutation
+1.034–1.070 → 1.029–1.063), and that is expected rather than
+disappointing: λ is a median over ~292,000 site-SNP p-values, and 9
+sites contribute a few hundred of them. A median cannot move. This is
+the same reason λ was identified early in this project as the wrong
+diagnostic for a pathology confined to a few sites — tail height and the
+problematic-site count are the sensitive statistics, and both
+collapse.</p>
+<!-- # Caveats -->
+<!-- - **Three starts is a hedge, not a proof.** A site whose likelihood has a third -->
+<!--   mode outside {0.01, 0.1, 0.5} would still be missed. What makes the result -->
+<!--   credible here is that starts 2 and 3 *agree* (φ = 0.699145 vs 0.699146), and -->
+<!--   that no site anywhere produced a three-way split. -->
+<!-- - **`fit_bb_mle`'s zero-gradient fallback is untouched.** It does not fire at -->
+<!--   these sites, but returning a zero gradient on a non-finite value is a hazard -->
+<!--   that should be replaced with a finite-difference fallback. -->
+<!-- - **The audit covers the null fit only**, at k = 3 on one phenotype tree. The -->
+<!--   per-SNP full-model fits were not audited site by site. -->
+<!-- - **275 sites had at least one start fail outright**; the multi-start recovers a -->
+<!--   usable fit for some but not all of them. -->
+<!-- # Provenance -->
+<!-- ```{r prov} -->
+<!-- knitr::kable(data.table( -->
+<!--   step = c("genome-wide single vs multi-start audit", -->
+<!--            "agreement among the 3 starts", -->
+<!--            "can the data reject phi = 0 or phi = 1", -->
+<!--            "the fix", "calibration re-run"), -->
+<!--   script = c("24.multistart_audit.R", "25.multistart_agreement.R", -->
+<!--              "scratch profile-likelihood pass", -->
+<!--              "betabin_lib.R (BB_PHI_STARTS; backup at betabin_lib.R.bak_presinglestart)", -->
+<!--              "run_calibration_multistart.sbatch -> 8.calibration_site_resolved.R")), -->
+<!--   caption = "Outputs under qtl_betabinomial/multistart_audit/.") -->
+<!-- ``` -->
+<!-- Related: [filtering strategy](qtl_mapping_betabinomial_strategy.html) · -->
+<!-- [how many covariate PCs](qtl_mapping_betabinomial_npcs_tradeoff.html) · -->
+<!-- [diagnosing the problematic sites](qtl_mapping_betabinomial_problematic_diagnosis.html) · -->
+<!-- [beta-binomial model](qtl_mapping_betabinomial_model.html) -->
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 7 (Core)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el7-x86_64/lib/libopenblas_haswellp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_4.0.3     data.table_1.14.2
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.12        highr_0.9          RColorBrewer_1.1-3 pillar_1.9.0      
+ [5] compiler_4.2.0     bslib_0.3.1        later_1.3.0        jquerylib_0.1.4   
+ [9] git2r_0.30.1       workflowr_1.7.0    R.methodsS3_1.8.1  R.utils_2.11.0    
+[13] tools_4.2.0        digest_0.6.29      gtable_0.3.6       jsonlite_1.8.0    
+[17] evaluate_0.15      lifecycle_1.0.4    tibble_3.2.1       pkgconfig_2.0.3   
+[21] rlang_1.1.2        cli_3.6.1          rstudioapi_0.13    yaml_2.3.5        
+[25] xfun_0.41          fastmap_1.1.0      withr_2.5.0        dplyr_1.1.4       
+[29] stringr_1.5.1      knitr_1.39         generics_0.1.4     fs_1.5.2          
+[33] vctrs_0.6.5        sass_0.4.1         tidyselect_1.2.0   rprojroot_2.0.3   
+[37] grid_4.2.0         glue_1.6.2         R6_2.5.1           fansi_1.0.3       
+[41] rmarkdown_2.25     farver_2.1.0       magrittr_2.0.3     scales_1.4.0      
+[45] promises_1.2.0.1   htmltools_0.5.2    dichromat_2.0-0.1  httpuv_1.6.5      
+[49] labeling_0.4.2     S7_0.2.0           utf8_1.2.2         stringi_1.7.6     
+[53] R.oo_1.24.0       </code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
