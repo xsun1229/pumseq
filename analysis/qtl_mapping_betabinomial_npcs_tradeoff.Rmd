@@ -18,6 +18,7 @@ PSI  <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl"
 D    <- file.path(PSI, "qtl_betabinomial/phi_vs_npcs")
 G    <- file.path(PSI, "qtl_betabinomial/goodness_of_fit")
 FIG  <- file.path(PSI, "qtl_betabinomial/figures_npcs")
+DIAG <- file.path(PSI, "qtl_betabinomial/diagnostic_figures")
 SUF  <- "_auto_noUCcalled"            # the autosome-only sweep (chr1-22)
 
 # sid contains a space ("3 37277733"), so the separator must be given explicitly
@@ -173,16 +174,30 @@ Real-data λ cannot settle the question, because it cannot separate "more signal
 from "more inflation".
 
 ```{r cal-tab}
-knitr::kable(cal[, .(
+# join the fit-level counts (from the null-only sweep) onto the calibration
+# results so one table carries the whole picture per k.
+ct <- merge(cal, ov[, .(npcs, n_fitted, n_failed)], by = "npcs", all.x = TRUE)
+# problematic sites AFTER that k's own phi filter, i.e. from the same filtered
+# calibration run the lambda columns come from -- not the unfiltered tree.
+ct[, problematic := vapply(npcs, function(k) {
+  fp <- file.path(DIAG, sprintf("pathological_sites_w5kb_pc%d_auto_noUCcalled_noPhi_pc%d.txt", k, k))
+  if (file.exists(fp)) max(0L, length(readLines(fp)) - 1L) else NA_integer_
+}, integer(1))]
+
+knitr::kable(ct[order(npcs), .(
   `k (PCs)`             = npcs,
+  `total sites`         = format(NTOT, big.mark = ","),
+  `fittable`            = format(n_fitted, big.mark = ","),
+  `unfittable`          = format(n_failed, big.mark = ","),
   `phi excluded`        = phi_excluded,
-  `permutation lambda`  = sprintf("%.3f - %.3f", perm_lo, perm_hi),
-  `real lambda`         = round(real_lambda, 3),
   `sites tested`        = format(sites, big.mark = ","),
   `p-values`            = format(n_pvalues, big.mark = ","),
+  `real lambda`         = round(real_lambda, 3),
+  `permutation lambda`  = sprintf("%.3f - %.3f", perm_lo, perm_hi),
+  `problematic (post-filter)` = problematic,
   `real tail`           = round(real_tail, 1),
   `worst permuted tail` = round(worst_perm_tail, 1))],
-  caption = "Site-resolved calibration, real scan plus 5 phenotype permutations at each k, +/-5 kb windows.")
+  caption = "One row per k. 'total sites' and 'fittable' are from the null-only fits (section 2); 'sites tested' is lower again because a site also needs a cis-SNP at MAF >= 0.05 within +/-5 kb. 'problematic (post-filter)' = sites still extreme under permutation AFTER that k's phi filter. NOTE this is not comparable across k as a measure of filter quality: at k = 3 the filter removes 33 sites and clears all 9 that were problematic beforehand, leaving 2 NEW ones created by recomputing the PCs; at k >= 10 it removes nothing, so the column is simply the unfiltered count. Real scan plus 5 phenotype permutations at each k, chr1-22.")
 ```
 
 ```{r cal-fig, fig.height=7.6}

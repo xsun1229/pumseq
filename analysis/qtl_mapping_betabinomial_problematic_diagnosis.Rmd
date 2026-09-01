@@ -50,7 +50,24 @@ permuted scans only, which keeps the look at the real data non-circular:
 `fold5_union_auto_noUCcalled` — U/C-variant sites already excluded (1,118 of
 11,856), φ-boundary sites deliberately **retained** so they can be examined here.
 
-> **There are `r NPROB` problematic sites** out of 10,045 tested.
+> **There are `r NPROB` problematic sites** out of 10,045 tested, on the
+> phenotype **before** the φ filter is applied.
+
+Which stage is meant matters, because the count differs by stage. On the
+autosome-only phenotype at k = 3, ±5 kb:
+
+| stage | problematic sites |
+|---|---|
+| all autosomal sites | 30 |
+| minus U/C-variant sites (1,118) — **this page** | **`r NPROB`** |
+| + minus the 33 φ-boundary sites | 2 |
+
+All `r NPROB` of the sites on this page are in that 33-site φ list, so the filter
+removes every one of them. The 2 that remain afterwards are *different* sites
+(`chr2:89245076`, `chr2:88861447`), newly flagged once the covariate PCs are
+recomputed on the reduced site set — the PCs derive from the phenotype, so
+changing the site set changes every fit. See
+[the covariate-count page](qtl_mapping_betabinomial_npcs_tradeoff.html).
 
 `r NCTRL` well-behaved sites, matched on covered cell lines and pooled %pU, are
 carried through every panel below for contrast.
