@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree8746acdb0f598e21a29e8c69641b0573a835cbfbtargetblank8746acda">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee959c87528654bc09d037974a248cd0daf8d6286targetblanke959c87a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/8746acdb0f598e21a29e8c69641b0573a835cbfb" target="_blank">8746acd</a>
+<a href="https://github.com/xsun1229/pumseq/tree/e959c87528654bc09d037974a248cd0daf8d6286" target="_blank">e959c87</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree8746acdb0f598e21a29e8c69641b0573a835cbfbtargetblank8746acda"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee959c87528654bc09d037974a248cd0daf8d6286targetblanke959c87a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/8746acdb0f598e21a29e8c69641b0573a835cbfb" target="_blank">8746acd</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/e959c87528654bc09d037974a248cd0daf8d6286" target="_blank">e959c87</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -574,7 +574,7 @@ Ignored files:
 
 Unstaged changes:
     Modified:   analysis/qtl_mapping_betabinomial_npcs_tradeoff.Rmd
-    Modified:   analysis/qtl_mapping_betabinomial_problematic_diagnosis.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_strategy.Rmd
 
 </code></pre>
 <p>
@@ -621,6 +621,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/e959c87528654bc09d037974a248cd0daf8d6286/analysis/qtl_mapping_betabinomial_npcs_tradeoff.Rmd" target="_blank">e959c87</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-01
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/e959c87528654bc09d037974a248cd0daf8d6286/docs/qtl_mapping_betabinomial_npcs_tradeoff.html" target="_blank">e959c87</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-01
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -744,10 +778,19 @@ class="math inline">\(\mu_i\)</span> more freedom to track each cell
 line, so scatter that φ currently absorbs could instead be explained by
 the mean structure. That raises the question this page answers: how does
 the φ problem behave across k, and which k should the scan use?</p>
-<p><strong>Window size does not enter.</strong> φ comes from the
-<em>null</em> fit, which contains no genotype at all; the window only
-decides which cis-SNPs are tested afterwards. Every site’s null fit is
-bit-for-bit identical at 5 kb and at 100 kb.</p>
+<p><strong>Window size is not an input to the null fit.</strong> φ comes
+from the null, which contains no genotype; the window only decides which
+cis-SNPs are tested afterwards. This is true <em>by construction</em>
+rather than by verification — the window is not a parameter of the fit
+at all, so there is nothing to vary. (The script that produces every φ
+on this page never reads a genotype file.)</p>
+<p>That invariance covers φ <strong>only</strong>. Everything in section
+3 is calibration, and calibration <em>is</em> window-dependent: a wider
+window admits more cis-SNPs per site, which changes the per-site
+minimum-p distribution, the tail heights and the problematic-site
+counts. <strong>All calibration on this page is at ±5 kb</strong>, and
+no other window has been run, so nothing here speaks to how λ behaves at
+20, 50 or 100 kb.</p>
 </div>
 <div id="φ-estimated-across-many-pc-settings" class="section level1">
 <h1>2. φ estimated across many PC settings</h1>
@@ -898,6 +941,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/e959c87528654bc09d037974a248cd0daf8d6286/docs/figure/qtl_mapping_betabinomial_npcs_tradeoff.Rmd/tradeoff-1.png" target="_blank">e959c87</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-01
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/27a3e4653304f0205d19c2ceacb87d089e554eaf/docs/figure/qtl_mapping_betabinomial_npcs_tradeoff.Rmd/tradeoff-1.png" target="_blank">27a3e46</a>
@@ -1181,6 +1235,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/e959c87528654bc09d037974a248cd0daf8d6286/docs/figure/qtl_mapping_betabinomial_npcs_tradeoff.Rmd/cal-fig-1.png" target="_blank">e959c87</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-01
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/27a3e4653304f0205d19c2ceacb87d089e554eaf/docs/figure/qtl_mapping_betabinomial_npcs_tradeoff.Rmd/cal-fig-1.png" target="_blank">27a3e46</a>
 </td>
 <td>
@@ -1244,6 +1309,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/e959c87528654bc09d037974a248cd0daf8d6286/docs/figure/qtl_mapping_betabinomial_npcs_tradeoff.Rmd/qq-1.png" target="_blank">e959c87</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-01
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/27a3e4653304f0205d19c2ceacb87d089e554eaf/docs/figure/qtl_mapping_betabinomial_npcs_tradeoff.Rmd/qq-1.png" target="_blank">27a3e46</a>
 </td>
 <td>
@@ -1295,6 +1371,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/e959c87528654bc09d037974a248cd0daf8d6286/docs/figure/qtl_mapping_betabinomial_npcs_tradeoff.Rmd/qq-zoom-1.png" target="_blank">e959c87</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-01
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/27a3e4653304f0205d19c2ceacb87d089e554eaf/docs/figure/qtl_mapping_betabinomial_npcs_tradeoff.Rmd/qq-zoom-1.png" target="_blank">27a3e46</a>
@@ -1381,6 +1468,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/e959c87528654bc09d037974a248cd0daf8d6286/docs/figure/qtl_mapping_betabinomial_npcs_tradeoff.Rmd/phidist-1.png" target="_blank">e959c87</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-01
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/27a3e4653304f0205d19c2ceacb87d089e554eaf/docs/figure/qtl_mapping_betabinomial_npcs_tradeoff.Rmd/phidist-1.png" target="_blank">27a3e46</a>

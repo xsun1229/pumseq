@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
                       fig.align = "center", fig.width = 11)
 
 PSI <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl"
-DAT <- file.path(PSI, "qtl_betabinomial/strategy_page_data")
+DAT <- file.path(PSI, "qtl_betabinomial/strategy_page_data_auto")
 
 qq   <- fread(file.path(DAT, "qq_all_runs.tsv.gz"))
 lam  <- fread(file.path(DAT, "lambda_all_runs.tsv"))
@@ -36,6 +36,11 @@ COLS <- c(real = "#e34948", perm1 = "#9ec5f4", perm2 = "#6da7ec",
 lv <- function(r, d, col) lam[run == r & dataset == d][[col]]
 FINAL <- RUN_LV[3]
 ```
+
+Everything on this page is restricted to **chr1–22**, with the covariate PCs
+recomputed on chr1–22 only. Non-autosomal sites never contributed a p-value in any
+case — the genotype panel is `pumseq_genotype.hg38.chr1-22` — but they were
+previously feeding the covariate PCs, and through them every null fit.
 
 # Why filter at all: the fitted overdispersion
 
@@ -188,9 +193,11 @@ guards against μ hitting 0 or 1 and against runaway coefficients
 for this rule is inside `fit_bb_mle`, not a site exclusion list.
 
 **Data simulated from these fits often cannot be refitted at all.** Simulate 30
-datasets from a site's own fitted model and try to recover it: ordinary sites
-succeed every time, boundary sites fail 20–45% of the time. If a model cannot be
+datasets from a site's own fitted model and try to recover it: the median ordinary
+site fails 0% of the time, the median boundary site 33%. If a model cannot be
 recovered from data it generated itself, nothing computed from it is trustworthy.
+(The ranges overlap — some ordinary sites fail often too — so this is a contrast
+of typical values, not a clean separator.)
 
 ## Does the filter converge?
 
@@ -209,8 +216,8 @@ It converges after `r max(iter$round)` rounds at
 caught `r iter$n_new_flagged[1]` and missed
 `r max(iter$n_dropped_total) - iter$n_new_flagged[1]`.
 
-φ itself is stable for the sites that are kept (correlation 0.9986 between the
-first and last round, with only 0.11% of sites moving by more than 0.01), which
+φ itself is stable for the sites that are kept (correlation 0.99987 between the
+first and last round, with only 0.12% of sites moving by more than 0.01), which
 is why convergence is quick — the PCs enter the model through μ, while φ is
 driven mostly by a site's own scatter.
 

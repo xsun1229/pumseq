@@ -96,9 +96,18 @@ cell line, so scatter that φ currently absorbs could instead be explained by th
 mean structure. That raises the question this page answers: how does the φ problem
 behave across k, and which k should the scan use?
 
-**Window size does not enter.** φ comes from the *null* fit, which contains no
-genotype at all; the window only decides which cis-SNPs are tested afterwards.
-Every site's null fit is bit-for-bit identical at 5 kb and at 100 kb.
+**Window size is not an input to the null fit.** φ comes from the null, which
+contains no genotype; the window only decides which cis-SNPs are tested
+afterwards. This is true *by construction* rather than by verification — the
+window is not a parameter of the fit at all, so there is nothing to vary. (The
+script that produces every φ on this page never reads a genotype file.)
+
+That invariance covers φ **only**. Everything in section 3 is calibration, and
+calibration *is* window-dependent: a wider window admits more cis-SNPs per site,
+which changes the per-site minimum-p distribution, the tail heights and the
+problematic-site counts. **All calibration on this page is at ±5 kb**, and no
+other window has been run, so nothing here speaks to how λ behaves at 20, 50 or
+100 kb.
 
 # 2. φ estimated across many PC settings
 
