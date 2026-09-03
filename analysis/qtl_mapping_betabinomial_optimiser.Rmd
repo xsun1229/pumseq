@@ -313,6 +313,181 @@ for a pathology confined to a few sites — tail height and the problematic-site
 count are the sensitive statistics, and both collapse.
 
 
+# 7. Choosing φ when it is not identifiable
+
+Section 5 leaves an open problem. Taking the highest-likelihood solution is the
+right rule whenever the likelihood actually distinguishes the candidates — but at
+about half of all sites it does not, and there the winning start is decided by
+log-likelihood differences of order 10⁻⁹. That is arbitrary. In statistical
+terms φ is **unidentifiable** at those sites: different values give the same
+likelihood, so the data contain no information to choose between them.
+
+When a parameter is unidentifiable, one workable remedy is to choose the value
+that looks reasonable in light of the other sites. Most sites do return a single
+well-determined φ; the distribution of those φ has a peak, which is the most
+likely value of φ across the dataset; and where a site is ambiguous, the
+candidate nearest that peak can be taken instead of an arbitrary one.
+
+> **The rule.** Run the optimiser from φ₀ ∈ {0.01, 0.1, 0.5} as before. Of the
+> solutions that converge, return the one whose φ is closest to the peak on the
+> log₁₀ scale.
+
+Note what this does and does not touch. It changes *which of several optima is
+reported*, never how they are found — so the multi-start fix of sections 2–3
+stands unchanged underneath it, and the 13 broken fits are recovered by the
+multi-start whichever selection rule is layered on top.
+
+## 7.1 Building the reference value
+
+The peak has to be measured on sites where φ *is* determined, otherwise it
+measures the optimiser rather than the dispersion.
+
+```{r peakcon}
+PS <- file.path(PSI, "qtl_betabinomial/phisel_compare")
+knitr::kable(fread(file.path(PS, "peak_construction.tsv"), sep = "\t"),
+  caption = "Sites where all three starts agree on phi are the ones where phi is identified. Over ALL sites the mode is instead 2.4e-6, but 99.5% of the sites below 1e-4 are ones where the starts DISAGREE -- that mode is the PHI_EPS = 1e-6 floor showing through, not a fact about dispersion.")
+```
+
+```{r peakstab}
+knitr::kable(fread(file.path(PS, "peak_stability.tsv"), sep = "\t"),
+  caption = "The peak is solid to about one significant figure -- call it phi = 0.013 -- and the second figure is not meaningful. That is enough here, because the competing candidates at an ambiguous site are typically orders of magnitude apart, so a 10% wobble in the reference cannot flip a decision.")
+```
+
+## 7.2 The φ distributions
+
+The left and middle panels are the reason the peak has to be measured on the
+agreeing subset. The right panel is what the rule actually returns.
+
+```{r phidist, fig.height=4.8, fig.width=13}
+PHID <- fread(file.path(PS, "phi_distributions.tsv.gz"), sep = "\t")
+VLV <- c("before: MLE (best of 3 starts)",
+         "source: all 3 starts agree (builds the peak)",
+         "after: the rule applied")
+PHID[, view := factor(view, levels = VLV)]
+PEAK <- 0.0126; EPS <- 1e-6
+ggplot(PHID, aes(phi)) +
+  geom_histogram(bins = 60, fill = "#4a7fbf", colour = NA) +
+  geom_vline(xintercept = PEAK, colour = "#2c8a4a", linewidth = 0.7) +
+  geom_vline(xintercept = EPS, colour = "grey35", linetype = "dotted", linewidth = 0.5) +
+  facet_wrap(~ view, nrow = 1, scales = "free_y") +
+  scale_x_log10(breaks = 10^seq(-6, 0, 2), labels = c("1e-6", "1e-4", "1e-2", "1")) +
+  labs(x = expression(hat(varphi)~"(log scale)"), y = "sites",
+       title = "Where the reference value comes from, and what the rule returns",
+       subtitle = paste(
+         "Green = the peak, 0.0126. Dotted = the PHI_EPS = 1e-6 numerical floor. Same 10,450 sites in the outer two panels.",
+         "LEFT: under the MLE half the sites pile against the floor. At an ambiguous site the winning start is decided by loglik differences of ~1e-9, so that pile is arbitrary.",
+         "MIDDLE: restricting to the sites where all 3 starts agree removes the pile and leaves one clean hump. The peak is the mode of this panel.",
+         "RIGHT: the rule clears the floor and moves the low mode up ~20x, but the shape stays bimodal -- it does NOT reproduce the middle panel.", sep = "\n")) +
+  theme_bw(base_size = 11) +
+  theme(panel.grid.minor = element_blank(), strip.text = element_text(size = 9),
+        plot.subtitle = element_text(size = 8))
+```
+
+```{r phidsum}
+knitr::kable(fread(file.path(PS, "phi_distribution_summary.tsv"), sep = "\t"),
+  caption = "The pile at the numerical floor is what the rule removes: 16.3% of sites to 0.9%. But 41.8% still sit below 1e-4 afterwards, against 0.5% in the agreeing subset.")
+```
+
+**The rule does not reshape the φ distribution into the middle panel, and it was
+never going to.** It chooses among the three optima the starts actually found, so
+where all three are low it returns a low value — the nearest available candidate,
+not the peak itself. What it does achieve is removing the arbitrary pile at the
+`PHI_EPS = 1e-6` floor, from 16.3% of sites to 0.9%, and lifting the low mode from
+2.4×10⁻⁶ to 5.2×10⁻⁵.
+
+That is worth being clear about, because it bounds what the rule can be claimed
+to do: it replaces an arbitrary choice with a defensible one at the sites where a
+choice exists, and it does not manufacture dispersion where the candidate set
+offers none. Section 5 still applies — at four sites in five there is no
+defensible point estimate of φ, and no selection rule can create one.
+
+```{r ruledi}
+knitr::kable(fread(file.path(PS, "rule_divergence.tsv"), sep = "\t"),
+  caption = "The rule changes phi at about half of all sites -- that is expected, since that is how often phi is ambiguous -- but it OVERRULES the likelihood at only 63, and gives up more than one log unit at only 3.")
+```
+
+At the 13 sites from section 3, the rule recovers the maximum-likelihood answer
+at 11, including every site where the optimiser had run off to φ = 1:
+
+```{r sites13}
+knitr::kable(fread(file.path(PS, "sites13_by_rule.tsv"), sep = "\t"),
+  caption = "The two misses are the last two rows, where the candidate nearer the peak is the worse-fitting one and choosing it gives up 1.9-2.7 log units. Note that phi ~ 0.0013 IS closer to the genome-wide peak than phi ~ 0.556 -- by the heuristic's own logic it is the more reasonable value, and it is only wrong by the likelihood's standard.")
+```
+
+## 7.3 Does it calibrate?
+
+This is the criterion that matters, and it is the one the 13-site scorecard
+cannot answer: the rule re-picks φ across roughly half the genome, so only a full
+real-plus-permutation run shows what that does.
+
+```{r phiselcal}
+RL <- c("1 start (historical)", "MLE (3 starts)", "peak")
+knitr::kable(fread(file.path(PS, "phisel_headline.tsv"), sep = "\t")[run %chin% RL][match(RL, run)],
+  caption = "All three runs: k = 3, +/-5 kb, chr1-22, U/C sites removed, phi-boundary sites RETAINED, same 5 permutation seeds. The ONLY difference is how phi is chosen.")
+```
+
+**The rule calibrates exactly as well as the MLE.** Zero problematic sites, real
+tail 28.2 and worst permuted tail 11.3 in both cases — identical to the decimal,
+and each leaves a single permutation candidate that fails the real-data half of
+the criterion. The 63 sites where the rule overrules the likelihood are nowhere
+near the tail, so the log-likelihood given up there never converts into a false
+positive.
+
+```{r qqphisel, fig.height=4.6, fig.width=13}
+qs <- fread(file.path(PS, "qq_thinned_phisel.tsv.gz"), sep = "\t")[run %chin% RL]
+qs[, run := factor(run, levels = RL)]
+qs[, kind := ifelse(dataset == "real", "real", "permuted")]
+ggplot(qs, aes(expected, observed, group = dataset, colour = kind, shape = kind)) +
+  geom_abline(slope = 1, intercept = 0, colour = "grey55", linewidth = 0.3) +
+  geom_point(size = 0.5, alpha = 0.55) +
+  facet_wrap(~ run, nrow = 1) +
+  scale_colour_manual(values = c(real = "#1f4e9c", permuted = "#c0392b"), name = NULL) +
+  scale_shape_manual(values = c(real = 16, permuted = 17), name = NULL) +
+  coord_cartesian(ylim = c(0, 45)) +
+  guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
+  labs(x = expression(Expected~-log[10](p)), y = expression(Observed~-log[10](p)),
+       title = "Calibration: single start vs the MLE vs the peak rule (y clipped at 45)",
+       subtitle = paste("Every p-value in the tail is drawn -- all 2,000 smallest per dataset; the bulk is thinned. Points, not lines:",
+                        "a line interpolates across the gaps and renders the artefact tail as a smooth ramp, hiding that it is a few",
+                        "discrete clusters of SNPs at a handful of broken sites. Clipped points are outside the view, not deleted.", sep = "\n")) +
+  theme_bw(base_size = 11) +
+  theme(legend.position = "top", panel.grid.minor = element_blank(),
+        strip.text = element_text(size = 9))
+```
+
+The counts behind those tails:
+
+```{r tailcnt}
+knitr::kable(dcast(fread(file.path(PS, "tail_counts.tsv"), sep = "\t")[run %chin% RL],
+                   run ~ kind, value.var = "N")[match(RL, run)],
+  caption = "Number of p-values reaching 1e-10. Under the historical fitter over five thousand PERMUTED p-values clear it; under the corrected fitter exactly one does. The real counts barely change (2,026 -> 2,010), so the fix removes false positives rather than suppressing signal generally.")
+```
+
+## 7.4 What is adopted
+
+Like the multi-start, the rule is switched on by an environment variable so the
+default reproduces every pre-existing result exactly:
+
+```r
+BB_PHI_SELECT <- Sys.getenv("BB_PHI_SELECT", "loglik")   # betabin_lib.R
+BB_PHI_PEAK   <- 0.0126
+# "loglik"   the MLE -- the historical behaviour, bit-for-bit
+# "peak"     nearest 0.0126 among the converged starts
+```
+
+The peak rule is adopted for production. Three points are worth keeping in view:
+
+- **It is not a substitute for fixing the optimiser.** Multi-start is what
+  recovers the 13 broken fits; the peak rule then resolves which of several
+  equally-likely φ to report at the sites where the data cannot say. Applied on
+  top of a single start it would not have helped, since a single start produces
+  only one candidate to choose from.
+- **Its worst-case cost is bounded and small.** Across the genome the most
+  log-likelihood it gives up at any site is 4.4, against the 20–320 units the
+  single-start failure was losing.
+- **It does not make φ identifiable.** It removes the arbitrariness in which
+  value gets reported; it does not add information the data do not contain. Any
+  downstream use of φ as a per-site quantity still has to contend with section 5.
 
 <!-- # Caveats -->
 

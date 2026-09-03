@@ -11,11 +11,11 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-09-01" />
+<meta name="date" content="2026-09-03" />
 
 <title>Beta-binomial pU-QTL: the φ pathology is an optimiser failure</title>
 
-<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
@@ -31,15 +31,15 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
-<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
-<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
 
 <link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
 <!-- Add a small amount of space between sections. -->
@@ -374,7 +374,7 @@ div.tocify {
 <h1 class="title toc-ignore">Beta-binomial pU-QTL: the φ pathology is an
 optimiser failure</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-09-01</h4>
+<h4 class="date">2026-09-03</h4>
 
 </div>
 
@@ -403,7 +403,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-09-01
+<strong>Last updated:</strong> 2026-09-03
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -441,10 +441,10 @@ changes </a>
 <div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown is untracked by Git. To know which version of the R
-Markdown file created these results, you’ll want to first commit it to
-the Git repo. If you’re still working on the analysis, you can ignore
-this warning. When you’re finished, you can run
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
 <code>wflow_publish</code> to commit the R Markdown file and build the
 HTML.</p>
 </div>
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree8b7e398f92549f6366bf7c7bc7cf5c26f82c85e5targetblank8b7e398a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree9504a637e0f1ef87b22c2d48ee4b232956b45bc3targetblank9504a63a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/8b7e398f92549f6366bf7c7bc7cf5c26f82c85e5" target="_blank">8b7e398</a>
+<a href="https://github.com/xsun1229/pumseq/tree/9504a637e0f1ef87b22c2d48ee4b232956b45bc3" target="_blank">9504a63</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree8b7e398f92549f6366bf7c7bc7cf5c26f82c85e5targetblank8b7e398a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree9504a637e0f1ef87b22c2d48ee4b232956b45bc3targetblank9504a63a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/8b7e398f92549f6366bf7c7bc7cf5c26f82c85e5" target="_blank">8b7e398</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/9504a637e0f1ef87b22c2d48ee4b232956b45bc3" target="_blank">9504a63</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -572,11 +572,8 @@ were generated:
 Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
-Untracked files:
-    Untracked:  analysis/qtl_mapping_betabinomial_optimiser.Rmd
-
 Unstaged changes:
-    Modified:   analysis/index.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_optimiser.Rmd
 
 </code></pre>
 <p>
@@ -591,10 +588,75 @@ have uncommitted changes.
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
+
 <p>
-There are no past versions. Publish this analysis with
-<code>wflow_publish()</code> to start tracking its development.
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>analysis/qtl_mapping_betabinomial_optimiser.Rmd</code>) and HTML
+(<code>docs/qtl_mapping_betabinomial_optimiser.html</code>) files. If
+you’ve configured a remote Git repository (see
+<code>?wflow_git_remote</code>), click on the hyperlinks in the table
+below to view the files as they were in that past version.
 </p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/9504a637e0f1ef87b22c2d48ee4b232956b45bc3/analysis/qtl_mapping_betabinomial_optimiser.Rmd" target="_blank">9504a63</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-01
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/9504a637e0f1ef87b22c2d48ee4b232956b45bc3/docs/qtl_mapping_betabinomial_optimiser.html" target="_blank">9504a63</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-01
+</td>
+<td>
+update
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <hr>
 </div>
 </div>
@@ -846,6 +908,43 @@ start is fine almost everywhere.</caption>
                           sum(ms$gain &lt; -1e-6))) +
   theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_optimiser.Rmd/llscatter-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-llscatter-1">
+Past versions of llscatter-1.png
+</button>
+</p>
+<div id="fig-llscatter-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/9504a637e0f1ef87b22c2d48ee4b232956b45bc3/docs/figure/qtl_mapping_betabinomial_optimiser.Rmd/llscatter-1.png" target="_blank">9504a63</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p><strong>All 9 problematic sites are among the 13 that gain more than
 one log unit.</strong> The correspondence between “single-start failure”
 and “broke calibration” is essentially exact.</p>
@@ -1289,6 +1388,43 @@ ggplot(q, aes(expected, observed, colour = dataset)) +
   theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;,
                                    strip.text = element_text(size = 9))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_optimiser.Rmd/qq-ms-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq-ms-1">
+Past versions of qq-ms-1.png
+</button>
+</p>
+<div id="fig-qq-ms-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/9504a637e0f1ef87b22c2d48ee4b232956b45bc3/docs/figure/qtl_mapping_betabinomial_optimiser.Rmd/qq-ms-1.png" target="_blank">9504a63</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code># clipped companion: the left panel&#39;s artefact tail compresses everything else,
 # so the bulk behaviour near the diagonal is invisible without clipping.
 YM &lt;- 12
@@ -1307,6 +1443,43 @@ ggplot(q, aes(expected, observed, colour = dataset)) +
   theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;,
                                    strip.text = element_text(size = 9))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_optimiser.Rmd/qq-ms-zoom-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq-ms-zoom-1">
+Past versions of qq-ms-zoom-1.png
+</button>
+</p>
+<div id="fig-qq-ms-zoom-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/9504a637e0f1ef87b22c2d48ee4b232956b45bc3/docs/figure/qtl_mapping_betabinomial_optimiser.Rmd/qq-ms-zoom-1.png" target="_blank">9504a63</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p><strong>λ barely moves</strong> (1.401 → 1.399, permutation
 1.034–1.070 → 1.029–1.063), and that is expected rather than
 disappointing: λ is a median over ~292,000 site-SNP p-values, and 9
@@ -1315,6 +1488,558 @@ the same reason λ was identified early in this project as the wrong
 diagnostic for a pathology confined to a few sites — tail height and the
 problematic-site count are the sensitive statistics, and both
 collapse.</p>
+</div>
+</div>
+<div id="choosing-φ-when-it-is-not-identifiable" class="section level1">
+<h1>7. Choosing φ when it is not identifiable</h1>
+<p>Section 5 leaves an open problem. Taking the highest-likelihood
+solution is the right rule whenever the likelihood actually
+distinguishes the candidates — but at about half of all sites it does
+not, and there the winning start is decided by log-likelihood
+differences of order 10⁻⁹. That is arbitrary. In statistical terms φ is
+<strong>unidentifiable</strong> at those sites: different values give
+the same likelihood, so the data contain no information to choose
+between them.</p>
+<p>When a parameter is unidentifiable, one workable remedy is to choose
+the value that looks reasonable in light of the other sites. Most sites
+do return a single well-determined φ; the distribution of those φ has a
+peak, which is the most likely value of φ across the dataset; and where
+a site is ambiguous, the candidate nearest that peak can be taken
+instead of an arbitrary one.</p>
+<blockquote>
+<p><strong>The rule.</strong> Run the optimiser from φ₀ ∈ {0.01, 0.1,
+0.5} as before. Of the solutions that converge, return the one whose φ
+is closest to the peak on the log₁₀ scale.</p>
+</blockquote>
+<p>Note what this does and does not touch. It changes <em>which of
+several optima is reported</em>, never how they are found — so the
+multi-start fix of sections 2–3 stands unchanged underneath it, and the
+13 broken fits are recovered by the multi-start whichever selection rule
+is layered on top.</p>
+<div id="building-the-reference-value" class="section level2">
+<h2>7.1 Building the reference value</h2>
+<p>The peak has to be measured on sites where φ <em>is</em> determined,
+otherwise it measures the optimiser rather than the dispersion.</p>
+<pre class="r"><code>PS &lt;- file.path(PSI, &quot;qtl_betabinomial/phisel_compare&quot;)
+knitr::kable(fread(file.path(PS, &quot;peak_construction.tsv&quot;), sep = &quot;\t&quot;),
+  caption = &quot;Sites where all three starts agree on phi are the ones where phi is identified. Over ALL sites the mode is instead 2.4e-6, but 99.5% of the sites below 1e-4 are ones where the starts DISAGREE -- that mode is the PHI_EPS = 1e-6 floor showing through, not a fact about dispersion.&quot;)</code></pre>
+<table>
+<caption>Sites where all three starts agree on phi are the ones where
+phi is identified. Over ALL sites the mode is instead 2.4e-6, but 99.5%
+of the sites below 1e-4 are ones where the starts DISAGREE – that mode
+is the PHI_EPS = 1e-6 floor showing through, not a fact about
+dispersion.</caption>
+<thead>
+<tr class="header">
+<th align="left">quantity</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">sites in the phenotype</td>
+<td align="left">10,738</td>
+</tr>
+<tr class="even">
+<td align="left">attempted by the audit</td>
+<td align="left">10,725</td>
+</tr>
+<tr class="odd">
+<td align="left">all 3 starts converged</td>
+<td align="left">10,450</td>
+</tr>
+<tr class="even">
+<td align="left">all 3 agree on phi within 5% (used for the peak)</td>
+<td align="left">5,045</td>
+</tr>
+<tr class="odd">
+<td align="left">peak of log10(phi) on those sites</td>
+<td align="left">0.0126</td>
+</tr>
+<tr class="even">
+<td align="left">median phi on those sites</td>
+<td align="left">0.0252</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(fread(file.path(PS, &quot;peak_stability.tsv&quot;), sep = &quot;\t&quot;),
+  caption = &quot;The peak is solid to about one significant figure -- call it phi = 0.013 -- and the second figure is not meaningful. That is enough here, because the competing candidates at an ambiguous site are typically orders of magnitude apart, so a 10% wobble in the reference cannot flip a decision.&quot;)</code></pre>
+<table>
+<caption>The peak is solid to about one significant figure – call it phi
+= 0.013 – and the second figure is not meaningful. That is enough here,
+because the competing candidates at an ambiguous site are typically
+orders of magnitude apart, so a 10% wobble in the reference cannot flip
+a decision.</caption>
+<thead>
+<tr class="header">
+<th align="left">method</th>
+<th align="right">peak</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">KDE, bandwidth adjust = 0.5</td>
+<td align="right">0.01288</td>
+</tr>
+<tr class="even">
+<td align="left">KDE, bandwidth adjust = 0.75</td>
+<td align="right">0.01278</td>
+</tr>
+<tr class="odd">
+<td align="left">KDE, bandwidth adjust = 1</td>
+<td align="right">0.01260</td>
+</tr>
+<tr class="even">
+<td align="left">KDE, bandwidth adjust = 1.5</td>
+<td align="right">0.01206</td>
+</tr>
+<tr class="odd">
+<td align="left">KDE, bandwidth adjust = 2</td>
+<td align="right">0.01296</td>
+</tr>
+<tr class="even">
+<td align="left">histogram, 20 bins</td>
+<td align="right">0.01778</td>
+</tr>
+<tr class="odd">
+<td align="left">histogram, 30 bins</td>
+<td align="right">0.01259</td>
+</tr>
+<tr class="even">
+<td align="left">histogram, 40 bins</td>
+<td align="right">0.01259</td>
+</tr>
+<tr class="odd">
+<td align="left">histogram, 60 bins</td>
+<td align="right">0.01413</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="the-φ-distributions" class="section level2">
+<h2>7.2 The φ distributions</h2>
+<p>The left and middle panels are the reason the peak has to be measured
+on the agreeing subset. The right panel is what the rule actually
+returns.</p>
+<pre class="r"><code>PHID &lt;- fread(file.path(PS, &quot;phi_distributions.tsv.gz&quot;), sep = &quot;\t&quot;)
+VLV &lt;- c(&quot;before: MLE (best of 3 starts)&quot;,
+         &quot;source: all 3 starts agree (builds the peak)&quot;,
+         &quot;after: the rule applied&quot;)
+PHID[, view := factor(view, levels = VLV)]
+PEAK &lt;- 0.0126; EPS &lt;- 1e-6
+ggplot(PHID, aes(phi)) +
+  geom_histogram(bins = 60, fill = &quot;#4a7fbf&quot;, colour = NA) +
+  geom_vline(xintercept = PEAK, colour = &quot;#2c8a4a&quot;, linewidth = 0.7) +
+  geom_vline(xintercept = EPS, colour = &quot;grey35&quot;, linetype = &quot;dotted&quot;, linewidth = 0.5) +
+  facet_wrap(~ view, nrow = 1, scales = &quot;free_y&quot;) +
+  scale_x_log10(breaks = 10^seq(-6, 0, 2), labels = c(&quot;1e-6&quot;, &quot;1e-4&quot;, &quot;1e-2&quot;, &quot;1&quot;)) +
+  labs(x = expression(hat(varphi)~&quot;(log scale)&quot;), y = &quot;sites&quot;,
+       title = &quot;Where the reference value comes from, and what the rule returns&quot;,
+       subtitle = paste(
+         &quot;Green = the peak, 0.0126. Dotted = the PHI_EPS = 1e-6 numerical floor. Same 10,450 sites in the outer two panels.&quot;,
+         &quot;LEFT: under the MLE half the sites pile against the floor. At an ambiguous site the winning start is decided by loglik differences of ~1e-9, so that pile is arbitrary.&quot;,
+         &quot;MIDDLE: restricting to the sites where all 3 starts agree removes the pile and leaves one clean hump. The peak is the mode of this panel.&quot;,
+         &quot;RIGHT: the rule clears the floor and moves the low mode up ~20x, but the shape stays bimodal -- it does NOT reproduce the middle panel.&quot;, sep = &quot;\n&quot;)) +
+  theme_bw(base_size = 11) +
+  theme(panel.grid.minor = element_blank(), strip.text = element_text(size = 9),
+        plot.subtitle = element_text(size = 8))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_optimiser.Rmd/phidist-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>knitr::kable(fread(file.path(PS, &quot;phi_distribution_summary.tsv&quot;), sep = &quot;\t&quot;),
+  caption = &quot;The pile at the numerical floor is what the rule removes: 16.3% of sites to 0.9%. But 41.8% still sit below 1e-4 afterwards, against 0.5% in the agreeing subset.&quot;)</code></pre>
+<table>
+<caption>The pile at the numerical floor is what the rule removes: 16.3%
+of sites to 0.9%. But 41.8% still sit below 1e-4 afterwards, against
+0.5% in the agreeing subset.</caption>
+<colgroup>
+<col width="40%" />
+<col width="5%" />
+<col width="12%" />
+<col width="16%" />
+<col width="8%" />
+<col width="17%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">view</th>
+<th align="right">sites</th>
+<th align="left">below 1e-4</th>
+<th align="left">at the 1e-6 floor</th>
+<th align="right">median</th>
+<th align="right">mode of log10(phi)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">before: MLE (best of 3 starts)</td>
+<td align="right">10450</td>
+<td align="left">5,130 (49.1%)</td>
+<td align="left">1,707 (16.3%)</td>
+<td align="right">0.000290</td>
+<td align="right">2.40e-06</td>
+</tr>
+<tr class="even">
+<td align="left">source: all 3 starts agree (builds the peak)</td>
+<td align="right">5045</td>
+<td align="left">25 (0.5%)</td>
+<td align="left">10 (0.2%)</td>
+<td align="right">0.025200</td>
+<td align="right">1.26e-02</td>
+</tr>
+<tr class="odd">
+<td align="left">after: the rule applied</td>
+<td align="right">10450</td>
+<td align="left">4,367 (41.8%)</td>
+<td align="left">89 (0.9%)</td>
+<td align="right">0.000575</td>
+<td align="right">5.15e-05</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The rule does not reshape the φ distribution into the middle
+panel, and it was never going to.</strong> It chooses among the three
+optima the starts actually found, so where all three are low it returns
+a low value — the nearest available candidate, not the peak itself. What
+it does achieve is removing the arbitrary pile at the
+<code>PHI_EPS = 1e-6</code> floor, from 16.3% of sites to 0.9%, and
+lifting the low mode from 2.4×10⁻⁶ to 5.2×10⁻⁵.</p>
+<p>That is worth being clear about, because it bounds what the rule can
+be claimed to do: it replaces an arbitrary choice with a defensible one
+at the sites where a choice exists, and it does not manufacture
+dispersion where the candidate set offers none. Section 5 still applies
+— at four sites in five there is no defensible point estimate of φ, and
+no selection rule can create one.</p>
+<pre class="r"><code>knitr::kable(fread(file.path(PS, &quot;rule_divergence.tsv&quot;), sep = &quot;\t&quot;),
+  caption = &quot;The rule changes phi at about half of all sites -- that is expected, since that is how often phi is ambiguous -- but it OVERRULES the likelihood at only 63, and gives up more than one log unit at only 3.&quot;)</code></pre>
+<table>
+<caption>The rule changes phi at about half of all sites – that is
+expected, since that is how often phi is ambiguous – but it OVERRULES
+the likelihood at only 63, and gives up more than one log unit at only
+3.</caption>
+<thead>
+<tr class="header">
+<th align="left">statistic</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">sites where all 3 starts converged</td>
+<td align="left">10,450</td>
+</tr>
+<tr class="even">
+<td align="left">phi differs from the MLE’s phi by &gt; 5%
+(relative)</td>
+<td align="left">5,410 (51.8%)</td>
+</tr>
+<tr class="odd">
+<td align="left">phi differs by more than 10-fold</td>
+<td align="left">2,045 (19.6%)</td>
+</tr>
+<tr class="even">
+<td align="left">the rule OVERRIDES the likelihood (loglik gap &gt;
+0.01)</td>
+<td align="left">63 (0.60%)</td>
+</tr>
+<tr class="odd">
+<td align="left">…giving up more than 1 log unit</td>
+<td align="left">3</td>
+</tr>
+<tr class="even">
+<td align="left">worst log-likelihood given up anywhere</td>
+<td align="left">4.4</td>
+</tr>
+</tbody>
+</table>
+<p>At the 13 sites from section 3, the rule recovers the
+maximum-likelihood answer at 11, including every site where the
+optimiser had run off to φ = 1:</p>
+<pre class="r"><code>knitr::kable(fread(file.path(PS, &quot;sites13_by_rule.tsv&quot;), sep = &quot;\t&quot;),
+  caption = &quot;The two misses are the last two rows, where the candidate nearer the peak is the worse-fitting one and choosing it gives up 1.9-2.7 log units. Note that phi ~ 0.0013 IS closer to the genome-wide peak than phi ~ 0.556 -- by the heuristic&#39;s own logic it is the more reasonable value, and it is only wrong by the likelihood&#39;s standard.&quot;)</code></pre>
+<table>
+<caption>The two misses are the last two rows, where the candidate
+nearer the peak is the worse-fitting one and choosing it gives up
+1.9-2.7 log units. Note that phi ~ 0.0013 IS closer to the genome-wide
+peak than phi ~ 0.556 – by the heuristic’s own logic it is the more
+reasonable value, and it is only wrong by the likelihood’s
+standard.</caption>
+<colgroup>
+<col width="17%" />
+<col width="29%" />
+<col width="8%" />
+<col width="9%" />
+<col width="21%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="left">candidate_phis</th>
+<th align="right">phi_mle</th>
+<th align="right">phi_peak</th>
+<th align="right">loglik_cost_of_peak</th>
+<th align="left">same_optimum</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr14:106129991</td>
+<td align="left">0.00132 | 0.556</td>
+<td align="right">0.556</td>
+<td align="right">0.00132</td>
+<td align="right">2.70</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">chr22:22687094</td>
+<td align="left">0.0017 | 0.395</td>
+<td align="right">0.395</td>
+<td align="right">0.00170</td>
+<td align="right">1.92</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">chr17:53106304</td>
+<td align="left">0.922 | 1</td>
+<td align="right">0.922</td>
+<td align="right">0.92200</td>
+<td align="right">0.00</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:32643315</td>
+<td align="left">0.856 | 1</td>
+<td align="right">0.855</td>
+<td align="right">0.85500</td>
+<td align="right">0.00</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:88861305</td>
+<td align="left">0.835 | 1</td>
+<td align="right">0.835</td>
+<td align="right">0.83500</td>
+<td align="right">0.00</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:29943223</td>
+<td align="left">0.757 | 0.757 | 1</td>
+<td align="right">0.757</td>
+<td align="right">0.75700</td>
+<td align="right">0.00</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">chr3:37277733</td>
+<td align="left">0.699 | 1</td>
+<td align="right">0.699</td>
+<td align="right">0.69900</td>
+<td align="right">0.00</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">chr2:89176553</td>
+<td align="left">1.03e-06 | 0.692</td>
+<td align="right">0.692</td>
+<td align="right">0.69200</td>
+<td align="right">0.00</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">chr14:106627394</td>
+<td align="left">0.677 | 1</td>
+<td align="right">0.677</td>
+<td align="right">0.67700</td>
+<td align="right">0.00</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106639258</td>
+<td align="left">0.618 | 1</td>
+<td align="right">0.618</td>
+<td align="right">0.61800</td>
+<td align="right">0.00</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:90039467</td>
+<td align="left">0.57 | 1</td>
+<td align="right">0.570</td>
+<td align="right">0.57000</td>
+<td align="right">0.00</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">chr17:36212383</td>
+<td align="left">0.511 | 1</td>
+<td align="right">0.511</td>
+<td align="right">0.51100</td>
+<td align="right">0.00</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:89085177</td>
+<td align="left">0.509 | 0.51 | 1</td>
+<td align="right">0.509</td>
+<td align="right">0.50900</td>
+<td align="right">0.00</td>
+<td align="left">TRUE</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="does-it-calibrate" class="section level2">
+<h2>7.3 Does it calibrate?</h2>
+<p>This is the criterion that matters, and it is the one the 13-site
+scorecard cannot answer: the rule re-picks φ across roughly half the
+genome, so only a full real-plus-permutation run shows what that
+does.</p>
+<pre class="r"><code>RL &lt;- c(&quot;1 start (historical)&quot;, &quot;MLE (3 starts)&quot;, &quot;peak&quot;)
+knitr::kable(fread(file.path(PS, &quot;phisel_headline.tsv&quot;), sep = &quot;\t&quot;)[run %chin% RL][match(RL, run)],
+  caption = &quot;All three runs: k = 3, +/-5 kb, chr1-22, U/C sites removed, phi-boundary sites RETAINED, same 5 permutation seeds. The ONLY difference is how phi is chosen.&quot;)</code></pre>
+<table>
+<caption>All three runs: k = 3, +/-5 kb, chr1-22, U/C sites removed,
+phi-boundary sites RETAINED, same 5 permutation seeds. The ONLY
+difference is how phi is chosen.</caption>
+<colgroup>
+<col width="19%" />
+<col width="11%" />
+<col width="14%" />
+<col width="14%" />
+<col width="9%" />
+<col width="14%" />
+<col width="16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">run</th>
+<th align="right">real lambda</th>
+<th align="right">perm lambda min</th>
+<th align="right">perm lambda max</th>
+<th align="right">real tail</th>
+<th align="right">worst perm tail</th>
+<th align="right">problematic sites</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">1 start (historical)</td>
+<td align="right">1.401</td>
+<td align="right">1.034</td>
+<td align="right">1.070</td>
+<td align="right">141.3</td>
+<td align="right">142.6</td>
+<td align="right">9</td>
+</tr>
+<tr class="even">
+<td align="left">MLE (3 starts)</td>
+<td align="right">1.399</td>
+<td align="right">1.029</td>
+<td align="right">1.063</td>
+<td align="right">28.2</td>
+<td align="right">11.3</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">peak</td>
+<td align="right">1.401</td>
+<td align="right">1.031</td>
+<td align="right">1.064</td>
+<td align="right">28.2</td>
+<td align="right">11.3</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The rule calibrates exactly as well as the MLE.</strong> Zero
+problematic sites, real tail 28.2 and worst permuted tail 11.3 in both
+cases — identical to the decimal, and each leaves a single permutation
+candidate that fails the real-data half of the criterion. The 63 sites
+where the rule overrules the likelihood are nowhere near the tail, so
+the log-likelihood given up there never converts into a false
+positive.</p>
+<pre class="r"><code>qs &lt;- fread(file.path(PS, &quot;qq_thinned_phisel.tsv.gz&quot;), sep = &quot;\t&quot;)[run %chin% RL]
+qs[, run := factor(run, levels = RL)]
+qs[, kind := ifelse(dataset == &quot;real&quot;, &quot;real&quot;, &quot;permuted&quot;)]
+ggplot(qs, aes(expected, observed, group = dataset, colour = kind, shape = kind)) +
+  geom_abline(slope = 1, intercept = 0, colour = &quot;grey55&quot;, linewidth = 0.3) +
+  geom_point(size = 0.5, alpha = 0.55) +
+  facet_wrap(~ run, nrow = 1) +
+  scale_colour_manual(values = c(real = &quot;#1f4e9c&quot;, permuted = &quot;#c0392b&quot;), name = NULL) +
+  scale_shape_manual(values = c(real = 16, permuted = 17), name = NULL) +
+  coord_cartesian(ylim = c(0, 45)) +
+  guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
+  labs(x = expression(Expected~-log[10](p)), y = expression(Observed~-log[10](p)),
+       title = &quot;Calibration: single start vs the MLE vs the peak rule (y clipped at 45)&quot;,
+       subtitle = paste(&quot;Every p-value in the tail is drawn -- all 2,000 smallest per dataset; the bulk is thinned. Points, not lines:&quot;,
+                        &quot;a line interpolates across the gaps and renders the artefact tail as a smooth ramp, hiding that it is a few&quot;,
+                        &quot;discrete clusters of SNPs at a handful of broken sites. Clipped points are outside the view, not deleted.&quot;, sep = &quot;\n&quot;)) +
+  theme_bw(base_size = 11) +
+  theme(legend.position = &quot;top&quot;, panel.grid.minor = element_blank(),
+        strip.text = element_text(size = 9))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_optimiser.Rmd/qqphisel-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>The counts behind those tails:</p>
+<pre class="r"><code>knitr::kable(dcast(fread(file.path(PS, &quot;tail_counts.tsv&quot;), sep = &quot;\t&quot;)[run %chin% RL],
+                   run ~ kind, value.var = &quot;N&quot;)[match(RL, run)],
+  caption = &quot;Number of p-values reaching 1e-10. Under the historical fitter over five thousand PERMUTED p-values clear it; under the corrected fitter exactly one does. The real counts barely change (2,026 -&gt; 2,010), so the fix removes false positives rather than suppressing signal generally.&quot;)</code></pre>
+<table>
+<caption>Number of p-values reaching 1e-10. Under the historical fitter
+over five thousand PERMUTED p-values clear it; under the corrected
+fitter exactly one does. The real counts barely change (2,026 -&gt;
+2,010), so the fix removes false positives rather than suppressing
+signal generally.</caption>
+<thead>
+<tr class="header">
+<th align="left">run</th>
+<th align="right">permuted</th>
+<th align="right">real</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">1 start (historical)</td>
+<td align="right">5065</td>
+<td align="right">2026</td>
+</tr>
+<tr class="even">
+<td align="left">MLE (3 starts)</td>
+<td align="right">1</td>
+<td align="right">2010</td>
+</tr>
+<tr class="odd">
+<td align="left">peak</td>
+<td align="right">1</td>
+<td align="right">2010</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="what-is-adopted" class="section level2">
+<h2>7.4 What is adopted</h2>
+<p>Like the multi-start, the rule is switched on by an environment
+variable so the default reproduces every pre-existing result
+exactly:</p>
+<pre class="r"><code>BB_PHI_SELECT &lt;- Sys.getenv(&quot;BB_PHI_SELECT&quot;, &quot;loglik&quot;)   # betabin_lib.R
+BB_PHI_PEAK   &lt;- 0.0126
+# &quot;loglik&quot;   the MLE -- the historical behaviour, bit-for-bit
+# &quot;peak&quot;     nearest 0.0126 among the converged starts</code></pre>
+<p>The peak rule is adopted for production. Three points are worth
+keeping in view:</p>
+<ul>
+<li><strong>It is not a substitute for fixing the optimiser.</strong>
+Multi-start is what recovers the 13 broken fits; the peak rule then
+resolves which of several equally-likely φ to report at the sites where
+the data cannot say. Applied on top of a single start it would not have
+helped, since a single start produces only one candidate to choose
+from.</li>
+<li><strong>Its worst-case cost is bounded and small.</strong> Across
+the genome the most log-likelihood it gives up at any site is 4.4,
+against the 20–320 units the single-start failure was losing.</li>
+<li><strong>It does not make φ identifiable.</strong> It removes the
+arbitrariness in which value gets reported; it does not add information
+the data do not contain. Any downstream use of φ as a per-site quantity
+still has to contend with section 5.</li>
+</ul>
 <!-- # Caveats -->
 <!-- - **Three starts is a hedge, not a proof.** A site whose likelihood has a third -->
 <!--   mode outside {0.01, 0.1, 0.5} would still be missed. What makes the result -->
@@ -1355,10 +2080,10 @@ Session information
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.2.0 (2022-04-22)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: CentOS Linux 7 (Core)
+Running under: CentOS Linux 8
 
 Matrix products: default
-BLAS/LAPACK: /software/openblas-0.3.13-el7-x86_64/lib/libopenblas_haswellp-r0.3.13.so
+BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
 
 locale:
 [1] C
@@ -1367,23 +2092,24 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] ggplot2_4.0.3     data.table_1.14.2
+[1] ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.0  
 
 loaded via a namespace (and not attached):
- [1] Rcpp_1.0.12        highr_0.9          RColorBrewer_1.1-3 pillar_1.9.0      
- [5] compiler_4.2.0     bslib_0.3.1        later_1.3.0        jquerylib_0.1.4   
- [9] git2r_0.30.1       workflowr_1.7.0    R.methodsS3_1.8.1  R.utils_2.11.0    
-[13] tools_4.2.0        digest_0.6.29      gtable_0.3.6       jsonlite_1.8.0    
-[17] evaluate_0.15      lifecycle_1.0.4    tibble_3.2.1       pkgconfig_2.0.3   
-[21] rlang_1.1.2        cli_3.6.1          rstudioapi_0.13    yaml_2.3.5        
-[25] xfun_0.41          fastmap_1.1.0      withr_2.5.0        dplyr_1.1.4       
-[29] stringr_1.5.1      knitr_1.39         generics_0.1.4     fs_1.5.2          
-[33] vctrs_0.6.5        sass_0.4.1         tidyselect_1.2.0   rprojroot_2.0.3   
-[37] grid_4.2.0         glue_1.6.2         R6_2.5.1           fansi_1.0.3       
-[41] rmarkdown_2.25     farver_2.1.0       magrittr_2.0.3     scales_1.4.0      
-[45] promises_1.2.0.1   htmltools_0.5.2    dichromat_2.0-0.1  httpuv_1.6.5      
-[49] labeling_0.4.2     S7_0.2.0           utf8_1.2.2         stringi_1.7.6     
-[53] R.oo_1.24.0       </code></pre>
+ [1] tidyselect_1.2.0  xfun_0.38         bslib_0.3.1       colorspace_2.0-3 
+ [5] vctrs_0.6.1       generics_0.1.3    htmltools_0.5.7   yaml_2.3.5       
+ [9] utf8_1.2.2        rlang_1.1.2       R.oo_1.24.0       jquerylib_0.1.4  
+[13] later_1.3.0       pillar_1.9.0      glue_1.6.2        withr_2.5.0      
+[17] R.utils_2.11.0    lifecycle_1.0.4   stringr_1.5.0     munsell_0.5.0    
+[21] gtable_0.3.0      R.methodsS3_1.8.1 evaluate_0.15     labeling_0.4.2   
+[25] knitr_1.42        callr_3.7.0       fastmap_1.1.0     httpuv_1.6.5     
+[29] ps_1.7.0          fansi_1.0.3       highr_0.9         Rcpp_1.0.11      
+[33] promises_1.2.0.1  scales_1.2.0      jsonlite_1.8.7    farver_2.1.0     
+[37] fs_1.5.2          digest_0.6.29     stringi_1.7.6     processx_3.5.3   
+[41] dplyr_1.1.2       getPass_0.2-2     rprojroot_2.0.3   grid_4.2.0       
+[45] cli_3.6.2         tools_4.2.0       magrittr_2.0.3    sass_0.4.1       
+[49] tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3   rmarkdown_2.21   
+[53] httr_1.4.5        rstudioapi_0.14   R6_2.5.1          git2r_0.30.1     
+[57] compiler_4.2.0   </code></pre>
 </div>
 </div>
 </div>
