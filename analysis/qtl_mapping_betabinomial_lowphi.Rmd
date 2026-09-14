@@ -74,23 +74,37 @@ RB <- fread(file.path(RC, "recovery_by_site.txt.gz"), sep = "\t")[is.finite(phi_
 PT <- sort(unique(RB$phi_true))
 RB[, panel := factor(sprintf("true phi = %g", phi_true),
                      levels = sprintf("true phi = %g", PT))]
-vl <- unique(RB[, .(panel, phi_true)])
+# two reference lines per panel: the phi used to SIMULATE, and the mode of what
+# came back. Their agreement is the whole result, so nothing else is marked.
+vl <- melt(merge(unique(RB[, .(panel, phi_true)]),
+                 RS[, .(phi_true, mode = `mode phi_hat`)], by = "phi_true"),
+           id.vars = c("panel", "phi_true"), measure.vars = c("phi_true", "mode"),
+           variable.name = "what", value.name = "x")
+vl[, what := factor(ifelse(what == "phi_true", "true phi (simulated)",
+                           "mode of the refitted phi"),
+                    levels = c("true phi (simulated)", "mode of the refitted phi"))]
 ggplot(RB, aes(phi_hat)) +
   geom_histogram(bins = 60, fill = "#4a7fbf", colour = NA) +
-  geom_vline(data = vl, aes(xintercept = phi_true), colour = "#c0392b", linewidth = 0.7) +
-  geom_vline(xintercept = MLE_PEAK, colour = "#2c8a4a", linewidth = 0.6, linetype = "longdash") +
   geom_vline(xintercept = PHI_EPS, colour = "grey35", linetype = "dotted") +
+  geom_vline(data = vl, aes(xintercept = x, colour = what, linetype = what),
+             linewidth = 0.7) +
   facet_wrap(~ panel, nrow = 2, scales = "free_y") +
   scale_x_log10(breaks = 10^seq(-6, 0, 2), labels = c("1e-6", "1e-4", "1e-2", "1")) +
+  scale_colour_manual(values = c("true phi (simulated)" = "#c0392b",
+                                 "mode of the refitted phi" = "#1f4e9c"), name = NULL) +
+  scale_linetype_manual(values = c("true phi (simulated)" = "solid",
+                                   "mode of the refitted phi" = "longdash"), name = NULL) +
   labs(x = expression(hat(varphi)*", axis log-spaced (ticks are "*hat(varphi)*" itself)"),
        y = "sites",
        title = "Simulated from a KNOWN phi, then refitted",
        subtitle = paste(
-         "Red solid = the TRUE phi. Green dashed = 0.0126, the peak in the REAL data. Dotted = the 1e-6 floor.",
+         "Red = the phi used to simulate. Blue dashed = the mode of the phi that came back. The closer the two, the better the recovery.",
+         "Dotted grey = the PHI_EPS = 1e-6 numerical floor.",
          "Note the 'true phi = 0.0126' panel: ONE true value produces a bimodal estimate distribution with a pile at the floor.",
          sep = "\n")) +
   theme_bw(base_size = 11) +
-  theme(panel.grid.minor = element_blank(), plot.subtitle = element_text(size = 8))
+  theme(legend.position = "top", panel.grid.minor = element_blank(),
+        plot.subtitle = element_text(size = 8))
 ```
 
 Two further results fall out of this, both of which correct earlier readings of

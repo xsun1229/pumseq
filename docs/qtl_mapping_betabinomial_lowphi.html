@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreecb6168907f22f43f300e4364dee666a8e3d73395targetblankcb61689a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreefe36e473bfe11ea944f859926a525850853a96c7targetblankfe36e47a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/cb6168907f22f43f300e4364dee666a8e3d73395" target="_blank">cb61689</a>
+<a href="https://github.com/xsun1229/pumseq/tree/fe36e473bfe11ea944f859926a525850853a96c7" target="_blank">fe36e47</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreecb6168907f22f43f300e4364dee666a8e3d73395targetblankcb61689a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreefe36e473bfe11ea944f859926a525850853a96c7targetblankfe36e47a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/cb6168907f22f43f300e4364dee666a8e3d73395" target="_blank">cb61689</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/fe36e473bfe11ea944f859926a525850853a96c7" target="_blank">fe36e47</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -620,6 +620,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/fe36e473bfe11ea944f859926a525850853a96c7/analysis/qtl_mapping_betabinomial_lowphi.Rmd" target="_blank">fe36e47</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/fe36e473bfe11ea944f859926a525850853a96c7/docs/qtl_mapping_betabinomial_lowphi.html" target="_blank">fe36e47</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -827,23 +861,37 @@ below what our depth can resolve.</p>
 PT &lt;- sort(unique(RB$phi_true))
 RB[, panel := factor(sprintf(&quot;true phi = %g&quot;, phi_true),
                      levels = sprintf(&quot;true phi = %g&quot;, PT))]
-vl &lt;- unique(RB[, .(panel, phi_true)])
+# two reference lines per panel: the phi used to SIMULATE, and the mode of what
+# came back. Their agreement is the whole result, so nothing else is marked.
+vl &lt;- melt(merge(unique(RB[, .(panel, phi_true)]),
+                 RS[, .(phi_true, mode = `mode phi_hat`)], by = &quot;phi_true&quot;),
+           id.vars = c(&quot;panel&quot;, &quot;phi_true&quot;), measure.vars = c(&quot;phi_true&quot;, &quot;mode&quot;),
+           variable.name = &quot;what&quot;, value.name = &quot;x&quot;)
+vl[, what := factor(ifelse(what == &quot;phi_true&quot;, &quot;true phi (simulated)&quot;,
+                           &quot;mode of the refitted phi&quot;),
+                    levels = c(&quot;true phi (simulated)&quot;, &quot;mode of the refitted phi&quot;))]
 ggplot(RB, aes(phi_hat)) +
   geom_histogram(bins = 60, fill = &quot;#4a7fbf&quot;, colour = NA) +
-  geom_vline(data = vl, aes(xintercept = phi_true), colour = &quot;#c0392b&quot;, linewidth = 0.7) +
-  geom_vline(xintercept = MLE_PEAK, colour = &quot;#2c8a4a&quot;, linewidth = 0.6, linetype = &quot;longdash&quot;) +
   geom_vline(xintercept = PHI_EPS, colour = &quot;grey35&quot;, linetype = &quot;dotted&quot;) +
+  geom_vline(data = vl, aes(xintercept = x, colour = what, linetype = what),
+             linewidth = 0.7) +
   facet_wrap(~ panel, nrow = 2, scales = &quot;free_y&quot;) +
   scale_x_log10(breaks = 10^seq(-6, 0, 2), labels = c(&quot;1e-6&quot;, &quot;1e-4&quot;, &quot;1e-2&quot;, &quot;1&quot;)) +
+  scale_colour_manual(values = c(&quot;true phi (simulated)&quot; = &quot;#c0392b&quot;,
+                                 &quot;mode of the refitted phi&quot; = &quot;#1f4e9c&quot;), name = NULL) +
+  scale_linetype_manual(values = c(&quot;true phi (simulated)&quot; = &quot;solid&quot;,
+                                   &quot;mode of the refitted phi&quot; = &quot;longdash&quot;), name = NULL) +
   labs(x = expression(hat(varphi)*&quot;, axis log-spaced (ticks are &quot;*hat(varphi)*&quot; itself)&quot;),
        y = &quot;sites&quot;,
        title = &quot;Simulated from a KNOWN phi, then refitted&quot;,
        subtitle = paste(
-         &quot;Red solid = the TRUE phi. Green dashed = 0.0126, the peak in the REAL data. Dotted = the 1e-6 floor.&quot;,
+         &quot;Red = the phi used to simulate. Blue dashed = the mode of the phi that came back. The closer the two, the better the recovery.&quot;,
+         &quot;Dotted grey = the PHI_EPS = 1e-6 numerical floor.&quot;,
          &quot;Note the &#39;true phi = 0.0126&#39; panel: ONE true value produces a bimodal estimate distribution with a pile at the floor.&quot;,
          sep = &quot;\n&quot;)) +
   theme_bw(base_size = 11) +
-  theme(panel.grid.minor = element_blank(), plot.subtitle = element_text(size = 8))</code></pre>
+  theme(legend.position = &quot;top&quot;, panel.grid.minor = element_blank(),
+        plot.subtitle = element_text(size = 8))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_lowphi.Rmd/recfig-1.png" width="1248" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-recfig-1">
