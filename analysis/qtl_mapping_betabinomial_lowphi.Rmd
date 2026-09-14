@@ -20,7 +20,7 @@ RC  <- file.path(PSI, "qtl_betabinomial/phi_recovery")
 MLE_PEAK <- 0.0126; PHI_EPS <- 1e-6
 ```
 
-# 1. The objection
+# 1. The problem
 
 The mode of the fitted overdispersion across sites is **φ ≈ 0.0126**, and that
 number carries weight: it is the reference value the
@@ -31,12 +31,24 @@ cannot reject φ = 0 at all**. The natural suspicion is that 0.0126 describes ou
 *estimator* — a nearly flat likelihood with a hard boundary at zero — rather than
 the dispersion in the data.
 
-This page is the answer to that objection. Three independent lines of evidence,
-one of which uses no likelihood at all, plus the physical meaning of a small φ.
-It also addresses the obvious follow-up: if most sites cannot reject φ = 0, why
-model dispersion at all?
+This page answers that objection in two steps. **§2 establishes that the
+estimate is correct** — three checks with non-overlapping failure modes, one of
+which uses no likelihood at all. **§3 then asks what the number means**: why so
+small a value is the expected answer rather than a suspicious one, why
+dispersion still has to be modelled when most sites cannot distinguish it from
+zero, and what such a site looks like in the raw counts. §4 states what can and
+cannot be concluded.
 
-# 2. Does the estimator recover a known φ?
+# 2. Confirming the estimate is correct
+
+Before asking what φ ≈ 0.013 means, we have to establish that it *is* the
+number — that it describes the data rather than the machinery that produced it.
+Three checks, deliberately chosen so their failure modes do not overlap: one
+that tests the estimator against a known truth, one that avoids the likelihood
+entirely, and one that bypasses estimation altogether and asks only what the raw
+scatter permits.
+
+## 2.1 Does the estimator recover a known φ?
 
 The cleanest test is to generate data where the answer is known. Per site, take
 the **real depths n_i** and the **real fitted mean vector μ_i** from the k = 3
@@ -110,7 +122,7 @@ knitr::kable(data.table(
   caption = "A single true phi of 0.0126 reproduces the real distribution's mode, its boundary pile-up, its sub-1e-4 mass and its identification rate.")
 ```
 
-# 3. An estimator with no likelihood in it
+## 2.2 An estimator with no likelihood in it
 
 The recovery simulation still relies on `fit_bb_mle`. A fully independent check
 is possible because φ enters the model through only one quantity, the design
@@ -181,7 +193,7 @@ selection, not the mean model, is the likely cause of the residual 16–20%. The
 moment estimator is also less efficient than the MLE, so its per-site values are
 noisier.
 
-# 4. Would a larger φ fit the data?
+## 2.3 Would a larger φ fit the observed scatter?
 
 Independently of any estimator, we can ask which φ reproduces the spread of %pU
 actually observed across cell lines.
@@ -199,9 +211,17 @@ with no model fitting involved.
 
 Note honestly that at the *median* site φ = 0 fits marginally better than 0.0126
 (ratio 1.016 versus 1.051). That is the same fact as most sites being
-unidentifiable, and it is not an argument for the binomial — see §6.
+unidentifiable, and it is not an argument for the binomial — see §3.2.
 
-# 5. What a small φ actually means
+# 3. Exploring what φ means
+
+The estimate stands. The harder question is what a dispersion of 0.013 is
+actually saying about pseudouridylation — why so small a number is the expected
+answer rather than a suspicious one, why dispersion still has to be modelled
+when most individual sites cannot distinguish it from zero, and what such a site
+looks like in the raw counts.
+
+## 3.1 What a small φ actually means
 
 ```{r interp}
 knitr::kable(fread(file.path(LP, "interpretation.tsv"), sep = "\t"),
@@ -230,7 +250,7 @@ So the answer to "is φ too small?" is that φ is small **because at this depth 
 cell-line-to-cell-line variability in %pU is mostly read sampling.** The genuine
 biological component is real but modest, and the estimator finds it correctly.
 
-# 6. Then why model dispersion at all?
+## 3.2 Then why model dispersion at all?
 
 Because per-site non-rejection is a power statement, and the aggregate is not
 remotely ambiguous.
@@ -269,7 +289,7 @@ minority where it is large. That minority is real, not artefact: a single true
 φ = 0.0126 produces only 1.3% of sites above 0.128, whereas the real data have
 12.3% — a ten-fold excess, 1,290 sites against 135.
 
-# 7. What a low-φ site looks like
+## 3.3 What a low-φ site looks like
 
 Everything above argues from summary statistics. This section looks at
 individual sites, all drawn from the **reproducible subset** — the sites where
@@ -283,7 +303,7 @@ low φ even within that subset (φ < 0.003), and three high-φ sites for contras
 > **These are deliberately the deepest available sites, not a random sample.** At
 > the median site (8 reads) the sampling noise on one %pU measurement is ±7.4 pp
 > against a biological signal of 2.4 pp, so nothing is visible by eye at typical
-> depth — which is §5's point, not a counterexample to it. The sites below carry
+> depth — which is §3.1's point, not a counterexample to it. The sites below carry
 > 1,800–8,100 reads per cell line, so binomial noise is negligible and the
 > **observed** scatter is essentially the biological scatter. That is what makes
 > them a fair test of whether φ means what we claim.
@@ -362,14 +382,14 @@ ggplot(BN, aes(100 * bin_mid, mass, colour = group)) +
         strip.text = element_text(size = 8))
 ```
 
-The prior panels make the α criterion from §5 concrete. At the peak and below,
+The prior panels make the α criterion from §3.1 concrete. At the peak and below,
 α ≈ 5–23 and the prior on p_i is a narrow unimodal bump — a coherent description
 of a site whose pU level varies modestly between cell lines. In the contrast
 group α ≈ 0.16–0.39 and the prior piles against 0 and 1, asserting that cell
 lines are either unmodified or fully modified. **That is what a large φ commits
 you to**, and it is the right description for only about 12% of sites.
 
-# 8. What can and cannot be claimed
+# 4. What can and cannot be claimed
 
 **Supported.** φ ≈ 0.013 is a reliable estimate of the *modal* dispersion across
 sites. Three methods with unrelated failure modes agree; the estimator recovers a
@@ -390,7 +410,7 @@ unnecessary, since the heuristic is a crude discrete approximation to the same
 idea. Full pooling would be wrong: the 12% of genuinely high-dispersion sites
 must be able to pull away from the mode. **Not yet implemented.**
 
-# 9. Provenance
+# 5. Provenance
 
 - Recovery simulation: `28.phi_recovery_simulation.R` via `run_phi_recovery.sbatch`
   → `qtl_betabinomial/phi_recovery/`. True φ ∈ {0.005, 0.0126, 0.05, 0.1, 0.2, 0.4},
