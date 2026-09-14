@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree622e61ab7fa170567727c2c807b86c3f3430a5a8targetblank622e61aa">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreefa51397deb22d75668eeb46a8a3e088009393b7atargetblankfa51397a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/622e61ab7fa170567727c2c807b86c3f3430a5a8" target="_blank">622e61a</a>
+<a href="https://github.com/xsun1229/pumseq/tree/fa51397deb22d75668eeb46a8a3e088009393b7a" target="_blank">fa51397</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree622e61ab7fa170567727c2c807b86c3f3430a5a8targetblank622e61aa"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreefa51397deb22d75668eeb46a8a3e088009393b7atargetblankfa51397a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/622e61ab7fa170567727c2c807b86c3f3430a5a8" target="_blank">622e61a</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/fa51397deb22d75668eeb46a8a3e088009393b7a" target="_blank">fa51397</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -620,6 +620,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/fa51397deb22d75668eeb46a8a3e088009393b7a/analysis/qtl_mapping_betabinomial_lowphi.Rmd" target="_blank">fa51397</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/fa51397deb22d75668eeb46a8a3e088009393b7a/docs/qtl_mapping_betabinomial_lowphi.html" target="_blank">fa51397</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1821,6 +1855,43 @@ ggplot(OB, aes(100 * pu, row, colour = grp)) +
         axis.text.y = element_text(size = 8, family = &quot;mono&quot;),
         plot.subtitle = element_text(size = 8))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_lowphi.Rmd/strip-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-strip-1">
+Past versions of strip-1.png
+</button>
+</p>
+<div id="fig-strip-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/fa51397deb22d75668eeb46a8a3e088009393b7a/docs/figure/qtl_mapping_betabinomial_lowphi.Rmd/strip-1.png" target="_blank">fa51397</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Eleven sites cannot establish a relationship, so the same question
 asked of every site. For each one, compare the spread the fitted model
 predicts against the spread actually observed — once using the fitted φ,
@@ -1898,39 +1969,90 @@ sampling noise alone cannot.</caption>
 </tbody>
 </table>
 <pre class="r"><code>VS &lt;- fread(file.path(LP, &quot;phi_vs_spread.txt.gz&quot;), sep = &quot;\t&quot;)
+# NB these are tertiles of READ DEPTH, not of phi. Depth and phi are nearly
+# independent here (Spearman 0.05; high-phi fraction 12.9/9.5/14.3% across the
+# three), so the columns are not a proxy for dispersion. Labels carry the actual
+# read counts so &quot;shallow&quot; cannot be misread as &quot;low phi&quot;.
 VS[, dep := cut(median_depth, quantile(median_depth, c(0, 1/3, 2/3, 1)),
                 include.lowest = TRUE,
-                labels = c(&quot;shallow third&quot;, &quot;middle third&quot;, &quot;deep third&quot;))]
-M &lt;- melt(VS[, .(dep, obs_sd, `fitted phi` = pred_sd_bb, `phi = 0 (binomial only)` = pred_sd_binom)],
+                labels = c(&quot;median depth 1-5 reads&quot;, &quot;6-14 reads&quot;, &quot;15+ reads&quot;))]
+M &lt;- melt(VS[, .(dep, obs_sd,
+                 `predicted using the fitted phi` = pred_sd_bb,
+                 `predicted with phi = 0 (sampling noise only)` = pred_sd_binom)],
           id.vars = c(&quot;dep&quot;, &quot;obs_sd&quot;), variable.name = &quot;prediction&quot;, value.name = &quot;pred&quot;)
 ggplot(M, aes(pred, obs_sd, colour = prediction)) +
-  geom_abline(slope = 1, intercept = 0, colour = &quot;grey40&quot;, linetype = &quot;dashed&quot;, linewidth = 0.4) +
+  geom_abline(slope = 1, intercept = 0, colour = &quot;grey30&quot;, linetype = &quot;dashed&quot;, linewidth = 0.4) +
   geom_point(size = 0.35, alpha = 0.25, shape = 16) +
-  facet_wrap(~ dep, nrow = 1) +
+  facet_grid(prediction ~ dep, labeller = label_wrap_gen(width = 30)) +
   scale_x_log10() + scale_y_log10() +
-  scale_colour_manual(values = c(&quot;fitted phi&quot; = &quot;#1f4e9c&quot;,
-                                 &quot;phi = 0 (binomial only)&quot; = &quot;#d98c00&quot;), name = NULL) +
-  guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
+  scale_colour_manual(values = c(&quot;predicted using the fitted phi&quot; = &quot;#1f4e9c&quot;,
+                                 &quot;predicted with phi = 0 (sampling noise only)&quot; = &quot;#d98c00&quot;),
+                      guide = &quot;none&quot;) +
   labs(x = &quot;predicted SD of %pU&quot;, y = &quot;observed SD of %pU&quot;,
        title = &quot;Does phi describe the observed spread? All 10,467 sites&quot;,
        subtitle = paste(
-         &quot;Dashed = perfect agreement. Blue uses each site&#39;s fitted phi; orange sets phi = 0, leaving only sampling noise.&quot;,
-         &quot;In the DEEP third, where sampling noise is smallest, the orange cloud sits clearly BELOW the diagonal (binomial pred/obs = 0.88)&quot;,
-         &quot;while blue is on it (0.96) -- that gap is the dispersion, and it is what phi is measuring.&quot;,
+         &quot;Dashed = perfect agreement. TOP row uses each site&#39;s fitted phi; BOTTOM row sets phi = 0, leaving only binomial sampling noise.&quot;,
+         &quot;Columns are tertiles of READ DEPTH, not of phi -- the two are nearly independent (Spearman 0.05).&quot;,
+         &quot;Top row sits on the diagonal everywhere. Bottom row falls below it, and the shortfall grows with depth (pred/obs 1.00 -&gt; 1.02 -&gt; 0.88):&quot;,
+         &quot;deep sites have little sampling noise, so whatever spread remains must be real dispersion. That gap is what phi measures.&quot;,
          sep = &quot;\n&quot;)) +
   theme_bw(base_size = 11) +
-  theme(legend.position = &quot;top&quot;, panel.grid.minor = element_blank(),
+  theme(panel.grid.minor = element_blank(), strip.text.y = element_text(size = 8),
         plot.subtitle = element_text(size = 8))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_lowphi.Rmd/spreadfig-1.png" width="1152" style="display: block; margin: auto;" /></p>
-<p>The blue cloud tracks the diagonal in all three depth strata (BB
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-spreadfig-1">
+Past versions of spreadfig-1.png
+</button>
+</p>
+<div id="fig-spreadfig-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/fa51397deb22d75668eeb46a8a3e088009393b7a/docs/figure/qtl_mapping_betabinomial_lowphi.Rmd/spreadfig-1.png" target="_blank">fa51397</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The top row tracks the diagonal in all three depth strata (BB
 pred/obs 0.96–1.05), so the fitted φ reproduces the observed scatter
-across the whole dataset, not merely at hand-picked sites. The orange
-cloud — sampling noise alone — falls short, and does so most clearly in
-the <strong>deep third</strong> (0.881), which is exactly where it
-should: deep sites have little sampling noise, so whatever spread
-remains has to be real dispersion. The correlation between φ and the
-observed spread also strengthens with depth (Spearman 0.22 → 0.34 →
-0.54), for the same reason.</p>
+across the whole dataset, not merely at hand-picked sites. The bottom
+row — sampling noise alone — falls short, and does so most clearly at
+<strong>15+ reads</strong> (0.881), which is exactly where it should:
+deep sites have little sampling noise, so whatever spread remains has to
+be real dispersion. The correlation between φ and the observed spread
+strengthens with depth for the same reason (Spearman 0.22 → 0.34 →
+0.54).</p>
+<p>To be explicit, since the column labels could invite the wrong
+reading: those are <strong>read-depth</strong> tertiles (1–5, 6–14, 15+
+reads per cell line), and depth is nearly unrelated to φ — the fraction
+of high-φ sites is 12.9%, 9.5% and 14.3% across the three. The median φ
+does rise with depth (10⁻⁵ → 3×10⁻³), but that is the floor artefact
+from §2.1 rather than a dispersion difference: shallow sites collapse
+onto the 10⁻⁶ boundary far more often.</p>
 <pre class="r"><code>BN &lt;- fread(file.path(LS, &quot;prior_bins.tsv&quot;), sep = &quot;\t&quot;)
 BN &lt;- merge(BN, P[, .(sid, phi)], by = &quot;sid&quot;)
 BN[, grp := relab(group)]
@@ -1972,6 +2094,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/fa51397deb22d75668eeb46a8a3e088009393b7a/docs/figure/qtl_mapping_betabinomial_lowphi.Rmd/priorfig-1.png" target="_blank">fa51397</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/cb6168907f22f43f300e4364dee666a8e3d73395/docs/figure/qtl_mapping_betabinomial_lowphi.Rmd/priorfig-1.png" target="_blank">cb61689</a>

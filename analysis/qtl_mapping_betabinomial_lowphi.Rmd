@@ -428,41 +428,55 @@ SPF <- fread(file.path(LP, "phi_vs_spread_fit.tsv"), sep = "\t")
 knitr::kable(SPF, caption = "Predicted vs observed SD of %pU, per site, using each site's OWN fitted phi and its full depth vector. 'BB pred / obs' near 1 means phi reproduces the observed scatter; 'binomial pred / obs' below 1 means sampling noise alone cannot.")
 ```
 
-```{r spreadfig, fig.height=4.6, fig.width=12}
+```{r spreadfig, fig.height=7.2, fig.width=12}
 VS <- fread(file.path(LP, "phi_vs_spread.txt.gz"), sep = "\t")
+# NB these are tertiles of READ DEPTH, not of phi. Depth and phi are nearly
+# independent here (Spearman 0.05; high-phi fraction 12.9/9.5/14.3% across the
+# three), so the columns are not a proxy for dispersion. Labels carry the actual
+# read counts so "shallow" cannot be misread as "low phi".
 VS[, dep := cut(median_depth, quantile(median_depth, c(0, 1/3, 2/3, 1)),
                 include.lowest = TRUE,
-                labels = c("shallow third", "middle third", "deep third"))]
-M <- melt(VS[, .(dep, obs_sd, `fitted phi` = pred_sd_bb, `phi = 0 (binomial only)` = pred_sd_binom)],
+                labels = c("median depth 1-5 reads", "6-14 reads", "15+ reads"))]
+M <- melt(VS[, .(dep, obs_sd,
+                 `predicted using the fitted phi` = pred_sd_bb,
+                 `predicted with phi = 0 (sampling noise only)` = pred_sd_binom)],
           id.vars = c("dep", "obs_sd"), variable.name = "prediction", value.name = "pred")
 ggplot(M, aes(pred, obs_sd, colour = prediction)) +
-  geom_abline(slope = 1, intercept = 0, colour = "grey40", linetype = "dashed", linewidth = 0.4) +
+  geom_abline(slope = 1, intercept = 0, colour = "grey30", linetype = "dashed", linewidth = 0.4) +
   geom_point(size = 0.35, alpha = 0.25, shape = 16) +
-  facet_wrap(~ dep, nrow = 1) +
+  facet_grid(prediction ~ dep, labeller = label_wrap_gen(width = 30)) +
   scale_x_log10() + scale_y_log10() +
-  scale_colour_manual(values = c("fitted phi" = "#1f4e9c",
-                                 "phi = 0 (binomial only)" = "#d98c00"), name = NULL) +
-  guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
+  scale_colour_manual(values = c("predicted using the fitted phi" = "#1f4e9c",
+                                 "predicted with phi = 0 (sampling noise only)" = "#d98c00"),
+                      guide = "none") +
   labs(x = "predicted SD of %pU", y = "observed SD of %pU",
        title = "Does phi describe the observed spread? All 10,467 sites",
        subtitle = paste(
-         "Dashed = perfect agreement. Blue uses each site's fitted phi; orange sets phi = 0, leaving only sampling noise.",
-         "In the DEEP third, where sampling noise is smallest, the orange cloud sits clearly BELOW the diagonal (binomial pred/obs = 0.88)",
-         "while blue is on it (0.96) -- that gap is the dispersion, and it is what phi is measuring.",
+         "Dashed = perfect agreement. TOP row uses each site's fitted phi; BOTTOM row sets phi = 0, leaving only binomial sampling noise.",
+         "Columns are tertiles of READ DEPTH, not of phi -- the two are nearly independent (Spearman 0.05).",
+         "Top row sits on the diagonal everywhere. Bottom row falls below it, and the shortfall grows with depth (pred/obs 1.00 -> 1.02 -> 0.88):",
+         "deep sites have little sampling noise, so whatever spread remains must be real dispersion. That gap is what phi measures.",
          sep = "\n")) +
   theme_bw(base_size = 11) +
-  theme(legend.position = "top", panel.grid.minor = element_blank(),
+  theme(panel.grid.minor = element_blank(), strip.text.y = element_text(size = 8),
         plot.subtitle = element_text(size = 8))
 ```
 
-The blue cloud tracks the diagonal in all three depth strata (BB pred/obs
+The top row tracks the diagonal in all three depth strata (BB pred/obs
 0.96–1.05), so the fitted φ reproduces the observed scatter across the whole
-dataset, not merely at hand-picked sites. The orange cloud — sampling noise
-alone — falls short, and does so most clearly in the **deep third** (0.881),
-which is exactly where it should: deep sites have little sampling noise, so
-whatever spread remains has to be real dispersion. The correlation between φ and
-the observed spread also strengthens with depth (Spearman 0.22 → 0.34 → 0.54),
-for the same reason.
+dataset, not merely at hand-picked sites. The bottom row — sampling noise alone
+— falls short, and does so most clearly at **15+ reads** (0.881), which is
+exactly where it should: deep sites have little sampling noise, so whatever
+spread remains has to be real dispersion. The correlation between φ and the
+observed spread strengthens with depth for the same reason (Spearman 0.22 → 0.34
+→ 0.54).
+
+To be explicit, since the column labels could invite the wrong reading: those
+are **read-depth** tertiles (1–5, 6–14, 15+ reads per cell line), and depth is
+nearly unrelated to φ — the fraction of high-φ sites is 12.9%, 9.5% and 14.3%
+across the three. The median φ does rise with depth (10⁻⁵ → 3×10⁻³), but that is
+the floor artefact from §2.1 rather than a dispersion difference: shallow sites
+collapse onto the 10⁻⁶ boundary far more often.
 
 ```{r priorfig, fig.height=8, fig.width=13}
 BN <- fread(file.path(LS, "prior_bins.tsv"), sep = "\t")
