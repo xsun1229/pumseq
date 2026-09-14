@@ -1,0 +1,244 @@
+---
+title: "Beta-binomial pU-QTL: the window × nPC calibration grid"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = "center", fig.width = 10)
+
+PSI <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl"
+CG  <- file.path(PSI, "qtl_betabinomial/calibration_grid")
+
+G  <- fread(file.path(CG, "grid_calibration.tsv"), sep = "\t")
+PB <- fread(file.path(CG, "grid_problematic.tsv"), sep = "\t")
+QQ <- fread(file.path(CG, "grid_qq_thinned.tsv.gz"), sep = "\t")
+
+WINDOWS <- c(5, 20, 50, 100); KS <- c(3, 5, 7, 10, 15, 20)
+wlab <- function(x) factor(sprintf("%d kb", x), levels = sprintf("%d kb", WINDOWS))
+klab <- function(x) factor(sprintf("k = %d", x), levels = sprintf("k = %d", KS))
+G[, window := wlab(window_kb)]
+pal <- c("5 kb" = "#1f4e9c", "20 kb" = "#2c8a4a", "50 kb" = "#d98c00", "100 kb" = "#c0392b")
+```
+
+# 1. What this is, and what it is not
+
+Two parameters were never chosen on evidence: the cis **window** and the number
+of phenotype **PCs** (k). A 4 × 7 sweep of those already existed
+(`lrt_results_merged/grid_summary.txt`), but it was a **scan** sweep — it reports
+how many QTLs each configuration discovers and says nothing about whether any of
+them is correctly calibrated. It was also produced by the single-start fitter, so
+its counts are partly the optimiser artefact described in
+[the optimiser page](qtl_mapping_betabinomial_optimiser.html).
+
+This page re-measures every cell the way calibration is measured everywhere else
+in the project: **real data plus 5 genome-wide phenotype permutations**, under
+the multi-start fitter. Permuted data cannot contain any genotype–phenotype
+relationship, so anything significant there is a false positive by construction.
+
+> **24 cells**: window ∈ {5, 20, 50, 100} kb × k ∈ {3, 5, 7, 10, 15, 20}.
+> Phenotype `fold5_union_auto_noUCcalled` (chr1–22, U/C-variant sites removed,
+> φ-boundary sites **retained**), `BB_PHI_STARTS=0.01,0.1,0.5`, MLE selection,
+> same 5 permutation seeds in every cell.
+
+Cost scales with the number of cis tests, which is why this is affordable at all
+while the equivalent scan sweep is not: the scan runs 100 per-site permutations
+(101 passes) against this grid's 6.
+
+```{r cost}
+knitr::kable(G[npcs == 3, .(window, `tested sites` = tested_sites,
+                            `cis tests` = format(tests, big.mark = ","))],
+  caption = "Tests per configuration at k = 3. A 20x wider window is ~20x the tests, so the 100 kb cells cost ~13x the 5 kb cells.")
+```
+
+# 2. The grid
+
+```{r grid}
+knitr::kable(G[, .(window, k = npcs, `tested sites` = tested_sites,
+                   `real lambda` = real_lambda,
+                   `perm lambda` = sprintf("%.3f - %.3f", perm_lambda_min, perm_lambda_max),
+                   `real tail` = real_tail, `worst perm tail` = worst_perm_tail,
+                   problematic)],
+  caption = "All 24 cells. 'problematic' = sites with permuted min-p < 1e-10 AND real min-p < 1e-10, the same definition used throughout the project.")
+```
+
+# 3. Permutation λ: driven by k, not by window
+
+λ on permuted data should be 1. It is the primary criterion for k, because k
+changes the covariate model and therefore the per-test null.
+
+```{r lamtab}
+sep <- dcast(G, npcs ~ window_kb, value.var = "perm_lambda_max")
+setnames(sep, c("k", paste0("w", setdiff(names(sep), "npcs"), "kb")))
+knitr::kable(sep, caption = "Worst permutation lambda. Rows vary a lot; columns barely move.")
+```
+
+```{r lamfig, fig.height=4.6, fig.width=8.4}
+ggplot(G, aes(npcs, perm_lambda_max, colour = window)) +
+  geom_hline(yintercept = 1, colour = "grey55", linetype = "dashed", linewidth = 0.4) +
+  geom_line(linewidth = 0.6) + geom_point(size = 2) +
+  scale_colour_manual(values = pal, name = "window") +
+  scale_x_continuous(breaks = KS) +
+  labs(x = "phenotype PCs (k)", y = expression(worst~permutation~lambda),
+       title = "Permutation calibration across the grid",
+       subtitle = "The four lines nearly coincide: lambda depends on k and hardly at all on window size.") +
+  theme_bw(base_size = 11) + theme(panel.grid.minor = element_blank())
+```
+
+Quantitatively, the spread of permutation λ **across windows at fixed k is
+0.012–0.100**, while **across k at fixed window it is 0.357–0.465** — a factor of
+4 to 40. This is the result that lets the two parameters be chosen
+independently, and it was an assumption before this grid was run, not a fact.
+
+λ rises monotonically with k at every window, from ~1.06 at k = 3 to ~1.43–1.53
+at k = 20. More covariates steadily degrade the null. With 50 cell lines, k = 20
+means fitting 21 parameters, and the
+[failure-mode breakdown](qtl_mapping_betabinomial_npcs_tradeoff.html) shows
+95–98% of the resulting fit failures are the μ-boundary and coefficient guards,
+i.e. the model saturating the data.
+
+# 4. Problematic sites
+
+```{r probtab}
+pm <- dcast(G, npcs ~ window_kb, value.var = "problematic")
+setnames(pm, c("k", paste0("w", setdiff(names(pm), "npcs"), "kb")))
+knitr::kable(pm, caption = "Number of sites significant in BOTH real and permuted data. Zero is the only acceptable value; k = 3 achieves it at every window.")
+```
+
+This is the sharpest statistic in the grid — λ is a median over hundreds of
+thousands of p-values and moves little even when the tail is catastrophic,
+whereas this count responds directly. Note it rises with **both** k and window:
+at k = 7 it goes 0 → 0 → 3 → 4 as the window widens, because more tests per site
+means a smaller minimum p-value by chance alone.
+
+```{r probsites}
+if (nrow(PB)) knitr::kable(
+  PB[, .(site = paste0("chr", sub(" ", ":", sid)), window_kb, k = npcs,
+         `perm min-p` = signif(min_p_perm, 3),
+         `real -log10p` = round(real_nlp, 1))][order(window_kb, k)][1:min(.N, 25)],
+  caption = "The offending sites (first 25). None occurs at k = 3 in any window.")
+```
+
+# 5. QQ plots for all 24 cells
+
+Blue = real data, red = the 5 permutations. Every red point above the diagonal
+is a false positive by construction, so **a taller red cloud is a worse-calibrated
+cell**. Rows are windows, columns are k.
+
+Points rather than lines, and the thinning keeps every one of the 2,000 smallest
+p-values per dataset and thins only the bulk — uniform-in-rank thinning would
+discard most of the tail, which is the only part that carries the conclusion.
+
+```{r qqgrid, fig.height=9.5, fig.width=13}
+QQ[, kind := ifelse(dataset == "real", "real", "permuted")]
+QQ[, `:=`(window = wlab(window_kb), kk = klab(npcs))]
+ggplot(QQ, aes(expected, observed, group = dataset, colour = kind)) +
+  geom_abline(slope = 1, intercept = 0, colour = "grey55", linewidth = 0.25) +
+  geom_point(size = 0.25, alpha = 0.5, shape = 16) +
+  facet_grid(window ~ kk) +
+  scale_colour_manual(values = c(real = "#1f4e9c", permuted = "#c0392b"), name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
+  labs(x = expression(Expected~-log[10](p)), y = expression(Observed~-log[10](p)),
+       title = "Calibration across the whole grid",
+       subtitle = "Red = 5 permutations (false positives by construction). Reading across a row shows the effect of k; down a column, the effect of window.") +
+  theme_bw(base_size = 10) +
+  theme(legend.position = "top", panel.grid.minor = element_blank(),
+        strip.text = element_text(size = 9))
+```
+
+The same figure with the y-axis clipped, so the permuted clouds — which are what
+the comparison turns on — are not compressed by the real-data tail:
+
+```{r qqgridclip, fig.height=9.5, fig.width=13}
+ggplot(QQ, aes(expected, observed, group = dataset, colour = kind)) +
+  geom_abline(slope = 1, intercept = 0, colour = "grey55", linewidth = 0.25) +
+  geom_point(size = 0.25, alpha = 0.5, shape = 16) +
+  facet_grid(window ~ kk) +
+  coord_cartesian(ylim = c(0, 35)) +
+  scale_colour_manual(values = c(real = "#1f4e9c", permuted = "#c0392b"), name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
+  labs(x = expression(Expected~-log[10](p)), y = expression(Observed~-log[10](p)),
+       title = "Same grid, y-axis clipped to 35",
+       subtitle = "Clipped points are outside the view, not deleted.") +
+  theme_bw(base_size = 10) +
+  theme(legend.position = "top", panel.grid.minor = element_blank(),
+        strip.text = element_text(size = 9))
+```
+
+Permuted-only, at a common scale, which is the cleanest way to rank the cells:
+
+```{r qqperm, fig.height=9.5, fig.width=13}
+ggplot(QQ[kind == "permuted"], aes(expected, observed, group = dataset)) +
+  geom_abline(slope = 1, intercept = 0, colour = "grey55", linewidth = 0.25) +
+  geom_point(size = 0.25, alpha = 0.5, shape = 16, colour = "#c0392b") +
+  facet_grid(window ~ kk) +
+  coord_cartesian(ylim = c(0, 20)) +
+  labs(x = expression(Expected~-log[10](p)), y = expression(Observed~-log[10](p)),
+       title = "Permutations only: pure false positives, common y-axis",
+       subtitle = paste("The k = 3 column hugs the diagonal at every window. Departure grows to the right, hardly at all downwards.",
+                        "y-axis clipped to 20; the k = 20 cells reach 29-31 at the wider windows, so their topmost points are outside the view, not deleted.", sep = "\n")) +
+  theme_bw(base_size = 10) +
+  theme(panel.grid.minor = element_blank(), strip.text = element_text(size = 9))
+```
+
+# 6. What the grid decides, and what it does not
+
+**k = 3, settled.** Three criteria agree, and now robustly across all four
+windows: permutation λ is minimised at k = 3 (~1.06, rising monotonically to
+~1.43–1.53 at k = 20); problematic sites are **zero at k = 3 in every window**
+and rise with k everywhere; and unusable sites are a U-shape minimised at k = 3
+(2.3% lost, against 11.3% at k = 0 and 38.8% at k = 20). No other k is better on
+any of the three.
+
+**The window is not settled by this grid.** Two things get in the way, and both
+are limitations of the statistics available here rather than results:
+
+```{r tails}
+knitr::kable(dcast(G, npcs ~ window_kb, value.var = "worst_perm_tail")[
+  , setnames(.SD, c("k", paste0("w", WINDOWS, "kb")))],
+  caption = "Worst permuted tail height. IDENTICAL across windows at every k -- the worst permuted hit is the same site-SNP pair in all four windows, all within 5 kb, so widening the window never finds anything more extreme. The same is true of the real tail.")
+```
+
+First, the tail heights are *identical* across windows, because the extreme tail
+is owned by specific site–SNP pairs that all lie within 5 kb. Widening the window
+adds a great many null tests and nothing more extreme. Second, and consequently,
+a permutation-derived threshold does **not** adapt to the multiple-testing burden
+across windows — it is fixed by one extreme pair — so counting real sites that
+beat it favours wider windows purely because they get more attempts per site.
+
+**A metric on this page that does not work, recorded so it is not reused.** The
+precompute also emits a "calibrated discovery count" — real sites beating that
+cell's own worst permuted min-p. It is unusable across k, because the threshold
+is a single order statistic from 5 permutations and varies from 11.3 to 31.4
+across cells, so a cell that drew clean permutations gets a lenient bar. It
+reports 83 discoveries for k = 10 at 5 kb against 75 for k = 3, which inverts the
+correct ranking. Across windows at fixed k = 3 the threshold happens to be
+identical (11.3) so the counts 75 / 81 / 83 / 86 are at least comparable, but
+they are confounded as described above and should not be read as power.
+
+Deciding the window properly needs the per-site multiple-testing correction the
+scan computes with its 100 per-site permutations. That is ~325 h of compute for
+the four windows at k = 3, of which only the winning cell is kept. The
+alternative is to fix 5 kb on the grounds that the entire extreme tail already
+lies within it, and 13× the compute buys nothing measurable — **an open decision,
+not a conclusion.**
+
+# 7. Provenance
+
+- Calibrations: `run_calibration_grid.sbatch <WINDOW_BP> <NPCS>`, 24 jobs on
+  caslake, output stems
+  `calib_siteres_w{5,20,50,100}kb_pc{3,5,7,10,15,20}_auto_noUCcalled_MS`.
+  Runtimes 52 min (5 kb, k=3) to ~10 h (100 kb, k=20).
+- Summary + figures: `27.calibration_grid_summary.R` via
+  `run_calibration_grid_summary.sbatch` → `qtl_betabinomial/calibration_grid/`.
+- Fitter: `betabin_lib.R` with `BB_PHI_STARTS=0.01,0.1,0.5`, `BB_PHI_SELECT=loglik`.
+- Related: [the optimiser failure](qtl_mapping_betabinomial_optimiser.html) ·
+  [nPCs trade-off](qtl_mapping_betabinomial_npcs_tradeoff.html) ·
+  [filtering strategy](qtl_mapping_betabinomial_strategy.html)

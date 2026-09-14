@@ -56,6 +56,8 @@ Beta Binomial
 * [How many covariate PCs? The phi-boundary / fittability trade-off](qtl_mapping_betabinomial_npcs_tradeoff.html)
 * [Diagnosing the problematic sites: %pU by genotype, phi, and the fitted prior on p_i](qtl_mapping_betabinomial_problematic_diagnosis.html)
 * [The phi pathology is an optimiser failure (multi-start audit)](qtl_mapping_betabinomial_optimiser.html)
+* [Window x nPC calibration grid: 24 cells, real + 5 permutations](qtl_mapping_betabinomial_grid.html)
+* [Is the overdispersion really that small? Validating the phi peak](qtl_mapping_betabinomial_lowphi.html)
 
 
 

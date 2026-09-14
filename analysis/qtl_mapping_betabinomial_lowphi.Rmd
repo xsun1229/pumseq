@@ -1,0 +1,408 @@
+---
+title: "Beta-binomial pU-QTL: is the overdispersion really that small?"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = "center", fig.width = 10)
+
+PSI <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl"
+LP  <- file.path(PSI, "qtl_betabinomial/low_phi_validation")
+RC  <- file.path(PSI, "qtl_betabinomial/phi_recovery")
+MLE_PEAK <- 0.0126; PHI_EPS <- 1e-6
+```
+
+# 1. The objection
+
+The mode of the fitted overdispersion across sites is **φ ≈ 0.0126**, and that
+number carries weight: it is the reference value the
+[φ-selection heuristic](qtl_mapping_betabinomial_optimiser.html#7_Choosing_φ_when_it_is_not_identifiable)
+aims at. It looks implausibly small. At our median depth of 8 reads it inflates
+the variance of y/n by only about 10% over a binomial, and **79.2% of sites
+cannot reject φ = 0 at all**. The natural suspicion is that 0.0126 describes our
+*estimator* — a nearly flat likelihood with a hard boundary at zero — rather than
+the dispersion in the data.
+
+This page is the answer to that objection. Three independent lines of evidence,
+one of which uses no likelihood at all, plus the physical meaning of a small φ.
+It also addresses the obvious follow-up: if most sites cannot reject φ = 0, why
+model dispersion at all?
+
+# 2. Does the estimator recover a known φ?
+
+The cleanest test is to generate data where the answer is known. Per site, take
+the **real depths n_i** and the **real fitted mean vector μ_i** from the k = 3
+null (μ_i varies across cell lines because logit μ_i = β₀ + z_iᵀγ), then for a
+grid of **true** φ simulate
+
+$$p_i \sim \mathrm{Beta}\!\left(\mu_i\tfrac{1-\varphi}{\varphi},\ (1-\mu_i)\tfrac{1-\varphi}{\varphi}\right), \qquad y_i \sim \mathrm{Binomial}(n_i, p_i)$$
+
+and refit with the same multi-start fitter and the same covariates. The simulated
+data therefore face exactly the estimation problem the real data pose.
+
+```{r rectab}
+RS <- fread(file.path(RC, "recovery_summary.tsv"), sep = "\t")
+knitr::kable(RS, caption = "Recovery of a known phi at our real depths. The MODE is what matters, because it is the statistic the heuristic uses.")
+```
+
+**The mode is very nearly unbiased from 0.0126 upwards** — within 3% at 0.0126
+itself and within 10% across the whole range up to 0.4. Only at a true φ of
+0.005 does it collapse to the floor, which is below what our depth can resolve.
+
+```{r recfig, fig.height=7, fig.width=13}
+RB <- fread(file.path(RC, "recovery_by_site.txt.gz"), sep = "\t")[is.finite(phi_hat)]
+PT <- sort(unique(RB$phi_true))
+RB[, panel := factor(sprintf("true phi = %g", phi_true),
+                     levels = sprintf("true phi = %g", PT))]
+vl <- unique(RB[, .(panel, phi_true)])
+ggplot(RB, aes(phi_hat)) +
+  geom_histogram(bins = 60, fill = "#4a7fbf", colour = NA) +
+  geom_vline(data = vl, aes(xintercept = phi_true), colour = "#c0392b", linewidth = 0.7) +
+  geom_vline(xintercept = MLE_PEAK, colour = "#2c8a4a", linewidth = 0.6, linetype = "longdash") +
+  geom_vline(xintercept = PHI_EPS, colour = "grey35", linetype = "dotted") +
+  facet_wrap(~ panel, nrow = 2, scales = "free_y") +
+  scale_x_log10(breaks = 10^seq(-6, 0, 2), labels = c("1e-6", "1e-4", "1e-2", "1")) +
+  labs(x = expression(hat(varphi)*", axis log-spaced (ticks are "*hat(varphi)*" itself)"),
+       y = "sites",
+       title = "Simulated from a KNOWN phi, then refitted",
+       subtitle = paste(
+         "Red solid = the TRUE phi. Green dashed = 0.0126, the peak in the REAL data. Dotted = the 1e-6 floor.",
+         "Note the 'true phi = 0.0126' panel: ONE true value produces a bimodal estimate distribution with a pile at the floor.",
+         sep = "\n")) +
+  theme_bw(base_size = 11) +
+  theme(panel.grid.minor = element_blank(), plot.subtitle = element_text(size = 8))
+```
+
+Two further results fall out of this, both of which correct earlier readings of
+the real φ distribution.
+
+**The low-end bimodality is an artefact of the estimator.** Look at the
+`true phi = 0.0126` panel: a *single* true value produces both a pile at the
+floor and a clean hump at the truth. So the floor pile and the ~46% of real
+sites below 10⁻⁴ are not a distinct population of near-binomial sites — they are
+what this estimator does to low-φ sites at 8 reads. An earlier version of the
+optimiser page described these as two regimes; that reading was wrong.
+
+**The median is badly biased; only the mode is usable.** At a true φ of 0.0126
+the median estimate is 0.0023, five-fold low, because half the estimates fall
+into the artefact pile. This is why the reference value must be a mode and not
+an average — a point in favour of how the heuristic was constructed.
+
+Simulating a single true φ = 0.0126 reproduces the real data on every summary:
+
+```{r recmatch}
+knitr::kable(data.table(
+  statistic = c("mode", "% at the 1e-6 floor", "% below 1e-4", "% identified (reject phi=0)"),
+  `real data` = c("0.0126", "16.3%", "49.1%", "20.8%"),
+  `simulated, truth = 0.0126` = c(
+    sprintf("%.4f", RS[phi_true == 0.0126]$`mode phi_hat`),
+    RS[phi_true == 0.0126]$`% at 1e-6 floor`,
+    RS[phi_true == 0.0126]$`% below 1e-4`,
+    RS[phi_true == 0.0126]$`% identified`)),
+  caption = "A single true phi of 0.0126 reproduces the real distribution's mode, its boundary pile-up, its sub-1e-4 mass and its identification rate.")
+```
+
+# 3. An estimator with no likelihood in it
+
+The recovery simulation still relies on `fit_bb_mle`. A fully independent check
+is possible because φ enters the model through only one quantity, the design
+effect:
+
+$$\mathrm{Var}(y_i/n_i) = \frac{p(1-p)}{n_i}\bigl[1 + (n_i-1)\varphi\bigr]$$
+
+So a Pearson χ² of the counts against their fitted mean recovers φ by moments.
+With m covered cell lines and q fitted mean parameters,
+
+$$S = \sum_i \frac{(y_i - n_i\hat\mu_i)^2}{n_i\hat\mu_i(1-\hat\mu_i)}, \qquad \mathbb{E}[S] \approx (m-q) + \varphi\sum_i (n_i-1), \qquad \hat\varphi_{\text{mom}} = \frac{S-(m-q)}{\sum_i (n_i-1)}$$
+
+This is the classic overdispersion moment estimator (the construction behind
+Tarone 1979). It is **closed form — no likelihood, no optimiser, no starting
+value** — so it cannot suffer the bimodal-likelihood failure that made the
+multi-start fix necessary in the first place.
+
+```{r momtab}
+MS <- fread(file.path(LP, "moment_summary.tsv"), sep = "\t")
+knitr::kable(MS, caption = "Two moment variants and the MLE. NB the MLE row's mode is taken over ALL sites, which is the 2.4e-6 floor artefact; the 0.0126 peak comes from the subset where all three optimiser starts agree. The moment estimators need no such subsetting.")
+```
+
+**The moment estimators peak at 0.0146 and 0.0152, against the MLE's 0.0126** —
+agreement within 16–20% between methods whose failure modes have nothing in
+common. That is the direct answer to "is the peak an artefact of your fitter?".
+
+It also independently vindicates the decision to build the peak on the
+reproducible subset. Computed over *all* sites with no filtering, the moment
+estimators land near 0.015 — close to the subset-based MLE peak of 0.0126, and
+four orders of magnitude away from the all-sites MLE mode of 2.4×10⁻⁶.
+
+```{r momfig, fig.height=4.6, fig.width=13}
+MB <- fread(file.path(LP, "moment_by_site.txt.gz"), sep = "\t")
+PL <- rbind(data.table(phi = MB$phi_mle,          est = "MLE, multi-start"),
+            data.table(phi = MB$phi_mom_pooled,   est = "moments, pooled mean"),
+            data.table(phi = MB$phi_mom_adjusted, est = "moments, covariate-adjusted"))
+PL <- PL[is.finite(phi) & phi > 0]
+PL[, est := factor(est, levels = c("MLE, multi-start", "moments, pooled mean",
+                                   "moments, covariate-adjusted"))]
+mode_log10 <- function(x) { d <- density(log10(x)); 10^d$x[which.max(d$y)] }
+md <- PL[, .(mode = mode_log10(phi)), by = est]
+ggplot(PL, aes(phi)) +
+  geom_histogram(bins = 60, fill = "#4a7fbf", colour = NA) +
+  geom_vline(xintercept = MLE_PEAK, colour = "#2c8a4a", linewidth = 0.7) +
+  geom_vline(data = md, aes(xintercept = mode), colour = "#c0392b",
+             linetype = "longdash", linewidth = 0.6) +
+  geom_vline(xintercept = PHI_EPS, colour = "grey35", linetype = "dotted") +
+  facet_wrap(~ est, nrow = 1, scales = "free_y") +
+  scale_x_log10(breaks = 10^seq(-6, 0, 2), labels = c("1e-6", "1e-4", "1e-2", "1")) +
+  labs(x = expression(hat(varphi)*", axis log-spaced (ticks are "*hat(varphi)*" itself)"),
+       y = "sites",
+       title = "Three estimators of phi, only the first of which uses a likelihood",
+       subtitle = paste(
+         "Green solid = 0.0126, the MLE peak on the reproducible subset. Red dashed = each panel's OWN mode. Dotted = the 1e-6 floor.",
+         "Only positive estimates are shown: the moment estimators return phi <= 0 at 34% and 39% of sites respectively (see caveats below).",
+         sep = "\n")) +
+  theme_bw(base_size = 11) +
+  theme(panel.grid.minor = element_blank(), plot.subtitle = element_text(size = 8))
+```
+
+**Caveats, stated plainly.** The moment estimator returns φ ≤ 0 at 34% (pooled)
+and 39% (adjusted) of sites, meaning the observed scatter was at or below
+binomial — the moment analogue of the MLE's pile-up at the floor. Those cannot
+be a true variance, so the mode is taken over positive values only, and that
+selection biases it **upward**. Adjusting for covariates was expected to shrink
+the gap to the MLE and did not — 0.0152 against the pooled 0.0146 — so the
+selection, not the mean model, is the likely cause of the residual 16–20%. The
+moment estimator is also less efficient than the MLE, so its per-site values are
+noisier.
+
+# 4. Would a larger φ fit the data?
+
+Independently of any estimator, we can ask which φ reproduces the spread of %pU
+actually observed across cell lines.
+
+```{r spread}
+SP <- fread(file.path(LP, "spread_check.tsv"), sep = "\t")
+knitr::kable(SP[, .(phi = label, `median predicted SD`, `median observed SD`,
+                    `predicted / observed`, `% sites over-predicted`)],
+  caption = "A well-chosen phi should sit near predicted/observed = 1 and split the sites about 50/50.")
+```
+
+**A φ of 0.45 predicts nearly double the spread we observe** and over-predicts at
+90% of sites. So a substantially larger value is excluded by the raw scatter,
+with no model fitting involved.
+
+Note honestly that at the *median* site φ = 0 fits marginally better than 0.0126
+(ratio 1.016 versus 1.051). That is the same fact as most sites being
+unidentifiable, and it is not an argument for the binomial — see §6.
+
+# 5. What a small φ actually means
+
+```{r interp}
+knitr::kable(fread(file.path(LP, "interpretation.tsv"), sep = "\t"),
+  caption = "At the median site: pooled %pU = 4.6%, median depth 8 reads. alpha = mu(1-phi)/phi; when alpha < 1 the Beta prior is U-shaped, i.e. the model asserts pU levels pile up at 0% and 100% across cell lines.")
+```
+
+φ = 0.0126 says the true pU level varies by about **±2.4 percentage points**
+across cell lines around a mean of 4.6% — modest but real biological variation.
+It is also the only value in that table keeping **α > 1**, i.e. a sensible
+unimodal distribution of pU levels. From φ = 0.05 upward α falls below 1 and the
+model asserts that pU levels pile up at 0% and 100%, which is not what these
+sites look like.
+
+```{r budget}
+knitr::kable(fread(file.path(LP, "depth_budget.tsv"), sep = "\t"),
+  caption = "The depth budget: why a small phi is expected, and why individual sites cannot see it.")
+```
+
+**This is the whole explanation for the 79.2%.** At 8 reads, one %pU measurement
+carries **±7.4 pp** of pure sampling noise while the biological signal is
+**2.4 pp** — noise exceeds signal **3.1-fold per site**, and resolving it would
+need roughly **79 reads per cell line**. A single site therefore cannot reject
+φ = 0, which is a statement about our depth, not about whether dispersion exists.
+
+So the answer to "is φ too small?" is that φ is small **because at this depth the
+cell-line-to-cell-line variability in %pU is mostly read sampling.** The genuine
+biological component is real but modest, and the estimator finds it correctly.
+
+# 6. Then why model dispersion at all?
+
+Because per-site non-rejection is a power statement, and the aggregate is not
+remotely ambiguous.
+
+```{r aggtab}
+knitr::kable(fread(file.path(LP, "aggregate_test.tsv"), sep = "\t"),
+  caption = "Testing phi = 0 GLOBALLY. NB phi = 0 lies on the boundary of the parameter space, so the LRT null is the mixture 0.5*chi2_0 + 0.5*chi2_1 (Chernoff 1954; Self & Liang 1987) and the 95% cut is a loglik drop of 1.353, not the 1.92 of a chi2_1.")
+```
+
+```{r idtab}
+knitr::kable(fread(file.path(LP, "identifiability.tsv"), sep = "\t"),
+  caption = "Per-site identifiability at both critical values. Earlier passes of this project used 1.92 and so reported 81.4% unidentifiable; the boundary-correct figure is 79.2%.")
+```
+
+Twenty-one percent of sites reject φ = 0 against 5% expected, the summed LRT is
+**296× its null expectation**, and 11.7% of sites reject individually with a
+log-likelihood drop above 10. And the decisive practical point — the binomial
+model *is* the φ = 0 model, and we ran it:
+
+```{r binom}
+bl <- fread("/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl/qtl_binomial/lrt_calibration/calib_lrt_w5kb_pc3_lambda.txt")
+bb <- fread(file.path(PSI, "qtl_betabinomial/lrt_calibration/calib_siteres_w5kb_pc3_auto_noUCcalled_MS_lambda.txt"))
+knitr::kable(data.table(
+  model = c("binomial (phi = 0 by construction)", "beta-binomial, same window and k"),
+  `real lambda` = c(round(bl[dataset == "real"]$lambda, 3), round(bb[dataset == "real"]$lambda, 3)),
+  `permutation lambda` = c(
+    sprintf("%.2f - %.2f", min(bl[dataset != "real"]$lambda), max(bl[dataset != "real"]$lambda)),
+    sprintf("%.3f - %.3f", min(bb[dataset != "real"]$lambda), max(bb[dataset != "real"]$lambda)))),
+  caption = "Permuted data contain no genotype-phenotype relationship by construction, so a permutation lambda of 3 is pure false-positive inflation.")
+```
+
+Setting φ = 0 roughly **triples the median test statistic on data with no
+signal**. The dispersion costs nothing at the 79% of low-φ sites, where φ̂ goes
+small and the model reduces to near-binomial, and prevents catastrophe at the
+minority where it is large. That minority is real, not artefact: a single true
+φ = 0.0126 produces only 1.3% of sites above 0.128, whereas the real data have
+12.3% — a ten-fold excess, 1,290 sites against 135.
+
+# 7. What a low-φ site looks like
+
+Everything above argues from summary statistics. This section looks at
+individual sites, all drawn from the **reproducible subset** — the sites where
+all three optimiser starts agree on φ to within 5%, i.e. the middle panel of the
+φ-distribution figure and the set the peak is measured on.
+
+Three groups: five sites bracketing the peak (φ ∈ [0.010, 0.016]), three with
+low φ even within that subset (φ < 0.003), and three high-φ sites for contrast
+(φ > 0.3), where α < 1 and the Beta prior turns U-shaped.
+
+> **These are deliberately the deepest available sites, not a random sample.** At
+> the median site (8 reads) the sampling noise on one %pU measurement is ±7.4 pp
+> against a biological signal of 2.4 pp, so nothing is visible by eye at typical
+> depth — which is §5's point, not a counterexample to it. The sites below carry
+> 1,800–8,100 reads per cell line, so binomial noise is negligible and the
+> **observed** scatter is essentially the biological scatter. That is what makes
+> them a fair test of whether φ means what we claim.
+
+```{r sitetab}
+LS <- file.path(PSI, "qtl_betabinomial/lowphi_sites")
+P  <- fread(file.path(LS, "site_table.tsv"), sep = "\t")
+GRP <- c("near the peak (phi ~ 0.0126)", "low (phi < 0.003)",
+         "high, for contrast (phi > 0.3)")
+P[, group := factor(group, levels = GRP)]
+setorder(P, group, -phi)
+knitr::kable(P[, .(site = paste0("chr", sub(" ", ":", sid)), group,
+                   phi = signif(phi, 4), `alpha (median)` = round(alpha_median, 2),
+                   n_cl, `median depth` = median_depth,
+                   `pooled %pU` = round(100 * pooled_pu, 1),
+                   `observed SD (pp)` = round(100 * obs_sd_pu, 1),
+                   `SD implied by phi (pp)` = round(100 * prior_sd_pi, 1),
+                   `lead cis-SNP` = lead_snp)],
+  caption = "All 11 sites are covered in all 50 cell lines. 'SD implied by phi' is sqrt(mu(1-mu)phi), the Beta spread around each cell line's own mu_i.")
+```
+
+**The observed scatter tracks what φ predicts across a 260-fold range of φ** —
+1.4 pp observed against 1.0 pp implied at φ = 0.0023, about 4 pp against 3 pp at
+the peak, and 40.7 pp against 38.5 pp at φ = 0.60. The observed value sits
+consistently a little above the implied one at low φ because the implied figure
+covers only the Beta dispersion around each cell line's μ_i, whereas the observed
+scatter also contains the covariate-driven spread in μ_i itself; at high φ the
+dispersion dominates and the two converge.
+
+The important comparison is the near-peak group against the contrast group. A
+φ ≈ 0.013 site has a %pU spread of **4–8 pp**, not the **19–41 pp** of the
+high-φ sites. So the peak value is describing a genuinely tight distribution,
+which is what the objection needs to be tested against.
+
+```{r pugeno, fig.height=8, fig.width=13}
+OB <- fread(file.path(LS, "observed.tsv"), sep = "\t")
+OB[, group := factor(group, levels = GRP)]
+OB <- merge(OB, P[, .(sid, phi)], by = "sid")
+OB[, panel := sprintf("chr%s\nphi = %.4f", sub(" ", ":", sid), phi)]
+OB[, panel := factor(panel, levels = unique(OB[order(group, -phi)]$panel))]
+OB[, gf := factor(geno, levels = c(0, 1, 2))]
+ggplot(OB[!is.na(gf)], aes(gf, 100 * pu)) +
+  geom_boxplot(aes(fill = group), outlier.shape = NA, alpha = 0.45, width = 0.6) +
+  geom_jitter(width = 0.15, height = 0, size = 0.9, alpha = 0.7) +
+  facet_wrap(~ panel, ncol = 4, scales = "free_y") +
+  scale_fill_manual(values = c("#1f4e9c", "#2c8a4a", "#c0392b"), name = NULL) +
+  labs(x = "genotype at the lead cis-SNP (copies of the counted allele)", y = "%pU",
+       title = "%pU by genotype at the lead cis-SNP",
+       subtitle = paste(
+         "One point per cell line. y-axes are free, so compare the SPREAD within a panel against the table, not across panels.",
+         "Blue = near the peak, green = low phi, red = high phi. The high-phi panels show the U-shaped signature: %pU pushed towards 0 and 100%.",
+         sep = "\n")) +
+  theme_bw(base_size = 10) +
+  theme(legend.position = "top", panel.grid.minor = element_blank(),
+        strip.text = element_text(size = 8))
+```
+
+```{r priorfig, fig.height=8, fig.width=13}
+BN <- fread(file.path(LS, "prior_bins.tsv"), sep = "\t")
+BN[, group := factor(group, levels = GRP)]
+BN <- merge(BN, P[, .(sid, phi)], by = "sid")
+BN[, panel := sprintf("chr%s\nphi = %.4f", sub(" ", ":", sid), phi)]
+BN[, panel := factor(panel, levels = levels(OB$panel))]
+ggplot(BN, aes(100 * bin_mid, mass, colour = group)) +
+  geom_line(linewidth = 0.6) +
+  facet_wrap(~ panel, ncol = 4, scales = "free_y") +
+  scale_colour_manual(values = c("#1f4e9c", "#2c8a4a", "#c0392b"), name = NULL) +
+  labs(x = expression("latent pU rate "*p[i]*" (%)"), y = "probability mass",
+       title = "The fitted Beta prior on the latent rate p_i",
+       subtitle = paste(
+         "Exact probability mass from pbeta, averaged over the 50 per-cell-line Beta distributions -- no simulation.",
+         "Near the peak (blue) and at low phi (green) the prior is unimodal and narrow. At high phi (red) alpha < 1 and it collapses towards the 0/1 boundaries.",
+         sep = "\n")) +
+  theme_bw(base_size = 10) +
+  theme(legend.position = "top", panel.grid.minor = element_blank(),
+        strip.text = element_text(size = 8))
+```
+
+The prior panels make the α criterion from §5 concrete. At the peak and below,
+α ≈ 5–23 and the prior on p_i is a narrow unimodal bump — a coherent description
+of a site whose pU level varies modestly between cell lines. In the contrast
+group α ≈ 0.16–0.39 and the prior piles against 0 and 1, asserting that cell
+lines are either unmodified or fully modified. **That is what a large φ commits
+you to**, and it is the right description for only about 12% of sites.
+
+# 8. What can and cannot be claimed
+
+**Supported.** φ ≈ 0.013 is a reliable estimate of the *modal* dispersion across
+sites. Three methods with unrelated failure modes agree; the estimator recovers a
+known φ to within 3% at this value; a substantially larger φ is excluded by the
+observed scatter; and the magnitude is exactly what the depth budget predicts.
+
+**Not supported, and should not be claimed.** φ is *not* estimable at an
+individual site — 79.2% cannot reject zero and per-site estimates scatter over
+orders of magnitude. The observed φ distribution is *not* the true distribution:
+its low-end bimodality is an estimator artefact, so only the mode and the
+high-φ tail can be read from it, and the median cannot.
+
+The practical consequence is that per-site φ should probably be **shrunk toward
+the population mode** rather than estimated freely — the modal value is well
+determined in aggregate while being undetermined per site, which is precisely
+the case for partial pooling. That would also make the φ-selection heuristic
+unnecessary, since the heuristic is a crude discrete approximation to the same
+idea. Full pooling would be wrong: the 12% of genuinely high-dispersion sites
+must be able to pull away from the mode. **Not yet implemented.**
+
+# 9. Provenance
+
+- Recovery simulation: `28.phi_recovery_simulation.R` via `run_phi_recovery.sbatch`
+  → `qtl_betabinomial/phi_recovery/`. True φ ∈ {0.005, 0.0126, 0.05, 0.1, 0.2, 0.4},
+  seed 2026, real n_i and fitted μ_i, k = 3, multi-start MLE.
+- Moment estimators, spread check, interpretation, aggregate test:
+  `29.low_phi_validation.R` via `run_low_phi_validation.sbatch`
+  → `qtl_betabinomial/low_phi_validation/`.
+- Per-site identifiability: `multistart_audit/identifiability.txt.gz`, profile
+  log-likelihood with β re-optimised at fixed φ.
+- Example sites: `30.lowphi_example_sites.R` via `run_lowphi_example_sites.sbatch`
+  → `qtl_betabinomial/lowphi_sites/`. Lead cis-SNP by beta-binomial LRT within
+  ±5 kb at MAF ≥ 0.05; genotypes from `genotype/qtl_binomial/by_chr/chr*.traw`.
+- Related: [the optimiser failure and the φ heuristic](qtl_mapping_betabinomial_optimiser.html) ·
+  [the model](qtl_mapping_betabinomial_model.html) ·
+  [window × nPC calibration grid](qtl_mapping_betabinomial_grid.html)

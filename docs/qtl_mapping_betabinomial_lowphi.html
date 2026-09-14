@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-09-13" />
+
+<title>Beta-binomial pU-QTL: is the overdispersion really that small?</title>
+
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Beta-binomial pU-QTL: is the overdispersion
+really that small?</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-09-13</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-09-13
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreededb4c8b928278e7a96f6fede5d03f5769499150targetblankdedb4c8a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/dedb4c8b928278e7a96f6fede5d03f5769499150" target="_blank">dedb4c8</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreededb4c8b928278e7a96f6fede5d03f5769499150targetblankdedb4c8a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/dedb4c8b928278e7a96f6fede5d03f5769499150" target="_blank">dedb4c8</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/qtl_mapping_betabinomial_grid.Rmd
+    Untracked:  analysis/qtl_mapping_betabinomial_lowphi.Rmd
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_optimiser.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = &quot;center&quot;, fig.width = 10)
+
+PSI &lt;- &quot;/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl&quot;
+LP  &lt;- file.path(PSI, &quot;qtl_betabinomial/low_phi_validation&quot;)
+RC  &lt;- file.path(PSI, &quot;qtl_betabinomial/phi_recovery&quot;)
+MLE_PEAK &lt;- 0.0126; PHI_EPS &lt;- 1e-6</code></pre>
+<div id="the-objection" class="section level1">
+<h1>1. The objection</h1>
+<p>The mode of the fitted overdispersion across sites is <strong>φ ≈
+0.0126</strong>, and that number carries weight: it is the reference
+value the <a
+href="qtl_mapping_betabinomial_optimiser.html#7_Choosing_φ_when_it_is_not_identifiable">φ-selection
+heuristic</a> aims at. It looks implausibly small. At our median depth
+of 8 reads it inflates the variance of y/n by only about 10% over a
+binomial, and <strong>79.2% of sites cannot reject φ = 0 at
+all</strong>. The natural suspicion is that 0.0126 describes our
+<em>estimator</em> — a nearly flat likelihood with a hard boundary at
+zero — rather than the dispersion in the data.</p>
+<p>This page is the answer to that objection. Three independent lines of
+evidence, one of which uses no likelihood at all, plus the physical
+meaning of a small φ. It also addresses the obvious follow-up: if most
+sites cannot reject φ = 0, why model dispersion at all?</p>
+</div>
+<div id="does-the-estimator-recover-a-known-φ" class="section level1">
+<h1>2. Does the estimator recover a known φ?</h1>
+<p>The cleanest test is to generate data where the answer is known. Per
+site, take the <strong>real depths n_i</strong> and the <strong>real
+fitted mean vector μ_i</strong> from the k = 3 null (μ_i varies across
+cell lines because logit μ_i = β₀ + z_iᵀγ), then for a grid of
+<strong>true</strong> φ simulate</p>
+<p><span class="math display">\[p_i \sim
+\mathrm{Beta}\!\left(\mu_i\tfrac{1-\varphi}{\varphi},\
+(1-\mu_i)\tfrac{1-\varphi}{\varphi}\right), \qquad y_i \sim
+\mathrm{Binomial}(n_i, p_i)\]</span></p>
+<p>and refit with the same multi-start fitter and the same covariates.
+The simulated data therefore face exactly the estimation problem the
+real data pose.</p>
+<pre class="r"><code>RS &lt;- fread(file.path(RC, &quot;recovery_summary.tsv&quot;), sep = &quot;\t&quot;)
+knitr::kable(RS, caption = &quot;Recovery of a known phi at our real depths. The MODE is what matters, because it is the statistic the heuristic uses.&quot;)</code></pre>
+<table>
+<caption>Recovery of a known phi at our real depths. The MODE is what
+matters, because it is the statistic the heuristic uses.</caption>
+<colgroup>
+<col width="7%" />
+<col width="4%" />
+<col width="10%" />
+<col width="12%" />
+<col width="7%" />
+<col width="6%" />
+<col width="13%" />
+<col width="10%" />
+<col width="10%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">phi_true</th>
+<th align="right">sites</th>
+<th align="right">mode phi_hat</th>
+<th align="right">median phi_hat</th>
+<th align="right">q25</th>
+<th align="right">q75</th>
+<th align="left">% at 1e-6 floor</th>
+<th align="left">% below 1e-4</th>
+<th align="left">% identified</th>
+<th align="right">bias: mode / truth</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.0050</td>
+<td align="right">10076</td>
+<td align="right">0.0000022</td>
+<td align="right">0.0000108</td>
+<td align="right">2.40e-06</td>
+<td align="right">0.00518</td>
+<td align="left">20.0%</td>
+<td align="left">57.8%</td>
+<td align="left">11.1%</td>
+<td align="right">0.000</td>
+</tr>
+<tr class="even">
+<td align="right">0.0126</td>
+<td align="right">10046</td>
+<td align="right">0.0121900</td>
+<td align="right">0.0023030</td>
+<td align="right">3.20e-06</td>
+<td align="right">0.01320</td>
+<td align="left">14.5%</td>
+<td align="left">45.5%</td>
+<td align="left">21.8%</td>
+<td align="right">0.967</td>
+</tr>
+<tr class="odd">
+<td align="right">0.0500</td>
+<td align="right">9994</td>
+<td align="right">0.0453300</td>
+<td align="right">0.0334900</td>
+<td align="right">3.81e-04</td>
+<td align="right">0.05510</td>
+<td align="left">5.3%</td>
+<td align="left">24.5%</td>
+<td align="left">49.8%</td>
+<td align="right">0.907</td>
+</tr>
+<tr class="even">
+<td align="right">0.1000</td>
+<td align="right">9923</td>
+<td align="right">0.0923500</td>
+<td align="right">0.0756100</td>
+<td align="right">3.33e-02</td>
+<td align="right">0.11000</td>
+<td align="left">2.7%</td>
+<td align="left">15.9%</td>
+<td align="left">65.1%</td>
+<td align="right">0.923</td>
+</tr>
+<tr class="odd">
+<td align="right">0.2000</td>
+<td align="right">9800</td>
+<td align="right">0.1892000</td>
+<td align="right">0.1621000</td>
+<td align="right">9.53e-02</td>
+<td align="right">0.22300</td>
+<td align="left">1.2%</td>
+<td align="left">9.4%</td>
+<td align="left">77.5%</td>
+<td align="right">0.946</td>
+</tr>
+<tr class="even">
+<td align="right">0.4000</td>
+<td align="right">9491</td>
+<td align="right">0.3905000</td>
+<td align="right">0.3474000</td>
+<td align="right">2.36e-01</td>
+<td align="right">0.43700</td>
+<td align="left">0.5%</td>
+<td align="left">5.2%</td>
+<td align="left">87.4%</td>
+<td align="right">0.976</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The mode is very nearly unbiased from 0.0126 upwards</strong>
+— within 3% at 0.0126 itself and within 10% across the whole range up to
+0.4. Only at a true φ of 0.005 does it collapse to the floor, which is
+below what our depth can resolve.</p>
+<pre class="r"><code>RB &lt;- fread(file.path(RC, &quot;recovery_by_site.txt.gz&quot;), sep = &quot;\t&quot;)[is.finite(phi_hat)]
+PT &lt;- sort(unique(RB$phi_true))
+RB[, panel := factor(sprintf(&quot;true phi = %g&quot;, phi_true),
+                     levels = sprintf(&quot;true phi = %g&quot;, PT))]
+vl &lt;- unique(RB[, .(panel, phi_true)])
+ggplot(RB, aes(phi_hat)) +
+  geom_histogram(bins = 60, fill = &quot;#4a7fbf&quot;, colour = NA) +
+  geom_vline(data = vl, aes(xintercept = phi_true), colour = &quot;#c0392b&quot;, linewidth = 0.7) +
+  geom_vline(xintercept = MLE_PEAK, colour = &quot;#2c8a4a&quot;, linewidth = 0.6, linetype = &quot;longdash&quot;) +
+  geom_vline(xintercept = PHI_EPS, colour = &quot;grey35&quot;, linetype = &quot;dotted&quot;) +
+  facet_wrap(~ panel, nrow = 2, scales = &quot;free_y&quot;) +
+  scale_x_log10(breaks = 10^seq(-6, 0, 2), labels = c(&quot;1e-6&quot;, &quot;1e-4&quot;, &quot;1e-2&quot;, &quot;1&quot;)) +
+  labs(x = expression(hat(varphi)*&quot;, axis log-spaced (ticks are &quot;*hat(varphi)*&quot; itself)&quot;),
+       y = &quot;sites&quot;,
+       title = &quot;Simulated from a KNOWN phi, then refitted&quot;,
+       subtitle = paste(
+         &quot;Red solid = the TRUE phi. Green dashed = 0.0126, the peak in the REAL data. Dotted = the 1e-6 floor.&quot;,
+         &quot;Note the &#39;true phi = 0.0126&#39; panel: ONE true value produces a bimodal estimate distribution with a pile at the floor.&quot;,
+         sep = &quot;\n&quot;)) +
+  theme_bw(base_size = 11) +
+  theme(panel.grid.minor = element_blank(), plot.subtitle = element_text(size = 8))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_lowphi.Rmd/recfig-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>Two further results fall out of this, both of which correct earlier
+readings of the real φ distribution.</p>
+<p><strong>The low-end bimodality is an artefact of the
+estimator.</strong> Look at the <code>true phi = 0.0126</code> panel: a
+<em>single</em> true value produces both a pile at the floor and a clean
+hump at the truth. So the floor pile and the ~46% of real sites below
+10⁻⁴ are not a distinct population of near-binomial sites — they are
+what this estimator does to low-φ sites at 8 reads. An earlier version
+of the optimiser page described these as two regimes; that reading was
+wrong.</p>
+<p><strong>The median is badly biased; only the mode is usable.</strong>
+At a true φ of 0.0126 the median estimate is 0.0023, five-fold low,
+because half the estimates fall into the artefact pile. This is why the
+reference value must be a mode and not an average — a point in favour of
+how the heuristic was constructed.</p>
+<p>Simulating a single true φ = 0.0126 reproduces the real data on every
+summary:</p>
+<pre class="r"><code>knitr::kable(data.table(
+  statistic = c(&quot;mode&quot;, &quot;% at the 1e-6 floor&quot;, &quot;% below 1e-4&quot;, &quot;% identified (reject phi=0)&quot;),
+  `real data` = c(&quot;0.0126&quot;, &quot;16.3%&quot;, &quot;49.1%&quot;, &quot;20.8%&quot;),
+  `simulated, truth = 0.0126` = c(
+    sprintf(&quot;%.4f&quot;, RS[phi_true == 0.0126]$`mode phi_hat`),
+    RS[phi_true == 0.0126]$`% at 1e-6 floor`,
+    RS[phi_true == 0.0126]$`% below 1e-4`,
+    RS[phi_true == 0.0126]$`% identified`)),
+  caption = &quot;A single true phi of 0.0126 reproduces the real distribution&#39;s mode, its boundary pile-up, its sub-1e-4 mass and its identification rate.&quot;)</code></pre>
+<table>
+<caption>A single true phi of 0.0126 reproduces the real distribution’s
+mode, its boundary pile-up, its sub-1e-4 mass and its identification
+rate.</caption>
+<thead>
+<tr class="header">
+<th align="left">statistic</th>
+<th align="left">real data</th>
+<th align="left">simulated, truth = 0.0126</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">mode</td>
+<td align="left">0.0126</td>
+<td align="left">0.0122</td>
+</tr>
+<tr class="even">
+<td align="left">% at the 1e-6 floor</td>
+<td align="left">16.3%</td>
+<td align="left">14.5%</td>
+</tr>
+<tr class="odd">
+<td align="left">% below 1e-4</td>
+<td align="left">49.1%</td>
+<td align="left">45.5%</td>
+</tr>
+<tr class="even">
+<td align="left">% identified (reject phi=0)</td>
+<td align="left">20.8%</td>
+<td align="left">21.8%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="an-estimator-with-no-likelihood-in-it" class="section level1">
+<h1>3. An estimator with no likelihood in it</h1>
+<p>The recovery simulation still relies on <code>fit_bb_mle</code>. A
+fully independent check is possible because φ enters the model through
+only one quantity, the design effect:</p>
+<p><span class="math display">\[\mathrm{Var}(y_i/n_i) =
+\frac{p(1-p)}{n_i}\bigl[1 + (n_i-1)\varphi\bigr]\]</span></p>
+<p>So a Pearson χ² of the counts against their fitted mean recovers φ by
+moments. With m covered cell lines and q fitted mean parameters,</p>
+<p><span class="math display">\[S = \sum_i \frac{(y_i -
+n_i\hat\mu_i)^2}{n_i\hat\mu_i(1-\hat\mu_i)}, \qquad \mathbb{E}[S]
+\approx (m-q) + \varphi\sum_i (n_i-1), \qquad \hat\varphi_{\text{mom}} =
+\frac{S-(m-q)}{\sum_i (n_i-1)}\]</span></p>
+<p>This is the classic overdispersion moment estimator (the construction
+behind Tarone 1979). It is <strong>closed form — no likelihood, no
+optimiser, no starting value</strong> — so it cannot suffer the
+bimodal-likelihood failure that made the multi-start fix necessary in
+the first place.</p>
+<pre class="r"><code>MS &lt;- fread(file.path(LP, &quot;moment_summary.tsv&quot;), sep = &quot;\t&quot;)
+knitr::kable(MS, caption = &quot;Two moment variants and the MLE. NB the MLE row&#39;s mode is taken over ALL sites, which is the 2.4e-6 floor artefact; the 0.0126 peak comes from the subset where all three optimiser starts agree. The moment estimators need no such subsetting.&quot;)</code></pre>
+<table>
+<caption>Two moment variants and the MLE. NB the MLE row’s mode is taken
+over ALL sites, which is the 2.4e-6 floor artefact; the 0.0126 peak
+comes from the subset where all three optimiser starts agree. The moment
+estimators need no such subsetting.</caption>
+<colgroup>
+<col width="32%" />
+<col width="3%" />
+<col width="9%" />
+<col width="15%" />
+<col width="11%" />
+<col width="5%" />
+<col width="4%" />
+<col width="16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">estimator</th>
+<th align="right">sites</th>
+<th align="left">phi &lt;= 0</th>
+<th align="right">mode (positive values)</th>
+<th align="right">median (positive)</th>
+<th align="right">q25</th>
+<th align="right">q75</th>
+<th align="right">ratio to MLE peak 0.0126</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">moments, pooled mean (no covariates, model-free)</td>
+<td align="right">10722</td>
+<td align="left">3,648 (34.0%)</td>
+<td align="right">0.0146200</td>
+<td align="right">0.0331600</td>
+<td align="right">9.82e-03</td>
+<td align="right">0.1430</td>
+<td align="right">1.160</td>
+</tr>
+<tr class="even">
+<td align="left">moments, covariate-adjusted mean (like-for-like)</td>
+<td align="right">10467</td>
+<td align="left">4,095 (39.1%)</td>
+<td align="right">0.0151700</td>
+<td align="right">0.0242400</td>
+<td align="right">7.76e-03</td>
+<td align="right">0.0951</td>
+<td align="right">1.204</td>
+</tr>
+<tr class="odd">
+<td align="left">MLE, multi-start (for reference)</td>
+<td align="right">10467</td>
+<td align="left">0 (0.0%)</td>
+<td align="right">0.0000024</td>
+<td align="right">0.0002384</td>
+<td align="right">2.90e-06</td>
+<td align="right">0.0230</td>
+<td align="right">0.000</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The moment estimators peak at 0.0146 and 0.0152, against the
+MLE’s 0.0126</strong> — agreement within 16–20% between methods whose
+failure modes have nothing in common. That is the direct answer to “is
+the peak an artefact of your fitter?”.</p>
+<p>It also independently vindicates the decision to build the peak on
+the reproducible subset. Computed over <em>all</em> sites with no
+filtering, the moment estimators land near 0.015 — close to the
+subset-based MLE peak of 0.0126, and four orders of magnitude away from
+the all-sites MLE mode of 2.4×10⁻⁶.</p>
+<pre class="r"><code>MB &lt;- fread(file.path(LP, &quot;moment_by_site.txt.gz&quot;), sep = &quot;\t&quot;)
+PL &lt;- rbind(data.table(phi = MB$phi_mle,          est = &quot;MLE, multi-start&quot;),
+            data.table(phi = MB$phi_mom_pooled,   est = &quot;moments, pooled mean&quot;),
+            data.table(phi = MB$phi_mom_adjusted, est = &quot;moments, covariate-adjusted&quot;))
+PL &lt;- PL[is.finite(phi) &amp; phi &gt; 0]
+PL[, est := factor(est, levels = c(&quot;MLE, multi-start&quot;, &quot;moments, pooled mean&quot;,
+                                   &quot;moments, covariate-adjusted&quot;))]
+mode_log10 &lt;- function(x) { d &lt;- density(log10(x)); 10^d$x[which.max(d$y)] }
+md &lt;- PL[, .(mode = mode_log10(phi)), by = est]
+ggplot(PL, aes(phi)) +
+  geom_histogram(bins = 60, fill = &quot;#4a7fbf&quot;, colour = NA) +
+  geom_vline(xintercept = MLE_PEAK, colour = &quot;#2c8a4a&quot;, linewidth = 0.7) +
+  geom_vline(data = md, aes(xintercept = mode), colour = &quot;#c0392b&quot;,
+             linetype = &quot;longdash&quot;, linewidth = 0.6) +
+  geom_vline(xintercept = PHI_EPS, colour = &quot;grey35&quot;, linetype = &quot;dotted&quot;) +
+  facet_wrap(~ est, nrow = 1, scales = &quot;free_y&quot;) +
+  scale_x_log10(breaks = 10^seq(-6, 0, 2), labels = c(&quot;1e-6&quot;, &quot;1e-4&quot;, &quot;1e-2&quot;, &quot;1&quot;)) +
+  labs(x = expression(hat(varphi)*&quot;, axis log-spaced (ticks are &quot;*hat(varphi)*&quot; itself)&quot;),
+       y = &quot;sites&quot;,
+       title = &quot;Three estimators of phi, only the first of which uses a likelihood&quot;,
+       subtitle = paste(
+         &quot;Green solid = 0.0126, the MLE peak on the reproducible subset. Red dashed = each panel&#39;s OWN mode. Dotted = the 1e-6 floor.&quot;,
+         &quot;Only positive estimates are shown: the moment estimators return phi &lt;= 0 at 34% and 39% of sites respectively (see caveats below).&quot;,
+         sep = &quot;\n&quot;)) +
+  theme_bw(base_size = 11) +
+  theme(panel.grid.minor = element_blank(), plot.subtitle = element_text(size = 8))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_lowphi.Rmd/momfig-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p><strong>Caveats, stated plainly.</strong> The moment estimator
+returns φ ≤ 0 at 34% (pooled) and 39% (adjusted) of sites, meaning the
+observed scatter was at or below binomial — the moment analogue of the
+MLE’s pile-up at the floor. Those cannot be a true variance, so the mode
+is taken over positive values only, and that selection biases it
+<strong>upward</strong>. Adjusting for covariates was expected to shrink
+the gap to the MLE and did not — 0.0152 against the pooled 0.0146 — so
+the selection, not the mean model, is the likely cause of the residual
+16–20%. The moment estimator is also less efficient than the MLE, so its
+per-site values are noisier.</p>
+</div>
+<div id="would-a-larger-φ-fit-the-data" class="section level1">
+<h1>4. Would a larger φ fit the data?</h1>
+<p>Independently of any estimator, we can ask which φ reproduces the
+spread of %pU actually observed across cell lines.</p>
+<pre class="r"><code>SP &lt;- fread(file.path(LP, &quot;spread_check.tsv&quot;), sep = &quot;\t&quot;)
+knitr::kable(SP[, .(phi = label, `median predicted SD`, `median observed SD`,
+                    `predicted / observed`, `% sites over-predicted`)],
+  caption = &quot;A well-chosen phi should sit near predicted/observed = 1 and split the sites about 50/50.&quot;)</code></pre>
+<table>
+<caption>A well-chosen phi should sit near predicted/observed = 1 and
+split the sites about 50/50.</caption>
+<colgroup>
+<col width="29%" />
+<col width="16%" />
+<col width="16%" />
+<col width="17%" />
+<col width="19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">phi</th>
+<th align="right">median predicted SD</th>
+<th align="right">median observed SD</th>
+<th align="right">predicted / observed</th>
+<th align="left">% sites over-predicted</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">0 (binomial)</td>
+<td align="right">0.0835</td>
+<td align="right">0.0822</td>
+<td align="right">1.016</td>
+<td align="left">50.8%</td>
+</tr>
+<tr class="even">
+<td align="left">0.0126 (the peak)</td>
+<td align="right">0.0863</td>
+<td align="right">0.0822</td>
+<td align="right">1.051</td>
+<td align="left">60.1%</td>
+</tr>
+<tr class="odd">
+<td align="left">0.05</td>
+<td align="right">0.0949</td>
+<td align="right">0.0822</td>
+<td align="right">1.155</td>
+<td align="left">70.1%</td>
+</tr>
+<tr class="even">
+<td align="left">0.2</td>
+<td align="right">0.1201</td>
+<td align="right">0.0822</td>
+<td align="right">1.462</td>
+<td align="left">82.0%</td>
+</tr>
+<tr class="odd">
+<td align="left">0.45 (a ‘plausible-looking’ value)</td>
+<td align="right">0.1534</td>
+<td align="right">0.0822</td>
+<td align="right">1.867</td>
+<td align="left">90.1%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>A φ of 0.45 predicts nearly double the spread we
+observe</strong> and over-predicts at 90% of sites. So a substantially
+larger value is excluded by the raw scatter, with no model fitting
+involved.</p>
+<p>Note honestly that at the <em>median</em> site φ = 0 fits marginally
+better than 0.0126 (ratio 1.016 versus 1.051). That is the same fact as
+most sites being unidentifiable, and it is not an argument for the
+binomial — see §6.</p>
+</div>
+<div id="what-a-small-φ-actually-means" class="section level1">
+<h1>5. What a small φ actually means</h1>
+<pre class="r"><code>knitr::kable(fread(file.path(LP, &quot;interpretation.tsv&quot;), sep = &quot;\t&quot;),
+  caption = &quot;At the median site: pooled %pU = 4.6%, median depth 8 reads. alpha = mu(1-phi)/phi; when alpha &lt; 1 the Beta prior is U-shaped, i.e. the model asserts pU levels pile up at 0% and 100% across cell lines.&quot;)</code></pre>
+<table>
+<caption>At the median site: pooled %pU = 4.6%, median depth 8 reads.
+alpha = mu(1-phi)/phi; when alpha &lt; 1 the Beta prior is U-shaped,
+i.e. the model asserts pU levels pile up at 0% and 100% across cell
+lines.</caption>
+<colgroup>
+<col width="6%" />
+<col width="25%" />
+<col width="5%" />
+<col width="30%" />
+<col width="32%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">phi</th>
+<th align="right">biological SD of %pU (pp)</th>
+<th align="right">alpha</th>
+<th align="left">prior on p_i</th>
+<th align="left">implied %pU range (mean +/- 2SD)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.0126</td>
+<td align="right">2.4</td>
+<td align="right">3.609</td>
+<td align="left">unimodal</td>
+<td align="left">0.0% - 9.3%</td>
+</tr>
+<tr class="even">
+<td align="right">0.0500</td>
+<td align="right">4.7</td>
+<td align="right">0.875</td>
+<td align="left">U-shaped: %pU piles at 0 and 1</td>
+<td align="left">0.0% - 14.0%</td>
+</tr>
+<tr class="odd">
+<td align="right">0.2000</td>
+<td align="right">9.4</td>
+<td align="right">0.184</td>
+<td align="left">U-shaped: %pU piles at 0 and 1</td>
+<td align="left">0.0% - 23.4%</td>
+</tr>
+<tr class="even">
+<td align="right">0.4500</td>
+<td align="right">14.1</td>
+<td align="right">0.056</td>
+<td align="left">U-shaped: %pU piles at 0 and 1</td>
+<td align="left">0.0% - 32.7%</td>
+</tr>
+</tbody>
+</table>
+<p>φ = 0.0126 says the true pU level varies by about <strong>±2.4
+percentage points</strong> across cell lines around a mean of 4.6% —
+modest but real biological variation. It is also the only value in that
+table keeping <strong>α &gt; 1</strong>, i.e. a sensible unimodal
+distribution of pU levels. From φ = 0.05 upward α falls below 1 and the
+model asserts that pU levels pile up at 0% and 100%, which is not what
+these sites look like.</p>
+<pre class="r"><code>knitr::kable(fread(file.path(LP, &quot;depth_budget.tsv&quot;), sep = &quot;\t&quot;),
+  caption = &quot;The depth budget: why a small phi is expected, and why individual sites cannot see it.&quot;)</code></pre>
+<table>
+<caption>The depth budget: why a small phi is expected, and why
+individual sites cannot see it.</caption>
+<thead>
+<tr class="header">
+<th align="left">quantity</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">median pooled pU</td>
+<td align="left">4.6%</td>
+</tr>
+<tr class="even">
+<td align="left">median depth</td>
+<td align="left">8 reads</td>
+</tr>
+<tr class="odd">
+<td align="left">measurement noise on one cell line (pp)</td>
+<td align="left">7.4</td>
+</tr>
+<tr class="even">
+<td align="left">biological SD implied by phi=0.0126 (pp)</td>
+<td align="left">2.4</td>
+</tr>
+<tr class="odd">
+<td align="left">noise / signal</td>
+<td align="left">3.1x</td>
+</tr>
+<tr class="even">
+<td align="left">reads per line needed to resolve</td>
+<td align="left">79</td>
+</tr>
+</tbody>
+</table>
+<p><strong>This is the whole explanation for the 79.2%.</strong> At 8
+reads, one %pU measurement carries <strong>±7.4 pp</strong> of pure
+sampling noise while the biological signal is <strong>2.4 pp</strong> —
+noise exceeds signal <strong>3.1-fold per site</strong>, and resolving
+it would need roughly <strong>79 reads per cell line</strong>. A single
+site therefore cannot reject φ = 0, which is a statement about our
+depth, not about whether dispersion exists.</p>
+<p>So the answer to “is φ too small?” is that φ is small <strong>because
+at this depth the cell-line-to-cell-line variability in %pU is mostly
+read sampling.</strong> The genuine biological component is real but
+modest, and the estimator finds it correctly.</p>
+</div>
+<div id="then-why-model-dispersion-at-all" class="section level1">
+<h1>6. Then why model dispersion at all?</h1>
+<p>Because per-site non-rejection is a power statement, and the
+aggregate is not remotely ambiguous.</p>
+<pre class="r"><code>knitr::kable(fread(file.path(LP, &quot;aggregate_test.tsv&quot;), sep = &quot;\t&quot;),
+  caption = &quot;Testing phi = 0 GLOBALLY. NB phi = 0 lies on the boundary of the parameter space, so the LRT null is the mixture 0.5*chi2_0 + 0.5*chi2_1 (Chernoff 1954; Self &amp; Liang 1987) and the 95% cut is a loglik drop of 1.353, not the 1.92 of a chi2_1.&quot;)</code></pre>
+<table>
+<caption>Testing phi = 0 GLOBALLY. NB phi = 0 lies on the boundary of
+the parameter space, so the LRT null is the mixture 0.5<em>chi2_0 +
+0.5</em>chi2_1 (Chernoff 1954; Self &amp; Liang 1987) and the 95% cut is
+a loglik drop of 1.353, not the 1.92 of a chi2_1.</caption>
+<thead>
+<tr class="header">
+<th align="left">quantity</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">sites tested</td>
+<td align="left">10,485</td>
+</tr>
+<tr class="even">
+<td align="left">reject phi=0 at nominal 5%</td>
+<td align="left">2,184 (20.8%)</td>
+</tr>
+<tr class="odd">
+<td align="left">expected if phi=0 everywhere</td>
+<td align="left">524 (5.0%)</td>
+</tr>
+<tr class="even">
+<td align="left">binomial test p-value</td>
+<td align="left">&lt; 2.22e-16</td>
+</tr>
+<tr class="odd">
+<td align="left">summed LRT statistic (2 x drop)</td>
+<td align="left">1,551,571</td>
+</tr>
+<tr class="even">
+<td align="left">expected summed LRT under phi=0</td>
+<td align="left">5,242</td>
+</tr>
+<tr class="odd">
+<td align="left">observed / expected</td>
+<td align="left">296x</td>
+</tr>
+<tr class="even">
+<td align="left">sites with drop &gt; 10</td>
+<td align="left">1,225 (11.7%)</td>
+</tr>
+<tr class="odd">
+<td align="left">sites with drop &gt; 50</td>
+<td align="left">732 (7.0%)</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(fread(file.path(LP, &quot;identifiability.tsv&quot;), sep = &quot;\t&quot;),
+  caption = &quot;Per-site identifiability at both critical values. Earlier passes of this project used 1.92 and so reported 81.4% unidentifiable; the boundary-correct figure is 79.2%.&quot;)</code></pre>
+<table>
+<caption>Per-site identifiability at both critical values. Earlier
+passes of this project used 1.92 and so reported 81.4% unidentifiable;
+the boundary-correct figure is 79.2%.</caption>
+<colgroup>
+<col width="43%" />
+<col width="5%" />
+<col width="21%" />
+<col width="12%" />
+<col width="16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">critical value</th>
+<th align="right">crit</th>
+<th align="right">sites rejecting phi=0</th>
+<th align="left">% identified</th>
+<th align="left">% UNidentifiable</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chi2_1, drop &gt; 1.92 (used in earlier passes)</td>
+<td align="right">1.920</td>
+<td align="right">1949</td>
+<td align="left">18.6%</td>
+<td align="left">81.4%</td>
+</tr>
+<tr class="even">
+<td align="left">boundary mixture, drop &gt; 1.353 (CORRECT)</td>
+<td align="right">1.353</td>
+<td align="right">2184</td>
+<td align="left">20.8%</td>
+<td align="left">79.2%</td>
+</tr>
+</tbody>
+</table>
+<p>Twenty-one percent of sites reject φ = 0 against 5% expected, the
+summed LRT is <strong>296× its null expectation</strong>, and 11.7% of
+sites reject individually with a log-likelihood drop above 10. And the
+decisive practical point — the binomial model <em>is</em> the φ = 0
+model, and we ran it:</p>
+<pre class="r"><code>bl &lt;- fread(&quot;/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl/qtl_binomial/lrt_calibration/calib_lrt_w5kb_pc3_lambda.txt&quot;)
+bb &lt;- fread(file.path(PSI, &quot;qtl_betabinomial/lrt_calibration/calib_siteres_w5kb_pc3_auto_noUCcalled_MS_lambda.txt&quot;))
+knitr::kable(data.table(
+  model = c(&quot;binomial (phi = 0 by construction)&quot;, &quot;beta-binomial, same window and k&quot;),
+  `real lambda` = c(round(bl[dataset == &quot;real&quot;]$lambda, 3), round(bb[dataset == &quot;real&quot;]$lambda, 3)),
+  `permutation lambda` = c(
+    sprintf(&quot;%.2f - %.2f&quot;, min(bl[dataset != &quot;real&quot;]$lambda), max(bl[dataset != &quot;real&quot;]$lambda)),
+    sprintf(&quot;%.3f - %.3f&quot;, min(bb[dataset != &quot;real&quot;]$lambda), max(bb[dataset != &quot;real&quot;]$lambda)))),
+  caption = &quot;Permuted data contain no genotype-phenotype relationship by construction, so a permutation lambda of 3 is pure false-positive inflation.&quot;)</code></pre>
+<table>
+<caption>Permuted data contain no genotype-phenotype relationship by
+construction, so a permutation lambda of 3 is pure false-positive
+inflation.</caption>
+<thead>
+<tr class="header">
+<th align="left">model</th>
+<th align="right">real lambda</th>
+<th align="left">permutation lambda</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">binomial (phi = 0 by construction)</td>
+<td align="right">5.547</td>
+<td align="left">2.93 - 3.44</td>
+</tr>
+<tr class="even">
+<td align="left">beta-binomial, same window and k</td>
+<td align="right">1.399</td>
+<td align="left">1.029 - 1.063</td>
+</tr>
+</tbody>
+</table>
+<p>Setting φ = 0 roughly <strong>triples the median test statistic on
+data with no signal</strong>. The dispersion costs nothing at the 79% of
+low-φ sites, where φ̂ goes small and the model reduces to near-binomial,
+and prevents catastrophe at the minority where it is large. That
+minority is real, not artefact: a single true φ = 0.0126 produces only
+1.3% of sites above 0.128, whereas the real data have 12.3% — a ten-fold
+excess, 1,290 sites against 135.</p>
+</div>
+<div id="what-a-low-φ-site-looks-like" class="section level1">
+<h1>7. What a low-φ site looks like</h1>
+<p>Everything above argues from summary statistics. This section looks
+at individual sites, all drawn from the <strong>reproducible
+subset</strong> — the sites where all three optimiser starts agree on φ
+to within 5%, i.e. the middle panel of the φ-distribution figure and the
+set the peak is measured on.</p>
+<p>Three groups: five sites bracketing the peak (φ ∈ [0.010, 0.016]),
+three with low φ even within that subset (φ &lt; 0.003), and three
+high-φ sites for contrast (φ &gt; 0.3), where α &lt; 1 and the Beta
+prior turns U-shaped.</p>
+<blockquote>
+<p><strong>These are deliberately the deepest available sites, not a
+random sample.</strong> At the median site (8 reads) the sampling noise
+on one %pU measurement is ±7.4 pp against a biological signal of 2.4 pp,
+so nothing is visible by eye at typical depth — which is §5’s point, not
+a counterexample to it. The sites below carry 1,800–8,100 reads per cell
+line, so binomial noise is negligible and the <strong>observed</strong>
+scatter is essentially the biological scatter. That is what makes them a
+fair test of whether φ means what we claim.</p>
+</blockquote>
+<pre class="r"><code>LS &lt;- file.path(PSI, &quot;qtl_betabinomial/lowphi_sites&quot;)
+P  &lt;- fread(file.path(LS, &quot;site_table.tsv&quot;), sep = &quot;\t&quot;)
+GRP &lt;- c(&quot;near the peak (phi ~ 0.0126)&quot;, &quot;low (phi &lt; 0.003)&quot;,
+         &quot;high, for contrast (phi &gt; 0.3)&quot;)
+P[, group := factor(group, levels = GRP)]
+setorder(P, group, -phi)
+knitr::kable(P[, .(site = paste0(&quot;chr&quot;, sub(&quot; &quot;, &quot;:&quot;, sid)), group,
+                   phi = signif(phi, 4), `alpha (median)` = round(alpha_median, 2),
+                   n_cl, `median depth` = median_depth,
+                   `pooled %pU` = round(100 * pooled_pu, 1),
+                   `observed SD (pp)` = round(100 * obs_sd_pu, 1),
+                   `SD implied by phi (pp)` = round(100 * prior_sd_pi, 1),
+                   `lead cis-SNP` = lead_snp)],
+  caption = &quot;All 11 sites are covered in all 50 cell lines. &#39;SD implied by phi&#39; is sqrt(mu(1-mu)phi), the Beta spread around each cell line&#39;s own mu_i.&quot;)</code></pre>
+<table style="width:100%;">
+<caption>All 11 sites are covered in all 50 cell lines. ‘SD implied by
+phi’ is sqrt(mu(1-mu)phi), the Beta spread around each cell line’s own
+mu_i.</caption>
+<colgroup>
+<col width="10%" />
+<col width="19%" />
+<col width="5%" />
+<col width="9%" />
+<col width="3%" />
+<col width="8%" />
+<col width="7%" />
+<col width="10%" />
+<col width="14%" />
+<col width="10%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="left">group</th>
+<th align="right">phi</th>
+<th align="right">alpha (median)</th>
+<th align="right">n_cl</th>
+<th align="right">median depth</th>
+<th align="right">pooled %pU</th>
+<th align="right">observed SD (pp)</th>
+<th align="right">SD implied by phi (pp)</th>
+<th align="left">lead cis-SNP</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr2:216499392</td>
+<td align="left">near the peak (phi ~ 0.0126)</td>
+<td align="right">0.015110</td>
+<td align="right">19.98</td>
+<td align="right">50</td>
+<td align="right">4242.5</td>
+<td align="right">32.8</td>
+<td align="right">7.8</td>
+<td align="right">5.7</td>
+<td align="left">2:216499126:G:T</td>
+</tr>
+<tr class="even">
+<td align="left">chr17:39201278</td>
+<td align="left">near the peak (phi ~ 0.0126)</td>
+<td align="right">0.013810</td>
+<td align="right">23.10</td>
+<td align="right">50</td>
+<td align="right">5090.5</td>
+<td align="right">31.5</td>
+<td align="right">7.0</td>
+<td align="right">5.5</td>
+<td align="left">17:39200770:A:T</td>
+</tr>
+<tr class="odd">
+<td align="left">chr12:120199451</td>
+<td align="left">near the peak (phi ~ 0.0126)</td>
+<td align="right">0.012960</td>
+<td align="right">5.32</td>
+<td align="right">50</td>
+<td align="right">8129.0</td>
+<td align="right">9.0</td>
+<td align="right">4.0</td>
+<td align="right">3.0</td>
+<td align="left">12:120198746:C:A</td>
+</tr>
+<tr class="even">
+<td align="left">chr19:49491457</td>
+<td align="left">near the peak (phi ~ 0.0126)</td>
+<td align="right">0.012640</td>
+<td align="right">5.75</td>
+<td align="right">50</td>
+<td align="right">5906.5</td>
+<td align="right">9.7</td>
+<td align="right">4.8</td>
+<td align="right">3.1</td>
+<td align="left">19:49486493:A:G</td>
+</tr>
+<tr class="odd">
+<td align="left">chr11:75405650</td>
+<td align="left">near the peak (phi ~ 0.0126)</td>
+<td align="right">0.011340</td>
+<td align="right">6.44</td>
+<td align="right">50</td>
+<td align="right">4287.0</td>
+<td align="right">8.6</td>
+<td align="right">3.9</td>
+<td align="right">2.9</td>
+<td align="left">11:75408029:G:T</td>
+</tr>
+<tr class="even">
+<td align="left">chr13:27255333</td>
+<td align="left">low (phi &lt; 0.003)</td>
+<td align="right">0.002843</td>
+<td align="right">16.89</td>
+<td align="right">50</td>
+<td align="right">2536.5</td>
+<td align="right">4.6</td>
+<td align="right">1.5</td>
+<td align="right">1.1</td>
+<td align="left">13:27251241:C:G</td>
+</tr>
+<tr class="odd">
+<td align="left">chr20:62387123</td>
+<td align="left">low (phi &lt; 0.003)</td>
+<td align="right">0.002826</td>
+<td align="right">17.63</td>
+<td align="right">50</td>
+<td align="right">1825.0</td>
+<td align="right">5.6</td>
+<td align="right">1.7</td>
+<td align="right">1.2</td>
+<td align="left">20:62384924:T:C</td>
+</tr>
+<tr class="even">
+<td align="left">chr11:8684037</td>
+<td align="left">low (phi &lt; 0.003)</td>
+<td align="right">0.002305</td>
+<td align="right">17.14</td>
+<td align="right">50</td>
+<td align="right">3756.0</td>
+<td align="right">4.6</td>
+<td align="right">1.4</td>
+<td align="right">1.0</td>
+<td align="left">11:8688697:G:T</td>
+</tr>
+<tr class="odd">
+<td align="left">chr14:105855808</td>
+<td align="left">high, for contrast (phi &gt; 0.3)</td>
+<td align="right">0.599500</td>
+<td align="right">0.30</td>
+<td align="right">50</td>
+<td align="right">2098.5</td>
+<td align="right">46.9</td>
+<td align="right">40.7</td>
+<td align="right">38.5</td>
+<td align="left">14:105858270:C:A</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:29942781</td>
+<td align="left">high, for contrast (phi &gt; 0.3)</td>
+<td align="right">0.569500</td>
+<td align="right">0.39</td>
+<td align="right">50</td>
+<td align="right">4281.5</td>
+<td align="right">40.4</td>
+<td align="right">36.4</td>
+<td align="right">37.7</td>
+<td align="left">6:29943448:A:G</td>
+</tr>
+<tr class="odd">
+<td align="left">chr6:31356934</td>
+<td align="left">high, for contrast (phi &gt; 0.3)</td>
+<td align="right">0.354500</td>
+<td align="right">0.16</td>
+<td align="right">50</td>
+<td align="right">5249.5</td>
+<td align="right">9.7</td>
+<td align="right">18.7</td>
+<td align="right">17.3</td>
+<td align="left">6:31357540:C:T</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The observed scatter tracks what φ predicts across a 260-fold
+range of φ</strong> — 1.4 pp observed against 1.0 pp implied at φ =
+0.0023, about 4 pp against 3 pp at the peak, and 40.7 pp against 38.5 pp
+at φ = 0.60. The observed value sits consistently a little above the
+implied one at low φ because the implied figure covers only the Beta
+dispersion around each cell line’s μ_i, whereas the observed scatter
+also contains the covariate-driven spread in μ_i itself; at high φ the
+dispersion dominates and the two converge.</p>
+<p>The important comparison is the near-peak group against the contrast
+group. A φ ≈ 0.013 site has a %pU spread of <strong>4–8 pp</strong>, not
+the <strong>19–41 pp</strong> of the high-φ sites. So the peak value is
+describing a genuinely tight distribution, which is what the objection
+needs to be tested against.</p>
+<pre class="r"><code>OB &lt;- fread(file.path(LS, &quot;observed.tsv&quot;), sep = &quot;\t&quot;)
+OB[, group := factor(group, levels = GRP)]
+OB &lt;- merge(OB, P[, .(sid, phi)], by = &quot;sid&quot;)
+OB[, panel := sprintf(&quot;chr%s\nphi = %.4f&quot;, sub(&quot; &quot;, &quot;:&quot;, sid), phi)]
+OB[, panel := factor(panel, levels = unique(OB[order(group, -phi)]$panel))]
+OB[, gf := factor(geno, levels = c(0, 1, 2))]
+ggplot(OB[!is.na(gf)], aes(gf, 100 * pu)) +
+  geom_boxplot(aes(fill = group), outlier.shape = NA, alpha = 0.45, width = 0.6) +
+  geom_jitter(width = 0.15, height = 0, size = 0.9, alpha = 0.7) +
+  facet_wrap(~ panel, ncol = 4, scales = &quot;free_y&quot;) +
+  scale_fill_manual(values = c(&quot;#1f4e9c&quot;, &quot;#2c8a4a&quot;, &quot;#c0392b&quot;), name = NULL) +
+  labs(x = &quot;genotype at the lead cis-SNP (copies of the counted allele)&quot;, y = &quot;%pU&quot;,
+       title = &quot;%pU by genotype at the lead cis-SNP&quot;,
+       subtitle = paste(
+         &quot;One point per cell line. y-axes are free, so compare the SPREAD within a panel against the table, not across panels.&quot;,
+         &quot;Blue = near the peak, green = low phi, red = high phi. The high-phi panels show the U-shaped signature: %pU pushed towards 0 and 100%.&quot;,
+         sep = &quot;\n&quot;)) +
+  theme_bw(base_size = 10) +
+  theme(legend.position = &quot;top&quot;, panel.grid.minor = element_blank(),
+        strip.text = element_text(size = 8))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_lowphi.Rmd/pugeno-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>BN &lt;- fread(file.path(LS, &quot;prior_bins.tsv&quot;), sep = &quot;\t&quot;)
+BN[, group := factor(group, levels = GRP)]
+BN &lt;- merge(BN, P[, .(sid, phi)], by = &quot;sid&quot;)
+BN[, panel := sprintf(&quot;chr%s\nphi = %.4f&quot;, sub(&quot; &quot;, &quot;:&quot;, sid), phi)]
+BN[, panel := factor(panel, levels = levels(OB$panel))]
+ggplot(BN, aes(100 * bin_mid, mass, colour = group)) +
+  geom_line(linewidth = 0.6) +
+  facet_wrap(~ panel, ncol = 4, scales = &quot;free_y&quot;) +
+  scale_colour_manual(values = c(&quot;#1f4e9c&quot;, &quot;#2c8a4a&quot;, &quot;#c0392b&quot;), name = NULL) +
+  labs(x = expression(&quot;latent pU rate &quot;*p[i]*&quot; (%)&quot;), y = &quot;probability mass&quot;,
+       title = &quot;The fitted Beta prior on the latent rate p_i&quot;,
+       subtitle = paste(
+         &quot;Exact probability mass from pbeta, averaged over the 50 per-cell-line Beta distributions -- no simulation.&quot;,
+         &quot;Near the peak (blue) and at low phi (green) the prior is unimodal and narrow. At high phi (red) alpha &lt; 1 and it collapses towards the 0/1 boundaries.&quot;,
+         sep = &quot;\n&quot;)) +
+  theme_bw(base_size = 10) +
+  theme(legend.position = &quot;top&quot;, panel.grid.minor = element_blank(),
+        strip.text = element_text(size = 8))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_lowphi.Rmd/priorfig-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>The prior panels make the α criterion from §5 concrete. At the peak
+and below, α ≈ 5–23 and the prior on p_i is a narrow unimodal bump — a
+coherent description of a site whose pU level varies modestly between
+cell lines. In the contrast group α ≈ 0.16–0.39 and the prior piles
+against 0 and 1, asserting that cell lines are either unmodified or
+fully modified. <strong>That is what a large φ commits you to</strong>,
+and it is the right description for only about 12% of sites.</p>
+</div>
+<div id="what-can-and-cannot-be-claimed" class="section level1">
+<h1>8. What can and cannot be claimed</h1>
+<p><strong>Supported.</strong> φ ≈ 0.013 is a reliable estimate of the
+<em>modal</em> dispersion across sites. Three methods with unrelated
+failure modes agree; the estimator recovers a known φ to within 3% at
+this value; a substantially larger φ is excluded by the observed
+scatter; and the magnitude is exactly what the depth budget
+predicts.</p>
+<p><strong>Not supported, and should not be claimed.</strong> φ is
+<em>not</em> estimable at an individual site — 79.2% cannot reject zero
+and per-site estimates scatter over orders of magnitude. The observed φ
+distribution is <em>not</em> the true distribution: its low-end
+bimodality is an estimator artefact, so only the mode and the high-φ
+tail can be read from it, and the median cannot.</p>
+<p>The practical consequence is that per-site φ should probably be
+<strong>shrunk toward the population mode</strong> rather than estimated
+freely — the modal value is well determined in aggregate while being
+undetermined per site, which is precisely the case for partial pooling.
+That would also make the φ-selection heuristic unnecessary, since the
+heuristic is a crude discrete approximation to the same idea. Full
+pooling would be wrong: the 12% of genuinely high-dispersion sites must
+be able to pull away from the mode. <strong>Not yet
+implemented.</strong></p>
+</div>
+<div id="provenance" class="section level1">
+<h1>9. Provenance</h1>
+<ul>
+<li>Recovery simulation: <code>28.phi_recovery_simulation.R</code> via
+<code>run_phi_recovery.sbatch</code> →
+<code>qtl_betabinomial/phi_recovery/</code>. True φ ∈ {0.005, 0.0126,
+0.05, 0.1, 0.2, 0.4}, seed 2026, real n_i and fitted μ_i, k = 3,
+multi-start MLE.</li>
+<li>Moment estimators, spread check, interpretation, aggregate test:
+<code>29.low_phi_validation.R</code> via
+<code>run_low_phi_validation.sbatch</code> →
+<code>qtl_betabinomial/low_phi_validation/</code>.</li>
+<li>Per-site identifiability:
+<code>multistart_audit/identifiability.txt.gz</code>, profile
+log-likelihood with β re-optimised at fixed φ.</li>
+<li>Example sites: <code>30.lowphi_example_sites.R</code> via
+<code>run_lowphi_example_sites.sbatch</code> →
+<code>qtl_betabinomial/lowphi_sites/</code>. Lead cis-SNP by
+beta-binomial LRT within ±5 kb at MAF ≥ 0.05; genotypes from
+<code>genotype/qtl_binomial/by_chr/chr*.traw</code>.</li>
+<li>Related: <a href="qtl_mapping_betabinomial_optimiser.html">the
+optimiser failure and the φ heuristic</a> · <a
+href="qtl_mapping_betabinomial_model.html">the model</a> · <a
+href="qtl_mapping_betabinomial_grid.html">window × nPC calibration
+grid</a></li>
+</ul>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 8
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.0  
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.2.0  xfun_0.38         bslib_0.3.1       colorspace_2.0-3 
+ [5] vctrs_0.6.1       generics_0.1.3    htmltools_0.5.7   yaml_2.3.5       
+ [9] utf8_1.2.2        rlang_1.1.2       R.oo_1.24.0       jquerylib_0.1.4  
+[13] later_1.3.0       pillar_1.9.0      glue_1.6.2        withr_2.5.0      
+[17] R.utils_2.11.0    lifecycle_1.0.4   stringr_1.5.0     munsell_0.5.0    
+[21] gtable_0.3.0      R.methodsS3_1.8.1 evaluate_0.15     labeling_0.4.2   
+[25] knitr_1.42        callr_3.7.0       fastmap_1.1.0     httpuv_1.6.5     
+[29] ps_1.7.0          fansi_1.0.3       highr_0.9         Rcpp_1.0.11      
+[33] promises_1.2.0.1  scales_1.2.0      jsonlite_1.8.7    farver_2.1.0     
+[37] fs_1.5.2          digest_0.6.29     stringi_1.7.6     processx_3.5.3   
+[41] dplyr_1.1.2       getPass_0.2-2     rprojroot_2.0.3   grid_4.2.0       
+[45] cli_3.6.2         tools_4.2.0       magrittr_2.0.3    sass_0.4.1       
+[49] tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3   rmarkdown_2.21   
+[53] httr_1.4.5        rstudioapi_0.14   R6_2.5.1          git2r_0.30.1     
+[57] compiler_4.2.0   </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

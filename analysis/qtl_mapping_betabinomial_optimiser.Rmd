@@ -371,10 +371,14 @@ ggplot(PHID, aes(phi)) +
   geom_vline(xintercept = EPS, colour = "grey35", linetype = "dotted", linewidth = 0.5) +
   facet_wrap(~ view, nrow = 1, scales = "free_y") +
   scale_x_log10(breaks = 10^seq(-6, 0, 2), labels = c("1e-6", "1e-4", "1e-2", "1")) +
-  labs(x = expression(hat(varphi)~"(log scale)"), y = "sites",
+  # NB "(log scale)" was previously misread as "log of phi". The tick labels ARE
+  # phi values -- the tick marked 1e-2 is phi = 0.01 -- and only their SPACING is
+  # logarithmic. If the axis showed log10(phi) the ticks would read -6..0.
+  labs(x = expression(hat(varphi)*", axis log-spaced (ticks are "*hat(varphi)*" itself)"), y = "sites",
        title = "Where the reference value comes from, and what the rule returns",
        subtitle = paste(
          "Green = the peak, 0.0126. Dotted = the PHI_EPS = 1e-6 numerical floor. Same 10,450 sites in the outer two panels.",
+         "phi is a proportion in (0,1) throughout: the observed range is 1e-6 to 0.999999. The x axis spans that range; no value is log-transformed.",
          "LEFT: under the MLE half the sites pile against the floor. At an ambiguous site the winning start is decided by loglik differences of ~1e-9, so that pile is arbitrary.",
          "MIDDLE: restricting to the sites where all 3 starts agree removes the pile and leaves one clean hump. The peak is the mode of this panel.",
          "RIGHT: the rule clears the floor and moves the low mode up ~20x, but the shape stays bimodal -- it does NOT reproduce the middle panel.", sep = "\n")) +

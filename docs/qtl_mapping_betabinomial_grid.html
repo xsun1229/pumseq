@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-09-10" />
+
+<title>Beta-binomial pU-QTL: the window × nPC calibration grid</title>
+
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Beta-binomial pU-QTL: the window × nPC
+calibration grid</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-09-10</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-09-10
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreededb4c8b928278e7a96f6fede5d03f5769499150targetblankdedb4c8a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/dedb4c8b928278e7a96f6fede5d03f5769499150" target="_blank">dedb4c8</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreededb4c8b928278e7a96f6fede5d03f5769499150targetblankdedb4c8a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/dedb4c8b928278e7a96f6fede5d03f5769499150" target="_blank">dedb4c8</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/qtl_mapping_betabinomial_grid.Rmd
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = &quot;center&quot;, fig.width = 10)
+
+PSI &lt;- &quot;/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl&quot;
+CG  &lt;- file.path(PSI, &quot;qtl_betabinomial/calibration_grid&quot;)
+
+G  &lt;- fread(file.path(CG, &quot;grid_calibration.tsv&quot;), sep = &quot;\t&quot;)
+PB &lt;- fread(file.path(CG, &quot;grid_problematic.tsv&quot;), sep = &quot;\t&quot;)
+QQ &lt;- fread(file.path(CG, &quot;grid_qq_thinned.tsv.gz&quot;), sep = &quot;\t&quot;)
+
+WINDOWS &lt;- c(5, 20, 50, 100); KS &lt;- c(3, 5, 7, 10, 15, 20)
+wlab &lt;- function(x) factor(sprintf(&quot;%d kb&quot;, x), levels = sprintf(&quot;%d kb&quot;, WINDOWS))
+klab &lt;- function(x) factor(sprintf(&quot;k = %d&quot;, x), levels = sprintf(&quot;k = %d&quot;, KS))
+G[, window := wlab(window_kb)]
+pal &lt;- c(&quot;5 kb&quot; = &quot;#1f4e9c&quot;, &quot;20 kb&quot; = &quot;#2c8a4a&quot;, &quot;50 kb&quot; = &quot;#d98c00&quot;, &quot;100 kb&quot; = &quot;#c0392b&quot;)</code></pre>
+<div id="what-this-is-and-what-it-is-not" class="section level1">
+<h1>1. What this is, and what it is not</h1>
+<p>Two parameters were never chosen on evidence: the cis
+<strong>window</strong> and the number of phenotype <strong>PCs</strong>
+(k). A 4 × 7 sweep of those already existed
+(<code>lrt_results_merged/grid_summary.txt</code>), but it was a
+<strong>scan</strong> sweep — it reports how many QTLs each
+configuration discovers and says nothing about whether any of them is
+correctly calibrated. It was also produced by the single-start fitter,
+so its counts are partly the optimiser artefact described in <a
+href="qtl_mapping_betabinomial_optimiser.html">the optimiser
+page</a>.</p>
+<p>This page re-measures every cell the way calibration is measured
+everywhere else in the project: <strong>real data plus 5 genome-wide
+phenotype permutations</strong>, under the multi-start fitter. Permuted
+data cannot contain any genotype–phenotype relationship, so anything
+significant there is a false positive by construction.</p>
+<blockquote>
+<p><strong>24 cells</strong>: window ∈ {5, 20, 50, 100} kb × k ∈ {3, 5,
+7, 10, 15, 20}. Phenotype <code>fold5_union_auto_noUCcalled</code>
+(chr1–22, U/C-variant sites removed, φ-boundary sites
+<strong>retained</strong>), <code>BB_PHI_STARTS=0.01,0.1,0.5</code>, MLE
+selection, same 5 permutation seeds in every cell.</p>
+</blockquote>
+<p>Cost scales with the number of cis tests, which is why this is
+affordable at all while the equivalent scan sweep is not: the scan runs
+100 per-site permutations (101 passes) against this grid’s 6.</p>
+<pre class="r"><code>knitr::kable(G[npcs == 3, .(window, `tested sites` = tested_sites,
+                            `cis tests` = format(tests, big.mark = &quot;,&quot;))],
+  caption = &quot;Tests per configuration at k = 3. A 20x wider window is ~20x the tests, so the 100 kb cells cost ~13x the 5 kb cells.&quot;)</code></pre>
+<table>
+<caption>Tests per configuration at k = 3. A 20x wider window is ~20x
+the tests, so the 100 kb cells cost ~13x the 5 kb cells.</caption>
+<thead>
+<tr class="header">
+<th align="left">window</th>
+<th align="right">tested sites</th>
+<th align="left">cis tests</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">5 kb</td>
+<td align="right">9991</td>
+<td align="left">291,789</td>
+</tr>
+<tr class="even">
+<td align="left">20 kb</td>
+<td align="right">10123</td>
+<td align="left">1,159,758</td>
+</tr>
+<tr class="odd">
+<td align="left">50 kb</td>
+<td align="right">10199</td>
+<td align="left">2,938,919</td>
+</tr>
+<tr class="even">
+<td align="left">100 kb</td>
+<td align="right">10210</td>
+<td align="left">5,907,212</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="the-grid" class="section level1">
+<h1>2. The grid</h1>
+<pre class="r"><code>knitr::kable(G[, .(window, k = npcs, `tested sites` = tested_sites,
+                   `real lambda` = real_lambda,
+                   `perm lambda` = sprintf(&quot;%.3f - %.3f&quot;, perm_lambda_min, perm_lambda_max),
+                   `real tail` = real_tail, `worst perm tail` = worst_perm_tail,
+                   problematic)],
+  caption = &quot;All 24 cells. &#39;problematic&#39; = sites with permuted min-p &lt; 1e-10 AND real min-p &lt; 1e-10, the same definition used throughout the project.&quot;)</code></pre>
+<table>
+<caption>All 24 cells. ‘problematic’ = sites with permuted min-p &lt;
+1e-10 AND real min-p &lt; 1e-10, the same definition used throughout the
+project.</caption>
+<colgroup>
+<col width="8%" />
+<col width="3%" />
+<col width="14%" />
+<col width="13%" />
+<col width="16%" />
+<col width="11%" />
+<col width="18%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">window</th>
+<th align="right">k</th>
+<th align="right">tested sites</th>
+<th align="right">real lambda</th>
+<th align="left">perm lambda</th>
+<th align="right">real tail</th>
+<th align="right">worst perm tail</th>
+<th align="right">problematic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">5 kb</td>
+<td align="right">3</td>
+<td align="right">9991</td>
+<td align="right">1.399</td>
+<td align="left">1.029 - 1.063</td>
+<td align="right">28.2</td>
+<td align="right">11.3</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">5 kb</td>
+<td align="right">5</td>
+<td align="right">9518</td>
+<td align="right">1.486</td>
+<td align="left">1.079 - 1.144</td>
+<td align="right">29.1</td>
+<td align="right">17.6</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">5 kb</td>
+<td align="right">7</td>
+<td align="right">9083</td>
+<td align="right">1.519</td>
+<td align="left">1.128 - 1.182</td>
+<td align="right">32.6</td>
+<td align="right">17.7</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">5 kb</td>
+<td align="right">10</td>
+<td align="right">8399</td>
+<td align="right">1.636</td>
+<td align="left">1.202 - 1.270</td>
+<td align="right">33.0</td>
+<td align="right">11.4</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">5 kb</td>
+<td align="right">15</td>
+<td align="right">7340</td>
+<td align="right">1.707</td>
+<td align="left">1.331 - 1.380</td>
+<td align="right">33.4</td>
+<td align="right">13.6</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">5 kb</td>
+<td align="right">20</td>
+<td align="right">6267</td>
+<td align="right">1.771</td>
+<td align="left">1.445 - 1.528</td>
+<td align="right">35.4</td>
+<td align="right">18.5</td>
+<td align="right">6</td>
+</tr>
+<tr class="odd">
+<td align="left">20 kb</td>
+<td align="right">3</td>
+<td align="right">10123</td>
+<td align="right">1.309</td>
+<td align="left">1.015 - 1.059</td>
+<td align="right">28.2</td>
+<td align="right">11.3</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">20 kb</td>
+<td align="right">5</td>
+<td align="right">9637</td>
+<td align="right">1.397</td>
+<td align="left">1.068 - 1.129</td>
+<td align="right">29.1</td>
+<td align="right">17.6</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">20 kb</td>
+<td align="right">7</td>
+<td align="right">9182</td>
+<td align="right">1.440</td>
+<td align="left">1.110 - 1.177</td>
+<td align="right">32.6</td>
+<td align="right">17.7</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">20 kb</td>
+<td align="right">10</td>
+<td align="right">8480</td>
+<td align="right">1.532</td>
+<td align="left">1.201 - 1.258</td>
+<td align="right">33.0</td>
+<td align="right">15.0</td>
+<td align="right">4</td>
+</tr>
+<tr class="odd">
+<td align="left">20 kb</td>
+<td align="right">15</td>
+<td align="right">7407</td>
+<td align="right">1.591</td>
+<td align="left">1.287 - 1.364</td>
+<td align="right">33.4</td>
+<td align="right">22.3</td>
+<td align="right">6</td>
+</tr>
+<tr class="even">
+<td align="left">20 kb</td>
+<td align="right">20</td>
+<td align="right">6316</td>
+<td align="right">1.676</td>
+<td align="left">1.407 - 1.446</td>
+<td align="right">35.4</td>
+<td align="right">29.1</td>
+<td align="right">12</td>
+</tr>
+<tr class="odd">
+<td align="left">50 kb</td>
+<td align="right">3</td>
+<td align="right">10199</td>
+<td align="right">1.262</td>
+<td align="left">1.021 - 1.066</td>
+<td align="right">28.2</td>
+<td align="right">11.3</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">50 kb</td>
+<td align="right">5</td>
+<td align="right">9699</td>
+<td align="right">1.337</td>
+<td align="left">1.079 - 1.115</td>
+<td align="right">29.1</td>
+<td align="right">17.6</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">50 kb</td>
+<td align="right">7</td>
+<td align="right">9236</td>
+<td align="right">1.386</td>
+<td align="left">1.121 - 1.165</td>
+<td align="right">32.6</td>
+<td align="right">17.7</td>
+<td align="right">3</td>
+</tr>
+<tr class="even">
+<td align="left">50 kb</td>
+<td align="right">10</td>
+<td align="right">8534</td>
+<td align="right">1.466</td>
+<td align="left">1.204 - 1.246</td>
+<td align="right">33.0</td>
+<td align="right">19.1</td>
+<td align="right">10</td>
+</tr>
+<tr class="odd">
+<td align="left">50 kb</td>
+<td align="right">15</td>
+<td align="right">7441</td>
+<td align="right">1.542</td>
+<td align="left">1.283 - 1.354</td>
+<td align="right">33.4</td>
+<td align="right">25.9</td>
+<td align="right">13</td>
+</tr>
+<tr class="even">
+<td align="left">50 kb</td>
+<td align="right">20</td>
+<td align="right">6336</td>
+<td align="right">1.617</td>
+<td align="left">1.396 - 1.431</td>
+<td align="right">35.4</td>
+<td align="right">30.2</td>
+<td align="right">22</td>
+</tr>
+<tr class="odd">
+<td align="left">100 kb</td>
+<td align="right">3</td>
+<td align="right">10210</td>
+<td align="right">1.225</td>
+<td align="left">1.023 - 1.071</td>
+<td align="right">28.2</td>
+<td align="right">11.3</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">100 kb</td>
+<td align="right">5</td>
+<td align="right">9709</td>
+<td align="right">1.287</td>
+<td align="left">1.079 - 1.118</td>
+<td align="right">29.1</td>
+<td align="right">17.6</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">100 kb</td>
+<td align="right">7</td>
+<td align="right">9242</td>
+<td align="right">1.345</td>
+<td align="left">1.126 - 1.167</td>
+<td align="right">32.6</td>
+<td align="right">17.7</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="left">100 kb</td>
+<td align="right">10</td>
+<td align="right">8540</td>
+<td align="right">1.426</td>
+<td align="left">1.213 - 1.239</td>
+<td align="right">33.0</td>
+<td align="right">19.1</td>
+<td align="right">13</td>
+</tr>
+<tr class="odd">
+<td align="left">100 kb</td>
+<td align="right">15</td>
+<td align="right">7445</td>
+<td align="right">1.493</td>
+<td align="left">1.292 - 1.348</td>
+<td align="right">33.4</td>
+<td align="right">25.9</td>
+<td align="right">18</td>
+</tr>
+<tr class="even">
+<td align="left">100 kb</td>
+<td align="right">20</td>
+<td align="right">6340</td>
+<td align="right">1.547</td>
+<td align="left">1.380 - 1.428</td>
+<td align="right">35.4</td>
+<td align="right">31.4</td>
+<td align="right">32</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="permutation-λ-driven-by-k-not-by-window"
+class="section level1">
+<h1>3. Permutation λ: driven by k, not by window</h1>
+<p>λ on permuted data should be 1. It is the primary criterion for k,
+because k changes the covariate model and therefore the per-test
+null.</p>
+<pre class="r"><code>sep &lt;- dcast(G, npcs ~ window_kb, value.var = &quot;perm_lambda_max&quot;)
+setnames(sep, c(&quot;k&quot;, paste0(&quot;w&quot;, setdiff(names(sep), &quot;npcs&quot;), &quot;kb&quot;)))
+knitr::kable(sep, caption = &quot;Worst permutation lambda. Rows vary a lot; columns barely move.&quot;)</code></pre>
+<table>
+<caption>Worst permutation lambda. Rows vary a lot; columns barely
+move.</caption>
+<thead>
+<tr class="header">
+<th align="right">k</th>
+<th align="right">w5kb</th>
+<th align="right">w20kb</th>
+<th align="right">w50kb</th>
+<th align="right">w100kb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">1.063</td>
+<td align="right">1.059</td>
+<td align="right">1.066</td>
+<td align="right">1.071</td>
+</tr>
+<tr class="even">
+<td align="right">5</td>
+<td align="right">1.144</td>
+<td align="right">1.129</td>
+<td align="right">1.115</td>
+<td align="right">1.118</td>
+</tr>
+<tr class="odd">
+<td align="right">7</td>
+<td align="right">1.182</td>
+<td align="right">1.177</td>
+<td align="right">1.165</td>
+<td align="right">1.167</td>
+</tr>
+<tr class="even">
+<td align="right">10</td>
+<td align="right">1.270</td>
+<td align="right">1.258</td>
+<td align="right">1.246</td>
+<td align="right">1.239</td>
+</tr>
+<tr class="odd">
+<td align="right">15</td>
+<td align="right">1.380</td>
+<td align="right">1.364</td>
+<td align="right">1.354</td>
+<td align="right">1.348</td>
+</tr>
+<tr class="even">
+<td align="right">20</td>
+<td align="right">1.528</td>
+<td align="right">1.446</td>
+<td align="right">1.431</td>
+<td align="right">1.428</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>ggplot(G, aes(npcs, perm_lambda_max, colour = window)) +
+  geom_hline(yintercept = 1, colour = &quot;grey55&quot;, linetype = &quot;dashed&quot;, linewidth = 0.4) +
+  geom_line(linewidth = 0.6) + geom_point(size = 2) +
+  scale_colour_manual(values = pal, name = &quot;window&quot;) +
+  scale_x_continuous(breaks = KS) +
+  labs(x = &quot;phenotype PCs (k)&quot;, y = expression(worst~permutation~lambda),
+       title = &quot;Permutation calibration across the grid&quot;,
+       subtitle = &quot;The four lines nearly coincide: lambda depends on k and hardly at all on window size.&quot;) +
+  theme_bw(base_size = 11) + theme(panel.grid.minor = element_blank())</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_grid.Rmd/lamfig-1.png" width="806.4" style="display: block; margin: auto;" /></p>
+<p>Quantitatively, the spread of permutation λ <strong>across windows at
+fixed k is 0.012–0.100</strong>, while <strong>across k at fixed window
+it is 0.357–0.465</strong> — a factor of 4 to 40. This is the result
+that lets the two parameters be chosen independently, and it was an
+assumption before this grid was run, not a fact.</p>
+<p>λ rises monotonically with k at every window, from ~1.06 at k = 3 to
+~1.43–1.53 at k = 20. More covariates steadily degrade the null. With 50
+cell lines, k = 20 means fitting 21 parameters, and the <a
+href="qtl_mapping_betabinomial_npcs_tradeoff.html">failure-mode
+breakdown</a> shows 95–98% of the resulting fit failures are the
+μ-boundary and coefficient guards, i.e. the model saturating the
+data.</p>
+</div>
+<div id="problematic-sites" class="section level1">
+<h1>4. Problematic sites</h1>
+<pre class="r"><code>pm &lt;- dcast(G, npcs ~ window_kb, value.var = &quot;problematic&quot;)
+setnames(pm, c(&quot;k&quot;, paste0(&quot;w&quot;, setdiff(names(pm), &quot;npcs&quot;), &quot;kb&quot;)))
+knitr::kable(pm, caption = &quot;Number of sites significant in BOTH real and permuted data. Zero is the only acceptable value; k = 3 achieves it at every window.&quot;)</code></pre>
+<table>
+<caption>Number of sites significant in BOTH real and permuted data.
+Zero is the only acceptable value; k = 3 achieves it at every
+window.</caption>
+<thead>
+<tr class="header">
+<th align="right">k</th>
+<th align="right">w5kb</th>
+<th align="right">w20kb</th>
+<th align="right">w50kb</th>
+<th align="right">w100kb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="right">5</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="right">7</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="right">10</td>
+<td align="right">1</td>
+<td align="right">4</td>
+<td align="right">10</td>
+<td align="right">13</td>
+</tr>
+<tr class="odd">
+<td align="right">15</td>
+<td align="right">2</td>
+<td align="right">6</td>
+<td align="right">13</td>
+<td align="right">18</td>
+</tr>
+<tr class="even">
+<td align="right">20</td>
+<td align="right">6</td>
+<td align="right">12</td>
+<td align="right">22</td>
+<td align="right">32</td>
+</tr>
+</tbody>
+</table>
+<p>This is the sharpest statistic in the grid — λ is a median over
+hundreds of thousands of p-values and moves little even when the tail is
+catastrophic, whereas this count responds directly. Note it rises with
+<strong>both</strong> k and window: at k = 7 it goes 0 → 0 → 3 → 4 as
+the window widens, because more tests per site means a smaller minimum
+p-value by chance alone.</p>
+<pre class="r"><code>if (nrow(PB)) knitr::kable(
+  PB[, .(site = paste0(&quot;chr&quot;, sub(&quot; &quot;, &quot;:&quot;, sid)), window_kb, k = npcs,
+         `perm min-p` = signif(min_p_perm, 3),
+         `real -log10p` = round(real_nlp, 1))][order(window_kb, k)][1:min(.N, 25)],
+  caption = &quot;The offending sites (first 25). None occurs at k = 3 in any window.&quot;)</code></pre>
+<table>
+<caption>The offending sites (first 25). None occurs at k = 3 in any
+window.</caption>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="right">window_kb</th>
+<th align="right">k</th>
+<th align="right">perm min-p</th>
+<th align="right">real -log10p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr14:106639258</td>
+<td align="right">5</td>
+<td align="right">10</td>
+<td align="right">0</td>
+<td align="right">11.5</td>
+</tr>
+<tr class="even">
+<td align="left">chr17:38755939</td>
+<td align="right">5</td>
+<td align="right">15</td>
+<td align="right">0</td>
+<td align="right">10.0</td>
+</tr>
+<tr class="odd">
+<td align="left">chr1:160679062</td>
+<td align="right">5</td>
+<td align="right">15</td>
+<td align="right">0</td>
+<td align="right">11.4</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:32645865</td>
+<td align="right">5</td>
+<td align="right">20</td>
+<td align="right">0</td>
+<td align="right">20.2</td>
+</tr>
+<tr class="odd">
+<td align="left">chr6:31354270</td>
+<td align="right">5</td>
+<td align="right">20</td>
+<td align="right">0</td>
+<td align="right">24.3</td>
+</tr>
+<tr class="even">
+<td align="left">chr2:174079028</td>
+<td align="right">5</td>
+<td align="right">20</td>
+<td align="right">0</td>
+<td align="right">10.8</td>
+</tr>
+<tr class="odd">
+<td align="left">chr15:45073407</td>
+<td align="right">5</td>
+<td align="right">20</td>
+<td align="right">0</td>
+<td align="right">10.6</td>
+</tr>
+<tr class="even">
+<td align="left">chr22:22792862</td>
+<td align="right">5</td>
+<td align="right">20</td>
+<td align="right">0</td>
+<td align="right">10.7</td>
+</tr>
+<tr class="odd">
+<td align="left">chr14:106421966</td>
+<td align="right">5</td>
+<td align="right">20</td>
+<td align="right">0</td>
+<td align="right">12.9</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:31354270</td>
+<td align="right">20</td>
+<td align="right">10</td>
+<td align="right">0</td>
+<td align="right">18.5</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:88865816</td>
+<td align="right">20</td>
+<td align="right">10</td>
+<td align="right">0</td>
+<td align="right">11.0</td>
+</tr>
+<tr class="even">
+<td align="left">chr22:22409831</td>
+<td align="right">20</td>
+<td align="right">10</td>
+<td align="right">0</td>
+<td align="right">11.3</td>
+</tr>
+<tr class="odd">
+<td align="left">chr14:106639258</td>
+<td align="right">20</td>
+<td align="right">10</td>
+<td align="right">0</td>
+<td align="right">11.5</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:31354270</td>
+<td align="right">20</td>
+<td align="right">15</td>
+<td align="right">0</td>
+<td align="right">22.4</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:88885962</td>
+<td align="right">20</td>
+<td align="right">15</td>
+<td align="right">0</td>
+<td align="right">11.2</td>
+</tr>
+<tr class="even">
+<td align="left">chr22:22792862</td>
+<td align="right">20</td>
+<td align="right">15</td>
+<td align="right">0</td>
+<td align="right">10.9</td>
+</tr>
+<tr class="odd">
+<td align="left">chr17:38755939</td>
+<td align="right">20</td>
+<td align="right">15</td>
+<td align="right">0</td>
+<td align="right">10.0</td>
+</tr>
+<tr class="even">
+<td align="left">chr22:22900606</td>
+<td align="right">20</td>
+<td align="right">15</td>
+<td align="right">0</td>
+<td align="right">11.1</td>
+</tr>
+<tr class="odd">
+<td align="left">chr1:160679062</td>
+<td align="right">20</td>
+<td align="right">15</td>
+<td align="right">0</td>
+<td align="right">11.4</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:32645865</td>
+<td align="right">20</td>
+<td align="right">20</td>
+<td align="right">0</td>
+<td align="right">20.2</td>
+</tr>
+<tr class="odd">
+<td align="left">chr6:31354270</td>
+<td align="right">20</td>
+<td align="right">20</td>
+<td align="right">0</td>
+<td align="right">24.3</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:32578556</td>
+<td align="right">20</td>
+<td align="right">20</td>
+<td align="right">0</td>
+<td align="right">16.2</td>
+</tr>
+<tr class="odd">
+<td align="left">chr14:106627500</td>
+<td align="right">20</td>
+<td align="right">20</td>
+<td align="right">0</td>
+<td align="right">11.4</td>
+</tr>
+<tr class="even">
+<td align="left">chr2:174079028</td>
+<td align="right">20</td>
+<td align="right">20</td>
+<td align="right">0</td>
+<td align="right">10.8</td>
+</tr>
+<tr class="odd">
+<td align="left">chr15:45073407</td>
+<td align="right">20</td>
+<td align="right">20</td>
+<td align="right">0</td>
+<td align="right">10.6</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="qq-plots-for-all-24-cells" class="section level1">
+<h1>5. QQ plots for all 24 cells</h1>
+<p>Blue = real data, red = the 5 permutations. Every red point above the
+diagonal is a false positive by construction, so <strong>a taller red
+cloud is a worse-calibrated cell</strong>. Rows are windows, columns are
+k.</p>
+<p>Points rather than lines, and the thinning keeps every one of the
+2,000 smallest p-values per dataset and thins only the bulk —
+uniform-in-rank thinning would discard most of the tail, which is the
+only part that carries the conclusion.</p>
+<pre class="r"><code>QQ[, kind := ifelse(dataset == &quot;real&quot;, &quot;real&quot;, &quot;permuted&quot;)]
+QQ[, `:=`(window = wlab(window_kb), kk = klab(npcs))]
+ggplot(QQ, aes(expected, observed, group = dataset, colour = kind)) +
+  geom_abline(slope = 1, intercept = 0, colour = &quot;grey55&quot;, linewidth = 0.25) +
+  geom_point(size = 0.25, alpha = 0.5, shape = 16) +
+  facet_grid(window ~ kk) +
+  scale_colour_manual(values = c(real = &quot;#1f4e9c&quot;, permuted = &quot;#c0392b&quot;), name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
+  labs(x = expression(Expected~-log[10](p)), y = expression(Observed~-log[10](p)),
+       title = &quot;Calibration across the whole grid&quot;,
+       subtitle = &quot;Red = 5 permutations (false positives by construction). Reading across a row shows the effect of k; down a column, the effect of window.&quot;) +
+  theme_bw(base_size = 10) +
+  theme(legend.position = &quot;top&quot;, panel.grid.minor = element_blank(),
+        strip.text = element_text(size = 9))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_grid.Rmd/qqgrid-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>The same figure with the y-axis clipped, so the permuted clouds —
+which are what the comparison turns on — are not compressed by the
+real-data tail:</p>
+<pre class="r"><code>ggplot(QQ, aes(expected, observed, group = dataset, colour = kind)) +
+  geom_abline(slope = 1, intercept = 0, colour = &quot;grey55&quot;, linewidth = 0.25) +
+  geom_point(size = 0.25, alpha = 0.5, shape = 16) +
+  facet_grid(window ~ kk) +
+  coord_cartesian(ylim = c(0, 35)) +
+  scale_colour_manual(values = c(real = &quot;#1f4e9c&quot;, permuted = &quot;#c0392b&quot;), name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
+  labs(x = expression(Expected~-log[10](p)), y = expression(Observed~-log[10](p)),
+       title = &quot;Same grid, y-axis clipped to 35&quot;,
+       subtitle = &quot;Clipped points are outside the view, not deleted.&quot;) +
+  theme_bw(base_size = 10) +
+  theme(legend.position = &quot;top&quot;, panel.grid.minor = element_blank(),
+        strip.text = element_text(size = 9))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_grid.Rmd/qqgridclip-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>Permuted-only, at a common scale, which is the cleanest way to rank
+the cells:</p>
+<pre class="r"><code>ggplot(QQ[kind == &quot;permuted&quot;], aes(expected, observed, group = dataset)) +
+  geom_abline(slope = 1, intercept = 0, colour = &quot;grey55&quot;, linewidth = 0.25) +
+  geom_point(size = 0.25, alpha = 0.5, shape = 16, colour = &quot;#c0392b&quot;) +
+  facet_grid(window ~ kk) +
+  coord_cartesian(ylim = c(0, 20)) +
+  labs(x = expression(Expected~-log[10](p)), y = expression(Observed~-log[10](p)),
+       title = &quot;Permutations only: pure false positives, common y-axis&quot;,
+       subtitle = paste(&quot;The k = 3 column hugs the diagonal at every window. Departure grows to the right, hardly at all downwards.&quot;,
+                        &quot;y-axis clipped to 20; the k = 20 cells reach 29-31 at the wider windows, so their topmost points are outside the view, not deleted.&quot;, sep = &quot;\n&quot;)) +
+  theme_bw(base_size = 10) +
+  theme(panel.grid.minor = element_blank(), strip.text = element_text(size = 9))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_grid.Rmd/qqperm-1.png" width="1248" style="display: block; margin: auto;" /></p>
+</div>
+<div id="what-the-grid-decides-and-what-it-does-not"
+class="section level1">
+<h1>6. What the grid decides, and what it does not</h1>
+<p><strong>k = 3, settled.</strong> Three criteria agree, and now
+robustly across all four windows: permutation λ is minimised at k = 3
+(~1.06, rising monotonically to ~1.43–1.53 at k = 20); problematic sites
+are <strong>zero at k = 3 in every window</strong> and rise with k
+everywhere; and unusable sites are a U-shape minimised at k = 3 (2.3%
+lost, against 11.3% at k = 0 and 38.8% at k = 20). No other k is better
+on any of the three.</p>
+<p><strong>The window is not settled by this grid.</strong> Two things
+get in the way, and both are limitations of the statistics available
+here rather than results:</p>
+<pre class="r"><code>knitr::kable(dcast(G, npcs ~ window_kb, value.var = &quot;worst_perm_tail&quot;)[
+  , setnames(.SD, c(&quot;k&quot;, paste0(&quot;w&quot;, WINDOWS, &quot;kb&quot;)))],
+  caption = &quot;Worst permuted tail height. IDENTICAL across windows at every k -- the worst permuted hit is the same site-SNP pair in all four windows, all within 5 kb, so widening the window never finds anything more extreme. The same is true of the real tail.&quot;)</code></pre>
+<table>
+<caption>Worst permuted tail height. IDENTICAL across windows at every k
+– the worst permuted hit is the same site-SNP pair in all four windows,
+all within 5 kb, so widening the window never finds anything more
+extreme. The same is true of the real tail.</caption>
+<thead>
+<tr class="header">
+<th align="right">k</th>
+<th align="right">w5kb</th>
+<th align="right">w20kb</th>
+<th align="right">w50kb</th>
+<th align="right">w100kb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">11.3</td>
+<td align="right">11.3</td>
+<td align="right">11.3</td>
+<td align="right">11.3</td>
+</tr>
+<tr class="even">
+<td align="right">5</td>
+<td align="right">17.6</td>
+<td align="right">17.6</td>
+<td align="right">17.6</td>
+<td align="right">17.6</td>
+</tr>
+<tr class="odd">
+<td align="right">7</td>
+<td align="right">17.7</td>
+<td align="right">17.7</td>
+<td align="right">17.7</td>
+<td align="right">17.7</td>
+</tr>
+<tr class="even">
+<td align="right">10</td>
+<td align="right">11.4</td>
+<td align="right">15.0</td>
+<td align="right">19.1</td>
+<td align="right">19.1</td>
+</tr>
+<tr class="odd">
+<td align="right">15</td>
+<td align="right">13.6</td>
+<td align="right">22.3</td>
+<td align="right">25.9</td>
+<td align="right">25.9</td>
+</tr>
+<tr class="even">
+<td align="right">20</td>
+<td align="right">18.5</td>
+<td align="right">29.1</td>
+<td align="right">30.2</td>
+<td align="right">31.4</td>
+</tr>
+</tbody>
+</table>
+<p>First, the tail heights are <em>identical</em> across windows,
+because the extreme tail is owned by specific site–SNP pairs that all
+lie within 5 kb. Widening the window adds a great many null tests and
+nothing more extreme. Second, and consequently, a permutation-derived
+threshold does <strong>not</strong> adapt to the multiple-testing burden
+across windows — it is fixed by one extreme pair — so counting real
+sites that beat it favours wider windows purely because they get more
+attempts per site.</p>
+<p><strong>A metric on this page that does not work, recorded so it is
+not reused.</strong> The precompute also emits a “calibrated discovery
+count” — real sites beating that cell’s own worst permuted min-p. It is
+unusable across k, because the threshold is a single order statistic
+from 5 permutations and varies from 11.3 to 31.4 across cells, so a cell
+that drew clean permutations gets a lenient bar. It reports 83
+discoveries for k = 10 at 5 kb against 75 for k = 3, which inverts the
+correct ranking. Across windows at fixed k = 3 the threshold happens to
+be identical (11.3) so the counts 75 / 81 / 83 / 86 are at least
+comparable, but they are confounded as described above and should not be
+read as power.</p>
+<p>Deciding the window properly needs the per-site multiple-testing
+correction the scan computes with its 100 per-site permutations. That is
+~325 h of compute for the four windows at k = 3, of which only the
+winning cell is kept. The alternative is to fix 5 kb on the grounds that
+the entire extreme tail already lies within it, and 13× the compute buys
+nothing measurable — <strong>an open decision, not a
+conclusion.</strong></p>
+</div>
+<div id="provenance" class="section level1">
+<h1>7. Provenance</h1>
+<ul>
+<li>Calibrations:
+<code>run_calibration_grid.sbatch &lt;WINDOW_BP&gt; &lt;NPCS&gt;</code>,
+24 jobs on caslake, output stems
+<code>calib_siteres_w{5,20,50,100}kb_pc{3,5,7,10,15,20}_auto_noUCcalled_MS</code>.
+Runtimes 52 min (5 kb, k=3) to ~10 h (100 kb, k=20).</li>
+<li>Summary + figures: <code>27.calibration_grid_summary.R</code> via
+<code>run_calibration_grid_summary.sbatch</code> →
+<code>qtl_betabinomial/calibration_grid/</code>.</li>
+<li>Fitter: <code>betabin_lib.R</code> with
+<code>BB_PHI_STARTS=0.01,0.1,0.5</code>,
+<code>BB_PHI_SELECT=loglik</code>.</li>
+<li>Related: <a href="qtl_mapping_betabinomial_optimiser.html">the
+optimiser failure</a> · <a
+href="qtl_mapping_betabinomial_npcs_tradeoff.html">nPCs trade-off</a> ·
+<a href="qtl_mapping_betabinomial_strategy.html">filtering
+strategy</a></li>
+</ul>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 8
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.0  
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.2.0  xfun_0.38         bslib_0.3.1       colorspace_2.0-3 
+ [5] vctrs_0.6.1       generics_0.1.3    htmltools_0.5.7   yaml_2.3.5       
+ [9] utf8_1.2.2        rlang_1.1.2       R.oo_1.24.0       jquerylib_0.1.4  
+[13] later_1.3.0       pillar_1.9.0      glue_1.6.2        withr_2.5.0      
+[17] R.utils_2.11.0    lifecycle_1.0.4   stringr_1.5.0     munsell_0.5.0    
+[21] gtable_0.3.0      R.methodsS3_1.8.1 evaluate_0.15     labeling_0.4.2   
+[25] knitr_1.42        callr_3.7.0       fastmap_1.1.0     httpuv_1.6.5     
+[29] ps_1.7.0          fansi_1.0.3       highr_0.9         Rcpp_1.0.11      
+[33] promises_1.2.0.1  scales_1.2.0      jsonlite_1.8.7    farver_2.1.0     
+[37] fs_1.5.2          digest_0.6.29     stringi_1.7.6     processx_3.5.3   
+[41] dplyr_1.1.2       getPass_0.2-2     rprojroot_2.0.3   grid_4.2.0       
+[45] cli_3.6.2         tools_4.2.0       magrittr_2.0.3    sass_0.4.1       
+[49] tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3   rmarkdown_2.21   
+[53] httr_1.4.5        rstudioapi_0.14   R6_2.5.1          git2r_0.30.1     
+[57] compiler_4.2.0   </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
