@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreefe36e473bfe11ea944f859926a525850853a96c7targetblankfe36e47a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree622e61ab7fa170567727c2c807b86c3f3430a5a8targetblank622e61aa">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/fe36e473bfe11ea944f859926a525850853a96c7" target="_blank">fe36e47</a>
+<a href="https://github.com/xsun1229/pumseq/tree/622e61ab7fa170567727c2c807b86c3f3430a5a8" target="_blank">622e61a</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreefe36e473bfe11ea944f859926a525850853a96c7targetblankfe36e47a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree622e61ab7fa170567727c2c807b86c3f3430a5a8targetblank622e61aa"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/fe36e473bfe11ea944f859926a525850853a96c7" target="_blank">fe36e47</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/622e61ab7fa170567727c2c807b86c3f3430a5a8" target="_blank">622e61a</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -620,6 +620,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/622e61ab7fa170567727c2c807b86c3f3430a5a8/analysis/qtl_mapping_betabinomial_lowphi.Rmd" target="_blank">622e61a</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/622e61ab7fa170567727c2c807b86c3f3430a5a8/docs/qtl_mapping_betabinomial_lowphi.html" target="_blank">622e61a</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -723,6 +757,21 @@ value is the expected answer rather than a suspicious one, why
 dispersion still has to be modelled when most sites cannot distinguish
 it from zero, and what such a site looks like in the raw counts. §4
 states what can and cannot be concluded.</p>
+<blockquote>
+<p><strong>Every φ on this page is a 3-start estimate.</strong> The
+fitter runs the optimiser from φ₀ ∈ {0.01, 0.1, 0.5} and keeps the
+highest-likelihood solution (<code>BB_PHI_STARTS=0.01,0.1,0.5</code>,
+<code>BB_PHI_SELECT=loglik</code>) — the plain MLE, and the
+configuration adopted after <a
+href="qtl_mapping_betabinomial_optimiser.html">the single fixed start
+was found to converge to a worse local optimum</a> at 13 sites. That
+applies to the peak itself, the recovery simulation, the example sites
+and the per-site identifiability. Note the bimodality seen in the φ
+distributions is <em>not</em> what multi-start addresses: the pile at
+the numerical floor is the correct MLE at those sites (multi-start
+changes it at 0.23% of them), whereas the bug it fixes drove φ to the
+<em>upper</em> boundary, φ → 1.</p>
+</blockquote>
 </div>
 <div id="confirming-the-estimate-is-correct" class="section level1">
 <h1>2. Confirming the estimate is correct</h1>
@@ -915,6 +964,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/622e61ab7fa170567727c2c807b86c3f3430a5a8/docs/figure/qtl_mapping_betabinomial_lowphi.Rmd/recfig-1.png" target="_blank">622e61a</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/cb6168907f22f43f300e4364dee666a8e3d73395/docs/figure/qtl_mapping_betabinomial_lowphi.Rmd/recfig-1.png" target="_blank">cb61689</a>
@@ -1500,9 +1560,27 @@ subset</strong> — the sites where all three optimiser starts agree on φ
 to within 5%, i.e. the middle panel of the φ-distribution figure and the
 set the peak is measured on.</p>
 <p>Three groups: five sites bracketing the peak (φ ∈ [0.010, 0.016]),
-three with low φ even within that subset (φ &lt; 0.003), and three
-high-φ sites for contrast (φ &gt; 0.3), where α &lt; 1 and the Beta
-prior turns U-shaped.</p>
+three with low φ even within that subset (φ &lt; 0.003), and three with
+high φ (&gt; 0.3), where α &lt; 1 and the Beta prior turns U-shaped.</p>
+<blockquote>
+<p><strong>The high-φ group is labelled “artefact-enriched” for a
+reason.</strong> All three lie in IGH or MHC, which in LCLs are
+somatically rearranged or hyperpolymorphic — regions where φ is 6.8×
+more likely to be high than elsewhere in the genome. They show what a
+large φ looks like; they are not a fair sample of large-φ
+<em>biology</em>.</p>
+<p><strong>Genotype is deliberately not plotted.</strong> φ is estimated
+from the null fit, which contains no genotype term, so it describes
+spread across cell lines and nothing about any SNP. An earlier version
+of this section plotted %pU against the lead cis-SNP; that was
+misleading twice over — the lead SNP is the <em>most-associated</em> of
+11–56 tested with no significance filter (the low-φ sites’ nominal
+p-values matched chance exactly, KS p = 0.22), and because the null
+cannot see genotype, a strong cis effect <em>causes</em> a high φ rather
+than the reverse. Sites above φ = 0.3 carry a p &lt; 10⁻⁵ cis signal
+12.2% of the time against 0.0% below φ = 10⁻⁴, so that axis measured the
+confound, not biology.</p>
+</blockquote>
 <blockquote>
 <p><strong>These are deliberately the deepest available sites, not a
 random sample.</strong> At the median site (8 reads) the sampling noise
@@ -1701,78 +1779,167 @@ implied one at low φ because the implied figure covers only the Beta
 dispersion around each cell line’s μ_i, whereas the observed scatter
 also contains the covariate-driven spread in μ_i itself; at high φ the
 dispersion dominates and the two converge.</p>
-<p>The important comparison is the near-peak group against the contrast
+<p>The important comparison is the near-peak group against the high-φ
 group. A φ ≈ 0.013 site has a %pU spread of <strong>4–8 pp</strong>, not
 the <strong>19–41 pp</strong> of the high-φ sites. So the peak value is
 describing a genuinely tight distribution, which is what the objection
-needs to be tested against.</p>
+needs to be tested against. Seen directly:</p>
 <pre class="r"><code>OB &lt;- fread(file.path(LS, &quot;observed.tsv&quot;), sep = &quot;\t&quot;)
-OB[, group := factor(group, levels = GRP)]
-OB &lt;- merge(OB, P[, .(sid, phi)], by = &quot;sid&quot;)
-OB[, panel := sprintf(&quot;chr%s\nphi = %.4f&quot;, sub(&quot; &quot;, &quot;:&quot;, sid), phi)]
-OB[, panel := factor(panel, levels = unique(OB[order(group, -phi)]$panel))]
-OB[, gf := factor(geno, levels = c(0, 1, 2))]
-ggplot(OB[!is.na(gf)], aes(gf, 100 * pu)) +
-  geom_boxplot(aes(fill = group), outlier.shape = NA, alpha = 0.45, width = 0.6) +
-  geom_jitter(width = 0.15, height = 0, size = 0.9, alpha = 0.7) +
-  facet_wrap(~ panel, ncol = 4, scales = &quot;free_y&quot;) +
-  scale_fill_manual(values = c(&quot;#1f4e9c&quot;, &quot;#2c8a4a&quot;, &quot;#c0392b&quot;), name = NULL) +
-  labs(x = &quot;genotype at the lead cis-SNP (copies of the counted allele)&quot;, y = &quot;%pU&quot;,
-       title = &quot;%pU by genotype at the lead cis-SNP&quot;,
+OB &lt;- merge(OB, P[, .(sid, phi, pooled_pu, prior_sd_pi)], by = &quot;sid&quot;)
+# display labels: ascending phi, and the contrast group named for what it IS
+relab &lt;- function(g) factor(fifelse(grepl(&quot;^low&quot;, g), &quot;low: phi &lt; 0.003&quot;,
+                            fifelse(grepl(&quot;^near&quot;, g), &quot;near the peak: phi ~ 0.0126&quot;,
+                                    &quot;high phi &gt; 0.3 (artefact-enriched: IGH/MHC)&quot;)),
+                            levels = c(&quot;low: phi &lt; 0.003&quot;, &quot;near the peak: phi ~ 0.0126&quot;,
+                                       &quot;high phi &gt; 0.3 (artefact-enriched: IGH/MHC)&quot;))
+OB[, grp := relab(group)]; P[, grp := relab(group)]
+lev &lt;- P[order(phi)][, sprintf(&quot;chr%s   phi = %.4f&quot;, sub(&quot; &quot;, &quot;:&quot;, sid), phi)]
+mklab &lt;- function(d) factor(sprintf(&quot;chr%s   phi = %.4f&quot;, sub(&quot; &quot;, &quot;:&quot;, d$sid), d$phi), levels = lev)
+OB[, row := mklab(OB)]; P[, row := mklab(P)]
+pal3 &lt;- c(&quot;low: phi &lt; 0.003&quot; = &quot;#2c8a4a&quot;,
+          &quot;near the peak: phi ~ 0.0126&quot; = &quot;#1f4e9c&quot;,
+          &quot;high phi &gt; 0.3 (artefact-enriched: IGH/MHC)&quot; = &quot;#c0392b&quot;)
+ggplot(OB, aes(100 * pu, row, colour = grp)) +
+  geom_segment(data = P, inherit.aes = FALSE,
+               aes(y = row, yend = row,
+                   x = pmax(0, 100 * (pooled_pu - prior_sd_pi)),
+                   xend = pmin(100, 100 * (pooled_pu + prior_sd_pi))),
+               colour = &quot;grey70&quot;, linewidth = 3.2, alpha = 0.55) +
+  geom_point(size = 1.5, alpha = 0.8) +
+  scale_colour_manual(values = pal3, name = NULL) +
+  scale_x_continuous(limits = c(0, 100), breaks = seq(0, 100, 25)) +
+  guides(colour = guide_legend(nrow = 3, override.aes = list(size = 3))) +
+  labs(x = &quot;%pU in one cell line&quot;, y = NULL,
+       title = &quot;What phi looks like in the raw data: %pU across the 50 cell lines&quot;,
        subtitle = paste(
-         &quot;One point per cell line. y-axes are free, so compare the SPREAD within a panel against the table, not across panels.&quot;,
-         &quot;Blue = near the peak, green = low phi, red = high phi. The high-phi panels show the U-shaped signature: %pU pushed towards 0 and 100%.&quot;,
+         &quot;One point per cell line, sites ordered by phi, SHARED x-axis. Grey bar = the fitted Beta&#39;s +/-1 SD around the site mean.&quot;,
+         &quot;Genotype is deliberately absent: phi describes spread across cell lines and has nothing to do with any SNP.&quot;,
+         &quot;Low phi = tight cluster. Near the peak = wider. High phi = mass pushed towards both 0% and 100%.&quot;,
          sep = &quot;\n&quot;)) +
-  theme_bw(base_size = 10) +
+  theme_bw(base_size = 11) +
   theme(legend.position = &quot;top&quot;, panel.grid.minor = element_blank(),
-        strip.text = element_text(size = 8))</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_lowphi.Rmd/pugeno-1.png" width="1248" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pugeno-1">
-Past versions of pugeno-1.png
-</button>
-</p>
-<div id="fig-pugeno-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
+        axis.text.y = element_text(size = 8, family = &quot;mono&quot;),
+        plot.subtitle = element_text(size = 8))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_lowphi.Rmd/strip-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>Eleven sites cannot establish a relationship, so the same question
+asked of every site. For each one, compare the spread the fitted model
+predicts against the spread actually observed — once using the fitted φ,
+and once forcing φ = 0 so that only binomial sampling noise remains.</p>
+<pre class="r"><code>SPF &lt;- fread(file.path(LP, &quot;phi_vs_spread_fit.tsv&quot;), sep = &quot;\t&quot;)
+knitr::kable(SPF, caption = &quot;Predicted vs observed SD of %pU, per site, using each site&#39;s OWN fitted phi and its full depth vector. &#39;BB pred / obs&#39; near 1 means phi reproduces the observed scatter; &#39;binomial pred / obs&#39; below 1 means sampling noise alone cannot.&quot;)</code></pre>
+<table style="width:100%;">
+<caption>Predicted vs observed SD of %pU, per site, using each site’s
+OWN fitted phi and its full depth vector. ‘BB pred / obs’ near 1 means
+phi reproduces the observed scatter; ‘binomial pred / obs’ below 1 means
+sampling noise alone cannot.</caption>
+<colgroup>
+<col width="10%" />
+<col width="4%" />
+<col width="9%" />
+<col width="13%" />
+<col width="21%" />
+<col width="9%" />
+<col width="13%" />
+<col width="16%" />
+</colgroup>
 <thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
+<tr class="header">
+<th align="left">subset</th>
+<th align="right">sites</th>
+<th align="right">median obs SD</th>
+<th align="right">median pred SD (BB)</th>
+<th align="right">median pred SD (binomial only)</th>
+<th align="right">BB pred / obs</th>
+<th align="right">binomial pred / obs</th>
+<th align="right">Spearman, phi vs obs SD</th>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/cb6168907f22f43f300e4364dee666a8e3d73395/docs/figure/qtl_mapping_betabinomial_lowphi.Rmd/pugeno-1.png" target="_blank">cb61689</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-09-14
-</td>
+<tr class="odd">
+<td align="left">all sites</td>
+<td align="right">10467</td>
+<td align="right">0.0823</td>
+<td align="right">0.0880</td>
+<td align="right">0.0799</td>
+<td align="right">1.006</td>
+<td align="right">0.966</td>
+<td align="right">0.292</td>
+</tr>
+<tr class="even">
+<td align="left">depth: shallow</td>
+<td align="right">3724</td>
+<td align="right">0.1446</td>
+<td align="right">0.1388</td>
+<td align="right">0.1327</td>
+<td align="right">1.029</td>
+<td align="right">1.002</td>
+<td align="right">0.224</td>
+</tr>
+<tr class="odd">
+<td align="left">depth: middle</td>
+<td align="right">3309</td>
+<td align="right">0.0798</td>
+<td align="right">0.0848</td>
+<td align="right">0.0811</td>
+<td align="right">1.052</td>
+<td align="right">1.016</td>
+<td align="right">0.339</td>
+</tr>
+<tr class="even">
+<td align="left">depth: deep</td>
+<td align="right">3434</td>
+<td align="right">0.0523</td>
+<td align="right">0.0520</td>
+<td align="right">0.0445</td>
+<td align="right">0.959</td>
+<td align="right">0.881</td>
+<td align="right">0.536</td>
 </tr>
 </tbody>
 </table>
-</div>
-</div>
+<pre class="r"><code>VS &lt;- fread(file.path(LP, &quot;phi_vs_spread.txt.gz&quot;), sep = &quot;\t&quot;)
+VS[, dep := cut(median_depth, quantile(median_depth, c(0, 1/3, 2/3, 1)),
+                include.lowest = TRUE,
+                labels = c(&quot;shallow third&quot;, &quot;middle third&quot;, &quot;deep third&quot;))]
+M &lt;- melt(VS[, .(dep, obs_sd, `fitted phi` = pred_sd_bb, `phi = 0 (binomial only)` = pred_sd_binom)],
+          id.vars = c(&quot;dep&quot;, &quot;obs_sd&quot;), variable.name = &quot;prediction&quot;, value.name = &quot;pred&quot;)
+ggplot(M, aes(pred, obs_sd, colour = prediction)) +
+  geom_abline(slope = 1, intercept = 0, colour = &quot;grey40&quot;, linetype = &quot;dashed&quot;, linewidth = 0.4) +
+  geom_point(size = 0.35, alpha = 0.25, shape = 16) +
+  facet_wrap(~ dep, nrow = 1) +
+  scale_x_log10() + scale_y_log10() +
+  scale_colour_manual(values = c(&quot;fitted phi&quot; = &quot;#1f4e9c&quot;,
+                                 &quot;phi = 0 (binomial only)&quot; = &quot;#d98c00&quot;), name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
+  labs(x = &quot;predicted SD of %pU&quot;, y = &quot;observed SD of %pU&quot;,
+       title = &quot;Does phi describe the observed spread? All 10,467 sites&quot;,
+       subtitle = paste(
+         &quot;Dashed = perfect agreement. Blue uses each site&#39;s fitted phi; orange sets phi = 0, leaving only sampling noise.&quot;,
+         &quot;In the DEEP third, where sampling noise is smallest, the orange cloud sits clearly BELOW the diagonal (binomial pred/obs = 0.88)&quot;,
+         &quot;while blue is on it (0.96) -- that gap is the dispersion, and it is what phi is measuring.&quot;,
+         sep = &quot;\n&quot;)) +
+  theme_bw(base_size = 11) +
+  theme(legend.position = &quot;top&quot;, panel.grid.minor = element_blank(),
+        plot.subtitle = element_text(size = 8))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_lowphi.Rmd/spreadfig-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>The blue cloud tracks the diagonal in all three depth strata (BB
+pred/obs 0.96–1.05), so the fitted φ reproduces the observed scatter
+across the whole dataset, not merely at hand-picked sites. The orange
+cloud — sampling noise alone — falls short, and does so most clearly in
+the <strong>deep third</strong> (0.881), which is exactly where it
+should: deep sites have little sampling noise, so whatever spread
+remains has to be real dispersion. The correlation between φ and the
+observed spread also strengthens with depth (Spearman 0.22 → 0.34 →
+0.54), for the same reason.</p>
 <pre class="r"><code>BN &lt;- fread(file.path(LS, &quot;prior_bins.tsv&quot;), sep = &quot;\t&quot;)
-BN[, group := factor(group, levels = GRP)]
 BN &lt;- merge(BN, P[, .(sid, phi)], by = &quot;sid&quot;)
-BN[, panel := sprintf(&quot;chr%s\nphi = %.4f&quot;, sub(&quot; &quot;, &quot;:&quot;, sid), phi)]
-BN[, panel := factor(panel, levels = levels(OB$panel))]
-ggplot(BN, aes(100 * bin_mid, mass, colour = group)) +
+BN[, grp := relab(group)]
+BN[, row := factor(sprintf(&quot;chr%s   phi = %.4f&quot;, sub(&quot; &quot;, &quot;:&quot;, sid), phi), levels = lev)]
+ggplot(BN, aes(100 * bin_mid, mass, colour = grp)) +
   geom_line(linewidth = 0.6) +
-  facet_wrap(~ panel, ncol = 4, scales = &quot;free_y&quot;) +
-  scale_colour_manual(values = c(&quot;#1f4e9c&quot;, &quot;#2c8a4a&quot;, &quot;#c0392b&quot;), name = NULL) +
+  facet_wrap(~ row, ncol = 4, scales = &quot;free_y&quot;) +
+  scale_colour_manual(values = pal3, name = NULL) +
+  guides(colour = guide_legend(nrow = 3)) +
   labs(x = expression(&quot;latent pU rate &quot;*p[i]*&quot; (%)&quot;), y = &quot;probability mass&quot;,
        title = &quot;The fitted Beta prior on the latent rate p_i&quot;,
        subtitle = paste(
@@ -1823,10 +1990,11 @@ XSun
 <p>The prior panels make the α criterion from §3.1 concrete. At the peak
 and below, α ≈ 5–23 and the prior on p_i is a narrow unimodal bump — a
 coherent description of a site whose pU level varies modestly between
-cell lines. In the contrast group α ≈ 0.16–0.39 and the prior piles
+cell lines. In the high-φ group α ≈ 0.16–0.39 and the prior piles
 against 0 and 1, asserting that cell lines are either unmodified or
 fully modified. <strong>That is what a large φ commits you to</strong>,
-and it is the right description for only about 12% of sites.</p>
+and it is the right description for only about 12% of sites — most of
+which, as noted above, sit in the Ig/MHC artefact regions.</p>
 </div>
 </div>
 <div id="what-can-and-cannot-be-claimed" class="section level1">
@@ -1864,7 +2032,12 @@ multi-start MLE.</li>
 <li>Moment estimators, spread check, interpretation, aggregate test:
 <code>29.low_phi_validation.R</code> via
 <code>run_low_phi_validation.sbatch</code> →
-<code>qtl_betabinomial/low_phi_validation/</code>.</li>
+<code>qtl_betabinomial/low_phi_validation/</code>. Multi-start MLE for
+the <code>phi_mle</code> column; the moment estimators use no fitter at
+all beyond taking μ̂_i from it.</li>
+<li>The peak value 0.0126: mode of log₁₀φ over the 5,045 sites where all
+three starts agree on φ to within 5%
+(<code>25.multistart_agreement.R</code>).</li>
 <li>Per-site identifiability:
 <code>multistart_audit/identifiability.txt.gz</code>, profile
 log-likelihood with β re-optimised at fixed φ.</li>
