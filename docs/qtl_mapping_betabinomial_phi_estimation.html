@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-09-16" />
+
+<title>Estimating phi per site: the problem, and six things we have tried</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Estimating phi per site: the problem, and
+six things we have tried</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-09-16</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-09-16
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreea90f3cbe28bbd5b01f7ec977c43da52c4adc80f1targetblanka90f3cba">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/a90f3cbe28bbd5b01f7ec977c43da52c4adc80f1" target="_blank">a90f3cb</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreea90f3cbe28bbd5b01f7ec977c43da52c4adc80f1targetblanka90f3cba"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/a90f3cbe28bbd5b01f7ec977c43da52c4adc80f1" target="_blank">a90f3cb</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/qtl_mapping_betabinomial_phi_estimation.Rmd
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_lowphi.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = &quot;center&quot;, fig.width = 10)
+PSI &lt;- &quot;/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl&quot;
+RC  &lt;- file.path(PSI, &quot;qtl_betabinomial/phi_recovery&quot;)
+LP  &lt;- file.path(PSI, &quot;qtl_betabinomial/low_phi_validation&quot;)</code></pre>
+<blockquote>
+<p>This page records a problem with our per-site estimates of the
+overdispersion φ, and the six things we have tried against it.</p>
+</blockquote>
+<div id="the-problem-estimates-pile-up-at-zero-when-φ-is-small"
+class="section level1">
+<h1>1. The problem: estimates pile up at zero when φ is small</h1>
+<p>The test is simple: simulate data where we <em>know</em> φ, then
+refit with our usual estimator and see what comes back.</p>
+<p><strong>How the data were simulated.</strong> We reuse the real
+design rather than an idealised one. Fitting the null model to the real
+counts at every site gives, per site, a fitted mean μ̂ᵢ for each cell
+line (which varies across lines through the 3 phenotype PCs). Those
+means and the <strong>real read depths nᵢ</strong> are held fixed as
+templates; only φ is imposed. Then for a chosen true φ, at every site
+and every cell line:</p>
+<p><span class="math display">\[p_i \;\sim\;
+\mathrm{Beta}\!\left(\hat\mu_i\tfrac{1-\varphi}{\varphi},\;
+(1-\hat\mu_i)\tfrac{1-\varphi}{\varphi}\right), \qquad y_i \;\sim\;
+\mathrm{Binomial}(n_i,\, p_i)\]</span></p>
+<p>The simulated counts therefore have our actual depth distribution,
+our actual mean structure and our actual number of cell lines — so the
+estimation problem is the one we really face, with the single difference
+that we know the answer.</p>
+<p><strong>Scale of the simulation.</strong></p>
+<pre class="r"><code>RBx &lt;- fread(file.path(RC, &quot;recovery_by_site.txt.gz&quot;), sep = &quot;\t&quot;)
+knitr::kable(data.table(
+  quantity = c(&quot;true phi values imposed&quot;,
+               &quot;sites simulated per true phi&quot;,
+               &quot;cell lines per simulated site&quot;,
+               &quot;site-level datasets in total&quot;,
+               &quot;simulated count observations (y, n) in total&quot;,
+               &quot;random seed&quot;),
+  value = c(paste(sort(unique(RBx$phi_true)), collapse = &quot;, &quot;),
+            format(uniqueN(RBx$sid), big.mark = &quot;,&quot;),
+            &quot;median 49 (range 10-50)&quot;,
+            format(nrow(RBx), big.mark = &quot;,&quot;),
+            &quot;~3.08 million&quot;,
+            &quot;2026&quot;)),
+  caption = &quot;One dataset per site per true phi. Each &#39;site-level dataset&#39; is ~49 paired counts (y_i, n_i), one per cell line, which is exactly what a real site provides. The histograms below pool the ~10,000 sites within each true-phi panel.&quot;)</code></pre>
+<table>
+<caption>One dataset per site per true phi. Each ‘site-level dataset’ is
+~49 paired counts (y_i, n_i), one per cell line, which is exactly what a
+real site provides. The histograms below pool the ~10,000 sites within
+each true-phi panel.</caption>
+<colgroup>
+<col width="56%" />
+<col width="43%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">quantity</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">true phi values imposed</td>
+<td align="left">0.005, 0.0126, 0.05, 0.1, 0.2, 0.4</td>
+</tr>
+<tr class="even">
+<td align="left">sites simulated per true phi</td>
+<td align="left">10,467</td>
+</tr>
+<tr class="odd">
+<td align="left">cell lines per simulated site</td>
+<td align="left">median 49 (range 10-50)</td>
+</tr>
+<tr class="even">
+<td align="left">site-level datasets in total</td>
+<td align="left">62,802</td>
+</tr>
+<tr class="odd">
+<td align="left">simulated count observations (y, n) in total</td>
+<td align="left">~3.08 million</td>
+</tr>
+<tr class="even">
+<td align="left">random seed</td>
+<td align="left">2026</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The design of one panel, step by step.</strong> Take a single
+true φ, say 0.0126. Give <strong>every one of the 10,467 sites that same
+φ</strong> — so within a panel there is exactly one true value, and it
+is the red line. Simulate that site’s ~49 paired counts. Estimate φ̂ at
+that site, using only that site’s own data, exactly as the production
+pipeline does. Repeat independently for all 10,467 sites, and plot the
+histogram of the resulting 10,467 estimates. Then repeat the whole
+procedure at each of the six true φ values to get the six panels.</p>
+<p><strong>What success would look like.</strong> If the estimator were
+perfect, all 10,467 estimates would equal 0.0126 and the histogram would
+be a single narrow spike on the red line. It cannot be that sharp in
+practice — each site has only ~49 cell lines at ~8 reads, so some
+scatter is unavoidable and expected. A <em>well-behaved</em> estimator
+would therefore give <strong>one hump centred on the red line</strong>,
+with its width reflecting nothing but sampling noise.</p>
+<p>What the figure actually shows at small φ is <strong>a hump on the
+red line plus a second spike jammed against the boundary</strong>. The
+hump is fine and expected. The second spike is the failure: those sites
+did not return a noisy version of 0.0126, they returned essentially
+zero.</p>
+<p>A handful of fits fail outright at each value (9,491 to 10,076
+succeed of 10,467) and are excluded from the panel. Note the failure
+rate itself rises with φ, so those exclusions are not random.</p>
+<div id="which-sites-are-estimated-badly" class="section level2">
+<h2>1.1 Which sites are estimated badly?</h2>
+<p>If the estimates are wrong at a large minority of sites, the natural
+question is whether those sites share anything. They do, and it is
+overwhelmingly <strong>read depth</strong>.</p>
+<pre class="r"><code>knitr::kable(fread(file.path(RC, &quot;accuracy_by_property.tsv&quot;), sep = &quot;\t&quot;),
+  caption = &quot;Sites at true phi = 0.0126, grouped by how accurate their estimate turned out. The accurate group has 9x more information (sum n(n-1)) and 3.7x lower predicted SE than the sites that collapsed to the floor. Cell-line count and pooled %pU barely differ between groups.&quot;)</code></pre>
+<table style="width:100%;">
+<caption>Sites at true phi = 0.0126, grouped by how accurate their
+estimate turned out. The accurate group has 9x more information (sum
+n(n-1)) and 3.7x lower predicted SE than the sites that collapsed to the
+floor. Cell-line count and pooled %pU barely differ between
+groups.</caption>
+<colgroup>
+<col width="17%" />
+<col width="3%" />
+<col width="6%" />
+<col width="13%" />
+<col width="12%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">grp</th>
+<th align="right">sites</th>
+<th align="left">% of sites</th>
+<th align="right">median reads per line</th>
+<th align="right">median total reads</th>
+<th align="right">median cell lines</th>
+<th align="left">median pooled %pU</th>
+<th align="left">median sum n(n-1)</th>
+<th align="right">predicted SE(phi)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">collapsed to the 1e-6 floor</td>
+<td align="right">1460</td>
+<td align="left">14.5%</td>
+<td align="right">8</td>
+<td align="right">490</td>
+<td align="right">49</td>
+<td align="left">4.0%</td>
+<td align="left">7,544</td>
+<td align="right">0.0217</td>
+</tr>
+<tr class="even">
+<td align="left">&gt;10x too low (not at floor)</td>
+<td align="right">3380</td>
+<td align="left">33.6%</td>
+<td align="right">5</td>
+<td align="right">268</td>
+<td align="right">47</td>
+<td align="left">4.6%</td>
+<td align="left">2,130</td>
+<td align="right">0.0434</td>
+</tr>
+<tr class="odd">
+<td align="left">wrong but not extreme</td>
+<td align="right">2288</td>
+<td align="left">22.8%</td>
+<td align="right">10</td>
+<td align="right">630</td>
+<td align="right">49</td>
+<td align="left">4.8%</td>
+<td align="left">11,235</td>
+<td align="right">0.0167</td>
+</tr>
+<tr class="even">
+<td align="left">accurate (within 2x)</td>
+<td align="right">2918</td>
+<td align="left">29.0%</td>
+<td align="right">24</td>
+<td align="right">1547</td>
+<td align="right">50</td>
+<td align="left">5.4%</td>
+<td align="left">69,750</td>
+<td align="right">0.0058</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(fread(file.path(RC, &quot;accuracy_by_depth.tsv&quot;), sep = &quot;\t&quot;),
+  caption = &quot;Accuracy by read-depth quintile. This is the actionable result: at ~51 reads per cell line, only 3% of sites collapse and 68% land within 2x, whereas at ~3 reads only 7% are within 2x.&quot;)</code></pre>
+<table>
+<caption>Accuracy by read-depth quintile. This is the actionable result:
+at ~51 reads per cell line, only 3% of sites collapse and 68% land
+within 2x, whereas at ~3 reads only 7% are within 2x.</caption>
+<colgroup>
+<col width="13%" />
+<col width="5%" />
+<col width="20%" />
+<col width="19%" />
+<col width="22%" />
+<col width="19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">depth quintile</th>
+<th align="right">sites</th>
+<th align="right">median reads per line</th>
+<th align="left">% collapsed to floor</th>
+<th align="left">% more than 10x too low</th>
+<th align="left">% within 2x of truth</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">[1,4]</td>
+<td align="right">2627</td>
+<td align="right">3</td>
+<td align="left">12.8%</td>
+<td align="left">73.2%</td>
+<td align="left">7.1%</td>
+</tr>
+<tr class="even">
+<td align="left">(4,7]</td>
+<td align="right">1762</td>
+<td align="right">6</td>
+<td align="left">20.6%</td>
+<td align="left">65.3%</td>
+<td align="left">13.7%</td>
+</tr>
+<tr class="odd">
+<td align="left">(7,12]</td>
+<td align="right">1693</td>
+<td align="right">10</td>
+<td align="left">24.0%</td>
+<td align="left">52.6%</td>
+<td align="left">22.7%</td>
+</tr>
+<tr class="even">
+<td align="left">(12,26]</td>
+<td align="right">1988</td>
+<td align="right">17</td>
+<td align="left">14.8%</td>
+<td align="left">34.9%</td>
+<td align="left">38.3%</td>
+</tr>
+<tr class="odd">
+<td align="left">(26,1.467e+04]</td>
+<td align="right">1976</td>
+<td align="right">51</td>
+<td align="left">3.0%</td>
+<td align="left">9.3%</td>
+<td align="left">68.0%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Three things follow.</strong></p>
+<p><strong>Depth is the whole story, and it is actionable.</strong>
+Sites in the top depth quintile (~51 reads per cell line) collapse only
+3% of the time and are within 2x of the truth 68% of the time. Sites in
+the bottom quintile (~3 reads) are within 2x only 7% of the time. So a
+per-site φ <em>is</em> recoverable — for the deep sites. The obvious
+consequence is that φ should be reported only above a depth threshold,
+not genome-wide.</p>
+<p><strong>Cell-line count and %pU are not the problem.</strong> The
+four accuracy groups have essentially the same number of covered cell
+lines (47-50) and similar modification rates (4.0-5.4%). Only depth and
+the information summary sum n(n-1) separate them.</p>
+<p><strong>The boundary rate is not monotone in depth</strong> — it
+peaks at ~10 reads (24%) rather than at the lowest depth (12.8%). At
+very low depth the Pearson statistic is so noisy that estimates scatter
+in <em>both</em> directions rather than settling on the boundary, so the
+shallowest sites are wrong in both directions rather than specifically
+collapsed.</p>
+<pre class="r"><code>RB &lt;- fread(file.path(RC, &quot;recovery_by_site.txt.gz&quot;), sep = &quot;\t&quot;)[is.finite(phi_hat)]
+RS &lt;- fread(file.path(RC, &quot;recovery_summary.tsv&quot;), sep = &quot;\t&quot;)
+SP &lt;- fread(file.path(RC, &quot;site_properties.txt.gz&quot;), sep = &quot;\t&quot;)
+RB &lt;- merge(RB, SP[, .(sid, med_depth)], by = &quot;sid&quot;)
+PT &lt;- sort(unique(RB$phi_true))
+RB[, panel := factor(sprintf(&quot;true phi = %g&quot;, phi_true),
+                     levels = sprintf(&quot;true phi = %g&quot;, PT))]
+# colour by READ DEPTH quintile -- the point is that the boundary spike and the
+# hump on the truth are made of different sites
+qb &lt;- quantile(SP$med_depth, 0:5/5)
+RB[, dq := cut(med_depth, qb, include.lowest = TRUE,
+               labels = c(&quot;1-3 reads (shallowest 20%)&quot;, &quot;4-6&quot;, &quot;7-11&quot;, &quot;12-24&quot;,
+                          &quot;25+ reads (deepest 20%)&quot;))]
+vl &lt;- merge(unique(RB[, .(panel, phi_true)]), RS[, .(phi_true, mode = `mode phi_hat`)], by = &quot;phi_true&quot;)
+ggplot(RB, aes(phi_hat, fill = dq)) +
+  geom_histogram(bins = 60, colour = NA) +
+  geom_vline(xintercept = 1e-6, colour = &quot;grey35&quot;, linetype = &quot;dotted&quot;) +
+  geom_vline(data = vl, aes(xintercept = phi_true), colour = &quot;#c0392b&quot;, linewidth = 0.7) +
+  facet_wrap(~ panel, nrow = 2, scales = &quot;free_y&quot;) +
+  scale_x_log10(breaks = 10^seq(-6, 0, 2), labels = c(&quot;1e-6&quot;, &quot;1e-4&quot;, &quot;1e-2&quot;, &quot;1&quot;)) +
+  scale_fill_viridis_d(option = &quot;viridis&quot;, direction = -1,
+                       name = &quot;median reads per cell line&quot;) +
+  guides(fill = guide_legend(nrow = 1, reverse = TRUE)) +
+  labs(x = expression(hat(varphi)*&quot;, axis log-spaced&quot;), y = &quot;sites&quot;,
+       title = &quot;Simulated from a KNOWN phi, then refitted -- coloured by read depth&quot;,
+       subtitle = paste(
+         &quot;Red = the true phi used to simulate. Dotted grey = the 1e-6 numerical floor. Stacked bars, so colour shows COMPOSITION.&quot;,
+         &quot;A perfect estimator would give one narrow spike on the red line; a well-behaved one, a single hump centred there.&quot;,
+         &quot;The hump on the truth is built from the DEEP sites (yellow). Depth, not the value of phi, decides which a site lands in.&quot;,
+         sep = &quot;\n&quot;)) +
+  theme_bw(base_size = 11) +
+  theme(legend.position = &quot;top&quot;, panel.grid.minor = element_blank(),
+        plot.subtitle = element_text(size = 8))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_phi_estimation.Rmd/prob-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>At a true φ of 0.0126 — the value our real data suggest — <strong>14%
+of sites return essentially zero</strong> and about half are more than
+tenfold too low, even though the mode of the distribution sits correctly
+on the truth:</p>
+<pre class="r"><code>knitr::kable(RB[, { r &lt;- phi_hat/phi_true[1]
+  .(`within 2x of truth` = sprintf(&quot;%.1f%%&quot;, 100*mean(r &gt; 0.5 &amp; r &lt; 2)),
+    `&gt;10x too low`       = sprintf(&quot;%.1f%%&quot;, 100*mean(r &lt; 0.1)),
+    `at the 1e-6 floor`  = sprintf(&quot;%.1f%%&quot;, 100*mean(phi_hat &lt; 2e-6)),
+    `median fold error`  = round(median(pmax(r, 1/r)), 1)) },
+  by = .(`true phi` = phi_true)][order(`true phi`)],
+  caption = &quot;Per-site accuracy against known truth. The mode is nearly unbiased at every true phi &gt;= 0.0126, but individual sites are frequently wrong by orders of magnitude, and worst where phi is smallest.&quot;)</code></pre>
+<table>
+<caption>Per-site accuracy against known truth. The mode is nearly
+unbiased at every true phi &gt;= 0.0126, but individual sites are
+frequently wrong by orders of magnitude, and worst where phi is
+smallest.</caption>
+<colgroup>
+<col width="11%" />
+<col width="24%" />
+<col width="16%" />
+<col width="23%" />
+<col width="23%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">true phi</th>
+<th align="left">within 2x of truth</th>
+<th align="left">&gt;10x too low</th>
+<th align="left">at the 1e-6 floor</th>
+<th align="right">median fold error</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.0050</td>
+<td align="left">18.2%</td>
+<td align="left">59.8%</td>
+<td align="left">20.0%</td>
+<td align="right">461.4</td>
+</tr>
+<tr class="even">
+<td align="right">0.0126</td>
+<td align="left">29.0%</td>
+<td align="left">48.2%</td>
+<td align="left">14.5%</td>
+<td align="right">9.0</td>
+</tr>
+<tr class="odd">
+<td align="right">0.0500</td>
+<td align="left">51.8%</td>
+<td align="left">26.9%</td>
+<td align="left">5.3%</td>
+<td align="right">1.9</td>
+</tr>
+<tr class="even">
+<td align="right">0.1000</td>
+<td align="left">62.0%</td>
+<td align="left">18.1%</td>
+<td align="left">2.7%</td>
+<td align="right">1.6</td>
+</tr>
+<tr class="odd">
+<td align="right">0.2000</td>
+<td align="left">70.8%</td>
+<td align="left">11.4%</td>
+<td align="left">1.2%</td>
+<td align="right">1.4</td>
+</tr>
+<tr class="even">
+<td align="right">0.4000</td>
+<td align="left">79.3%</td>
+<td align="left">7.0%</td>
+<td align="left">0.5%</td>
+<td align="right">1.3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="what-we-tried" class="section level1">
+<h1>2. What we tried</h1>
+<pre class="r"><code>knitr::kable(data.table(
+  approach = c(&quot;multi-start optimiser&quot;,
+               &quot;peak-proximity rule&quot;,
+               &quot;trend-based prior centre (DESeq2/edgeR style)&quot;,
+               &quot;Gaussian prior on log phi&quot;,
+               &quot;Student-t prior on log phi&quot;,
+               &quot;two-component mixture prior&quot;,
+               &quot;prior derived from the MOMENT estimator&quot;),
+  idea = c(&quot;start the optimiser from 3 values of phi, keep the best fit&quot;,
+           &quot;of the optima found, take the one nearest the population mode&quot;,
+           &quot;predict each site&#39;s phi from its mean and depth, shrink toward that&quot;,
+           &quot;penalise phi values far from 0.0126&quot;,
+           &quot;same, but with a heavy tail so distant sites escape&quot;,
+           &quot;two plausible centres (0.019 and 0.46) instead of one&quot;,
+           &quot;estimate the prior from an optimiser-free estimator, then MAP&quot;),
+  outcome = c(&quot;FIXED A DIFFERENT BUG: 13 sites where the likelihood is bimodal and one fixed start found the worse optimum. Did NOT touch the boundary spike.&quot;,
+              &quot;NO. Per-site tracking unchanged; it only moves the pile off the boundary to ~1e-4. A relocation, not a repair.&quot;,
+              &quot;RULED OUT before building: phi is not predictable from site features (R-squared = 0.058), so there is no trend to shrink toward.&quot;,
+              &quot;NO. Loses to a CONSTANT GUESS at 3 of 4 true phi, and tracks WORSE than the MLE at large phi (Spearman 0.68 vs 0.74).&quot;,
+              &quot;NO. Same failure -- at 2 log-units out the tail has not saturated enough to help.&quot;,
+              &quot;MARGINAL. Roughly ties the MLE on tracking at large phi; and its second component is not supported by an optimiser-free estimator (see 3.2).&quot;,
+              &quot;BEST OF THE SIX, but not a solution: it is the only approach that beats a constant guess at all four true phi, yet per-site tracking at the modal phi is still only Spearman 0.41.&quot;)),
+  caption = &quot;Six attempts. Verdicts are by per-site tracking (see 3.1), not by the &#39;within 2x&#39; rate, which is misleading -- see below.&quot;)</code></pre>
+<table>
+<caption>Six attempts. Verdicts are by per-site tracking (see 3.1), not
+by the ‘within 2x’ rate, which is misleading – see below.</caption>
+<colgroup>
+<col width="15%" />
+<col width="23%" />
+<col width="61%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">approach</th>
+<th align="left">idea</th>
+<th align="left">outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">multi-start optimiser</td>
+<td align="left">start the optimiser from 3 values of phi, keep the best
+fit</td>
+<td align="left">FIXED A DIFFERENT BUG: 13 sites where the likelihood is
+bimodal and one fixed start found the worse optimum. Did NOT touch the
+boundary spike.</td>
+</tr>
+<tr class="even">
+<td align="left">peak-proximity rule</td>
+<td align="left">of the optima found, take the one nearest the
+population mode</td>
+<td align="left">NO. Per-site tracking unchanged; it only moves the pile
+off the boundary to ~1e-4. A relocation, not a repair.</td>
+</tr>
+<tr class="odd">
+<td align="left">trend-based prior centre (DESeq2/edgeR style)</td>
+<td align="left">predict each site’s phi from its mean and depth, shrink
+toward that</td>
+<td align="left">RULED OUT before building: phi is not predictable from
+site features (R-squared = 0.058), so there is no trend to shrink
+toward.</td>
+</tr>
+<tr class="even">
+<td align="left">Gaussian prior on log phi</td>
+<td align="left">penalise phi values far from 0.0126</td>
+<td align="left">NO. Loses to a CONSTANT GUESS at 3 of 4 true phi, and
+tracks WORSE than the MLE at large phi (Spearman 0.68 vs 0.74).</td>
+</tr>
+<tr class="odd">
+<td align="left">Student-t prior on log phi</td>
+<td align="left">same, but with a heavy tail so distant sites
+escape</td>
+<td align="left">NO. Same failure – at 2 log-units out the tail has not
+saturated enough to help.</td>
+</tr>
+<tr class="even">
+<td align="left">two-component mixture prior</td>
+<td align="left">two plausible centres (0.019 and 0.46) instead of
+one</td>
+<td align="left">MARGINAL. Roughly ties the MLE on tracking at large
+phi; and its second component is not supported by an optimiser-free
+estimator (see 3.2).</td>
+</tr>
+<tr class="odd">
+<td align="left">prior derived from the MOMENT estimator</td>
+<td align="left">estimate the prior from an optimiser-free estimator,
+then MAP</td>
+<td align="left">BEST OF THE SIX, but not a solution: it is the only
+approach that beats a constant guess at all four true phi, yet per-site
+tracking at the modal phi is still only Spearman 0.41.</td>
+</tr>
+</tbody>
+</table>
+<div id="how-we-judge-worked-per-site-tracking-not-the-hit-rate"
+class="section level2">
+<h2>2.1 How we judge “worked”: per-site tracking, not the hit rate</h2>
+<p>We first scored these by the fraction of sites within 2x of the
+truth. <strong>That metric is misleading, and it flattered every
+method.</strong> If the true phi values are tightly clustered, then
+simply returning a constant near the middle scores well without using
+the data at all. So the table below adds two honest criteria:</p>
+<ul>
+<li><strong>slope</strong> of log(estimate) on log(truth). 1 means the
+estimate tracks each site; 0 means it returns a constant regardless of
+the data.</li>
+<li><strong>Spearman</strong> correlation between true and estimated
+phi, per site.</li>
+<li>a <strong>constant-guess benchmark</strong>: ignore the data
+entirely and return the true median at every site. Any method that
+cannot beat this is not measuring anything.</li>
+</ul>
+<pre class="r"><code>TR &lt;- fread(file.path(RC, &quot;approach_tracking.tsv&quot;), sep = &quot;\t&quot;)
+LV &lt;- c(&quot;(constant guess)&quot;, &quot;MLE&quot;, &quot;gauss sd=0.83&quot;, &quot;t df=2 sd=0.83&quot;,
+        &quot;t df=1 sd=0.4&quot;, &quot;MIXTURE&quot;, &quot;MAP: mom-median&quot;)
+TR &lt;- TR[est %chin% LV][, est := factor(est, levels = LV)]
+knitr::kable(dcast(TR, est ~ truth_centre, value.var = &quot;spearman&quot;)[order(est)],
+  caption = &quot;SPEARMAN correlation between true and estimated phi, per site, by the centre of the true phi distribution. Higher is better; the constant guess is 0 by construction.&quot;)</code></pre>
+<table>
+<caption>SPEARMAN correlation between true and estimated phi, per site,
+by the centre of the true phi distribution. Higher is better; the
+constant guess is 0 by construction.</caption>
+<thead>
+<tr class="header">
+<th align="left">est</th>
+<th align="right">0.0126</th>
+<th align="right">0.05</th>
+<th align="right">0.2</th>
+<th align="right">0.4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(constant guess)</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+</tr>
+<tr class="even">
+<td align="left">MLE</td>
+<td align="right">0.294</td>
+<td align="right">0.578</td>
+<td align="right">0.754</td>
+<td align="right">0.737</td>
+</tr>
+<tr class="odd">
+<td align="left">gauss sd=0.83</td>
+<td align="right">0.392</td>
+<td align="right">0.614</td>
+<td align="right">0.713</td>
+<td align="right">0.682</td>
+</tr>
+<tr class="even">
+<td align="left">t df=2 sd=0.83</td>
+<td align="right">0.397</td>
+<td align="right">0.611</td>
+<td align="right">0.713</td>
+<td align="right">0.695</td>
+</tr>
+<tr class="odd">
+<td align="left">t df=1 sd=0.4</td>
+<td align="right">0.408</td>
+<td align="right">0.583</td>
+<td align="right">0.675</td>
+<td align="right">0.668</td>
+</tr>
+<tr class="even">
+<td align="left">MIXTURE</td>
+<td align="right">0.391</td>
+<td align="right">0.629</td>
+<td align="right">0.735</td>
+<td align="right">0.742</td>
+</tr>
+<tr class="odd">
+<td align="left">MAP: mom-median</td>
+<td align="right">0.406</td>
+<td align="right">0.694</td>
+<td align="right">0.805</td>
+<td align="right">0.772</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(dcast(TR, est ~ truth_centre, value.var = &quot;slope&quot;)[order(est)],
+  caption = &quot;SLOPE of log(estimate) on log(truth). 1 = tracks each site; 0 = returns a constant; above 1 = spreads estimates more widely than the truth.&quot;)</code></pre>
+<table>
+<caption>SLOPE of log(estimate) on log(truth). 1 = tracks each site; 0 =
+returns a constant; above 1 = spreads estimates more widely than the
+truth.</caption>
+<thead>
+<tr class="header">
+<th align="left">est</th>
+<th align="right">0.0126</th>
+<th align="right">0.05</th>
+<th align="right">0.2</th>
+<th align="right">0.4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(constant guess)</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="even">
+<td align="left">MLE</td>
+<td align="right">1.55</td>
+<td align="right">1.85</td>
+<td align="right">1.85</td>
+<td align="right">1.72</td>
+</tr>
+<tr class="odd">
+<td align="left">gauss sd=0.83</td>
+<td align="right">0.46</td>
+<td align="right">0.81</td>
+<td align="right">1.10</td>
+<td align="right">1.27</td>
+</tr>
+<tr class="even">
+<td align="left">t df=2 sd=0.83</td>
+<td align="right">0.43</td>
+<td align="right">0.80</td>
+<td align="right">1.11</td>
+<td align="right">1.30</td>
+</tr>
+<tr class="odd">
+<td align="left">t df=1 sd=0.4</td>
+<td align="right">0.28</td>
+<td align="right">0.68</td>
+<td align="right">1.12</td>
+<td align="right">1.37</td>
+</tr>
+<tr class="even">
+<td align="left">MIXTURE</td>
+<td align="right">0.42</td>
+<td align="right">0.79</td>
+<td align="right">1.10</td>
+<td align="right">1.19</td>
+</tr>
+<tr class="odd">
+<td align="left">MAP: mom-median</td>
+<td align="right">0.36</td>
+<td align="right">0.62</td>
+<td align="right">0.82</td>
+<td align="right">0.90</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(dcast(TR, est ~ truth_centre, value.var = &quot;within2x&quot;)[order(est)],
+  caption = &quot;The &#39;within 2x&#39; rate, shown for comparison. Note the constant guess scores 68.7% at the smallest true phi -- which is why this metric cannot be used on its own.&quot;)</code></pre>
+<table>
+<caption>The ‘within 2x’ rate, shown for comparison. Note the constant
+guess scores 68.7% at the smallest true phi – which is why this metric
+cannot be used on its own.</caption>
+<thead>
+<tr class="header">
+<th align="left">est</th>
+<th align="left">0.0126</th>
+<th align="left">0.05</th>
+<th align="left">0.2</th>
+<th align="left">0.4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(constant guess)</td>
+<td align="left">68.7%</td>
+<td align="left">54.2%</td>
+<td align="left">54.4%</td>
+<td align="left">77.0%</td>
+</tr>
+<tr class="even">
+<td align="left">MLE</td>
+<td align="left">30.0%</td>
+<td align="left">50.4%</td>
+<td align="left">69.9%</td>
+<td align="left">79.6%</td>
+</tr>
+<tr class="odd">
+<td align="left">gauss sd=0.83</td>
+<td align="left">61.6%</td>
+<td align="left">53.7%</td>
+<td align="left">62.9%</td>
+<td align="left">70.8%</td>
+</tr>
+<tr class="even">
+<td align="left">t df=2 sd=0.83</td>
+<td align="left">64.7%</td>
+<td align="left">53.3%</td>
+<td align="left">62.9%</td>
+<td align="left">72.4%</td>
+</tr>
+<tr class="odd">
+<td align="left">t df=1 sd=0.4</td>
+<td align="left">74.3%</td>
+<td align="left">50.1%</td>
+<td align="left">57.1%</td>
+<td align="left">69.6%</td>
+</tr>
+<tr class="even">
+<td align="left">MIXTURE</td>
+<td align="left">66.1%</td>
+<td align="left">57.1%</td>
+<td align="left">65.1%</td>
+<td align="left">78.0%</td>
+</tr>
+<tr class="odd">
+<td align="left">MAP: mom-median</td>
+<td align="left">71.2%</td>
+<td align="left">73.1%</td>
+<td align="left">80.8%</td>
+<td align="left">89.0%</td>
+</tr>
+</tbody>
+</table>
+<p>Three things follow, and they change the verdicts.</p>
+<p><strong>The MLE spreads estimates too widely, not too
+narrowly.</strong> Its slope is 1.55-1.85 everywhere, well above 1. The
+boundary collapse is the cause: sites pushed to 1e-6 create extreme low
+values that stretch the range.</p>
+<p><strong>The fixed-centre priors do not work.</strong> The Gaussian
+scores 61.6% within 2x at the smallest true phi, which looked like a
+large gain over the MLE’s 30.0% – but a constant guess scores 68.7%, so
+it is worse than not using the data. It loses to the constant at three
+of the four true phi values, and at large phi it tracks worse than the
+plain MLE (Spearman 0.682 against 0.737). The Student-t behaves the same
+way. The mixture is better but only ties the MLE on tracking at large
+phi.</p>
+<p><strong>The moment-derived prior is the best of the six, but it does
+not solve the problem.</strong> It has the best Spearman at every true
+phi (0.41 / 0.69 / 0.81 / 0.77), it is the only approach that beats the
+constant guess at all four, and its slope rises toward 1 as information
+increases (0.36 -&gt; 0.62 -&gt; 0.82 -&gt; 0.90), which is the
+behaviour a shrinkage estimator should have. But <strong>0.41 at the phi
+our data actually suggest is weak per-site agreement</strong>, and no
+approach we tried does better there. Where information is plentiful (phi
+~ 0.2-0.4) the tracking is respectable; at the modal phi it is not.</p>
+<!-- ## 2.2 A caveat we had to correct ourselves on -->
+<!-- The mixture prior's two components were fitted to the subset of sites where all -->
+<!-- three optimiser starts agree on φ. But that subset is **defined by the estimator -->
+<!-- under suspicion**, so it cannot be used to decide whether the estimator's -->
+<!-- bimodality is real. Using an optimiser-free, covariate-adjusted estimator -->
+<!-- instead, the second peak largely disappears: -->
+<!-- ```{r bimod, fig.height=7, fig.width=12} -->
+<!-- MA <- file.path(PSI, "qtl_betabinomial/multistart_audit") -->
+<!-- ms <- fread(file.path(MA, "multistart_by_site.txt.gz"), sep = "\t") -->
+<!-- ag <- fread(file.path(MA, "agreement_by_site.txt.gz"), sep = "\t") -->
+<!-- mo <- fread(file.path(LP, "moment_by_site.txt.gz"), sep = "\t") -->
+<!-- LV <- c("MLE, all sites\n(has the boundary spike)", -->
+<!--         "MLE, 'reliable' subset\n(selected BY the MLE - circular)", -->
+<!--         "moments, pooled mean\n(no optimiser, NO covariates)", -->
+<!--         "moments, covariate-adjusted\n(no optimiser, WITH covariates)") -->
+<!-- bd <- rbindlist(list( -->
+<!--   data.table(phi = ms[is.finite(phi_3start)]$phi_3start,   src = LV[1]), -->
+<!--   data.table(phi = ag[n_ok == 3L & n_opt_phi == 1L]$phi_1, src = LV[2]), -->
+<!--   data.table(phi = mo$phi_mom_pooled,                      src = LV[3]), -->
+<!--   data.table(phi = mo$phi_mom_adjusted,                    src = LV[4]))) -->
+<!-- bd <- bd[is.finite(phi) & phi > 0][, src := factor(src, levels = LV)] -->
+<!-- bann <- bd[, .(n = .N, hi = mean(phi > 0.128), -->
+<!--                mode = { k <- density(log10(phi)); 10^k$x[which.max(k$y)] }), by = src] -->
+<!-- bann[, lab := sprintf("n = %s\nmode = %.4f\n%.1f%% above 0.128", -->
+<!--                       format(n, big.mark = ","), mode, 100 * hi)] -->
+<!-- ggplot(bd, aes(phi)) + -->
+<!--   geom_histogram(bins = 70, fill = "#4a7fbf", colour = NA) + -->
+<!--   geom_vline(xintercept = 0.128, colour = "#c0392b", linetype = "dashed", linewidth = 0.5) + -->
+<!--   geom_vline(xintercept = 1e-6, colour = "grey35", linetype = "dotted") + -->
+<!--   geom_text(data = bann, aes(x = 1.3e-6, y = Inf, label = lab), hjust = 0, vjust = 1.2, -->
+<!--             size = 2.7, colour = "grey15", lineheight = 0.95) + -->
+<!--   facet_wrap(~ src, nrow = 2, scales = "free_y") + -->
+<!--   scale_x_log10(breaks = 10^c(-6, -4, -2, 0), labels = c("1e-6", "1e-4", "1e-2", "1")) + -->
+<!--   labs(x = expression(hat(varphi)*", axis log-spaced"), y = "sites", -->
+<!--        title = "Is the phi distribution really two-humped? Four estimators, same data", -->
+<!--        subtitle = paste( -->
+<!--          "Red dashed = 0.128, where the Beta prior turns U-shaped. Dotted = the 1e-6 floor.", -->
+<!--          "The two-humped shape is clear in the MLE-based views and in the unadjusted moment estimator,", -->
+<!--          "but LARGELY DISAPPEARS in the covariate-adjusted moment estimator -- the fairest optimiser-free comparison.", -->
+<!--          sep = "\n")) + -->
+<!--   theme_bw(base_size = 10) + -->
+<!--   theme(panel.grid.minor = element_blank(), strip.text = element_text(size = 8), -->
+<!--         plot.subtitle = element_text(size = 7.5)) -->
+<!-- ``` -->
+</div>
+</div>
+<div id="the-best-of-the-six-a-prior-built-from-the-moment-estimator"
+class="section level1">
+<h1>3. The best of the six: a prior built from the moment estimator</h1>
+<p>Three passes, and the key point is that <strong>nothing is assumed
+about where φ sits</strong>:</p>
+<ol style="list-style-type: decimal">
+<li>compute the moment estimate at every site — closed form, no
+optimiser, no prior</li>
+<li>derive the prior’s centre and scale from those estimates by a fixed
+rule</li>
+<li>refit each site by MAP with that prior</li>
+</ol>
+<p><strong>How this simulation differs from the one in §1.</strong> In
+§1 a single true φ was imposed on every site, which is the right way to
+ask “does the estimator recover a known value”. It cannot be used to
+test a <em>prior</em>, because with one true value the best possible
+prior is a spike on that value — it would score perfectly while learning
+nothing. A prior describes how φ varies <em>between</em> sites, so the
+truth has to vary. So here:</p>
+<ol style="list-style-type: decimal">
+<li><strong>invent a per-site truth</strong>:
+<code>log10(φᵢ) ~ Normal(log10(centre), sd)</code>, clipped to [1e-5,
+0.9]. Four centres are used — 0.0126, 0.05, 0.2, 0.4 — so the method is
+tested where our data suggest φ sits <em>and</em> well away from
+it.</li>
+<li><strong>simulate counts</strong> as in §1, reusing the real depths
+nᵢ and real fitted μ̂ᵢ.</li>
+<li><strong>moment estimate</strong> at every site from those simulated
+counts.</li>
+<li><strong>derive the prior</strong> from those estimates — median of
+all of them (negatives included) for the centre, MAD of log10 of the
+positives for the width.</li>
+<li><strong>MAP refit</strong> per site with that prior.</li>
+<li><strong>score</strong> against the per-site truth from step 1.</li>
+</ol>
+<p>The prior is rebuilt from scratch inside every truth setting, so what
+is being tested is the whole procedure rather than a prior that happened
+to suit one answer. That is what makes the comparison fair: the derived
+centre had to find the truth at four different values, and it did (truth
+0.0126 → derived 0.0124; 0.05 → 0.0433; 0.2 → 0.140; 0.4 → 0.281). A
+fixed-centre prior would have been right in one column and wrong in
+three.</p>
+<pre class="r"><code>sc &lt;- fread(file.path(RC, &quot;moment_prior_by_site.txt.gz&quot;), sep = &quot;\t&quot;)
+sc &lt;- sc[is.finite(phi_hat) &amp; phi_hat &gt; 0 &amp; is.finite(phi_true) &amp;
+         est %chin% c(&quot;MLE&quot;, &quot;MAP: mom-median&quot;)]
+# defined here rather than in an earlier chunk so this figure stands alone
+EL &lt;- c(&quot;MLE&quot; = &quot;MLE (no prior)&quot;, &quot;MAP: mom-median&quot; = &quot;MAP, prior from moment estimates&quot;)
+CT &lt;- c(0.0126, 0.05, 0.2, 0.4)
+sc[, rl := factor(EL[est], levels = EL)]
+sc[, cl := factor(sprintf(&quot;true phi centred at %g&quot;, truth_centre),
+                  levels = sprintf(&quot;true phi centred at %g&quot;, CT))]
+sann &lt;- sc[, .(sp = cor(log10(phi_true), log10(phi_hat), method = &quot;spearman&quot;),
+               sl = coef(lm(log10(phi_hat) ~ log10(phi_true)))[2]), by = .(rl, cl)]
+sann[, lab := sprintf(&quot;Spearman %.2f\nslope %.2f&quot;, sp, sl)]
+ggplot(sc, aes(phi_true, phi_hat)) +
+  geom_abline(slope = 1, intercept = 0, colour = &quot;#c0392b&quot;, linewidth = 0.5) +
+  geom_point(size = 0.25, alpha = 0.15, shape = 16, colour = &quot;#1f4e9c&quot;) +
+  geom_smooth(method = &quot;gam&quot;, formula = y ~ s(x, bs = &quot;cs&quot;), se = FALSE,
+              colour = &quot;#f5a623&quot;, linewidth = 0.7) +
+  geom_text(data = sann, aes(x = 1.5e-5, y = 1.3, label = lab), hjust = 0, vjust = 1,
+            size = 2.7, colour = &quot;grey15&quot;, lineheight = 0.95) +
+  facet_grid(rl ~ cl, labeller = label_wrap_gen(width = 28)) +
+  scale_x_log10() + scale_y_log10() +
+  labs(x = expression(TRUE~varphi[i]~&quot;(one point per site)&quot;),
+       y = expression(estimated~hat(varphi)[i]),
+       title = &quot;Estimated against TRUE phi, site by site&quot;,
+       subtitle = paste(
+  &quot;Red = y = x, perfect recovery. Orange = a smooth fit through the points. One point per site.&quot;,
+  &quot;This is the honest test: matching histograms can hide a wrong pairing, a scatter cannot.&quot;,
+  &quot;TOP (MLE): the vertical smear at the bottom is the boundary collapse -- sites whose truth varies over a decade all returned ~1e-6.&quot;,
+  &quot;BOTTOM (MAP): the collapse is gone, but at the LEFT-hand columns the cloud is nearly FLAT -- the estimate barely responds to the truth (slope 0.36).&quot;,
+  &quot;Only at large phi (right-hand columns) does the cloud approach the red line, which is where a per-site phi means something.&quot;,
+  sep = &quot;\n&quot;)) +
+  theme_bw(base_size = 10) +
+  theme(panel.grid.minor = element_blank(), strip.text = element_text(size = 8),
+        plot.subtitle = element_text(size = 7.5))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_phi_estimation.Rmd/workedscatter-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>The scatter is a stricter test than the histogram above it, and it
+shows two things the histogram could not.</p>
+<p><strong>The MLE’s surviving estimates are unbiased.</strong> In the
+top row the main cloud sits squarely <em>on</em> the red line at every
+truth centre. The MLE’s problem is not that it estimates φ badly — it is
+that a detached blob of sites falls off the bottom entirely, spanning
+the whole range of truth and all returning ~10⁻⁶. So the MLE is really
+two estimators: an unbiased one, and a failure mode. That is a more
+favourable reading of the MLE than the pooled accuracy figures give
+it.</p>
+<p><strong>The MAP trades collapse for inflation, and the scatter makes
+the direction visible.</strong> In the bottom row the blob is gone, but
+at the low end the cloud sits <em>above</em> the red line — roughly
+tenfold above it at the left edge of the <code>0.0126</code> panel —
+before crossing it further right. That is shrinkage toward the prior
+centre seen from the side: sites whose true φ lies below the centre are
+pushed <strong>up</strong>, and sites above it are pulled
+<strong>down</strong>. Near-horizontal at small φ (slope 0.36),
+approaching the line by φ = 0.4 (slope 0.90).</p>
+<!-- Worth noting which direction of error is safer. Overestimating φ widens the null -->
+<!-- and is conservative for testing; the MLE's collapse to zero narrows it and is -->
+<!-- anti-conservative. So although the MAP is biased at the low end, it is biased the -->
+<!-- less dangerous way — which matters if these φ ever feed a test rather than being -->
+<!-- reported. -->
+<!-- ```{r workedtab} -->
+<!-- M <- fread(file.path(RC, "moment_prior_accuracy.tsv"), sep = "\t") -->
+<!-- knitr::kable(dcast(M[est %in% c("MLE", "MAP: mom-median", "MAP: mom-mode")], -->
+<!--                    truth_centre ~ est, value.var = "within 2x")[ -->
+<!--   , .(`true phi centre` = truth_centre, MLE, `MAP: mom-median`, `MAP: mom-mode`)], -->
+<!--   caption = "Percent within 2x of truth. Unlike every fixed-centre prior, this beats the MLE at EVERY true phi, including 0.2 and 0.4.") -->
+<!-- ``` -->
+<!-- The boundary spike is eliminated (>10× too low falls from 47.6% to 0.1% at small -->
+<!-- φ) **and** large-φ sites improve rather than degrade (80.4% → 89–92%). -->
+<!-- **But it is not recovering per-site φ at the low end, and that must be said -->
+<!-- plainly.** At the smallest true φ the slope of estimate on truth is **0.36** and -->
+<!-- the Spearman correlation **0.41** — near the centre the method is largely -->
+<!-- returning the prior rather than measuring the site. On the real data the effect -->
+<!-- is visible directly: the estimated distribution collapses to a spike at the prior -->
+<!-- centre, mode and median both 0.0048, and **57.8% of sites move by more than -->
+<!-- five-fold** from their MLE value. Tracking is genuinely good where information -->
+<!-- exists (slope 0.90, Spearman 0.77 at φ = 0.4), and that is where a reported -->
+<!-- per-site φ means something. -->
+<!-- So the defensible summary is: **the best available estimator of the population -->
+<!-- distribution and of the well-informed sites, and a shrunk summary rather than a -->
+<!-- measurement everywhere else. It is not a per-site measurement of phi at the low -->
+<!-- end, and we do not think any of the six approaches achieves that.** -->
+<!-- Applied to our real counts, the same calibrated rule puts the central φ at -->
+<!-- **0.0052** — about 2.4× below the 0.0126 we had been quoting from the mode of the -->
+<!-- MLE distribution. Worth noting these are different statistics (a median versus a -->
+<!-- mode), but the direction is consistent. -->
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 7 (Core)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el7-x86_64/lib/libopenblas_haswellp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_4.0.3     data.table_1.14.2
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.2.0   xfun_0.41          bslib_0.3.1        lattice_0.20-45   
+ [5] splines_4.2.0      vctrs_0.6.5        generics_0.1.4     htmltools_0.5.2   
+ [9] viridisLite_0.4.0  yaml_2.3.5         mgcv_1.8-40        utf8_1.2.2        
+[13] rlang_1.1.2        R.oo_1.24.0        jquerylib_0.1.4    later_1.3.0       
+[17] pillar_1.9.0       glue_1.6.2         withr_2.5.0        R.utils_2.11.0    
+[21] bit64_4.0.5        RColorBrewer_1.1-3 S7_0.2.0           lifecycle_1.0.4   
+[25] stringr_1.5.1      gtable_0.3.6       workflowr_1.7.0    R.methodsS3_1.8.1 
+[29] evaluate_0.15      labeling_0.4.2     knitr_1.39         fastmap_1.1.0     
+[33] httpuv_1.6.5       fansi_1.0.3        highr_0.9          Rcpp_1.0.12       
+[37] promises_1.2.0.1   scales_1.4.0       jsonlite_1.8.0     farver_2.1.0      
+[41] fs_1.5.2           bit_4.0.4          digest_0.6.29      stringi_1.7.6     
+[45] dplyr_1.1.4        grid_4.2.0         rprojroot_2.0.3    cli_3.6.1         
+[49] tools_4.2.0        magrittr_2.0.3     sass_0.4.1         tibble_3.2.1      
+[53] dichromat_2.0-0.1  pkgconfig_2.0.3    Matrix_1.5-3       rmarkdown_2.25    
+[57] rstudioapi_0.13    R6_2.5.1           nlme_3.1-157       git2r_0.30.1      
+[61] compiler_4.2.0    </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

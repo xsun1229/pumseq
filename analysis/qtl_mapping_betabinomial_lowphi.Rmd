@@ -41,14 +41,7 @@ cannot be concluded.
 
 > **Every φ on this page is a 3-start estimate.** The fitter runs the optimiser
 > from φ₀ ∈ {0.01, 0.1, 0.5} and keeps the highest-likelihood solution
-> (`BB_PHI_STARTS=0.01,0.1,0.5`, `BB_PHI_SELECT=loglik`) — the plain MLE, and the
-> configuration adopted after
-> [the single fixed start was found to converge to a worse local optimum](qtl_mapping_betabinomial_optimiser.html)
-> at 13 sites. That applies to the peak itself, the recovery simulation, the
-> example sites and the per-site identifiability. Note the bimodality seen in the
-> φ distributions is *not* what multi-start addresses: the pile at the numerical
-> floor is the correct MLE at those sites (multi-start changes it at 0.23% of
-> them), whereas the bug it fixes drove φ to the *upper* boundary, φ → 1.
+> (`BB_PHI_STARTS=0.01,0.1,0.5`, `BB_PHI_SELECT=loglik`) — the plain MLE
 
 # 2. Confirming the estimate is correct
 
@@ -132,6 +125,41 @@ optimiser page described these as two regimes; that reading was wrong.
 the median estimate is 0.0023, five-fold low, because half the estimates fall
 into the artefact pile. This is why the reference value must be a mode and not
 an average — a point in favour of how the heuristic was constructed.
+
+**But an unbiased mode does NOT mean accurate per-site estimates, and the gap is
+large.** The mode is a property of the distribution; individual sites are
+frequently wrong by orders of magnitude. Scored against the known truth:
+
+```{r recacc}
+RB2 <- fread(file.path(RC, "recovery_by_site.txt.gz"), sep = "\t")[is.finite(phi_hat)]
+knitr::kable(RB2[, { r <- phi_hat/phi_true[1]
+  .(sites = .N,
+    `within 2x of truth`    = sprintf("%.1f%%", 100*mean(r > 0.5 & r < 2)),
+    `within 10x`            = sprintf("%.1f%%", 100*mean(r > 0.1 & r < 10)),
+    `more than 10x TOO LOW` = sprintf("%.1f%%", 100*mean(r < 0.1)),
+    `at the 1e-6 floor`     = sprintf("%.1f%%", 100*mean(phi_hat < 2e-6)),
+    `median fold error`     = round(median(pmax(r, 1/r)), 1)) },
+  by = .(`true phi` = phi_true)][order(`true phi`)],
+  caption = "Per-site accuracy against known truth. Accuracy is strongly phi-dependent: phi is only reliably estimated per site when it is LARGE, and the modal value is precisely where it is not.")
+```
+
+At the truth that matters, φ = 0.0126, only **29.0%** of sites land within 2× of
+it, **48.2% are more than tenfold too low**, one site in seven collapses to the
+floor, and the median fold error is **9×**. Accuracy climbs steadily with φ —
+within-2× goes 18% → 29% → 52% → 62% → 71% → 79% as the truth rises from 0.005
+to 0.4, with median fold error falling from 461× to 1.3×.
+
+Since the real φ distribution is dominated by low-φ sites, the same must hold
+there: **most real per-site φ estimates are wrong by a large factor.** This is
+the same fact as "79.2% of sites cannot reject φ = 0", stated concretely.
+
+It does not, however, undermine the QTL results. The LRT compares null against
+full *at the same site* with φ free in both, so where the likelihood is flat both
+fits slide together and the statistic is largely insensitive to where φ lands.
+And that is measured rather than assumed: the permutation calibration gives
+λ = 1.03–1.06 with zero problematic sites at k = 3 (§3.2). A badly-estimated
+nuisance parameter inside a test verified on permuted data is tolerable; a
+badly-estimated *reported quantity* is not. See §4.
 
 Simulating a single true φ = 0.0126 reproduces the real data on every summary:
 
@@ -237,6 +265,97 @@ with no model fitting involved.
 Note honestly that at the *median* site φ = 0 fits marginally better than 0.0126
 (ratio 1.016 versus 1.051). That is the same fact as most sites being
 unidentifiable, and it is not an argument for the binomial — see §3.2.
+
+## 2.4 Does the peak-proximity rule estimate φ any better?
+
+Everything above uses the plain MLE. The [optimiser page](qtl_mapping_betabinomial_optimiser.html)
+proposes a different rule for unidentifiable sites: of the optima the three
+starts found, return the one nearest the population mode. On real data we can
+only check whether that changes *calibration* — it does not. We cannot check
+whether it gets φ **right**, because the truth is unknown.
+
+In simulation the truth is known, so accuracy is measurable. The same simulated
+datasets were refit under both rules, so differences are attributable to the
+rule rather than to simulation noise. Note the reference is fixed at 0.0126
+while the truth varies — so the rule is tested both where its reference is
+correct (φ = 0.0126) and where it is 32× too low (φ = 0.4).
+
+(A third variant, applying the peak only to break near-ties in likelihood, was
+also run and came out indistinguishable from the rule below at every true φ, so
+it is not shown.)
+
+```{r ruleacc}
+RA <- fread(file.path(RC, "rule_accuracy.tsv"), sep = "\t")[rule != "peak_tiebreak"]
+RA[, rule := factor(rule, levels = c("loglik", "peak"))]
+setorder(RA, phi_true, rule)
+knitr::kable(RA[, .(`true phi` = phi_true, rule,
+                    `within 2x` = `within 2x of truth`, `within 10x`,
+                    `at the 1e-6 floor`, `median fold error`,
+                    `mean |log10 error|`, `loglik lost vs MLE` = `total loglik lost vs MLE`)],
+  caption = "Accuracy against KNOWN truth. 'loglik' is the MLE used everywhere else on this page. 'loglik lost' is summed over ~10,000 sites, so it is negligible per site.")
+```
+
+```{r rulefig, fig.height=5.6, fig.width=13}
+RR <- fread(file.path(RC, "rule_accuracy_by_site.txt.gz"), sep = "\t")[
+  is.finite(phi_hat) & rule != "peak_tiebreak"]
+RUL <- c("loglik" = "MLE (highest likelihood)",
+         "peak" = "peak: nearest 0.0126")
+RR[, rl := factor(RUL[rule], levels = RUL)]
+PT2 <- sort(unique(RR$phi_true))
+RR[, pcol := factor(sprintf("true phi = %g", phi_true),
+                    levels = sprintf("true phi = %g", PT2))]
+# per-panel: the true value, the recovered mode, and the % stuck at the floor --
+# the floor is where the three rules actually differ, so label it directly
+ann <- RR[, .(frac_floor = mean(phi_hat < 2e-6),
+              mode = { d <- density(log10(phi_hat)); 10^d$x[which.max(d$y)] },
+              phi_true = phi_true[1]), by = .(rl, pcol)]
+ggplot(RR, aes(phi_hat)) +
+  geom_histogram(bins = 55, fill = "#4a7fbf", colour = NA) +
+  geom_vline(xintercept = PHI_EPS, colour = "grey35", linetype = "dotted") +
+  geom_vline(data = ann, aes(xintercept = phi_true), colour = "#c0392b", linewidth = 0.6) +
+  geom_vline(data = ann, aes(xintercept = mode), colour = "#1f4e9c",
+             linetype = "longdash", linewidth = 0.55) +
+  geom_text(data = ann, aes(x = 1e-6, y = Inf, label = sprintf("%.1f%% at floor", 100 * frac_floor)),
+            hjust = -0.05, vjust = 1.6, size = 2.7, colour = "grey20") +
+  facet_grid(rl ~ pcol, scales = "free_y", labeller = label_wrap_gen(width = 22)) +
+  scale_x_log10(breaks = 10^c(-6, -3, 0), labels = c("1e-6", "1e-3", "1")) +
+  labs(x = expression(hat(varphi)*", axis log-spaced (ticks are "*hat(varphi)*" itself)"),
+       y = "sites",
+       title = "The same simulated data, refitted under each selection rule",
+       subtitle = paste(
+         "Red = the true phi. Blue dashed = the recovered mode. Dotted grey = the 1e-6 floor.",
+         "Compare DOWN a column: the right-hand hump is essentially unchanged between rules -- the rules do not improve typical accuracy.",
+         "What changes is the LEFT pile at the floor, which the peak rule largely clears (e.g. 13.6% -> 1.1% at true phi = 0.0126).",
+         "That happens in every column, including true phi = 0.4 where the 0.0126 reference is 32x too low: it is a boundary rescue, not shrinkage toward the truth.",
+         sep = "\n")) +
+  theme_bw(base_size = 10) +
+  theme(panel.grid.minor = element_blank(), strip.text = element_text(size = 8),
+        plot.subtitle = element_text(size = 8))
+```
+
+**The rule does not improve accuracy in any conventional sense.** Within-2× and
+within-10× are unchanged to a decimal place at every true φ — 29.8% vs 29.9% at
+the modal truth, 79.4% vs 79.4% at φ = 0.4. If you want to know a site's φ to
+within a factor of two, the rule buys you nothing.
+
+**What it does is rescue boundary collapses.** The fraction of estimates pinned
+at the 10⁻⁶ floor falls from 13.6% to 1.1% at the modal truth (and 20.7% → 1.6%
+at φ = 0.005), which shows up as a ~20% reduction in mean |log₁₀ error|. So it
+converts *catastrophic* errors — off by four orders of magnitude — into merely
+*large* ones. That is a real improvement, and it costs a negligible amount of
+likelihood (a few log units summed over ten thousand sites).
+
+**And it helps even where its reference is badly wrong**, which was not what I
+expected: at φ = 0.4, where 0.0126 is 32× too low, mean error still improves
+(0.424 → 0.398). The reason is that the rule is not shrinking estimates toward
+the truth — it is pulling them off the boundary, and 0.0126 is closer to 0.4
+than 10⁻⁶ is. It is a boundary rescue that happens to work whether or not the
+reference value is right, which is a weaker and more honest description of it
+than "choosing a more reasonable φ".
+
+**What this does not change:** at the modal truth, 47.7% of estimates remain
+more than tenfold too low under the rule, against 48.1% under the MLE. Per-site
+φ is not made reportable by either rule — see §4.
 
 # 3. Exploring what φ means
 
@@ -515,8 +634,11 @@ known φ to within 3% at this value; a substantially larger φ is excluded by th
 observed scatter; and the magnitude is exactly what the depth budget predicts.
 
 **Not supported, and should not be claimed.** φ is *not* estimable at an
-individual site — 79.2% cannot reject zero and per-site estimates scatter over
-orders of magnitude. The observed φ distribution is *not* the true distribution:
+individual site. Measured against known truth (§2.1), at the modal value only
+29% of estimates land within 2× and 48% are more than tenfold too low, with a
+median fold error of 9×. **Per-site φ is therefore not a reportable quantity**
+and should never be interpreted, filtered on, or shown for an individual site —
+the retired φ > 0.99 filter was, in hindsight, thresholding noise. The observed φ distribution is *not* the true distribution:
 its low-end bimodality is an estimator artefact, so only the mode and the
 high-φ tail can be read from it, and the median cannot.
 
@@ -539,6 +661,11 @@ must be able to pull away from the mode. **Not yet implemented.**
   column; the moment estimators use no fitter at all beyond taking μ̂_i from it.
 - The peak value 0.0126: mode of log₁₀φ over the 5,045 sites where all three
   starts agree on φ to within 5% (`25.multistart_agreement.R`).
+- Selection-rule accuracy (§2.4): `32.phi_rule_accuracy.R` via
+  `run_phi_rule_accuracy.sbatch`. Each site simulated once per true φ and refit
+  under all three rules on the SAME counts, so the comparison is paired.
+- Genome-wide predicted vs observed spread (§3.3): `31.phi_vs_spread.R` via
+  `run_phi_vs_spread.sbatch`, using each site's own fitted φ and full depth vector.
 - Per-site identifiability: `multistart_audit/identifiability.txt.gz`, profile
   log-likelihood with β re-optimised at fixed φ.
 - Example sites: `30.lowphi_example_sites.R` via `run_lowphi_example_sites.sbatch`

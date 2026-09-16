@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreefa51397deb22d75668eeb46a8a3e088009393b7atargetblankfa51397a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreea90f3cbe28bbd5b01f7ec977c43da52c4adc80f1targetblanka90f3cba">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/fa51397deb22d75668eeb46a8a3e088009393b7a" target="_blank">fa51397</a>
+<a href="https://github.com/xsun1229/pumseq/tree/a90f3cbe28bbd5b01f7ec977c43da52c4adc80f1" target="_blank">a90f3cb</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreefa51397deb22d75668eeb46a8a3e088009393b7atargetblankfa51397a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreea90f3cbe28bbd5b01f7ec977c43da52c4adc80f1targetblanka90f3cba"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/fa51397deb22d75668eeb46a8a3e088009393b7a" target="_blank">fa51397</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/a90f3cbe28bbd5b01f7ec977c43da52c4adc80f1" target="_blank">a90f3cb</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -620,6 +620,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/a90f3cbe28bbd5b01f7ec977c43da52c4adc80f1/analysis/qtl_mapping_betabinomial_lowphi.Rmd" target="_blank">a90f3cb</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/a90f3cbe28bbd5b01f7ec977c43da52c4adc80f1/docs/qtl_mapping_betabinomial_lowphi.html" target="_blank">a90f3cb</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -795,16 +829,7 @@ states what can and cannot be concluded.</p>
 <p><strong>Every φ on this page is a 3-start estimate.</strong> The
 fitter runs the optimiser from φ₀ ∈ {0.01, 0.1, 0.5} and keeps the
 highest-likelihood solution (<code>BB_PHI_STARTS=0.01,0.1,0.5</code>,
-<code>BB_PHI_SELECT=loglik</code>) — the plain MLE, and the
-configuration adopted after <a
-href="qtl_mapping_betabinomial_optimiser.html">the single fixed start
-was found to converge to a worse local optimum</a> at 13 sites. That
-applies to the peak itself, the recovery simulation, the example sites
-and the per-site identifiability. Note the bimodality seen in the φ
-distributions is <em>not</em> what multi-start addresses: the pile at
-the numerical floor is the correct MLE at those sites (multi-start
-changes it at 0.23% of them), whereas the bug it fixes drove φ to the
-<em>upper</em> boundary, φ → 1.</p>
+<code>BB_PHI_SELECT=loglik</code>) — the plain MLE</p>
 </blockquote>
 </div>
 <div id="confirming-the-estimate-is-correct" class="section level1">
@@ -1039,6 +1064,119 @@ At a true φ of 0.0126 the median estimate is 0.0023, five-fold low,
 because half the estimates fall into the artefact pile. This is why the
 reference value must be a mode and not an average — a point in favour of
 how the heuristic was constructed.</p>
+<p><strong>But an unbiased mode does NOT mean accurate per-site
+estimates, and the gap is large.</strong> The mode is a property of the
+distribution; individual sites are frequently wrong by orders of
+magnitude. Scored against the known truth:</p>
+<pre class="r"><code>RB2 &lt;- fread(file.path(RC, &quot;recovery_by_site.txt.gz&quot;), sep = &quot;\t&quot;)[is.finite(phi_hat)]
+knitr::kable(RB2[, { r &lt;- phi_hat/phi_true[1]
+  .(sites = .N,
+    `within 2x of truth`    = sprintf(&quot;%.1f%%&quot;, 100*mean(r &gt; 0.5 &amp; r &lt; 2)),
+    `within 10x`            = sprintf(&quot;%.1f%%&quot;, 100*mean(r &gt; 0.1 &amp; r &lt; 10)),
+    `more than 10x TOO LOW` = sprintf(&quot;%.1f%%&quot;, 100*mean(r &lt; 0.1)),
+    `at the 1e-6 floor`     = sprintf(&quot;%.1f%%&quot;, 100*mean(phi_hat &lt; 2e-6)),
+    `median fold error`     = round(median(pmax(r, 1/r)), 1)) },
+  by = .(`true phi` = phi_true)][order(`true phi`)],
+  caption = &quot;Per-site accuracy against known truth. Accuracy is strongly phi-dependent: phi is only reliably estimated per site when it is LARGE, and the modal value is precisely where it is not.&quot;)</code></pre>
+<table>
+<caption>Per-site accuracy against known truth. Accuracy is strongly
+phi-dependent: phi is only reliably estimated per site when it is LARGE,
+and the modal value is precisely where it is not.</caption>
+<colgroup>
+<col width="8%" />
+<col width="5%" />
+<col width="18%" />
+<col width="10%" />
+<col width="21%" />
+<col width="17%" />
+<col width="17%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">true phi</th>
+<th align="right">sites</th>
+<th align="left">within 2x of truth</th>
+<th align="left">within 10x</th>
+<th align="left">more than 10x TOO LOW</th>
+<th align="left">at the 1e-6 floor</th>
+<th align="right">median fold error</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.0050</td>
+<td align="right">10076</td>
+<td align="left">18.2%</td>
+<td align="left">36.3%</td>
+<td align="left">59.8%</td>
+<td align="left">20.0%</td>
+<td align="right">461.4</td>
+</tr>
+<tr class="even">
+<td align="right">0.0126</td>
+<td align="right">10046</td>
+<td align="left">29.0%</td>
+<td align="left">50.5%</td>
+<td align="left">48.2%</td>
+<td align="left">14.5%</td>
+<td align="right">9.0</td>
+</tr>
+<tr class="odd">
+<td align="right">0.0500</td>
+<td align="right">9994</td>
+<td align="left">51.8%</td>
+<td align="left">72.8%</td>
+<td align="left">26.9%</td>
+<td align="left">5.3%</td>
+<td align="right">1.9</td>
+</tr>
+<tr class="even">
+<td align="right">0.1000</td>
+<td align="right">9923</td>
+<td align="left">62.0%</td>
+<td align="left">81.9%</td>
+<td align="left">18.1%</td>
+<td align="left">2.7%</td>
+<td align="right">1.6</td>
+</tr>
+<tr class="odd">
+<td align="right">0.2000</td>
+<td align="right">9800</td>
+<td align="left">70.8%</td>
+<td align="left">88.6%</td>
+<td align="left">11.4%</td>
+<td align="left">1.2%</td>
+<td align="right">1.4</td>
+</tr>
+<tr class="even">
+<td align="right">0.4000</td>
+<td align="right">9491</td>
+<td align="left">79.3%</td>
+<td align="left">93.0%</td>
+<td align="left">7.0%</td>
+<td align="left">0.5%</td>
+<td align="right">1.3</td>
+</tr>
+</tbody>
+</table>
+<p>At the truth that matters, φ = 0.0126, only <strong>29.0%</strong> of
+sites land within 2× of it, <strong>48.2% are more than tenfold too
+low</strong>, one site in seven collapses to the floor, and the median
+fold error is <strong>9×</strong>. Accuracy climbs steadily with φ —
+within-2× goes 18% → 29% → 52% → 62% → 71% → 79% as the truth rises from
+0.005 to 0.4, with median fold error falling from 461× to 1.3×.</p>
+<p>Since the real φ distribution is dominated by low-φ sites, the same
+must hold there: <strong>most real per-site φ estimates are wrong by a
+large factor.</strong> This is the same fact as “79.2% of sites cannot
+reject φ = 0”, stated concretely.</p>
+<p>It does not, however, undermine the QTL results. The LRT compares
+null against full <em>at the same site</em> with φ free in both, so
+where the likelihood is flat both fits slide together and the statistic
+is largely insensitive to where φ lands. And that is measured rather
+than assumed: the permutation calibration gives λ = 1.03–1.06 with zero
+problematic sites at k = 3 (§3.2). A badly-estimated nuisance parameter
+inside a test verified on permuted data is tolerable; a badly-estimated
+<em>reported quantity</em> is not. See §4.</p>
 <p>Simulating a single true φ = 0.0126 reproduces the real data on every
 summary:</p>
 <pre class="r"><code>knitr::kable(data.table(
@@ -1323,6 +1461,244 @@ involved.</p>
 better than 0.0126 (ratio 1.016 versus 1.051). That is the same fact as
 most sites being unidentifiable, and it is not an argument for the
 binomial — see §3.2.</p>
+</div>
+<div id="does-the-peak-proximity-rule-estimate-φ-any-better"
+class="section level2">
+<h2>2.4 Does the peak-proximity rule estimate φ any better?</h2>
+<p>Everything above uses the plain MLE. The <a
+href="qtl_mapping_betabinomial_optimiser.html">optimiser page</a>
+proposes a different rule for unidentifiable sites: of the optima the
+three starts found, return the one nearest the population mode. On real
+data we can only check whether that changes <em>calibration</em> — it
+does not. We cannot check whether it gets φ <strong>right</strong>,
+because the truth is unknown.</p>
+<p>In simulation the truth is known, so accuracy is measurable. The same
+simulated datasets were refit under both rules, so differences are
+attributable to the rule rather than to simulation noise. Note the
+reference is fixed at 0.0126 while the truth varies — so the rule is
+tested both where its reference is correct (φ = 0.0126) and where it is
+32× too low (φ = 0.4).</p>
+<p>(A third variant, applying the peak only to break near-ties in
+likelihood, was also run and came out indistinguishable from the rule
+below at every true φ, so it is not shown.)</p>
+<pre class="r"><code>RA &lt;- fread(file.path(RC, &quot;rule_accuracy.tsv&quot;), sep = &quot;\t&quot;)[rule != &quot;peak_tiebreak&quot;]
+RA[, rule := factor(rule, levels = c(&quot;loglik&quot;, &quot;peak&quot;))]
+setorder(RA, phi_true, rule)
+knitr::kable(RA[, .(`true phi` = phi_true, rule,
+                    `within 2x` = `within 2x of truth`, `within 10x`,
+                    `at the 1e-6 floor`, `median fold error`,
+                    `mean |log10 error|`, `loglik lost vs MLE` = `total loglik lost vs MLE`)],
+  caption = &quot;Accuracy against KNOWN truth. &#39;loglik&#39; is the MLE used everywhere else on this page. &#39;loglik lost&#39; is summed over ~10,000 sites, so it is negligible per site.&quot;)</code></pre>
+<table>
+<caption>Accuracy against KNOWN truth. ‘loglik’ is the MLE used
+everywhere else on this page. ‘loglik lost’ is summed over ~10,000
+sites, so it is negligible per site.</caption>
+<colgroup>
+<col width="7%" />
+<col width="5%" />
+<col width="8%" />
+<col width="9%" />
+<col width="14%" />
+<col width="14%" />
+<col width="23%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">true phi</th>
+<th align="left">rule</th>
+<th align="left">within 2x</th>
+<th align="left">within 10x</th>
+<th align="left">at the 1e-6 floor</th>
+<th align="right">median fold error</th>
+<th align="right">mean |log10 error|</th>
+<th align="right">loglik lost vs MLE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.0050</td>
+<td align="left">loglik</td>
+<td align="left">18.0%</td>
+<td align="left">36.0%</td>
+<td align="left">20.7%</td>
+<td align="right">508.67</td>
+<td align="right">2.053</td>
+<td align="right">0.0</td>
+</tr>
+<tr class="even">
+<td align="right">0.0050</td>
+<td align="left">peak</td>
+<td align="left">18.0%</td>
+<td align="left">37.0%</td>
+<td align="left">1.6%</td>
+<td align="right">51.35</td>
+<td align="right">1.545</td>
+<td align="right">9.3</td>
+</tr>
+<tr class="odd">
+<td align="right">0.0126</td>
+<td align="left">loglik</td>
+<td align="left">29.8%</td>
+<td align="left">50.6%</td>
+<td align="left">13.6%</td>
+<td align="right">8.78</td>
+<td align="right">1.810</td>
+<td align="right">0.0</td>
+</tr>
+<tr class="even">
+<td align="right">0.0126</td>
+<td align="left">peak</td>
+<td align="left">29.9%</td>
+<td align="left">50.9%</td>
+<td align="left">1.1%</td>
+<td align="right">8.32</td>
+<td align="right">1.433</td>
+<td align="right">5.3</td>
+</tr>
+<tr class="odd">
+<td align="right">0.0500</td>
+<td align="left">loglik</td>
+<td align="left">51.6%</td>
+<td align="left">72.9%</td>
+<td align="left">4.8%</td>
+<td align="right">1.91</td>
+<td align="right">1.191</td>
+<td align="right">0.0</td>
+</tr>
+<tr class="even">
+<td align="right">0.0500</td>
+<td align="left">peak</td>
+<td align="left">51.6%</td>
+<td align="left">73.0%</td>
+<td align="left">0.3%</td>
+<td align="right">1.91</td>
+<td align="right">1.011</td>
+<td align="right">1.4</td>
+</tr>
+<tr class="odd">
+<td align="right">0.1000</td>
+<td align="left">loglik</td>
+<td align="left">61.0%</td>
+<td align="left">81.0%</td>
+<td align="left">2.6%</td>
+<td align="right">1.62</td>
+<td align="right">0.920</td>
+<td align="right">0.0</td>
+</tr>
+<tr class="even">
+<td align="right">0.1000</td>
+<td align="left">peak</td>
+<td align="left">61.0%</td>
+<td align="left">81.0%</td>
+<td align="left">0.2%</td>
+<td align="right">1.62</td>
+<td align="right">0.812</td>
+<td align="right">1.4</td>
+</tr>
+<tr class="odd">
+<td align="right">0.2000</td>
+<td align="left">loglik</td>
+<td align="left">70.9%</td>
+<td align="left">88.4%</td>
+<td align="left">1.1%</td>
+<td align="right">1.44</td>
+<td align="right">0.628</td>
+<td align="right">0.0</td>
+</tr>
+<tr class="even">
+<td align="right">0.2000</td>
+<td align="left">peak</td>
+<td align="left">70.9%</td>
+<td align="left">88.4%</td>
+<td align="left">0.1%</td>
+<td align="right">1.44</td>
+<td align="right">0.573</td>
+<td align="right">0.3</td>
+</tr>
+<tr class="odd">
+<td align="right">0.4000</td>
+<td align="left">loglik</td>
+<td align="left">79.4%</td>
+<td align="left">92.9%</td>
+<td align="left">0.5%</td>
+<td align="right">1.30</td>
+<td align="right">0.424</td>
+<td align="right">0.0</td>
+</tr>
+<tr class="even">
+<td align="right">0.4000</td>
+<td align="left">peak</td>
+<td align="left">79.4%</td>
+<td align="left">93.0%</td>
+<td align="left">0.1%</td>
+<td align="right">1.30</td>
+<td align="right">0.398</td>
+<td align="right">2.8</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>RR &lt;- fread(file.path(RC, &quot;rule_accuracy_by_site.txt.gz&quot;), sep = &quot;\t&quot;)[
+  is.finite(phi_hat) &amp; rule != &quot;peak_tiebreak&quot;]
+RUL &lt;- c(&quot;loglik&quot; = &quot;MLE (highest likelihood)&quot;,
+         &quot;peak&quot; = &quot;peak: nearest 0.0126&quot;)
+RR[, rl := factor(RUL[rule], levels = RUL)]
+PT2 &lt;- sort(unique(RR$phi_true))
+RR[, pcol := factor(sprintf(&quot;true phi = %g&quot;, phi_true),
+                    levels = sprintf(&quot;true phi = %g&quot;, PT2))]
+# per-panel: the true value, the recovered mode, and the % stuck at the floor --
+# the floor is where the three rules actually differ, so label it directly
+ann &lt;- RR[, .(frac_floor = mean(phi_hat &lt; 2e-6),
+              mode = { d &lt;- density(log10(phi_hat)); 10^d$x[which.max(d$y)] },
+              phi_true = phi_true[1]), by = .(rl, pcol)]
+ggplot(RR, aes(phi_hat)) +
+  geom_histogram(bins = 55, fill = &quot;#4a7fbf&quot;, colour = NA) +
+  geom_vline(xintercept = PHI_EPS, colour = &quot;grey35&quot;, linetype = &quot;dotted&quot;) +
+  geom_vline(data = ann, aes(xintercept = phi_true), colour = &quot;#c0392b&quot;, linewidth = 0.6) +
+  geom_vline(data = ann, aes(xintercept = mode), colour = &quot;#1f4e9c&quot;,
+             linetype = &quot;longdash&quot;, linewidth = 0.55) +
+  geom_text(data = ann, aes(x = 1e-6, y = Inf, label = sprintf(&quot;%.1f%% at floor&quot;, 100 * frac_floor)),
+            hjust = -0.05, vjust = 1.6, size = 2.7, colour = &quot;grey20&quot;) +
+  facet_grid(rl ~ pcol, scales = &quot;free_y&quot;, labeller = label_wrap_gen(width = 22)) +
+  scale_x_log10(breaks = 10^c(-6, -3, 0), labels = c(&quot;1e-6&quot;, &quot;1e-3&quot;, &quot;1&quot;)) +
+  labs(x = expression(hat(varphi)*&quot;, axis log-spaced (ticks are &quot;*hat(varphi)*&quot; itself)&quot;),
+       y = &quot;sites&quot;,
+       title = &quot;The same simulated data, refitted under each selection rule&quot;,
+       subtitle = paste(
+         &quot;Red = the true phi. Blue dashed = the recovered mode. Dotted grey = the 1e-6 floor.&quot;,
+         &quot;Compare DOWN a column: the right-hand hump is essentially unchanged between rules -- the rules do not improve typical accuracy.&quot;,
+         &quot;What changes is the LEFT pile at the floor, which the peak rule largely clears (e.g. 13.6% -&gt; 1.1% at true phi = 0.0126).&quot;,
+         &quot;That happens in every column, including true phi = 0.4 where the 0.0126 reference is 32x too low: it is a boundary rescue, not shrinkage toward the truth.&quot;,
+         sep = &quot;\n&quot;)) +
+  theme_bw(base_size = 10) +
+  theme(panel.grid.minor = element_blank(), strip.text = element_text(size = 8),
+        plot.subtitle = element_text(size = 8))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_lowphi.Rmd/rulefig-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p><strong>The rule does not improve accuracy in any conventional
+sense.</strong> Within-2× and within-10× are unchanged to a decimal
+place at every true φ — 29.8% vs 29.9% at the modal truth, 79.4% vs
+79.4% at φ = 0.4. If you want to know a site’s φ to within a factor of
+two, the rule buys you nothing.</p>
+<p><strong>What it does is rescue boundary collapses.</strong> The
+fraction of estimates pinned at the 10⁻⁶ floor falls from 13.6% to 1.1%
+at the modal truth (and 20.7% → 1.6% at φ = 0.005), which shows up as a
+~20% reduction in mean |log₁₀ error|. So it converts
+<em>catastrophic</em> errors — off by four orders of magnitude — into
+merely <em>large</em> ones. That is a real improvement, and it costs a
+negligible amount of likelihood (a few log units summed over ten
+thousand sites).</p>
+<p><strong>And it helps even where its reference is badly
+wrong</strong>, which was not what I expected: at φ = 0.4, where 0.0126
+is 32× too low, mean error still improves (0.424 → 0.398). The reason is
+that the rule is not shrinking estimates toward the truth — it is
+pulling them off the boundary, and 0.0126 is closer to 0.4 than 10⁻⁶ is.
+It is a boundary rescue that happens to work whether or not the
+reference value is right, which is a weaker and more honest description
+of it than “choosing a more reasonable φ”.</p>
+<p><strong>What this does not change:</strong> at the modal truth, 47.7%
+of estimates remain more than tenfold too low under the rule, against
+48.1% under the MLE. Per-site φ is not made reportable by either rule —
+see §4.</p>
 </div>
 </div>
 <div id="exploring-what-φ-means" class="section level1">
@@ -2024,6 +2400,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/a90f3cbe28bbd5b01f7ec977c43da52c4adc80f1/docs/figure/qtl_mapping_betabinomial_lowphi.Rmd/spreadfig-1.png" target="_blank">a90f3cb</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/fa51397deb22d75668eeb46a8a3e088009393b7a/docs/figure/qtl_mapping_betabinomial_lowphi.Rmd/spreadfig-1.png" target="_blank">fa51397</a>
 </td>
 <td>
@@ -2139,11 +2526,16 @@ this value; a substantially larger φ is excluded by the observed
 scatter; and the magnitude is exactly what the depth budget
 predicts.</p>
 <p><strong>Not supported, and should not be claimed.</strong> φ is
-<em>not</em> estimable at an individual site — 79.2% cannot reject zero
-and per-site estimates scatter over orders of magnitude. The observed φ
-distribution is <em>not</em> the true distribution: its low-end
-bimodality is an estimator artefact, so only the mode and the high-φ
-tail can be read from it, and the median cannot.</p>
+<em>not</em> estimable at an individual site. Measured against known
+truth (§2.1), at the modal value only 29% of estimates land within 2×
+and 48% are more than tenfold too low, with a median fold error of 9×.
+<strong>Per-site φ is therefore not a reportable quantity</strong> and
+should never be interpreted, filtered on, or shown for an individual
+site — the retired φ &gt; 0.99 filter was, in hindsight, thresholding
+noise. The observed φ distribution is <em>not</em> the true
+distribution: its low-end bimodality is an estimator artefact, so only
+the mode and the high-φ tail can be read from it, and the median
+cannot.</p>
 <p>The practical consequence is that per-site φ should probably be
 <strong>shrunk toward the population mode</strong> rather than estimated
 freely — the modal value is well determined in aggregate while being
@@ -2171,6 +2563,14 @@ all beyond taking μ̂_i from it.</li>
 <li>The peak value 0.0126: mode of log₁₀φ over the 5,045 sites where all
 three starts agree on φ to within 5%
 (<code>25.multistart_agreement.R</code>).</li>
+<li>Selection-rule accuracy (§2.4): <code>32.phi_rule_accuracy.R</code>
+via <code>run_phi_rule_accuracy.sbatch</code>. Each site simulated once
+per true φ and refit under all three rules on the SAME counts, so the
+comparison is paired.</li>
+<li>Genome-wide predicted vs observed spread (§3.3):
+<code>31.phi_vs_spread.R</code> via
+<code>run_phi_vs_spread.sbatch</code>, using each site’s own fitted φ
+and full depth vector.</li>
 <li>Per-site identifiability:
 <code>multistart_audit/identifiability.txt.gz</code>, profile
 log-likelihood with β re-optimised at fixed φ.</li>

@@ -58,6 +58,7 @@ Beta Binomial
 * [The phi pathology is an optimiser failure (multi-start audit)](qtl_mapping_betabinomial_optimiser.html)
 * [Window x nPC calibration grid: 24 cells, real + 5 permutations](qtl_mapping_betabinomial_grid.html)
 * [Is the overdispersion really that small? Validating the phi peak](qtl_mapping_betabinomial_lowphi.html)
+* [Estimating phi: a boundary problem, what we tried, and what worked](qtl_mapping_betabinomial_phi_estimation.html)
 
 
 
