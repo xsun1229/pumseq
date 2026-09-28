@@ -196,7 +196,7 @@ knitr::kable(data.table(
               "NO. Loses to a CONSTANT GUESS at 3 of 4 true phi, and tracks WORSE than the MLE at large phi (Spearman 0.68 vs 0.74).",
               "NO. Same failure -- at 2 log-units out the tail has not saturated enough to help.",
               "MARGINAL. Roughly ties the MLE on tracking at large phi; and its second component is not supported by an optimiser-free estimator (see 3.2).",
-              "BEST OF THE SIX, but not a solution: it is the only approach that beats a constant guess at all four true phi, yet per-site tracking at the modal phi is still only Spearman 0.41.")),
+              "BEST OF THE SIX, but not a solution: two of its three pre-specified rules (mom-mode, mom-q60) are the only approaches that beat a constant guess at all four true phi, yet per-site tracking at the modal phi is still only Spearman 0.39-0.42. The third rule, mom-median, does not beat the constant guess there (see 4).")),
   caption = "Six attempts. Verdicts are by per-site tracking (see 3.1), not by the 'within 2x' rate, which is misleading -- see below.")
 ```
 
@@ -217,7 +217,7 @@ without using the data at all. So the table below adds two honest criteria:
 ```{r track}
 TR <- fread(file.path(RC, "approach_tracking.tsv"), sep = "\t")
 LV <- c("(constant guess)", "MLE", "gauss sd=0.83", "t df=2 sd=0.83",
-        "t df=1 sd=0.4", "MIXTURE", "MAP: mom-median")
+        "t df=1 sd=0.4", "MIXTURE", "MAP: mom-median", "MAP: mom-mode", "MAP: mom-q60")
 TR <- TR[est %chin% LV][, est := factor(est, levels = LV)]
 knitr::kable(dcast(TR, est ~ truth_centre, value.var = "spearman")[order(est)],
   caption = "SPEARMAN correlation between true and estimated phi, per site, by the centre of the true phi distribution. Higher is better; the constant guess is 0 by construction.")
@@ -248,12 +248,16 @@ Student-t behaves the same way. The mixture is better but only ties the MLE on
 tracking at large phi.
 
 **The moment-derived prior is the best of the six, but it does not solve the
-problem.** It has the best Spearman at every true phi (0.41 / 0.69 / 0.81 /
-0.77), it is the only approach that beats the constant guess at all four, and its
-slope rises toward 1 as information increases (0.36 -> 0.62 -> 0.82 -> 0.90),
-which is the behaviour a shrinkage estimator should have. But **0.41 at the phi
-our data actually suggest is weak per-site agreement**, and no approach we tried
-does better there. Where information is plentiful (phi ~ 0.2-0.4) the tracking is
+problem.** Three rules for building the prior were fixed in advance. The best of
+them, mom-q60, has the best Spearman at every true phi (0.42 / 0.70 / 0.82 /
+0.78); mom-q60 and mom-mode are the only approaches that beat the constant guess
+at all four; and the slope rises toward 1 as information increases
+(0.33 -> 0.58 -> 0.81 -> 0.86), which is the behaviour a shrinkage estimator
+should have. The third rule, mom-median, is weaker at small phi (Spearman 0.39,
+57.8% within 2x against the constant guess's 68.7%) -- a ranking that changed
+when the simulation was corrected (see 4). But **0.39-0.42 at the phi our data
+actually suggest is weak per-site agreement**, and no approach we tried does
+better there. Where information is plentiful (phi ~ 0.2-0.4) the tracking is
 respectable; at the modal phi it is not.
 
 <!-- ## 2.2 A caveat we had to correct ourselves on -->
@@ -322,7 +326,8 @@ has to vary. So here:
    to [1e-5, 0.9]. Four centres are used — 0.0126, 0.05, 0.2, 0.4 — so the method
    is tested where our data suggest φ sits *and* well away from it.
 2. **simulate counts** as in §1, reusing the real depths nᵢ and real fitted μ̂ᵢ.
-3. **moment estimate** at every site from those simulated counts.
+3. **moment estimate** at every site from those simulated counts, with the mean
+   re-estimated from the same counts -- exactly as on the real data (see 4).
 4. **derive the prior** from those estimates — median of all of them (negatives
    included) for the centre, MAD of log10 of the positives for the width.
 5. **MAP refit** per site with that prior.
@@ -331,9 +336,11 @@ has to vary. So here:
 The prior is rebuilt from scratch inside every truth setting, so what is being
 tested is the whole procedure rather than a prior that happened to suit one
 answer. That is what makes the comparison fair: the derived centre had to find
-the truth at four different values, and it did (truth 0.0126 → derived 0.0124;
-0.05 → 0.0433; 0.2 → 0.140; 0.4 → 0.281). A fixed-centre prior would have been
-right in one column and wrong in three.
+the truth at four different values. It follows the truth across a 32-fold range,
+but sits **consistently about 40% low** (median rule: truth 0.0126 → derived
+0.0068; 0.05 → 0.0327; 0.2 → 0.119; 0.4 → 0.252). That offset is a property of
+the moment estimator itself, explained in §4. A fixed-centre prior would have
+been right in one column and wrong in three.
 
 ```{r workedscatter, fig.height=6.4, fig.width=13}
 sc <- fread(file.path(RC, "moment_prior_by_site.txt.gz"), sep = "\t")
@@ -364,7 +371,7 @@ ggplot(sc, aes(phi_true, phi_hat)) +
   "Red = y = x, perfect recovery. Orange = a smooth fit through the points. One point per site.",
   "This is the honest test: matching histograms can hide a wrong pairing, a scatter cannot.",
   "TOP (MLE): the vertical smear at the bottom is the boundary collapse -- sites whose truth varies over a decade all returned ~1e-6.",
-  "BOTTOM (MAP): the collapse is gone, but at the LEFT-hand columns the cloud is nearly FLAT -- the estimate barely responds to the truth (slope 0.36).",
+  "BOTTOM (MAP): the collapse is gone, but at the LEFT-hand columns the cloud is nearly FLAT -- the estimate barely responds to the truth (slope 0.35).",
   "Only at large phi (right-hand columns) does the cloud approach the red line, which is where a per-site phi means something.",
   sep = "\n")) +
   theme_bw(base_size = 10) +
@@ -382,13 +389,94 @@ bottom entirely, spanning the whole range of truth and all returning ~10⁻⁶. 
 the MLE is really two estimators: an unbiased one, and a failure mode. That is a
 more favourable reading of the MLE than the pooled accuracy figures give it.
 
-**The MAP trades collapse for inflation, and the scatter makes the direction
-visible.** In the bottom row the blob is gone, but at the low end the cloud sits
-*above* the red line — roughly tenfold above it at the left edge of the
-`0.0126` panel — before crossing it further right. That is shrinkage toward the
-prior centre seen from the side: sites whose true φ lies below the centre are
-pushed **up**, and sites above it are pulled **down**. Near-horizontal at small
-φ (slope 0.36), approaching the line by φ = 0.4 (slope 0.90).
+**The MAP trades collapse for flattening, and the scatter makes the direction
+visible.** In the bottom row the blob is gone, but in the `0.0126` panel the cloud
+is nearly flat at φ̂ ≈ 0.006–0.009 whatever the truth. It sits slightly *above*
+the red line only for the lowest-truth sites (about 1.4× in the bottom tenth) and
+crosses it near φ ≈ 0.006 — below the true centre of 0.0126 — so most sites are
+pulled **down**, to about 0.2× the truth in the top tenth. That is shrinkage
+toward a prior centre that sits too low (§4). Near-horizontal at small φ
+(slope 0.35), approaching the line by φ = 0.4 (slope 0.88).
+
+# 4. Correction: the simulation gave the moment estimator the true mean
+
+A reviewer pointed out that the §3 simulation did not run the same procedure as
+the real data. In step 3 the moment estimator was handed the mean that
+*generated* the simulated counts, not a mean re-estimated from them — while still
+subtracting (m − q), the degrees-of-freedom correction that applies only when q
+mean parameters *were* estimated. With a known mean the Pearson statistic has
+
+$$E[S] = \sum_i \big[1 + (n_i - 1)\varphi\big] = m + \varphi \sum_i (n_i - 1),$$
+
+so subtracting (m − q) leaves $E[\hat\varphi] = \varphi + q / \sum_i (n_i - 1)$:
+an upward bias of about 0.016 on average, larger than φ itself at the low end. The
+real-data estimator re-estimates the mean, so it was never affected; only the
+simulation was.
+
+**Fix.** The mean is now re-estimated on every simulated dataset before the prior
+is derived, so the simulation runs the real-data procedure. Everything in §2 and
+§3 above uses the corrected run.
+
+**Checks that the diagnosis is right.** Putting identical simulated counts
+through a known-mean and a refit-mean version, the two degrees-of-freedom
+conventions differ by exactly 0.0160 at every true φ — the predicted
+q / Σ(nᵢ − 1). And the corrected simulation now matches the real data: at a
+true φ of 0.0126 it gives 37.9% negative moment estimates, against 39.1% observed
+(the uncorrected version gave 32.7%).
+
+```{r correction}
+OP <- fread(file.path(RC, "moment_prior_params_knownmean_OLD.tsv"))
+NP <- fread(file.path(RC, "moment_prior_params.tsv"))
+OA <- fread(file.path(RC, "moment_prior_accuracy_knownmean_OLD.tsv"))
+NW <- fread(file.path(RC, "moment_prior_accuracy.tsv"))
+cen <- merge(OP[grepl("^sim", source) & rule == "mom-median", .(source, old = centre)],
+             NP[grepl("^sim", source) & rule == "mom-median", .(source, new = centre)],
+             by = "source")
+cen[, truth := as.numeric(sub("sim, truth ", "", source))]
+acc <- merge(OA[, .(truth = truth_centre, est, before = `within 2x`)],
+             NW[, .(truth = truth_centre, est, after = `within 2x`)], by = c("truth", "est"))
+acc <- dcast(acc[grepl("^MAP", est)], truth ~ est, value.var = c("before", "after"))
+T4 <- merge(cen[, .(truth, old, new)], acc, by = "truth")
+knitr::kable(T4[order(truth), .(
+    `true phi centre` = truth,
+    `derived centre: before` = old, `after` = new, `after / truth` = round(new / truth, 2),
+    `mom-median: before` = `before_MAP: mom-median`, `after ` = `after_MAP: mom-median`,
+    `mom-mode after` = `after_MAP: mom-mode`, `mom-q60 after` = `after_MAP: mom-q60`)],
+  caption = "Before and after the fix. Derived centre = the prior centre the median rule reads off the simulated moment estimates. The four right-hand columns are % of sites within 2x of the truth; the constant guess scores 68.7 / 54.4 / 54.1 / 76.9%.")
+```
+
+**What the fix changed.**
+
+- **The ranking of the three prior rules.** mom-median fell from 71.2% to 57.8%
+  within 2x at the modal φ and no longer beats the constant guess (68.7%);
+  mom-mode (72.6%) and mom-q60 (71.8%) still do. The uncorrected simulation had
+  inflated mom-median's derived centre 1.8-fold, landing it near the truth by
+  accident.
+- **The derived prior centres**, which now sit consistently about 40% below the
+  truth rather than on it.
+- **Per-site tracking only slightly.** Spearman for mom-median moved 0.41 → 0.39
+  at the modal φ and 0.77 → 0.77 at φ = 0.4; the rule-to-rule differences are small.
+
+**What it did not change.** §1 (the MLE's boundary spike and the depth
+diagnosis), the multi-start, peak-proximity, Gaussian, Student-t and mixture
+results in §2, and the QTL calibration — none of these involve the moment
+estimator.
+
+**A second problem the fix exposed.** The refit-mean moment estimator — the one
+used on the real data — is itself biased **downward**: its median sits at
+0.55–0.65 of the true median, stable across a 32-fold range of φ. The (m − q)
+correction is exact for a quasi-likelihood fit with known weights, but here the
+mean is estimated *jointly with φ* by beta-binomial maximum likelihood, so the
+fitted means follow the observed proportions more closely than q parameters'
+worth and the correction subtracts too much. Two consequences:
+
+- The real-data moment median of **0.0052 is an underestimate**. Divided by the
+  simulated ratio at φ = 0.0126 (0.55), it implies a true median φ of about
+  **0.0095**, consistent with the MLE mode of 0.0126 — so the two estimators agree
+  once the bias is allowed for.
+- The **real-data MAP estimates have not yet been redone.** Their prior is centred
+  on that 0.0052, so every site is shrunk toward a centre that is too low, using
+  the rule (mom-median) that the corrected simulation ranks weakest.
 
 <!-- Worth noting which direction of error is safer. Overestimating φ widens the null -->
 <!-- and is conservative for testing; the MLE's collapse to zero narrows it and is -->

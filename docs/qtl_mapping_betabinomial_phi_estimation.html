@@ -11,11 +11,11 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-09-16" />
+<meta name="date" content="2026-09-28" />
 
 <title>Estimating phi per site: the problem, and six things we have tried</title>
 
-<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
@@ -31,15 +31,15 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
-<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
-<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
 
 <link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
 <!-- Add a small amount of space between sections. -->
@@ -374,7 +374,7 @@ div.tocify {
 <h1 class="title toc-ignore">Estimating phi per site: the problem, and
 six things we have tried</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-09-16</h4>
+<h4 class="date">2026-09-28</h4>
 
 </div>
 
@@ -403,7 +403,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-09-16
+<strong>Last updated:</strong> 2026-09-28
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -441,10 +441,10 @@ changes </a>
 <div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown is untracked by Git. To know which version of the R
-Markdown file created these results, you’ll want to first commit it to
-the Git repo. If you’re still working on the analysis, you can ignore
-this warning. When you’re finished, you can run
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
 <code>wflow_publish</code> to commit the R Markdown file and build the
 HTML.</p>
 </div>
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreea90f3cbe28bbd5b01f7ec977c43da52c4adc80f1targetblanka90f3cba">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree2a471bb932146a801823d48c6b3706036123481atargetblank2a471bba">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/a90f3cbe28bbd5b01f7ec977c43da52c4adc80f1" target="_blank">a90f3cb</a>
+<a href="https://github.com/xsun1229/pumseq/tree/2a471bb932146a801823d48c6b3706036123481a" target="_blank">2a471bb</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreea90f3cbe28bbd5b01f7ec977c43da52c4adc80f1targetblanka90f3cba"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree2a471bb932146a801823d48c6b3706036123481atargetblank2a471bba"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/a90f3cbe28bbd5b01f7ec977c43da52c4adc80f1" target="_blank">a90f3cb</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/2a471bb932146a801823d48c6b3706036123481a" target="_blank">2a471bb</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -572,12 +572,8 @@ were generated:
 Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
-Untracked files:
-    Untracked:  analysis/qtl_mapping_betabinomial_phi_estimation.Rmd
-
 Unstaged changes:
-    Modified:   analysis/index.Rmd
-    Modified:   analysis/qtl_mapping_betabinomial_lowphi.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_phi_estimation.Rmd
 
 </code></pre>
 <p>
@@ -592,10 +588,75 @@ have uncommitted changes.
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
+
 <p>
-There are no past versions. Publish this analysis with
-<code>wflow_publish()</code> to start tracking its development.
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>analysis/qtl_mapping_betabinomial_phi_estimation.Rmd</code>) and
+HTML (<code>docs/qtl_mapping_betabinomial_phi_estimation.html</code>)
+files. If you’ve configured a remote Git repository (see
+<code>?wflow_git_remote</code>), click on the hyperlinks in the table
+below to view the files as they were in that past version.
 </p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/2a471bb932146a801823d48c6b3706036123481a/analysis/qtl_mapping_betabinomial_phi_estimation.Rmd" target="_blank">2a471bb</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-16
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/2a471bb932146a801823d48c6b3706036123481a/docs/qtl_mapping_betabinomial_phi_estimation.html" target="_blank">2a471bb</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-16
+</td>
+<td>
+update
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <hr>
 </div>
 </div>
@@ -914,6 +975,43 @@ ggplot(RB, aes(phi_hat, fill = dq)) +
   theme(legend.position = &quot;top&quot;, panel.grid.minor = element_blank(),
         plot.subtitle = element_text(size = 8))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_phi_estimation.Rmd/prob-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-prob-1">
+Past versions of prob-1.png
+</button>
+</p>
+<div id="fig-prob-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/2a471bb932146a801823d48c6b3706036123481a/docs/figure/qtl_mapping_betabinomial_phi_estimation.Rmd/prob-1.png" target="_blank">2a471bb</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-16
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>At a true φ of 0.0126 — the value our real data suggest — <strong>14%
 of sites return essentially zero</strong> and about half are more than
 tenfold too low, even though the mode of the distribution sits correctly
@@ -1016,15 +1114,15 @@ smallest.</caption>
               &quot;NO. Loses to a CONSTANT GUESS at 3 of 4 true phi, and tracks WORSE than the MLE at large phi (Spearman 0.68 vs 0.74).&quot;,
               &quot;NO. Same failure -- at 2 log-units out the tail has not saturated enough to help.&quot;,
               &quot;MARGINAL. Roughly ties the MLE on tracking at large phi; and its second component is not supported by an optimiser-free estimator (see 3.2).&quot;,
-              &quot;BEST OF THE SIX, but not a solution: it is the only approach that beats a constant guess at all four true phi, yet per-site tracking at the modal phi is still only Spearman 0.41.&quot;)),
+              &quot;BEST OF THE SIX, but not a solution: two of its three pre-specified rules (mom-mode, mom-q60) are the only approaches that beat a constant guess at all four true phi, yet per-site tracking at the modal phi is still only Spearman 0.39-0.42. The third rule, mom-median, does not beat the constant guess there (see 4).&quot;)),
   caption = &quot;Six attempts. Verdicts are by per-site tracking (see 3.1), not by the &#39;within 2x&#39; rate, which is misleading -- see below.&quot;)</code></pre>
 <table>
 <caption>Six attempts. Verdicts are by per-site tracking (see 3.1), not
 by the ‘within 2x’ rate, which is misleading – see below.</caption>
 <colgroup>
+<col width="10%" />
 <col width="15%" />
-<col width="23%" />
-<col width="61%" />
+<col width="73%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -1082,9 +1180,11 @@ estimator (see 3.2).</td>
 <td align="left">prior derived from the MOMENT estimator</td>
 <td align="left">estimate the prior from an optimiser-free estimator,
 then MAP</td>
-<td align="left">BEST OF THE SIX, but not a solution: it is the only
-approach that beats a constant guess at all four true phi, yet per-site
-tracking at the modal phi is still only Spearman 0.41.</td>
+<td align="left">BEST OF THE SIX, but not a solution: two of its three
+pre-specified rules (mom-mode, mom-q60) are the only approaches that
+beat a constant guess at all four true phi, yet per-site tracking at the
+modal phi is still only Spearman 0.39-0.42. The third rule, mom-median,
+does not beat the constant guess there (see 4).</td>
 </tr>
 </tbody>
 </table>
@@ -1108,7 +1208,7 @@ cannot beat this is not measuring anything.</li>
 </ul>
 <pre class="r"><code>TR &lt;- fread(file.path(RC, &quot;approach_tracking.tsv&quot;), sep = &quot;\t&quot;)
 LV &lt;- c(&quot;(constant guess)&quot;, &quot;MLE&quot;, &quot;gauss sd=0.83&quot;, &quot;t df=2 sd=0.83&quot;,
-        &quot;t df=1 sd=0.4&quot;, &quot;MIXTURE&quot;, &quot;MAP: mom-median&quot;)
+        &quot;t df=1 sd=0.4&quot;, &quot;MIXTURE&quot;, &quot;MAP: mom-median&quot;, &quot;MAP: mom-mode&quot;, &quot;MAP: mom-q60&quot;)
 TR &lt;- TR[est %chin% LV][, est := factor(est, levels = LV)]
 knitr::kable(dcast(TR, est ~ truth_centre, value.var = &quot;spearman&quot;)[order(est)],
   caption = &quot;SPEARMAN correlation between true and estimated phi, per site, by the centre of the true phi distribution. Higher is better; the constant guess is 0 by construction.&quot;)</code></pre>
@@ -1170,10 +1270,24 @@ constant guess is 0 by construction.</caption>
 </tr>
 <tr class="odd">
 <td align="left">MAP: mom-median</td>
-<td align="right">0.406</td>
-<td align="right">0.694</td>
-<td align="right">0.805</td>
-<td align="right">0.772</td>
+<td align="right">0.391</td>
+<td align="right">0.685</td>
+<td align="right">0.804</td>
+<td align="right">0.767</td>
+</tr>
+<tr class="even">
+<td align="left">MAP: mom-mode</td>
+<td align="right">0.404</td>
+<td align="right">0.698</td>
+<td align="right">0.810</td>
+<td align="right">0.780</td>
+</tr>
+<tr class="odd">
+<td align="left">MAP: mom-q60</td>
+<td align="right">0.415</td>
+<td align="right">0.699</td>
+<td align="right">0.815</td>
+<td align="right">0.782</td>
 </tr>
 </tbody>
 </table>
@@ -1237,10 +1351,24 @@ truth.</caption>
 </tr>
 <tr class="odd">
 <td align="left">MAP: mom-median</td>
-<td align="right">0.36</td>
-<td align="right">0.62</td>
+<td align="right">0.35</td>
+<td align="right">0.60</td>
 <td align="right">0.82</td>
-<td align="right">0.90</td>
+<td align="right">0.88</td>
+</tr>
+<tr class="even">
+<td align="left">MAP: mom-mode</td>
+<td align="right">0.33</td>
+<td align="right">0.57</td>
+<td align="right">0.82</td>
+<td align="right">0.86</td>
+</tr>
+<tr class="odd">
+<td align="left">MAP: mom-q60</td>
+<td align="right">0.33</td>
+<td align="right">0.58</td>
+<td align="right">0.81</td>
+<td align="right">0.86</td>
 </tr>
 </tbody>
 </table>
@@ -1263,9 +1391,9 @@ cannot be used on its own.</caption>
 <tr class="odd">
 <td align="left">(constant guess)</td>
 <td align="left">68.7%</td>
-<td align="left">54.2%</td>
 <td align="left">54.4%</td>
-<td align="left">77.0%</td>
+<td align="left">54.1%</td>
+<td align="left">76.9%</td>
 </tr>
 <tr class="even">
 <td align="left">MLE</td>
@@ -1304,10 +1432,24 @@ cannot be used on its own.</caption>
 </tr>
 <tr class="odd">
 <td align="left">MAP: mom-median</td>
-<td align="left">71.2%</td>
-<td align="left">73.1%</td>
-<td align="left">80.8%</td>
-<td align="left">89.0%</td>
+<td align="left">57.8%</td>
+<td align="left">70.4%</td>
+<td align="left">80.0%</td>
+<td align="left">88.4%</td>
+</tr>
+<tr class="even">
+<td align="left">MAP: mom-mode</td>
+<td align="left">72.6%</td>
+<td align="left">75.0%</td>
+<td align="left">81.3%</td>
+<td align="left">90.6%</td>
+</tr>
+<tr class="odd">
+<td align="left">MAP: mom-q60</td>
+<td align="left">71.8%</td>
+<td align="left">74.3%</td>
+<td align="left">82.6%</td>
+<td align="left">91.1%</td>
 </tr>
 </tbody>
 </table>
@@ -1325,14 +1467,19 @@ plain MLE (Spearman 0.682 against 0.737). The Student-t behaves the same
 way. The mixture is better but only ties the MLE on tracking at large
 phi.</p>
 <p><strong>The moment-derived prior is the best of the six, but it does
-not solve the problem.</strong> It has the best Spearman at every true
-phi (0.41 / 0.69 / 0.81 / 0.77), it is the only approach that beats the
-constant guess at all four, and its slope rises toward 1 as information
-increases (0.36 -&gt; 0.62 -&gt; 0.82 -&gt; 0.90), which is the
-behaviour a shrinkage estimator should have. But <strong>0.41 at the phi
-our data actually suggest is weak per-site agreement</strong>, and no
-approach we tried does better there. Where information is plentiful (phi
-~ 0.2-0.4) the tracking is respectable; at the modal phi it is not.</p>
+not solve the problem.</strong> Three rules for building the prior were
+fixed in advance. The best of them, mom-q60, has the best Spearman at
+every true phi (0.42 / 0.70 / 0.82 / 0.78); mom-q60 and mom-mode are the
+only approaches that beat the constant guess at all four; and the slope
+rises toward 1 as information increases (0.33 -&gt; 0.58 -&gt; 0.81
+-&gt; 0.86), which is the behaviour a shrinkage estimator should have.
+The third rule, mom-median, is weaker at small phi (Spearman 0.39, 57.8%
+within 2x against the constant guess’s 68.7%) – a ranking that changed
+when the simulation was corrected (see 4). But <strong>0.39-0.42 at the
+phi our data actually suggest is weak per-site agreement</strong>, and
+no approach we tried does better there. Where information is plentiful
+(phi ~ 0.2-0.4) the tracking is respectable; at the modal phi it is
+not.</p>
 <!-- ## 2.2 A caveat we had to correct ourselves on -->
 <!-- The mixture prior's two components were fitted to the subset of sites where all -->
 <!-- three optimiser starts agree on φ. But that subset is **defined by the estimator -->
@@ -1407,7 +1554,8 @@ it.</li>
 <li><strong>simulate counts</strong> as in §1, reusing the real depths
 nᵢ and real fitted μ̂ᵢ.</li>
 <li><strong>moment estimate</strong> at every site from those simulated
-counts.</li>
+counts, with the mean re-estimated from the same counts – exactly as on
+the real data (see 4).</li>
 <li><strong>derive the prior</strong> from those estimates — median of
 all of them (negatives included) for the centre, MAD of log10 of the
 positives for the width.</li>
@@ -1417,10 +1565,12 @@ positives for the width.</li>
 <p>The prior is rebuilt from scratch inside every truth setting, so what
 is being tested is the whole procedure rather than a prior that happened
 to suit one answer. That is what makes the comparison fair: the derived
-centre had to find the truth at four different values, and it did (truth
-0.0126 → derived 0.0124; 0.05 → 0.0433; 0.2 → 0.140; 0.4 → 0.281). A
-fixed-centre prior would have been right in one column and wrong in
-three.</p>
+centre had to find the truth at four different values. It follows the
+truth across a 32-fold range, but sits <strong>consistently about 40%
+low</strong> (median rule: truth 0.0126 → derived 0.0068; 0.05 → 0.0327;
+0.2 → 0.119; 0.4 → 0.252). That offset is a property of the moment
+estimator itself, explained in §4. A fixed-centre prior would have been
+right in one column and wrong in three.</p>
 <pre class="r"><code>sc &lt;- fread(file.path(RC, &quot;moment_prior_by_site.txt.gz&quot;), sep = &quot;\t&quot;)
 sc &lt;- sc[is.finite(phi_hat) &amp; phi_hat &gt; 0 &amp; is.finite(phi_true) &amp;
          est %chin% c(&quot;MLE&quot;, &quot;MAP: mom-median&quot;)]
@@ -1449,13 +1599,50 @@ ggplot(sc, aes(phi_true, phi_hat)) +
   &quot;Red = y = x, perfect recovery. Orange = a smooth fit through the points. One point per site.&quot;,
   &quot;This is the honest test: matching histograms can hide a wrong pairing, a scatter cannot.&quot;,
   &quot;TOP (MLE): the vertical smear at the bottom is the boundary collapse -- sites whose truth varies over a decade all returned ~1e-6.&quot;,
-  &quot;BOTTOM (MAP): the collapse is gone, but at the LEFT-hand columns the cloud is nearly FLAT -- the estimate barely responds to the truth (slope 0.36).&quot;,
+  &quot;BOTTOM (MAP): the collapse is gone, but at the LEFT-hand columns the cloud is nearly FLAT -- the estimate barely responds to the truth (slope 0.35).&quot;,
   &quot;Only at large phi (right-hand columns) does the cloud approach the red line, which is where a per-site phi means something.&quot;,
   sep = &quot;\n&quot;)) +
   theme_bw(base_size = 10) +
   theme(panel.grid.minor = element_blank(), strip.text = element_text(size = 8),
         plot.subtitle = element_text(size = 7.5))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_phi_estimation.Rmd/workedscatter-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-workedscatter-1">
+Past versions of workedscatter-1.png
+</button>
+</p>
+<div id="fig-workedscatter-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/2a471bb932146a801823d48c6b3706036123481a/docs/figure/qtl_mapping_betabinomial_phi_estimation.Rmd/workedscatter-1.png" target="_blank">2a471bb</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-16
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>The scatter is a stricter test than the histogram above it, and it
 shows two things the histogram could not.</p>
 <p><strong>The MLE’s surviving estimates are unbiased.</strong> In the
@@ -1466,15 +1653,171 @@ the whole range of truth and all returning ~10⁻⁶. So the MLE is really
 two estimators: an unbiased one, and a failure mode. That is a more
 favourable reading of the MLE than the pooled accuracy figures give
 it.</p>
-<p><strong>The MAP trades collapse for inflation, and the scatter makes
+<p><strong>The MAP trades collapse for flattening, and the scatter makes
 the direction visible.</strong> In the bottom row the blob is gone, but
-at the low end the cloud sits <em>above</em> the red line — roughly
-tenfold above it at the left edge of the <code>0.0126</code> panel —
-before crossing it further right. That is shrinkage toward the prior
-centre seen from the side: sites whose true φ lies below the centre are
-pushed <strong>up</strong>, and sites above it are pulled
-<strong>down</strong>. Near-horizontal at small φ (slope 0.36),
-approaching the line by φ = 0.4 (slope 0.90).</p>
+in the <code>0.0126</code> panel the cloud is nearly flat at φ̂ ≈
+0.006–0.009 whatever the truth. It sits slightly <em>above</em> the red
+line only for the lowest-truth sites (about 1.4× in the bottom tenth)
+and crosses it near φ ≈ 0.006 — below the true centre of 0.0126 — so
+most sites are pulled <strong>down</strong>, to about 0.2× the truth in
+the top tenth. That is shrinkage toward a prior centre that sits too low
+(§4). Near-horizontal at small φ (slope 0.35), approaching the line by φ
+= 0.4 (slope 0.88).</p>
+</div>
+<div
+id="correction-the-simulation-gave-the-moment-estimator-the-true-mean"
+class="section level1">
+<h1>4. Correction: the simulation gave the moment estimator the true
+mean</h1>
+<p>A reviewer pointed out that the §3 simulation did not run the same
+procedure as the real data. In step 3 the moment estimator was handed
+the mean that <em>generated</em> the simulated counts, not a mean
+re-estimated from them — while still subtracting (m − q), the
+degrees-of-freedom correction that applies only when q mean parameters
+<em>were</em> estimated. With a known mean the Pearson statistic has</p>
+<p><span class="math display">\[E[S] = \sum_i \big[1 + (n_i -
+1)\varphi\big] = m + \varphi \sum_i (n_i - 1),\]</span></p>
+<p>so subtracting (m − q) leaves <span
+class="math inline">\(E[\hat\varphi] = \varphi + q / \sum_i (n_i -
+1)\)</span>: an upward bias of about 0.016 on average, larger than φ
+itself at the low end. The real-data estimator re-estimates the mean, so
+it was never affected; only the simulation was.</p>
+<p><strong>Fix.</strong> The mean is now re-estimated on every simulated
+dataset before the prior is derived, so the simulation runs the
+real-data procedure. Everything in §2 and §3 above uses the corrected
+run.</p>
+<p><strong>Checks that the diagnosis is right.</strong> Putting
+identical simulated counts through a known-mean and a refit-mean
+version, the two degrees-of-freedom conventions differ by exactly 0.0160
+at every true φ — the predicted q / Σ(nᵢ − 1). And the corrected
+simulation now matches the real data: at a true φ of 0.0126 it gives
+37.9% negative moment estimates, against 39.1% observed (the uncorrected
+version gave 32.7%).</p>
+<pre class="r"><code>OP &lt;- fread(file.path(RC, &quot;moment_prior_params_knownmean_OLD.tsv&quot;))
+NP &lt;- fread(file.path(RC, &quot;moment_prior_params.tsv&quot;))
+OA &lt;- fread(file.path(RC, &quot;moment_prior_accuracy_knownmean_OLD.tsv&quot;))
+NW &lt;- fread(file.path(RC, &quot;moment_prior_accuracy.tsv&quot;))
+cen &lt;- merge(OP[grepl(&quot;^sim&quot;, source) &amp; rule == &quot;mom-median&quot;, .(source, old = centre)],
+             NP[grepl(&quot;^sim&quot;, source) &amp; rule == &quot;mom-median&quot;, .(source, new = centre)],
+             by = &quot;source&quot;)
+cen[, truth := as.numeric(sub(&quot;sim, truth &quot;, &quot;&quot;, source))]
+acc &lt;- merge(OA[, .(truth = truth_centre, est, before = `within 2x`)],
+             NW[, .(truth = truth_centre, est, after = `within 2x`)], by = c(&quot;truth&quot;, &quot;est&quot;))
+acc &lt;- dcast(acc[grepl(&quot;^MAP&quot;, est)], truth ~ est, value.var = c(&quot;before&quot;, &quot;after&quot;))
+T4 &lt;- merge(cen[, .(truth, old, new)], acc, by = &quot;truth&quot;)
+knitr::kable(T4[order(truth), .(
+    `true phi centre` = truth,
+    `derived centre: before` = old, `after` = new, `after / truth` = round(new / truth, 2),
+    `mom-median: before` = `before_MAP: mom-median`, `after ` = `after_MAP: mom-median`,
+    `mom-mode after` = `after_MAP: mom-mode`, `mom-q60 after` = `after_MAP: mom-q60`)],
+  caption = &quot;Before and after the fix. Derived centre = the prior centre the median rule reads off the simulated moment estimates. The four right-hand columns are % of sites within 2x of the truth; the constant guess scores 68.7 / 54.4 / 54.1 / 76.9%.&quot;)</code></pre>
+<table>
+<caption>Before and after the fix. Derived centre = the prior centre the
+median rule reads off the simulated moment estimates. The four
+right-hand columns are % of sites within 2x of the truth; the constant
+guess scores 68.7 / 54.4 / 54.1 / 76.9%.</caption>
+<colgroup>
+<col width="13%" />
+<col width="19%" />
+<col width="7%" />
+<col width="11%" />
+<col width="16%" />
+<col width="5%" />
+<col width="12%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">true phi centre</th>
+<th align="right">derived centre: before</th>
+<th align="right">after</th>
+<th align="right">after / truth</th>
+<th align="left">mom-median: before</th>
+<th align="left">after</th>
+<th align="left">mom-mode after</th>
+<th align="left">mom-q60 after</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.0126</td>
+<td align="right">0.01241</td>
+<td align="right">0.006771</td>
+<td align="right">0.54</td>
+<td align="left">71.2%</td>
+<td align="left">57.8%</td>
+<td align="left">72.6%</td>
+<td align="left">71.8%</td>
+</tr>
+<tr class="even">
+<td align="right">0.0500</td>
+<td align="right">0.04328</td>
+<td align="right">0.032720</td>
+<td align="right">0.65</td>
+<td align="left">73.1%</td>
+<td align="left">70.4%</td>
+<td align="left">75.0%</td>
+<td align="left">74.3%</td>
+</tr>
+<tr class="odd">
+<td align="right">0.2000</td>
+<td align="right">0.14000</td>
+<td align="right">0.118900</td>
+<td align="right">0.59</td>
+<td align="left">80.8%</td>
+<td align="left">80.0%</td>
+<td align="left">81.3%</td>
+<td align="left">82.6%</td>
+</tr>
+<tr class="even">
+<td align="right">0.4000</td>
+<td align="right">0.28130</td>
+<td align="right">0.251600</td>
+<td align="right">0.63</td>
+<td align="left">89.0%</td>
+<td align="left">88.4%</td>
+<td align="left">90.6%</td>
+<td align="left">91.1%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What the fix changed.</strong></p>
+<ul>
+<li><strong>The ranking of the three prior rules.</strong> mom-median
+fell from 71.2% to 57.8% within 2x at the modal φ and no longer beats
+the constant guess (68.7%); mom-mode (72.6%) and mom-q60 (71.8%) still
+do. The uncorrected simulation had inflated mom-median’s derived centre
+1.8-fold, landing it near the truth by accident.</li>
+<li><strong>The derived prior centres</strong>, which now sit
+consistently about 40% below the truth rather than on it.</li>
+<li><strong>Per-site tracking only slightly.</strong> Spearman for
+mom-median moved 0.41 → 0.39 at the modal φ and 0.77 → 0.77 at φ = 0.4;
+the rule-to-rule differences are small.</li>
+</ul>
+<p><strong>What it did not change.</strong> §1 (the MLE’s boundary spike
+and the depth diagnosis), the multi-start, peak-proximity, Gaussian,
+Student-t and mixture results in §2, and the QTL calibration — none of
+these involve the moment estimator.</p>
+<p><strong>A second problem the fix exposed.</strong> The refit-mean
+moment estimator — the one used on the real data — is itself biased
+<strong>downward</strong>: its median sits at 0.55–0.65 of the true
+median, stable across a 32-fold range of φ. The (m − q) correction is
+exact for a quasi-likelihood fit with known weights, but here the mean
+is estimated <em>jointly with φ</em> by beta-binomial maximum
+likelihood, so the fitted means follow the observed proportions more
+closely than q parameters’ worth and the correction subtracts too much.
+Two consequences:</p>
+<ul>
+<li>The real-data moment median of <strong>0.0052 is an
+underestimate</strong>. Divided by the simulated ratio at φ = 0.0126
+(0.55), it implies a true median φ of about <strong>0.0095</strong>,
+consistent with the MLE mode of 0.0126 — so the two estimators agree
+once the bias is allowed for.</li>
+<li>The <strong>real-data MAP estimates have not yet been
+redone.</strong> Their prior is centred on that 0.0052, so every site is
+shrunk toward a centre that is too low, using the rule (mom-median) that
+the corrected simulation ranks weakest.</li>
+</ul>
 <!-- Worth noting which direction of error is safer. Overestimating φ widens the null -->
 <!-- and is conservative for testing; the MLE's collapse to zero narrows it and is -->
 <!-- anti-conservative. So although the MAP is biased at the low end, it is biased the -->
@@ -1517,10 +1860,10 @@ Session information
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.2.0 (2022-04-22)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: CentOS Linux 7 (Core)
+Running under: CentOS Linux 8
 
 Matrix products: default
-BLAS/LAPACK: /software/openblas-0.3.13-el7-x86_64/lib/libopenblas_haswellp-r0.3.13.so
+BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
 
 locale:
 [1] C
@@ -1529,25 +1872,26 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] ggplot2_4.0.3     data.table_1.14.2
+[1] ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.0  
 
 loaded via a namespace (and not attached):
- [1] tidyselect_1.2.0   xfun_0.41          bslib_0.3.1        lattice_0.20-45   
- [5] splines_4.2.0      vctrs_0.6.5        generics_0.1.4     htmltools_0.5.2   
- [9] viridisLite_0.4.0  yaml_2.3.5         mgcv_1.8-40        utf8_1.2.2        
-[13] rlang_1.1.2        R.oo_1.24.0        jquerylib_0.1.4    later_1.3.0       
-[17] pillar_1.9.0       glue_1.6.2         withr_2.5.0        R.utils_2.11.0    
-[21] bit64_4.0.5        RColorBrewer_1.1-3 S7_0.2.0           lifecycle_1.0.4   
-[25] stringr_1.5.1      gtable_0.3.6       workflowr_1.7.0    R.methodsS3_1.8.1 
-[29] evaluate_0.15      labeling_0.4.2     knitr_1.39         fastmap_1.1.0     
-[33] httpuv_1.6.5       fansi_1.0.3        highr_0.9          Rcpp_1.0.12       
-[37] promises_1.2.0.1   scales_1.4.0       jsonlite_1.8.0     farver_2.1.0      
-[41] fs_1.5.2           bit_4.0.4          digest_0.6.29      stringi_1.7.6     
-[45] dplyr_1.1.4        grid_4.2.0         rprojroot_2.0.3    cli_3.6.1         
-[49] tools_4.2.0        magrittr_2.0.3     sass_0.4.1         tibble_3.2.1      
-[53] dichromat_2.0-0.1  pkgconfig_2.0.3    Matrix_1.5-3       rmarkdown_2.25    
-[57] rstudioapi_0.13    R6_2.5.1           nlme_3.1-157       git2r_0.30.1      
-[61] compiler_4.2.0    </code></pre>
+ [1] tidyselect_1.2.0  xfun_0.38         bslib_0.3.1       lattice_0.20-45  
+ [5] splines_4.2.0     colorspace_2.0-3  vctrs_0.6.1       generics_0.1.3   
+ [9] viridisLite_0.4.0 htmltools_0.5.7   mgcv_1.8-40       yaml_2.3.5       
+[13] utf8_1.2.2        rlang_1.1.2       R.oo_1.24.0       jquerylib_0.1.4  
+[17] later_1.3.0       pillar_1.9.0      glue_1.6.2        withr_2.5.0      
+[21] R.utils_2.11.0    bit64_4.0.5       lifecycle_1.0.4   stringr_1.5.0    
+[25] munsell_0.5.0     gtable_0.3.0      R.methodsS3_1.8.1 evaluate_0.15    
+[29] labeling_0.4.2    knitr_1.42        callr_3.7.0       fastmap_1.1.0    
+[33] httpuv_1.6.5      ps_1.7.0          fansi_1.0.3       highr_0.9        
+[37] Rcpp_1.0.11       promises_1.2.0.1  scales_1.2.0      jsonlite_1.8.7   
+[41] farver_2.1.0      fs_1.5.2          bit_4.0.4         digest_0.6.29    
+[45] stringi_1.7.6     processx_3.5.3    dplyr_1.1.2       getPass_0.2-2    
+[49] rprojroot_2.0.3   grid_4.2.0        cli_3.6.2         tools_4.2.0      
+[53] magrittr_2.0.3    sass_0.4.1        tibble_3.2.1      whisker_0.4      
+[57] pkgconfig_2.0.3   Matrix_1.6-4      rmarkdown_2.21    httr_1.4.5       
+[61] rstudioapi_0.14   R6_2.5.1          nlme_3.1-157      git2r_0.30.1     
+[65] compiler_4.2.0   </code></pre>
 </div>
 </div>
 
