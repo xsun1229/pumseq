@@ -11,7 +11,7 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-09-14" />
+<meta name="date" content="2026-09-28" />
 
 <title>Beta-binomial pU-QTL: is the overdispersion really that small?</title>
 
@@ -374,7 +374,7 @@ div.tocify {
 <h1 class="title toc-ignore">Beta-binomial pU-QTL: is the overdispersion
 really that small?</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-09-14</h4>
+<h4 class="date">2026-09-28</h4>
 
 </div>
 
@@ -403,7 +403,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-09-14
+<strong>Last updated:</strong> 2026-09-28
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreea90f3cbe28bbd5b01f7ec977c43da52c4adc80f1targetblanka90f3cba">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree5c60be10bb04368c4ae6df28db7007857e77dd06targetblank5c60be1a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/a90f3cbe28bbd5b01f7ec977c43da52c4adc80f1" target="_blank">a90f3cb</a>
+<a href="https://github.com/xsun1229/pumseq/tree/5c60be10bb04368c4ae6df28db7007857e77dd06" target="_blank">5c60be1</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreea90f3cbe28bbd5b01f7ec977c43da52c4adc80f1targetblanka90f3cba"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree5c60be10bb04368c4ae6df28db7007857e77dd06targetblank5c60be1a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/a90f3cbe28bbd5b01f7ec977c43da52c4adc80f1" target="_blank">a90f3cb</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/5c60be10bb04368c4ae6df28db7007857e77dd06" target="_blank">5c60be1</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -574,6 +574,7 @@ Ignored files:
 
 Unstaged changes:
     Modified:   analysis/qtl_mapping_betabinomial_lowphi.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_phi_estimation.Rmd
 
 </code></pre>
 <p>
@@ -620,6 +621,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/2a471bb932146a801823d48c6b3706036123481a/analysis/qtl_mapping_betabinomial_lowphi.Rmd" target="_blank">2a471bb</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-16
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/2a471bb932146a801823d48c6b3706036123481a/docs/qtl_mapping_betabinomial_lowphi.html" target="_blank">2a471bb</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-16
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -889,82 +924,84 @@ matters, because it is the statistic the heuristic uses.</caption>
 <tbody>
 <tr class="odd">
 <td align="right">0.0050</td>
-<td align="right">10076</td>
-<td align="right">0.0000022</td>
-<td align="right">0.0000108</td>
+<td align="right">10054</td>
+<td align="right">0.0000021</td>
+<td align="right">0.0000111</td>
 <td align="right">2.40e-06</td>
-<td align="right">0.00518</td>
-<td align="left">20.0%</td>
-<td align="left">57.8%</td>
-<td align="left">11.1%</td>
+<td align="right">0.00534</td>
+<td align="left">20.5%</td>
+<td align="left">57.3%</td>
+<td align="left">11.3%</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="even">
 <td align="right">0.0126</td>
-<td align="right">10046</td>
-<td align="right">0.0121900</td>
-<td align="right">0.0023030</td>
-<td align="right">3.20e-06</td>
-<td align="right">0.01320</td>
-<td align="left">14.5%</td>
-<td align="left">45.5%</td>
-<td align="left">21.8%</td>
-<td align="right">0.967</td>
+<td align="right">10048</td>
+<td align="right">0.0121700</td>
+<td align="right">0.0021910</td>
+<td align="right">3.30e-06</td>
+<td align="right">0.01310</td>
+<td align="left">14.1%</td>
+<td align="left">45.8%</td>
+<td align="left">22.0%</td>
+<td align="right">0.966</td>
 </tr>
 <tr class="odd">
 <td align="right">0.0500</td>
-<td align="right">9994</td>
-<td align="right">0.0453300</td>
-<td align="right">0.0334900</td>
-<td align="right">3.81e-04</td>
-<td align="right">0.05510</td>
-<td align="left">5.3%</td>
-<td align="left">24.5%</td>
-<td align="left">49.8%</td>
-<td align="right">0.907</td>
+<td align="right">9985</td>
+<td align="right">0.0445100</td>
+<td align="right">0.0328900</td>
+<td align="right">2.14e-04</td>
+<td align="right">0.05430</td>
+<td align="left">5.0%</td>
+<td align="left">24.7%</td>
+<td align="left">49.2%</td>
+<td align="right">0.890</td>
 </tr>
 <tr class="even">
 <td align="right">0.1000</td>
-<td align="right">9923</td>
-<td align="right">0.0923500</td>
-<td align="right">0.0756100</td>
-<td align="right">3.33e-02</td>
+<td align="right">9954</td>
+<td align="right">0.0936200</td>
+<td align="right">0.0738900</td>
+<td align="right">3.19e-02</td>
 <td align="right">0.11000</td>
-<td align="left">2.7%</td>
-<td align="left">15.9%</td>
-<td align="left">65.1%</td>
-<td align="right">0.923</td>
+<td align="left">2.6%</td>
+<td align="left">16.1%</td>
+<td align="left">64.7%</td>
+<td align="right">0.936</td>
 </tr>
 <tr class="odd">
 <td align="right">0.2000</td>
-<td align="right">9800</td>
-<td align="right">0.1892000</td>
-<td align="right">0.1621000</td>
-<td align="right">9.53e-02</td>
-<td align="right">0.22300</td>
+<td align="right">9785</td>
+<td align="right">0.1888000</td>
+<td align="right">0.1643000</td>
+<td align="right">9.75e-02</td>
+<td align="right">0.22400</td>
 <td align="left">1.2%</td>
-<td align="left">9.4%</td>
-<td align="left">77.5%</td>
-<td align="right">0.946</td>
+<td align="left">9.0%</td>
+<td align="left">78.2%</td>
+<td align="right">0.944</td>
 </tr>
 <tr class="even">
 <td align="right">0.4000</td>
-<td align="right">9491</td>
-<td align="right">0.3905000</td>
-<td align="right">0.3474000</td>
-<td align="right">2.36e-01</td>
-<td align="right">0.43700</td>
-<td align="left">0.5%</td>
-<td align="left">5.2%</td>
-<td align="left">87.4%</td>
-<td align="right">0.976</td>
+<td align="right">9472</td>
+<td align="right">0.3909000</td>
+<td align="right">0.3459000</td>
+<td align="right">2.35e-01</td>
+<td align="right">0.43600</td>
+<td align="left">0.6%</td>
+<td align="left">5.1%</td>
+<td align="left">87.8%</td>
+<td align="right">0.977</td>
 </tr>
 </tbody>
 </table>
 <p><strong>The mode is very nearly unbiased from 0.0126 upwards</strong>
-— within 3% at 0.0126 itself and within 10% across the whole range up to
-0.4. Only at a true φ of 0.005 does it collapse to the floor, which is
-below what our depth can resolve.</p>
+— about 3% low at 0.0126 itself and within about 11% across the whole
+range up to 0.4 (a mode read off a density estimate moves by a few
+percent between simulation runs, so treat these as ±2%). Only at a true
+φ of 0.005 does it collapse to the floor, which is below what our depth
+can resolve.</p>
 <pre class="r"><code>RB &lt;- fread(file.path(RC, &quot;recovery_by_site.txt.gz&quot;), sep = &quot;\t&quot;)[is.finite(phi_hat)]
 PT &lt;- sort(unique(RB$phi_true))
 RB[, panel := factor(sprintf(&quot;true phi = %g&quot;, phi_true),
@@ -1060,10 +1097,10 @@ what this estimator does to low-φ sites at 8 reads. An earlier version
 of the optimiser page described these as two regimes; that reading was
 wrong.</p>
 <p><strong>The median is badly biased; only the mode is usable.</strong>
-At a true φ of 0.0126 the median estimate is 0.0023, five-fold low,
-because half the estimates fall into the artefact pile. This is why the
-reference value must be a mode and not an average — a point in favour of
-how the heuristic was constructed.</p>
+At a true φ of 0.0126 the median estimate is 0.0022, almost six-fold
+low, because half the estimates fall into the artefact pile. This is why
+the reference value must be a mode and not an average — a point in
+favour of how the heuristic was constructed.</p>
 <p><strong>But an unbiased mode does NOT mean accurate per-site
 estimates, and the gap is large.</strong> The mode is a property of the
 distribution; individual sites are frequently wrong by orders of
@@ -1105,66 +1142,66 @@ and the modal value is precisely where it is not.</caption>
 <tbody>
 <tr class="odd">
 <td align="right">0.0050</td>
-<td align="right">10076</td>
-<td align="left">18.2%</td>
-<td align="left">36.3%</td>
-<td align="left">59.8%</td>
-<td align="left">20.0%</td>
-<td align="right">461.4</td>
+<td align="right">10054</td>
+<td align="left">18.8%</td>
+<td align="left">37.2%</td>
+<td align="left">58.9%</td>
+<td align="left">20.5%</td>
+<td align="right">448.8</td>
 </tr>
 <tr class="even">
 <td align="right">0.0126</td>
-<td align="right">10046</td>
-<td align="left">29.0%</td>
-<td align="left">50.5%</td>
-<td align="left">48.2%</td>
-<td align="left">14.5%</td>
-<td align="right">9.0</td>
+<td align="right">10048</td>
+<td align="left">29.8%</td>
+<td align="left">50.3%</td>
+<td align="left">48.3%</td>
+<td align="left">14.1%</td>
+<td align="right">9.4</td>
 </tr>
 <tr class="odd">
 <td align="right">0.0500</td>
-<td align="right">9994</td>
-<td align="left">51.8%</td>
-<td align="left">72.8%</td>
-<td align="left">26.9%</td>
-<td align="left">5.3%</td>
+<td align="right">9985</td>
+<td align="left">51.6%</td>
+<td align="left">72.4%</td>
+<td align="left">27.5%</td>
+<td align="left">5.0%</td>
 <td align="right">1.9</td>
 </tr>
 <tr class="even">
 <td align="right">0.1000</td>
-<td align="right">9923</td>
-<td align="left">62.0%</td>
-<td align="left">81.9%</td>
-<td align="left">18.1%</td>
-<td align="left">2.7%</td>
+<td align="right">9954</td>
+<td align="left">61.4%</td>
+<td align="left">81.7%</td>
+<td align="left">18.3%</td>
+<td align="left">2.6%</td>
 <td align="right">1.6</td>
 </tr>
 <tr class="odd">
 <td align="right">0.2000</td>
-<td align="right">9800</td>
-<td align="left">70.8%</td>
-<td align="left">88.6%</td>
-<td align="left">11.4%</td>
+<td align="right">9785</td>
+<td align="left">71.5%</td>
+<td align="left">89.0%</td>
+<td align="left">11.0%</td>
 <td align="left">1.2%</td>
 <td align="right">1.4</td>
 </tr>
 <tr class="even">
 <td align="right">0.4000</td>
-<td align="right">9491</td>
-<td align="left">79.3%</td>
-<td align="left">93.0%</td>
-<td align="left">7.0%</td>
-<td align="left">0.5%</td>
+<td align="right">9472</td>
+<td align="left">79.4%</td>
+<td align="left">93.4%</td>
+<td align="left">6.6%</td>
+<td align="left">0.6%</td>
 <td align="right">1.3</td>
 </tr>
 </tbody>
 </table>
-<p>At the truth that matters, φ = 0.0126, only <strong>29.0%</strong> of
-sites land within 2× of it, <strong>48.2% are more than tenfold too
+<p>At the truth that matters, φ = 0.0126, only <strong>29.8%</strong> of
+sites land within 2× of it, <strong>48.3% are more than tenfold too
 low</strong>, one site in seven collapses to the floor, and the median
 fold error is <strong>9×</strong>. Accuracy climbs steadily with φ —
-within-2× goes 18% → 29% → 52% → 62% → 71% → 79% as the truth rises from
-0.005 to 0.4, with median fold error falling from 461× to 1.3×.</p>
+within-2× goes 19% → 30% → 52% → 61% → 72% → 79% as the truth rises from
+0.005 to 0.4, with median fold error falling from 449× to 1.3×.</p>
 <p>Since the real φ distribution is dominated by low-φ sites, the same
 must hold there: <strong>most real per-site φ estimates are wrong by a
 large factor.</strong> This is the same fact as “79.2% of sites cannot
@@ -1208,17 +1245,17 @@ rate.</caption>
 <tr class="even">
 <td align="left">% at the 1e-6 floor</td>
 <td align="left">16.3%</td>
-<td align="left">14.5%</td>
+<td align="left">14.1%</td>
 </tr>
 <tr class="odd">
 <td align="left">% below 1e-4</td>
 <td align="left">49.1%</td>
-<td align="left">45.5%</td>
+<td align="left">45.8%</td>
 </tr>
 <tr class="even">
 <td align="left">% identified (reject phi=0)</td>
 <td align="left">20.8%</td>
-<td align="left">21.8%</td>
+<td align="left">22.0%</td>
 </tr>
 </tbody>
 </table>
@@ -1519,122 +1556,122 @@ sites, so it is negligible per site.</caption>
 <tr class="odd">
 <td align="right">0.0050</td>
 <td align="left">loglik</td>
-<td align="left">18.0%</td>
-<td align="left">36.0%</td>
-<td align="left">20.7%</td>
-<td align="right">508.67</td>
-<td align="right">2.053</td>
+<td align="left">18.8%</td>
+<td align="left">37.2%</td>
+<td align="left">20.5%</td>
+<td align="right">448.79</td>
+<td align="right">2.014</td>
 <td align="right">0.0</td>
 </tr>
 <tr class="even">
 <td align="right">0.0050</td>
 <td align="left">peak</td>
-<td align="left">18.0%</td>
-<td align="left">37.0%</td>
-<td align="left">1.6%</td>
-<td align="right">51.35</td>
-<td align="right">1.545</td>
-<td align="right">9.3</td>
+<td align="left">18.9%</td>
+<td align="left">38.2%</td>
+<td align="left">1.5%</td>
+<td align="right">48.71</td>
+<td align="right">1.526</td>
+<td align="right">11.5</td>
 </tr>
 <tr class="odd">
 <td align="right">0.0126</td>
 <td align="left">loglik</td>
 <td align="left">29.8%</td>
-<td align="left">50.6%</td>
-<td align="left">13.6%</td>
-<td align="right">8.78</td>
-<td align="right">1.810</td>
+<td align="left">50.3%</td>
+<td align="left">14.1%</td>
+<td align="right">9.41</td>
+<td align="right">1.818</td>
 <td align="right">0.0</td>
 </tr>
 <tr class="even">
 <td align="right">0.0126</td>
 <td align="left">peak</td>
 <td align="left">29.9%</td>
-<td align="left">50.9%</td>
+<td align="left">50.5%</td>
 <td align="left">1.1%</td>
-<td align="right">8.32</td>
-<td align="right">1.433</td>
-<td align="right">5.3</td>
+<td align="right">9.09</td>
+<td align="right">1.431</td>
+<td align="right">5.8</td>
 </tr>
 <tr class="odd">
 <td align="right">0.0500</td>
 <td align="left">loglik</td>
 <td align="left">51.6%</td>
-<td align="left">72.9%</td>
-<td align="left">4.8%</td>
-<td align="right">1.91</td>
-<td align="right">1.191</td>
+<td align="left">72.4%</td>
+<td align="left">5.0%</td>
+<td align="right">1.92</td>
+<td align="right">1.209</td>
 <td align="right">0.0</td>
 </tr>
 <tr class="even">
 <td align="right">0.0500</td>
 <td align="left">peak</td>
 <td align="left">51.6%</td>
-<td align="left">73.0%</td>
-<td align="left">0.3%</td>
-<td align="right">1.91</td>
-<td align="right">1.011</td>
-<td align="right">1.4</td>
+<td align="left">72.4%</td>
+<td align="left">0.4%</td>
+<td align="right">1.92</td>
+<td align="right">1.024</td>
+<td align="right">2.0</td>
 </tr>
 <tr class="odd">
 <td align="right">0.1000</td>
 <td align="left">loglik</td>
-<td align="left">61.0%</td>
-<td align="left">81.0%</td>
+<td align="left">61.4%</td>
+<td align="left">81.7%</td>
 <td align="left">2.6%</td>
-<td align="right">1.62</td>
-<td align="right">0.920</td>
+<td align="right">1.61</td>
+<td align="right">0.897</td>
 <td align="right">0.0</td>
 </tr>
 <tr class="even">
 <td align="right">0.1000</td>
 <td align="left">peak</td>
-<td align="left">61.0%</td>
-<td align="left">81.0%</td>
+<td align="left">61.4%</td>
+<td align="left">81.8%</td>
 <td align="left">0.2%</td>
-<td align="right">1.62</td>
-<td align="right">0.812</td>
-<td align="right">1.4</td>
-</tr>
-<tr class="odd">
-<td align="right">0.2000</td>
-<td align="left">loglik</td>
-<td align="left">70.9%</td>
-<td align="left">88.4%</td>
-<td align="left">1.1%</td>
-<td align="right">1.44</td>
-<td align="right">0.628</td>
-<td align="right">0.0</td>
-</tr>
-<tr class="even">
-<td align="right">0.2000</td>
-<td align="left">peak</td>
-<td align="left">70.9%</td>
-<td align="left">88.4%</td>
-<td align="left">0.1%</td>
-<td align="right">1.44</td>
-<td align="right">0.573</td>
-<td align="right">0.3</td>
-</tr>
-<tr class="odd">
-<td align="right">0.4000</td>
-<td align="left">loglik</td>
-<td align="left">79.4%</td>
-<td align="left">92.9%</td>
-<td align="left">0.5%</td>
-<td align="right">1.30</td>
-<td align="right">0.424</td>
-<td align="right">0.0</td>
-</tr>
-<tr class="even">
-<td align="right">0.4000</td>
-<td align="left">peak</td>
-<td align="left">79.4%</td>
-<td align="left">93.0%</td>
-<td align="left">0.1%</td>
-<td align="right">1.30</td>
-<td align="right">0.398</td>
+<td align="right">1.61</td>
+<td align="right">0.793</td>
 <td align="right">2.8</td>
+</tr>
+<tr class="odd">
+<td align="right">0.2000</td>
+<td align="left">loglik</td>
+<td align="left">71.5%</td>
+<td align="left">89.0%</td>
+<td align="left">1.2%</td>
+<td align="right">1.43</td>
+<td align="right">0.605</td>
+<td align="right">0.0</td>
+</tr>
+<tr class="even">
+<td align="right">0.2000</td>
+<td align="left">peak</td>
+<td align="left">71.5%</td>
+<td align="left">89.0%</td>
+<td align="left">0.1%</td>
+<td align="right">1.43</td>
+<td align="right">0.557</td>
+<td align="right">0.4</td>
+</tr>
+<tr class="odd">
+<td align="right">0.4000</td>
+<td align="left">loglik</td>
+<td align="left">79.4%</td>
+<td align="left">93.4%</td>
+<td align="left">0.6%</td>
+<td align="right">1.31</td>
+<td align="right">0.418</td>
+<td align="right">0.0</td>
+</tr>
+<tr class="even">
+<td align="right">0.4000</td>
+<td align="left">peak</td>
+<td align="left">79.4%</td>
+<td align="left">93.4%</td>
+<td align="left">0.1%</td>
+<td align="right">1.31</td>
+<td align="right">0.395</td>
+<td align="right">0.4</td>
 </tr>
 </tbody>
 </table>
@@ -1674,14 +1711,51 @@ ggplot(RR, aes(phi_hat)) +
   theme(panel.grid.minor = element_blank(), strip.text = element_text(size = 8),
         plot.subtitle = element_text(size = 8))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_lowphi.Rmd/rulefig-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-rulefig-1">
+Past versions of rulefig-1.png
+</button>
+</p>
+<div id="fig-rulefig-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/2a471bb932146a801823d48c6b3706036123481a/docs/figure/qtl_mapping_betabinomial_lowphi.Rmd/rulefig-1.png" target="_blank">2a471bb</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-16
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p><strong>The rule does not improve accuracy in any conventional
 sense.</strong> Within-2× and within-10× are unchanged to a decimal
 place at every true φ — 29.8% vs 29.9% at the modal truth, 79.4% vs
 79.4% at φ = 0.4. If you want to know a site’s φ to within a factor of
 two, the rule buys you nothing.</p>
 <p><strong>What it does is rescue boundary collapses.</strong> The
-fraction of estimates pinned at the 10⁻⁶ floor falls from 13.6% to 1.1%
-at the modal truth (and 20.7% → 1.6% at φ = 0.005), which shows up as a
+fraction of estimates pinned at the 10⁻⁶ floor falls from 14.1% to 1.1%
+at the modal truth (and 20.5% → 1.5% at φ = 0.005), which shows up as a
 ~20% reduction in mean |log₁₀ error|. So it converts
 <em>catastrophic</em> errors — off by four orders of magnitude — into
 merely <em>large</em> ones. That is a real improvement, and it costs a
@@ -1689,15 +1763,15 @@ negligible amount of likelihood (a few log units summed over ten
 thousand sites).</p>
 <p><strong>And it helps even where its reference is badly
 wrong</strong>, which was not what I expected: at φ = 0.4, where 0.0126
-is 32× too low, mean error still improves (0.424 → 0.398). The reason is
+is 32× too low, mean error still improves (0.418 → 0.395). The reason is
 that the rule is not shrinking estimates toward the truth — it is
 pulling them off the boundary, and 0.0126 is closer to 0.4 than 10⁻⁶ is.
 It is a boundary rescue that happens to work whether or not the
 reference value is right, which is a weaker and more honest description
 of it than “choosing a more reasonable φ”.</p>
-<p><strong>What this does not change:</strong> at the modal truth, 47.7%
+<p><strong>What this does not change:</strong> at the modal truth, 48.0%
 of estimates remain more than tenfold too low under the rule, against
-48.1% under the MLE. Per-site φ is not made reportable by either rule —
+48.3% under the MLE. Per-site φ is not made reportable by either rule —
 see §4.</p>
 </div>
 </div>
@@ -2521,13 +2595,13 @@ which, as noted above, sit in the Ig/MHC artefact regions.</p>
 <h1>4. What can and cannot be claimed</h1>
 <p><strong>Supported.</strong> φ ≈ 0.013 is a reliable estimate of the
 <em>modal</em> dispersion across sites. Three methods with unrelated
-failure modes agree; the estimator recovers a known φ to within 3% at
-this value; a substantially larger φ is excluded by the observed
+failure modes agree; the estimator recovers a known φ to within about 3%
+at this value; a substantially larger φ is excluded by the observed
 scatter; and the magnitude is exactly what the depth budget
 predicts.</p>
 <p><strong>Not supported, and should not be claimed.</strong> φ is
 <em>not</em> estimable at an individual site. Measured against known
-truth (§2.1), at the modal value only 29% of estimates land within 2×
+truth (§2.1), at the modal value only 30% of estimates land within 2×
 and 48% are more than tenfold too low, with a median fold error of 9×.
 <strong>Per-site φ is therefore not a reportable quantity</strong> and
 should never be interpreted, filtered on, or shown for an individual
@@ -2552,8 +2626,13 @@ implemented.</strong></p>
 <li>Recovery simulation: <code>28.phi_recovery_simulation.R</code> via
 <code>run_phi_recovery.sbatch</code> →
 <code>qtl_betabinomial/phi_recovery/</code>. True φ ∈ {0.005, 0.0126,
-0.05, 0.1, 0.2, 0.4}, seed 2026, real n_i and fitted μ_i, k = 3,
-multi-start MLE.</li>
+0.05, 0.1, 0.2, 0.4}, real n_i and fitted μ_i, k = 3, multi-start MLE.
+Seeded per site (<code>SEED + 1e5 × setting + site row</code>, SEED =
+2026) so results reproduce exactly whatever the core count; before
+2026-09-28 the seed was set only in the parent process, which does not
+reach <code>mclapply</code> workers, and the runs were not reproducible.
+The rerun moved every figure on this page by simulation noise only
+(e.g. within-2× at φ = 0.0126: 29.0% → 29.8%).</li>
 <li>Moment estimators, spread check, interpretation, aggregate test:
 <code>29.low_phi_validation.R</code> via
 <code>run_low_phi_validation.sbatch</code> →

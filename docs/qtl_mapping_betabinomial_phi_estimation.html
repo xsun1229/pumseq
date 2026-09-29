@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree2a471bb932146a801823d48c6b3706036123481atargetblank2a471bba">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree5c60be10bb04368c4ae6df28db7007857e77dd06targetblank5c60be1a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/2a471bb932146a801823d48c6b3706036123481a" target="_blank">2a471bb</a>
+<a href="https://github.com/xsun1229/pumseq/tree/5c60be10bb04368c4ae6df28db7007857e77dd06" target="_blank">5c60be1</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree2a471bb932146a801823d48c6b3706036123481atargetblank2a471bba"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree5c60be10bb04368c4ae6df28db7007857e77dd06targetblank5c60be1a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/2a471bb932146a801823d48c6b3706036123481a" target="_blank">2a471bb</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/5c60be10bb04368c4ae6df28db7007857e77dd06" target="_blank">5c60be1</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -573,6 +573,7 @@ Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Unstaged changes:
+    Modified:   analysis/qtl_mapping_betabinomial_lowphi.Rmd
     Modified:   analysis/qtl_mapping_betabinomial_phi_estimation.Rmd
 
 </code></pre>
@@ -620,6 +621,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/5c60be10bb04368c4ae6df28db7007857e77dd06/analysis/qtl_mapping_betabinomial_phi_estimation.Rmd" target="_blank">5c60be1</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-28
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/5c60be10bb04368c4ae6df28db7007857e77dd06/docs/qtl_mapping_betabinomial_phi_estimation.html" target="_blank">5c60be1</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-28
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -705,7 +740,7 @@ knitr::kable(data.table(
             &quot;median 49 (range 10-50)&quot;,
             format(nrow(RBx), big.mark = &quot;,&quot;),
             &quot;~3.08 million&quot;,
-            &quot;2026&quot;)),
+            &quot;2026, set per site: SEED + 1e5 x (true-phi index) + site row&quot;)),
   caption = &quot;One dataset per site per true phi. Each &#39;site-level dataset&#39; is ~49 paired counts (y_i, n_i), one per cell line, which is exactly what a real site provides. The histograms below pool the ~10,000 sites within each true-phi panel.&quot;)</code></pre>
 <table>
 <caption>One dataset per site per true phi. Each ‘site-level dataset’ is
@@ -713,8 +748,8 @@ knitr::kable(data.table(
 real site provides. The histograms below pool the ~10,000 sites within
 each true-phi panel.</caption>
 <colgroup>
-<col width="56%" />
-<col width="43%" />
+<col width="42%" />
+<col width="57%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -745,7 +780,8 @@ each true-phi panel.</caption>
 </tr>
 <tr class="even">
 <td align="left">random seed</td>
-<td align="left">2026</td>
+<td align="left">2026, set per site: SEED + 1e5 x (true-phi index) +
+site row</td>
 </tr>
 </tbody>
 </table>
@@ -769,7 +805,7 @@ red line plus a second spike jammed against the boundary</strong>. The
 hump is fine and expected. The second spike is the failure: those sites
 did not return a noisy version of 0.0126, they returned essentially
 zero.</p>
-<p>A handful of fits fail outright at each value (9,491 to 10,076
+<p>A handful of fits fail outright at each value (9,472 to 10,054
 succeed of 10,467) and are excluded from the panel. Note the failure
 rate itself rises with φ, so those exclusions are not random.</p>
 <div id="which-sites-are-estimated-badly" class="section level2">
@@ -812,47 +848,47 @@ groups.</caption>
 <tbody>
 <tr class="odd">
 <td align="left">collapsed to the 1e-6 floor</td>
-<td align="right">1460</td>
-<td align="left">14.5%</td>
-<td align="right">8</td>
-<td align="right">490</td>
-<td align="right">49</td>
-<td align="left">4.0%</td>
-<td align="left">7,544</td>
-<td align="right">0.0217</td>
+<td align="right">1414</td>
+<td align="left">14.1%</td>
+<td align="right">7</td>
+<td align="right">472</td>
+<td align="right">48</td>
+<td align="left">4.1%</td>
+<td align="left">7,012</td>
+<td align="right">0.0218</td>
 </tr>
 <tr class="even">
 <td align="left">&gt;10x too low (not at floor)</td>
-<td align="right">3380</td>
-<td align="left">33.6%</td>
+<td align="right">3437</td>
+<td align="left">34.2%</td>
 <td align="right">5</td>
-<td align="right">268</td>
+<td align="right">272</td>
 <td align="right">47</td>
 <td align="left">4.6%</td>
-<td align="left">2,130</td>
-<td align="right">0.0434</td>
+<td align="left">2,170</td>
+<td align="right">0.0438</td>
 </tr>
 <tr class="odd">
 <td align="left">wrong but not extreme</td>
-<td align="right">2288</td>
-<td align="left">22.8%</td>
-<td align="right">10</td>
-<td align="right">630</td>
+<td align="right">2198</td>
+<td align="left">21.9%</td>
+<td align="right">9</td>
+<td align="right">566</td>
 <td align="right">49</td>
-<td align="left">4.8%</td>
-<td align="left">11,235</td>
-<td align="right">0.0167</td>
+<td align="left">4.9%</td>
+<td align="left">9,366</td>
+<td align="right">0.0183</td>
 </tr>
 <tr class="even">
 <td align="left">accurate (within 2x)</td>
-<td align="right">2918</td>
-<td align="left">29.0%</td>
+<td align="right">2999</td>
+<td align="left">29.8%</td>
 <td align="right">24</td>
-<td align="right">1547</td>
+<td align="right">1585</td>
 <td align="right">50</td>
-<td align="left">5.4%</td>
-<td align="left">69,750</td>
-<td align="right">0.0058</td>
+<td align="left">5.3%</td>
+<td align="left">74,310</td>
+<td align="right">0.0056</td>
 </tr>
 </tbody>
 </table>
@@ -883,60 +919,60 @@ within 2x, whereas at ~3 reads only 7% are within 2x.</caption>
 <tbody>
 <tr class="odd">
 <td align="left">[1,4]</td>
-<td align="right">2627</td>
+<td align="right">2640</td>
 <td align="right">3</td>
-<td align="left">12.8%</td>
-<td align="left">73.2%</td>
-<td align="left">7.1%</td>
+<td align="left">13.6%</td>
+<td align="left">74.1%</td>
+<td align="left">5.9%</td>
 </tr>
 <tr class="even">
 <td align="left">(4,7]</td>
-<td align="right">1762</td>
+<td align="right">1754</td>
 <td align="right">6</td>
-<td align="left">20.6%</td>
-<td align="left">65.3%</td>
-<td align="left">13.7%</td>
+<td align="left">20.9%</td>
+<td align="left">65.8%</td>
+<td align="left">12.2%</td>
 </tr>
 <tr class="odd">
 <td align="left">(7,12]</td>
-<td align="right">1693</td>
+<td align="right">1695</td>
 <td align="right">10</td>
-<td align="left">24.0%</td>
-<td align="left">52.6%</td>
-<td align="left">22.7%</td>
+<td align="left">20.6%</td>
+<td align="left">50.4%</td>
+<td align="left">24.5%</td>
 </tr>
 <tr class="even">
 <td align="left">(12,26]</td>
-<td align="right">1988</td>
+<td align="right">1984</td>
 <td align="right">17</td>
-<td align="left">14.8%</td>
-<td align="left">34.9%</td>
-<td align="left">38.3%</td>
+<td align="left">14.6%</td>
+<td align="left">35.7%</td>
+<td align="left">40.7%</td>
 </tr>
 <tr class="odd">
 <td align="left">(26,1.467e+04]</td>
-<td align="right">1976</td>
+<td align="right">1975</td>
 <td align="right">51</td>
-<td align="left">3.0%</td>
-<td align="left">9.3%</td>
-<td align="left">68.0%</td>
+<td align="left">2.5%</td>
+<td align="left">9.0%</td>
+<td align="left">71.1%</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Three things follow.</strong></p>
 <p><strong>Depth is the whole story, and it is actionable.</strong>
-Sites in the top depth quintile (~51 reads per cell line) collapse only
-3% of the time and are within 2x of the truth 68% of the time. Sites in
-the bottom quintile (~3 reads) are within 2x only 7% of the time. So a
+Sites in the top depth quintile (~51 reads per cell line) collapse under
+3% of the time and are within 2x of the truth 71% of the time. Sites in
+the bottom quintile (~3 reads) are within 2x only 6% of the time. So a
 per-site φ <em>is</em> recoverable — for the deep sites. The obvious
 consequence is that φ should be reported only above a depth threshold,
 not genome-wide.</p>
 <p><strong>Cell-line count and %pU are not the problem.</strong> The
 four accuracy groups have essentially the same number of covered cell
-lines (47-50) and similar modification rates (4.0-5.4%). Only depth and
+lines (47-50) and similar modification rates (4.1-5.3%). Only depth and
 the information summary sum n(n-1) separate them.</p>
 <p><strong>The boundary rate is not monotone in depth</strong> — it
-peaks at ~10 reads (24%) rather than at the lowest depth (12.8%). At
+peaks at 6-10 reads (~21%) rather than at the lowest depth (13.6%). At
 very low depth the Pearson statistic is so noisy that estimates scatter
 in <em>both</em> directions rather than settling on the boundary, so the
 shallowest sites are wrong in both directions rather than specifically
@@ -999,6 +1035,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/5c60be10bb04368c4ae6df28db7007857e77dd06/docs/figure/qtl_mapping_betabinomial_phi_estimation.Rmd/prob-1.png" target="_blank">5c60be1</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-28
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/2a471bb932146a801823d48c6b3706036123481a/docs/figure/qtl_mapping_betabinomial_phi_estimation.Rmd/prob-1.png" target="_blank">2a471bb</a>
 </td>
 <td>
@@ -1047,44 +1094,44 @@ smallest.</caption>
 <tbody>
 <tr class="odd">
 <td align="right">0.0050</td>
-<td align="left">18.2%</td>
-<td align="left">59.8%</td>
-<td align="left">20.0%</td>
-<td align="right">461.4</td>
+<td align="left">18.8%</td>
+<td align="left">58.9%</td>
+<td align="left">20.5%</td>
+<td align="right">448.8</td>
 </tr>
 <tr class="even">
 <td align="right">0.0126</td>
-<td align="left">29.0%</td>
-<td align="left">48.2%</td>
-<td align="left">14.5%</td>
-<td align="right">9.0</td>
+<td align="left">29.8%</td>
+<td align="left">48.3%</td>
+<td align="left">14.1%</td>
+<td align="right">9.4</td>
 </tr>
 <tr class="odd">
 <td align="right">0.0500</td>
-<td align="left">51.8%</td>
-<td align="left">26.9%</td>
-<td align="left">5.3%</td>
+<td align="left">51.6%</td>
+<td align="left">27.5%</td>
+<td align="left">5.0%</td>
 <td align="right">1.9</td>
 </tr>
 <tr class="even">
 <td align="right">0.1000</td>
-<td align="left">62.0%</td>
-<td align="left">18.1%</td>
-<td align="left">2.7%</td>
+<td align="left">61.4%</td>
+<td align="left">18.3%</td>
+<td align="left">2.6%</td>
 <td align="right">1.6</td>
 </tr>
 <tr class="odd">
 <td align="right">0.2000</td>
-<td align="left">70.8%</td>
-<td align="left">11.4%</td>
+<td align="left">71.5%</td>
+<td align="left">11.0%</td>
 <td align="left">1.2%</td>
 <td align="right">1.4</td>
 </tr>
 <tr class="even">
 <td align="right">0.4000</td>
-<td align="left">79.3%</td>
-<td align="left">7.0%</td>
-<td align="left">0.5%</td>
+<td align="left">79.4%</td>
+<td align="left">6.6%</td>
+<td align="left">0.6%</td>
 <td align="right">1.3</td>
 </tr>
 </tbody>
@@ -1111,10 +1158,10 @@ smallest.</caption>
   outcome = c(&quot;FIXED A DIFFERENT BUG: 13 sites where the likelihood is bimodal and one fixed start found the worse optimum. Did NOT touch the boundary spike.&quot;,
               &quot;NO. Per-site tracking unchanged; it only moves the pile off the boundary to ~1e-4. A relocation, not a repair.&quot;,
               &quot;RULED OUT before building: phi is not predictable from site features (R-squared = 0.058), so there is no trend to shrink toward.&quot;,
-              &quot;NO. Loses to a CONSTANT GUESS at 3 of 4 true phi, and tracks WORSE than the MLE at large phi (Spearman 0.68 vs 0.74).&quot;,
+              &quot;NO. Loses to a CONSTANT GUESS at 3 of 4 true phi, and tracks WORSE than the MLE at large phi (Spearman 0.69 vs 0.74).&quot;,
               &quot;NO. Same failure -- at 2 log-units out the tail has not saturated enough to help.&quot;,
               &quot;MARGINAL. Roughly ties the MLE on tracking at large phi; and its second component is not supported by an optimiser-free estimator (see 3.2).&quot;,
-              &quot;BEST OF THE SIX, but not a solution: two of its three pre-specified rules (mom-mode, mom-q60) are the only approaches that beat a constant guess at all four true phi, yet per-site tracking at the modal phi is still only Spearman 0.39-0.42. The third rule, mom-median, does not beat the constant guess there (see 4).&quot;)),
+              &quot;BEST OF THE SIX, but not a solution: two of its three pre-specified rules (mom-mode, mom-q60) are the only approaches that beat a constant guess at all four true phi, yet per-site tracking at the modal phi is still only Spearman 0.40-0.42. The third rule, mom-median, does not beat the constant guess there (see 4).&quot;)),
   caption = &quot;Six attempts. Verdicts are by per-site tracking (see 3.1), not by the &#39;within 2x&#39; rate, which is misleading -- see below.&quot;)</code></pre>
 <table>
 <caption>Six attempts. Verdicts are by per-site tracking (see 3.1), not
@@ -1159,7 +1206,7 @@ toward.</td>
 <td align="left">Gaussian prior on log phi</td>
 <td align="left">penalise phi values far from 0.0126</td>
 <td align="left">NO. Loses to a CONSTANT GUESS at 3 of 4 true phi, and
-tracks WORSE than the MLE at large phi (Spearman 0.68 vs 0.74).</td>
+tracks WORSE than the MLE at large phi (Spearman 0.69 vs 0.74).</td>
 </tr>
 <tr class="odd">
 <td align="left">Student-t prior on log phi</td>
@@ -1183,7 +1230,7 @@ then MAP</td>
 <td align="left">BEST OF THE SIX, but not a solution: two of its three
 pre-specified rules (mom-mode, mom-q60) are the only approaches that
 beat a constant guess at all four true phi, yet per-site tracking at the
-modal phi is still only Spearman 0.39-0.42. The third rule, mom-median,
+modal phi is still only Spearman 0.40-0.42. The third rule, mom-median,
 does not beat the constant guess there (see 4).</td>
 </tr>
 </tbody>
@@ -1235,59 +1282,59 @@ constant guess is 0 by construction.</caption>
 </tr>
 <tr class="even">
 <td align="left">MLE</td>
-<td align="right">0.294</td>
-<td align="right">0.578</td>
-<td align="right">0.754</td>
-<td align="right">0.737</td>
+<td align="right">0.299</td>
+<td align="right">0.593</td>
+<td align="right">0.757</td>
+<td align="right">0.740</td>
 </tr>
 <tr class="odd">
 <td align="left">gauss sd=0.83</td>
-<td align="right">0.392</td>
-<td align="right">0.614</td>
-<td align="right">0.713</td>
-<td align="right">0.682</td>
+<td align="right">0.400</td>
+<td align="right">0.622</td>
+<td align="right">0.715</td>
+<td align="right">0.685</td>
 </tr>
 <tr class="even">
 <td align="left">t df=2 sd=0.83</td>
-<td align="right">0.397</td>
-<td align="right">0.611</td>
-<td align="right">0.713</td>
+<td align="right">0.406</td>
+<td align="right">0.618</td>
+<td align="right">0.715</td>
 <td align="right">0.695</td>
 </tr>
 <tr class="odd">
 <td align="left">t df=1 sd=0.4</td>
-<td align="right">0.408</td>
-<td align="right">0.583</td>
-<td align="right">0.675</td>
-<td align="right">0.668</td>
+<td align="right">0.419</td>
+<td align="right">0.592</td>
+<td align="right">0.672</td>
+<td align="right">0.671</td>
 </tr>
 <tr class="even">
 <td align="left">MIXTURE</td>
-<td align="right">0.391</td>
-<td align="right">0.629</td>
-<td align="right">0.735</td>
-<td align="right">0.742</td>
+<td align="right">0.399</td>
+<td align="right">0.642</td>
+<td align="right">0.737</td>
+<td align="right">0.744</td>
 </tr>
 <tr class="odd">
 <td align="left">MAP: mom-median</td>
-<td align="right">0.391</td>
-<td align="right">0.685</td>
-<td align="right">0.804</td>
-<td align="right">0.767</td>
+<td align="right">0.397</td>
+<td align="right">0.679</td>
+<td align="right">0.808</td>
+<td align="right">0.760</td>
 </tr>
 <tr class="even">
 <td align="left">MAP: mom-mode</td>
-<td align="right">0.404</td>
-<td align="right">0.698</td>
-<td align="right">0.810</td>
-<td align="right">0.780</td>
+<td align="right">0.409</td>
+<td align="right">0.690</td>
+<td align="right">0.820</td>
+<td align="right">0.772</td>
 </tr>
 <tr class="odd">
 <td align="left">MAP: mom-q60</td>
-<td align="right">0.415</td>
-<td align="right">0.699</td>
-<td align="right">0.815</td>
-<td align="right">0.782</td>
+<td align="right">0.416</td>
+<td align="right">0.690</td>
+<td align="right">0.820</td>
+<td align="right">0.776</td>
 </tr>
 </tbody>
 </table>
@@ -1317,58 +1364,58 @@ truth.</caption>
 <tr class="even">
 <td align="left">MLE</td>
 <td align="right">1.55</td>
-<td align="right">1.85</td>
-<td align="right">1.85</td>
-<td align="right">1.72</td>
+<td align="right">1.92</td>
+<td align="right">1.79</td>
+<td align="right">1.65</td>
 </tr>
 <tr class="odd">
 <td align="left">gauss sd=0.83</td>
 <td align="right">0.46</td>
 <td align="right">0.81</td>
-<td align="right">1.10</td>
-<td align="right">1.27</td>
+<td align="right">1.09</td>
+<td align="right">1.26</td>
 </tr>
 <tr class="even">
 <td align="left">t df=2 sd=0.83</td>
-<td align="right">0.43</td>
-<td align="right">0.80</td>
-<td align="right">1.11</td>
-<td align="right">1.30</td>
+<td align="right">0.44</td>
+<td align="right">0.79</td>
+<td align="right">1.10</td>
+<td align="right">1.29</td>
 </tr>
 <tr class="odd">
 <td align="left">t df=1 sd=0.4</td>
-<td align="right">0.28</td>
-<td align="right">0.68</td>
-<td align="right">1.12</td>
-<td align="right">1.37</td>
+<td align="right">0.29</td>
+<td align="right">0.67</td>
+<td align="right">1.11</td>
+<td align="right">1.36</td>
 </tr>
 <tr class="even">
 <td align="left">MIXTURE</td>
-<td align="right">0.42</td>
+<td align="right">0.43</td>
 <td align="right">0.79</td>
-<td align="right">1.10</td>
-<td align="right">1.19</td>
+<td align="right">1.09</td>
+<td align="right">1.18</td>
 </tr>
 <tr class="odd">
 <td align="left">MAP: mom-median</td>
-<td align="right">0.35</td>
-<td align="right">0.60</td>
+<td align="right">0.37</td>
+<td align="right">0.61</td>
 <td align="right">0.82</td>
-<td align="right">0.88</td>
+<td align="right">0.89</td>
 </tr>
 <tr class="even">
 <td align="left">MAP: mom-mode</td>
-<td align="right">0.33</td>
-<td align="right">0.57</td>
-<td align="right">0.82</td>
-<td align="right">0.86</td>
+<td align="right">0.34</td>
+<td align="right">0.59</td>
+<td align="right">0.80</td>
+<td align="right">0.88</td>
 </tr>
 <tr class="odd">
 <td align="left">MAP: mom-q60</td>
-<td align="right">0.33</td>
-<td align="right">0.58</td>
-<td align="right">0.81</td>
-<td align="right">0.86</td>
+<td align="right">0.35</td>
+<td align="right">0.59</td>
+<td align="right">0.80</td>
+<td align="right">0.87</td>
 </tr>
 </tbody>
 </table>
@@ -1390,92 +1437,95 @@ cannot be used on its own.</caption>
 <tbody>
 <tr class="odd">
 <td align="left">(constant guess)</td>
-<td align="left">68.7%</td>
-<td align="left">54.4%</td>
-<td align="left">54.1%</td>
-<td align="left">76.9%</td>
+<td align="left">68.6%</td>
+<td align="left">54.7%</td>
+<td align="left">54.0%</td>
+<td align="left">77.4%</td>
 </tr>
 <tr class="even">
 <td align="left">MLE</td>
-<td align="left">30.0%</td>
+<td align="left">30.1%</td>
 <td align="left">50.4%</td>
-<td align="left">69.9%</td>
-<td align="left">79.6%</td>
+<td align="left">70.2%</td>
+<td align="left">80.8%</td>
 </tr>
 <tr class="odd">
 <td align="left">gauss sd=0.83</td>
-<td align="left">61.6%</td>
-<td align="left">53.7%</td>
-<td align="left">62.9%</td>
-<td align="left">70.8%</td>
+<td align="left">62.3%</td>
+<td align="left">53.1%</td>
+<td align="left">63.5%</td>
+<td align="left">72.0%</td>
 </tr>
 <tr class="even">
 <td align="left">t df=2 sd=0.83</td>
-<td align="left">64.7%</td>
-<td align="left">53.3%</td>
-<td align="left">62.9%</td>
-<td align="left">72.4%</td>
+<td align="left">65.3%</td>
+<td align="left">53.2%</td>
+<td align="left">63.5%</td>
+<td align="left">73.6%</td>
 </tr>
 <tr class="odd">
 <td align="left">t df=1 sd=0.4</td>
-<td align="left">74.3%</td>
-<td align="left">50.1%</td>
-<td align="left">57.1%</td>
-<td align="left">69.6%</td>
+<td align="left">74.4%</td>
+<td align="left">50.3%</td>
+<td align="left">57.9%</td>
+<td align="left">70.8%</td>
 </tr>
 <tr class="even">
 <td align="left">MIXTURE</td>
-<td align="left">66.1%</td>
-<td align="left">57.1%</td>
-<td align="left">65.1%</td>
-<td align="left">78.0%</td>
+<td align="left">66.8%</td>
+<td align="left">57.4%</td>
+<td align="left">65.2%</td>
+<td align="left">78.7%</td>
 </tr>
 <tr class="odd">
 <td align="left">MAP: mom-median</td>
-<td align="left">57.8%</td>
-<td align="left">70.4%</td>
-<td align="left">80.0%</td>
-<td align="left">88.4%</td>
+<td align="left">59.3%</td>
+<td align="left">69.8%</td>
+<td align="left">81.2%</td>
+<td align="left">87.6%</td>
 </tr>
 <tr class="even">
 <td align="left">MAP: mom-mode</td>
-<td align="left">72.6%</td>
-<td align="left">75.0%</td>
-<td align="left">81.3%</td>
-<td align="left">90.6%</td>
+<td align="left">72.2%</td>
+<td align="left">74.0%</td>
+<td align="left">83.4%</td>
+<td align="left">90.0%</td>
 </tr>
 <tr class="odd">
 <td align="left">MAP: mom-q60</td>
-<td align="left">71.8%</td>
-<td align="left">74.3%</td>
-<td align="left">82.6%</td>
-<td align="left">91.1%</td>
+<td align="left">72.1%</td>
+<td align="left">73.6%</td>
+<td align="left">83.5%</td>
+<td align="left">90.7%</td>
 </tr>
 </tbody>
 </table>
 <p>Three things follow, and they change the verdicts.</p>
 <p><strong>The MLE spreads estimates too widely, not too
-narrowly.</strong> Its slope is 1.55-1.85 everywhere, well above 1. The
+narrowly.</strong> Its slope is 1.55-1.92 everywhere, well above 1. The
 boundary collapse is the cause: sites pushed to 1e-6 create extreme low
 values that stretch the range.</p>
 <p><strong>The fixed-centre priors do not work.</strong> The Gaussian
-scores 61.6% within 2x at the smallest true phi, which looked like a
-large gain over the MLE’s 30.0% – but a constant guess scores 68.7%, so
+scores 62.3% within 2x at the smallest true phi, which looked like a
+large gain over the MLE’s 30.1% – but a constant guess scores 68.6%, so
 it is worse than not using the data. It loses to the constant at three
 of the four true phi values, and at large phi it tracks worse than the
-plain MLE (Spearman 0.682 against 0.737). The Student-t behaves the same
+plain MLE (Spearman 0.685 against 0.740). The Student-t behaves the same
 way. The mixture is better but only ties the MLE on tracking at large
 phi.</p>
 <p><strong>The moment-derived prior is the best of the six, but it does
 not solve the problem.</strong> Three rules for building the prior were
-fixed in advance. The best of them, mom-q60, has the best Spearman at
-every true phi (0.42 / 0.70 / 0.82 / 0.78); mom-q60 and mom-mode are the
-only approaches that beat the constant guess at all four; and the slope
-rises toward 1 as information increases (0.33 -&gt; 0.58 -&gt; 0.81
--&gt; 0.86), which is the behaviour a shrinkage estimator should have.
-The third rule, mom-median, is weaker at small phi (Spearman 0.39, 57.8%
-within 2x against the constant guess’s 68.7%) – a ranking that changed
-when the simulation was corrected (see 4). But <strong>0.39-0.42 at the
+fixed in advance. At larger phi they track clearly best: mom-q60 reaches
+Spearman 0.69 / 0.82 / 0.78 at phi = 0.05 / 0.2 / 0.4, against at most
+0.64 / 0.76 / 0.74 for every other approach. mom-q60 and mom-mode are
+the only approaches that beat the constant guess at all four true phi,
+and the slope rises toward 1 as information increases (0.35 -&gt; 0.59
+-&gt; 0.80 -&gt; 0.87), which is the behaviour a shrinkage estimator
+should have. At the modal phi, though, every prior – fixed-centre or
+moment-derived – lands at Spearman 0.40-0.42, within simulation noise of
+the others. The third rule, mom-median, is weaker at small phi (59.3%
+within 2x against the constant guess’s 68.6%) – a ranking that changed
+when the simulation was corrected (see 4). And <strong>0.40-0.42 at the
 phi our data actually suggest is weak per-site agreement</strong>, and
 no approach we tried does better there. Where information is plentiful
 (phi ~ 0.2-0.4) the tracking is respectable; at the modal phi it is
@@ -1567,8 +1617,8 @@ is being tested is the whole procedure rather than a prior that happened
 to suit one answer. That is what makes the comparison fair: the derived
 centre had to find the truth at four different values. It follows the
 truth across a 32-fold range, but sits <strong>consistently about 40%
-low</strong> (median rule: truth 0.0126 → derived 0.0068; 0.05 → 0.0327;
-0.2 → 0.119; 0.4 → 0.252). That offset is a property of the moment
+low</strong> (median rule: truth 0.0126 → derived 0.0071; 0.05 → 0.0326;
+0.2 → 0.121; 0.4 → 0.246). That offset is a property of the moment
 estimator itself, explained in §4. A fixed-centre prior would have been
 right in one column and wrong in three.</p>
 <pre class="r"><code>sc &lt;- fread(file.path(RC, &quot;moment_prior_by_site.txt.gz&quot;), sep = &quot;\t&quot;)
@@ -1599,7 +1649,7 @@ ggplot(sc, aes(phi_true, phi_hat)) +
   &quot;Red = y = x, perfect recovery. Orange = a smooth fit through the points. One point per site.&quot;,
   &quot;This is the honest test: matching histograms can hide a wrong pairing, a scatter cannot.&quot;,
   &quot;TOP (MLE): the vertical smear at the bottom is the boundary collapse -- sites whose truth varies over a decade all returned ~1e-6.&quot;,
-  &quot;BOTTOM (MAP): the collapse is gone, but at the LEFT-hand columns the cloud is nearly FLAT -- the estimate barely responds to the truth (slope 0.35).&quot;,
+  &quot;BOTTOM (MAP): the collapse is gone, but at the LEFT-hand columns the cloud is nearly FLAT -- the estimate barely responds to the truth (slope 0.37).&quot;,
   &quot;Only at large phi (right-hand columns) does the cloud approach the red line, which is where a per-site phi means something.&quot;,
   sep = &quot;\n&quot;)) +
   theme_bw(base_size = 10) +
@@ -1630,6 +1680,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/5c60be10bb04368c4ae6df28db7007857e77dd06/docs/figure/qtl_mapping_betabinomial_phi_estimation.Rmd/workedscatter-1.png" target="_blank">5c60be1</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-28
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/2a471bb932146a801823d48c6b3706036123481a/docs/figure/qtl_mapping_betabinomial_phi_estimation.Rmd/workedscatter-1.png" target="_blank">2a471bb</a>
 </td>
 <td>
@@ -1656,13 +1717,13 @@ it.</p>
 <p><strong>The MAP trades collapse for flattening, and the scatter makes
 the direction visible.</strong> In the bottom row the blob is gone, but
 in the <code>0.0126</code> panel the cloud is nearly flat at φ̂ ≈
-0.006–0.009 whatever the truth. It sits slightly <em>above</em> the red
-line only for the lowest-truth sites (about 1.4× in the bottom tenth)
+0.006–0.010 whatever the truth. It sits slightly <em>above</em> the red
+line only for the lowest-truth sites (about 1.5× in the bottom tenth)
 and crosses it near φ ≈ 0.006 — below the true centre of 0.0126 — so
 most sites are pulled <strong>down</strong>, to about 0.2× the truth in
 the top tenth. That is shrinkage toward a prior centre that sits too low
-(§4). Near-horizontal at small φ (slope 0.35), approaching the line by φ
-= 0.4 (slope 0.88).</p>
+(§4). Near-horizontal at small φ (slope 0.37), approaching the line by φ
+= 0.4 (slope 0.89).</p>
 </div>
 <div
 id="correction-the-simulation-gave-the-moment-estimator-the-true-mean"
@@ -1691,8 +1752,8 @@ identical simulated counts through a known-mean and a refit-mean
 version, the two degrees-of-freedom conventions differ by exactly 0.0160
 at every true φ — the predicted q / Σ(nᵢ − 1). And the corrected
 simulation now matches the real data: at a true φ of 0.0126 it gives
-37.9% negative moment estimates, against 39.1% observed (the uncorrected
-version gave 32.7%).</p>
+36.9% negative moment estimates, against 39.1% observed (the uncorrected
+version gave 31.1%).</p>
 <pre class="r"><code>OP &lt;- fread(file.path(RC, &quot;moment_prior_params_knownmean_OLD.tsv&quot;))
 NP &lt;- fread(file.path(RC, &quot;moment_prior_params.tsv&quot;))
 OA &lt;- fread(file.path(RC, &quot;moment_prior_accuracy_knownmean_OLD.tsv&quot;))
@@ -1742,58 +1803,63 @@ guess scores 68.7 / 54.4 / 54.1 / 76.9%.</caption>
 <tr class="odd">
 <td align="right">0.0126</td>
 <td align="right">0.01241</td>
-<td align="right">0.006771</td>
-<td align="right">0.54</td>
+<td align="right">0.007101</td>
+<td align="right">0.56</td>
 <td align="left">71.2%</td>
-<td align="left">57.8%</td>
-<td align="left">72.6%</td>
-<td align="left">71.8%</td>
+<td align="left">59.3%</td>
+<td align="left">72.2%</td>
+<td align="left">72.1%</td>
 </tr>
 <tr class="even">
 <td align="right">0.0500</td>
 <td align="right">0.04328</td>
-<td align="right">0.032720</td>
+<td align="right">0.032570</td>
 <td align="right">0.65</td>
 <td align="left">73.1%</td>
-<td align="left">70.4%</td>
-<td align="left">75.0%</td>
-<td align="left">74.3%</td>
+<td align="left">69.8%</td>
+<td align="left">74.0%</td>
+<td align="left">73.6%</td>
 </tr>
 <tr class="odd">
 <td align="right">0.2000</td>
 <td align="right">0.14000</td>
-<td align="right">0.118900</td>
-<td align="right">0.59</td>
+<td align="right">0.120700</td>
+<td align="right">0.60</td>
 <td align="left">80.8%</td>
-<td align="left">80.0%</td>
-<td align="left">81.3%</td>
-<td align="left">82.6%</td>
+<td align="left">81.2%</td>
+<td align="left">83.4%</td>
+<td align="left">83.5%</td>
 </tr>
 <tr class="even">
 <td align="right">0.4000</td>
 <td align="right">0.28130</td>
-<td align="right">0.251600</td>
-<td align="right">0.63</td>
+<td align="right">0.246000</td>
+<td align="right">0.62</td>
 <td align="left">89.0%</td>
-<td align="left">88.4%</td>
-<td align="left">90.6%</td>
-<td align="left">91.1%</td>
+<td align="left">87.6%</td>
+<td align="left">90.0%</td>
+<td align="left">90.7%</td>
 </tr>
 </tbody>
 </table>
 <p><strong>What the fix changed.</strong></p>
 <ul>
 <li><strong>The ranking of the three prior rules.</strong> mom-median
-fell from 71.2% to 57.8% within 2x at the modal φ and no longer beats
-the constant guess (68.7%); mom-mode (72.6%) and mom-q60 (71.8%) still
+fell from 71.2% to 59.3% within 2x at the modal φ and no longer beats
+the constant guess (68.6%); mom-mode (72.2%) and mom-q60 (72.1%) still
 do. The uncorrected simulation had inflated mom-median’s derived centre
-1.8-fold, landing it near the truth by accident.</li>
+1.7-fold, landing it near the truth by accident.</li>
 <li><strong>The derived prior centres</strong>, which now sit
 consistently about 40% below the truth rather than on it.</li>
 <li><strong>Per-site tracking only slightly.</strong> Spearman for
-mom-median moved 0.41 → 0.39 at the modal φ and 0.77 → 0.77 at φ = 0.4;
+mom-median moved 0.41 → 0.40 at the modal φ and 0.77 → 0.76 at φ = 0.4;
 the rule-to-rule differences are small.</li>
 </ul>
+<p>The “after” run also uses per-site random seeds, introduced at the
+same time because the earlier runs could not be reproduced (a seed set
+in the parent process does not reach the parallel workers). So each
+before/after difference includes simulation noise of about ±1 point,
+small against the 12-point change for mom-median.</p>
 <p><strong>What it did not change.</strong> §1 (the MLE’s boundary spike
 and the depth diagnosis), the multi-start, peak-proximity, Gaussian,
 Student-t and mixture results in §2, and the QTL calibration — none of
@@ -1801,23 +1867,29 @@ these involve the moment estimator.</p>
 <p><strong>A second problem the fix exposed.</strong> The refit-mean
 moment estimator — the one used on the real data — is itself biased
 <strong>downward</strong>: its median sits at 0.55–0.65 of the true
-median, stable across a 32-fold range of φ. The (m − q) correction is
-exact for a quasi-likelihood fit with known weights, but here the mean
-is estimated <em>jointly with φ</em> by beta-binomial maximum
-likelihood, so the fitted means follow the observed proportions more
-closely than q parameters’ worth and the correction subtracts too much.
-Two consequences:</p>
+median, stable across a 32-fold range of φ and across two independent
+simulation runs. The (m − q) correction is exact for a quasi-likelihood
+fit with known weights, but here the mean is estimated <em>jointly with
+φ</em> by beta-binomial maximum likelihood, so the fitted means follow
+the observed proportions more closely than q parameters’ worth and the
+correction subtracts too much. Two consequences:</p>
 <ul>
 <li>The real-data moment median of <strong>0.0052 is an
 underestimate</strong>. Divided by the simulated ratio at φ = 0.0126
-(0.55), it implies a true median φ of about <strong>0.0095</strong>,
-consistent with the MLE mode of 0.0126 — so the two estimators agree
-once the bias is allowed for.</li>
+(0.55 and 0.59 in two independent runs), it implies a true median φ of
+about <strong>0.009</strong>, much closer to the MLE mode of 0.0126 than
+the raw figure — so most of the gap between the two estimators is this
+bias.</li>
 <li>The <strong>real-data MAP estimates have not yet been
 redone.</strong> Their prior is centred on that 0.0052, so every site is
 shrunk toward a centre that is too low, using the rule (mom-median) that
 the corrected simulation ranks weakest.</li>
 </ul>
+<!-- NB 2026-09-28: the paragraph below is now WRONG on two counts; do not uncomment it as is. -->
+<!-- (1) After the moment-estimator fix (section 4) the MAP mostly UNDER-estimates phi, -->
+<!--     the anti-conservative direction. (2) MAP fits cannot feed the LRT: they are not -->
+<!--     maximum-likelihood, so ll_full >= ll_null fails (betabin_lib.R now refuses). A shrunk -->
+<!--     phi can enter a test only if it is held FIXED in both the null and full fits. -->
 <!-- Worth noting which direction of error is safer. Overestimating φ widens the null -->
 <!-- and is conservative for testing; the MLE's collapse to zero narrows it and is -->
 <!-- anti-conservative. So although the MAP is biased at the low end, it is biased the -->
