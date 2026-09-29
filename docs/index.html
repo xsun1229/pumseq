@@ -360,15 +360,15 @@ HTML.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree10b54c87aab45b82bfe71a8c9ae7b76630433cbctargetblank10b54c8a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeb3d2c5e64b46e65bfc00e22207c6df6f24c3d5c1targetblankb3d2c5ea">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/10b54c87aab45b82bfe71a8c9ae7b76630433cbc" target="_blank">10b54c8</a>
+<a href="https://github.com/xsun1229/pumseq/tree/b3d2c5e64b46e65bfc00e22207c6df6f24c3d5c1" target="_blank">b3d2c5e</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree10b54c87aab45b82bfe71a8c9ae7b76630433cbctargetblank10b54c8a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeb3d2c5e64b46e65bfc00e22207c6df6f24c3d5c1targetblankb3d2c5ea"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -378,7 +378,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/10b54c87aab45b82bfe71a8c9ae7b76630433cbc" target="_blank">10b54c8</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/b3d2c5e64b46e65bfc00e22207c6df6f24c3d5c1" target="_blank">b3d2c5e</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -394,9 +394,6 @@ were generated:
 <pre><code>
 Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
-
-Untracked files:
-    Untracked:  analysis/qtl_mapping_betabinomial_problematic_sites_revisited.Rmd
 
 Unstaged changes:
     Modified:   analysis/index.Rmd
@@ -444,6 +441,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/b3d2c5e64b46e65bfc00e22207c6df6f24c3d5c1/analysis/index.Rmd" target="_blank">b3d2c5e</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-29
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/b3d2c5e64b46e65bfc00e22207c6df6f24c3d5c1/docs/index.html" target="_blank">b3d2c5e</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-29
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1535,24 +1566,34 @@ model</a></li>
 beta binomial GLM on the 5-fold union sites</a></li>
 <li><a href="qtl_mapping_betabinomial_diagnostic.html">Beta-binomial
 top-hit diagnostic: genotype vs. %pU for the top 20 QTLs</a></li>
-<li><a href="qtl_mapping_betabinomial_strategy.html">Current filtering
-strategy and its calibration (real + 5 permutations)</a></li>
+<li><a href="qtl_mapping_betabinomial_strategy.html">Filtering strategy
+and its calibration (real + 5 permutations)</a> – <em>superseded: its
+phi &gt; 0.99 filter is no longer needed, see <a
+href="qtl_mapping_betabinomial_optimiser.html">the optimiser
+page</a></em></li>
 <li><a href="qtl_mapping_betabinomial_gof_failed.html">A goodness-of-fit
 test that did not work, and what it revealed</a></li>
 <li><a href="qtl_mapping_betabinomial_npcs_tradeoff.html">How many
-covariate PCs? The phi-boundary / fittability trade-off</a></li>
+covariate PCs? The phi-boundary / fittability trade-off</a> – <em>the
+phi-boundary part is superseded by <a
+href="qtl_mapping_betabinomial_optimiser.html">the optimiser page</a>;
+the PC choice is settled on <a
+href="qtl_mapping_betabinomial_grid.html">the calibration
+grid</a></em></li>
 <li><a
 href="qtl_mapping_betabinomial_problematic_diagnosis.html">Diagnosing
 the problematic sites: %pU by genotype, phi, and the fitted prior on
-p_i</a></li>
+p_i</a> – <em>old single-start fitter; superseded by <a
+href="qtl_mapping_betabinomial_problematic_sites_revisited.html">the 9
+problematic sites, revisited</a></em></li>
 <li><a href="qtl_mapping_betabinomial_optimiser.html">The phi pathology
 is an optimiser failure (multi-start audit)</a></li>
 <li><a href="qtl_mapping_betabinomial_grid.html">Window x nPC
 calibration grid: 24 cells, real + 5 permutations</a></li>
 <li><a href="qtl_mapping_betabinomial_lowphi.html">Is the overdispersion
 really that small? Validating the phi peak</a></li>
-<li><a href="qtl_mapping_betabinomial_phi_estimation.html">Estimating
-phi: a boundary problem, what we tried, and what worked</a></li>
+<li><a href="qtl_mapping_betabinomial_phi_estimation.html">How well can
+we estimate dispersion at each pU site?</a></li>
 <li><a
 href="qtl_mapping_betabinomial_problematic_sites_revisited.html">The 9
 problematic sites, revisited: large phi, all-or-nothing %pU, and
