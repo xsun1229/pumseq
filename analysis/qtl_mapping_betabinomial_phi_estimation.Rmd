@@ -182,7 +182,7 @@ ggplot(mu_depth_stats, aes(depth_group, too_low, colour = pu_group, group = pu_g
   scale_colour_manual(values = c("Below 5%" = "#D55E00", "At least 5%" = "#0072B2"),
                       name = "Real-data pooled pU") +
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 25)) +
-  scale_x_discrete(labels = c("Up to 5" = "≤5", "More than 5 to 15" = ">5–15", "More than 15" = ">15")) +
+  scale_x_discrete(labels = c("Up to 5" = "<=5", "More than 5 to 15" = ">5 to 15", "More than 15" = ">15")) +
   labs(x = "Median reads per covered cell line", y = "More than 10x too low (%)",
        title = "Does lower pU accompany poorer recovery at similar depth?",
        subtitle = "Each point summarises successful fits in one depth and pU group; lines connect group summaries.") +
