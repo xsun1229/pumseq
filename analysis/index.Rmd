@@ -59,6 +59,7 @@ Beta Binomial
 * [Window x nPC calibration grid: 24 cells, real + 5 permutations](qtl_mapping_betabinomial_grid.html)
 * [Is the overdispersion really that small? Validating the phi peak](qtl_mapping_betabinomial_lowphi.html)
 * [Estimating phi: a boundary problem, what we tried, and what worked](qtl_mapping_betabinomial_phi_estimation.html)
+* [The 9 problematic sites, revisited: large phi, all-or-nothing %pU, and inherited C](qtl_mapping_betabinomial_problematic_sites_revisited.html)
 
 
 

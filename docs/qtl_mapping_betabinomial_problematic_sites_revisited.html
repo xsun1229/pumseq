@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-09-29" />
+
+<title>The 9 problematic sites, revisited: large φ, all-or-nothing %pU, and inherited C</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">The 9 problematic sites, revisited: large
+φ, all-or-nothing %pU, and inherited C</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-09-29</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-09-29
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree10b54c87aab45b82bfe71a8c9ae7b76630433cbctargetblank10b54c8a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/10b54c87aab45b82bfe71a8c9ae7b76630433cbc" target="_blank">10b54c8</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree10b54c87aab45b82bfe71a8c9ae7b76630433cbctargetblank10b54c8a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/10b54c87aab45b82bfe71a8c9ae7b76630433cbc" target="_blank">10b54c8</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/qtl_mapping_betabinomial_problematic_sites_revisited.Rmd
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.align = &quot;center&quot;)
+QB &lt;- &quot;/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl/qtl_betabinomial&quot;
+DF &lt;- file.path(QB, &quot;diagnostic_figures&quot;)
+T  &lt;- fread(file.path(DF, &quot;problematic_sites_stats.tsv&quot;))
+L  &lt;- fread(file.path(DF, &quot;problematic_sites_by_line.tsv&quot;))
+PB &lt;- fread(file.path(DF, &quot;phi_band_untreated.tsv&quot;))
+GM &lt;- T[sid == &quot;GENOME-WIDE MEDIAN&quot;]; T &lt;- T[sid != &quot;GENOME-WIDE MEDIAN&quot;]
+lab &lt;- function(s) paste0(&quot;chr&quot;, sub(&quot; &quot;, &quot;:&quot;, s))
+T[, site := lab(sid)][, panel := ifelse(region == &quot;-&quot;, site, paste0(site, &quot; (&quot;, region, &quot;)&quot;))]
+LV &lt;- T$panel                                   # one site order everywhere: old real -log10 p, highest first
+L &lt;- merge(L, T[, .(sid, panel)], by = &quot;sid&quot;)[, panel := factor(panel, levels = LV)]
+pc &lt;- function(x) ifelse(is.na(x), &quot;-&quot;, sprintf(&quot;%.0f%%&quot;, 100 * x))
+f2 &lt;- function(x) ifelse(is.na(x), &quot;fit failed&quot;, formatC(x, format = &quot;fg&quot;, digits = 2, flag = &quot;#&quot;))
+BLUE &lt;- &quot;#2a78d6&quot;                                # single series: one colour, no legend needed
+thm &lt;- theme_bw(base_size = 10) +
+  theme(panel.grid.minor = element_blank(), panel.grid.major = element_line(colour = &quot;grey92&quot;),
+        strip.background = element_rect(fill = &quot;grey96&quot;, colour = NA), strip.text = element_text(size = 8.5),
+        plot.subtitle = element_text(size = 8.5, colour = &quot;grey30&quot;))
+n_deep  &lt;- T[, sum(top1_share_reads &gt;= 0.10)]
+n_full  &lt;- T[, sum(high_lines_both &gt; 0 &amp; high_lines_inherited / high_lines_both &gt;= 0.9)]
+n_part  &lt;- T[, sum(high_lines_both &gt; 0 &amp; high_lines_inherited &gt; 0 &amp; high_lines_inherited / high_lines_both &lt; 0.9)]
+n_untst &lt;- T[, sum(high_lines_both == 0)]
+PB[, band := factor(band, levels = band)]
+top &lt;- PB[band == &quot;&gt; 0.5&quot;]; low &lt;- PB[band %in% c(&quot;&lt; 1e-4&quot;, &quot;1e-4 to 0.01&quot;)]</code></pre>
+<blockquote>
+<p><strong>The question.</strong> The φ-estimation work showed estimates
+collapsing to ~0 when the true φ is small. Are the <em>problematic
+sites</em> the same problem, or a different one — perhaps a few samples
+with much higher coverage than the rest? And what φ do they have?</p>
+<p><strong>Short answer.</strong></p>
+<ul>
+<li><strong>A different problem.</strong> Their φ is
+<strong>large</strong>: 0.51–0.92 (multi-start MLE), against about 0.01
+at a typical site (genome-wide median MAP estimate 0.0093). They are
+well measured, not information-starved.</li>
+<li><strong>A few very deep samples exist at 5 of the 9 sites, but they
+are not the cause:</strong> refitting without the deepest 1 or 3 cell
+lines leaves φ unchanged.</li>
+<li><strong>What all 9 share is an all-or-nothing pattern across cell
+lines</strong> — most at ~0% pU, a subset at 50–100%. <strong>Inherited
+C</strong> (C in untreated RNA, i.e. a genomic variant) accounts for the
+high cell lines fully at 3 sites and partly at 3; 2 sites cannot be
+tested.</li>
+<li><strong>With the corrected (multi-start) fitter none of them is a
+hit any more.</strong></li>
+</ul>
+</blockquote>
+<div id="the-sites" class="section level1">
+<h1>1. The sites</h1>
+<p>A site is <em>problematic</em> if its minimum cis-SNP p-value was
+extreme in the <strong>permuted</strong> data as well as the real data
+(min p &lt; 10⁻¹⁰ in at least one of 5 permutations, and real −log₁₀p
+&gt; 10). Permutation breaks any genotype–phenotype link, so such a site
+is reporting something about its own phenotype, not association. These 9
+were found with the <strong>old single-start fitter</strong> at ±5 kb, k
+= 3, on <code>fold5_union_auto_noUCcalled</code> (called U/C-variant
+sites removed). The <a
+href="qtl_mapping_betabinomial_problematic_diagnosis.html">earlier
+diagnosis page</a> describes them with that fitter.</p>
+<pre class="r"><code>knitr::kable(rbind(
+  T[, .(site, region, `cell lines` = cell_lines, `%pU` = sprintf(&quot;%.1f%%&quot;, 100 * pooled_pU),
+        `total reads` = format(round(total_reads), big.mark = &quot;,&quot;), `median reads per line` = median_reads)],
+  GM[, .(site = &quot;*genome-wide median*&quot;, region = &quot;&quot;, `cell lines` = cell_lines, `%pU` = sprintf(&quot;%.1f%%&quot;, 100 * pooled_pU),
+         `total reads` = format(round(total_reads), big.mark = &quot;,&quot;), `median reads per line` = median_reads)]),
+  caption = &quot;Region labels use approximate hg38 spans (IGH chr14:105.5-107 Mb, IGK chr2:88.8-90.4 Mb, MHC chr6:28.5-33.5 Mb), not yet checked against the gene annotation.&quot;)</code></pre>
+<table>
+<caption>Region labels use approximate hg38 spans (IGH chr14:105.5-107
+Mb, IGK chr2:88.8-90.4 Mb, MHC chr6:28.5-33.5 Mb), not yet checked
+against the gene annotation.</caption>
+<colgroup>
+<col width="26%" />
+<col width="8%" />
+<col width="13%" />
+<col width="7%" />
+<col width="15%" />
+<col width="27%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="left">region</th>
+<th align="right">cell lines</th>
+<th align="left">%pU</th>
+<th align="left">total reads</th>
+<th align="right">median reads per line</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr3:37277733</td>
+<td align="left">-</td>
+<td align="right">50</td>
+<td align="left">53.4%</td>
+<td align="left">3,997</td>
+<td align="right">76</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:29943223</td>
+<td align="left">MHC</td>
+<td align="right">44</td>
+<td align="left">57.9%</td>
+<td align="left">4,267</td>
+<td align="right">87</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:89085177</td>
+<td align="left">IGK</td>
+<td align="right">36</td>
+<td align="left">6.3%</td>
+<td align="left">8,010</td>
+<td align="right">9</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106627394</td>
+<td align="left">IGH</td>
+<td align="right">35</td>
+<td align="left">27.5%</td>
+<td align="left">4,400</td>
+<td align="right">20</td>
+</tr>
+<tr class="odd">
+<td align="left">chr17:36212383</td>
+<td align="left">-</td>
+<td align="right">48</td>
+<td align="left">8.4%</td>
+<td align="left">4,988</td>
+<td align="right">65</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106639258</td>
+<td align="left">IGH</td>
+<td align="right">42</td>
+<td align="left">6.7%</td>
+<td align="left">6,569</td>
+<td align="right">39</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:90039467</td>
+<td align="left">IGK</td>
+<td align="right">41</td>
+<td align="left">4.5%</td>
+<td align="left">10,737</td>
+<td align="right">40</td>
+</tr>
+<tr class="even">
+<td align="left">chr17:53106304</td>
+<td align="left">-</td>
+<td align="right">50</td>
+<td align="left">7.0%</td>
+<td align="left">1,745</td>
+<td align="right">28</td>
+</tr>
+<tr class="odd">
+<td align="left">chr6:32643315</td>
+<td align="left">MHC</td>
+<td align="right">40</td>
+<td align="left">8.8%</td>
+<td align="left">1,974</td>
+<td align="right">41</td>
+</tr>
+<tr class="even">
+<td align="left"><em>genome-wide median</em></td>
+<td align="left"></td>
+<td align="right">49</td>
+<td align="left">4.6%</td>
+<td align="left">512</td>
+<td align="right">8</td>
+</tr>
+</tbody>
+</table>
+<p>They are <strong>deep</strong>: 1,745–10,737 reads per site against a
+genome-wide median of 512. The low-φ collapse is a problem of shallow
+sites; these are the opposite.</p>
+</div>
+<div id="their-φ-is-large-not-collapsed" class="section level1">
+<h1>2. Their φ is large, not collapsed</h1>
+<pre class="r"><code>knitr::kable(rbind(
+  T[, .(site, `old single-start` = f2(phi_single_start), `multi-start MLE` = f2(phi_multistart),
+        `moment estimate` = f2(phi_moment), `MAP (mom-q60 prior)` = f2(phi_MAP))],
+  GM[, .(site = &quot;*genome-wide median*&quot;, `old single-start` = f2(phi_single_start), `multi-start MLE` = f2(phi_multistart),
+         `moment estimate` = f2(phi_moment), `MAP (mom-q60 prior)` = f2(phi_MAP))]),
+  caption = &quot;The old fitter pinned all 9 at the phi = 1 boundary -- a secondary optimum of a bimodal likelihood (see the optimiser page). The multi-start fit finds the real optimum, still large. The moment estimate is unbounded, hence 2.1 at one site.&quot;)</code></pre>
+<table>
+<caption>The old fitter pinned all 9 at the phi = 1 boundary – a
+secondary optimum of a bimodal likelihood (see the optimiser page). The
+multi-start fit finds the real optimum, still large. The moment estimate
+is unbounded, hence 2.1 at one site.</caption>
+<colgroup>
+<col width="23%" />
+<col width="18%" />
+<col width="17%" />
+<col width="17%" />
+<col width="22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="left">old single-start</th>
+<th align="left">multi-start MLE</th>
+<th align="left">moment estimate</th>
+<th align="left">MAP (mom-q60 prior)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr3:37277733</td>
+<td align="left">1.0</td>
+<td align="left">0.70</td>
+<td align="left">0.90</td>
+<td align="left">0.70</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:29943223</td>
+<td align="left">1.0</td>
+<td align="left">0.76</td>
+<td align="left">0.72</td>
+<td align="left">0.76</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:89085177</td>
+<td align="left">1.0</td>
+<td align="left">0.51</td>
+<td align="left">0.28</td>
+<td align="left">0.50</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106627394</td>
+<td align="left">1.0</td>
+<td align="left">0.68</td>
+<td align="left">0.85</td>
+<td align="left">0.67</td>
+</tr>
+<tr class="odd">
+<td align="left">chr17:36212383</td>
+<td align="left">1.0</td>
+<td align="left">0.51</td>
+<td align="left">0.65</td>
+<td align="left">0.49</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106639258</td>
+<td align="left">1.0</td>
+<td align="left">0.62</td>
+<td align="left">0.49</td>
+<td align="left">0.61</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:90039467</td>
+<td align="left">1.0</td>
+<td align="left">0.57</td>
+<td align="left">0.53</td>
+<td align="left">0.55</td>
+</tr>
+<tr class="even">
+<td align="left">chr17:53106304</td>
+<td align="left">1.0</td>
+<td align="left">0.92</td>
+<td align="left">0.49</td>
+<td align="left">0.92</td>
+</tr>
+<tr class="odd">
+<td align="left">chr6:32643315</td>
+<td align="left">1.0</td>
+<td align="left">0.86</td>
+<td align="left">2.1</td>
+<td align="left">0.85</td>
+</tr>
+<tr class="even">
+<td align="left"><em>genome-wide median</em></td>
+<td align="left">0.00043</td>
+<td align="left">0.00023</td>
+<td align="left">0.0052</td>
+<td align="left">0.0093</td>
+</tr>
+</tbody>
+</table>
+<p>A φ of 0.5–0.9 means the fitted distribution of %pU across cell lines
+is <strong>U-shaped</strong>: most mass near 0% and near 100%, little in
+between.</p>
+</div>
+<div id="a-few-very-deep-cell-lines-at-some-sites-but-not-the-cause"
+class="section level1">
+<h1>3. A few very deep cell lines — at some sites, but not the
+cause</h1>
+<pre class="r"><code>knitr::kable(rbind(
+  T[, .(site, `max / median reads` = sprintf(&quot;%.0fx&quot;, max_over_median),
+        `deepest line: share of reads` = pc(top1_share_reads), `3 deepest: share of reads` = pc(top3_share_reads),
+        `phi, all lines` = f2(phi_multistart), `phi without deepest` = f2(phi_without_deepest),
+        `phi without 3 deepest` = f2(phi_without_3_deepest))],
+  GM[, .(site = &quot;*genome-wide median*&quot;, `max / median reads` = sprintf(&quot;%.0fx&quot;, max_over_median),
+         `deepest line: share of reads` = pc(top1_share_reads), `3 deepest: share of reads` = pc(top3_share_reads),
+         `phi, all lines` = &quot;&quot;, `phi without deepest` = &quot;&quot;, `phi without 3 deepest` = &quot;&quot;)]),
+  caption = &quot;Multi-start MLE, k = 3. Removing the deepest cell lines does not reduce phi at any site.&quot;)</code></pre>
+<table>
+<caption>Multi-start MLE, k = 3. Removing the deepest cell lines does
+not reduce phi at any site.</caption>
+<colgroup>
+<col width="13%" />
+<col width="12%" />
+<col width="19%" />
+<col width="17%" />
+<col width="9%" />
+<col width="13%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="left">max / median reads</th>
+<th align="left">deepest line: share of reads</th>
+<th align="left">3 deepest: share of reads</th>
+<th align="left">phi, all lines</th>
+<th align="left">phi without deepest</th>
+<th align="left">phi without 3 deepest</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr3:37277733</td>
+<td align="left">3x</td>
+<td align="left">6%</td>
+<td align="left">16%</td>
+<td align="left">0.70</td>
+<td align="left">0.68</td>
+<td align="left">0.69</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:29943223</td>
+<td align="left">3x</td>
+<td align="left">7%</td>
+<td align="left">16%</td>
+<td align="left">0.76</td>
+<td align="left">0.76</td>
+<td align="left">0.77</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:89085177</td>
+<td align="left">360x</td>
+<td align="left">40%</td>
+<td align="left">74%</td>
+<td align="left">0.51</td>
+<td align="left">0.53</td>
+<td align="left">0.57</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106627394</td>
+<td align="left">50x</td>
+<td align="left">23%</td>
+<td align="left">58%</td>
+<td align="left">0.68</td>
+<td align="left">0.68</td>
+<td align="left">0.68</td>
+</tr>
+<tr class="odd">
+<td align="left">chr17:36212383</td>
+<td align="left">10x</td>
+<td align="left">13%</td>
+<td align="left">30%</td>
+<td align="left">0.51</td>
+<td align="left">0.51</td>
+<td align="left">0.49</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106639258</td>
+<td align="left">52x</td>
+<td align="left">31%</td>
+<td align="left">60%</td>
+<td align="left">0.62</td>
+<td align="left">0.65</td>
+<td align="left">0.67</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:90039467</td>
+<td align="left">60x</td>
+<td align="left">22%</td>
+<td align="left">53%</td>
+<td align="left">0.57</td>
+<td align="left">0.60</td>
+<td align="left">0.63</td>
+</tr>
+<tr class="even">
+<td align="left">chr17:53106304</td>
+<td align="left">5x</td>
+<td align="left">8%</td>
+<td align="left">17%</td>
+<td align="left">0.92</td>
+<td align="left">0.92</td>
+<td align="left">0.92</td>
+</tr>
+<tr class="odd">
+<td align="left">chr6:32643315</td>
+<td align="left">4x</td>
+<td align="left">9%</td>
+<td align="left">21%</td>
+<td align="left">0.86</td>
+<td align="left">0.86</td>
+<td align="left">fit failed</td>
+</tr>
+<tr class="even">
+<td align="left"><em>genome-wide median</em></td>
+<td align="left">4x</td>
+<td align="left">6%</td>
+<td align="left">16%</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<p>At 5 sites — the four in IGK/IGH and chr17:36212383 — one cell line
+carries 13–40% of all reads, far above the genome-wide 6%. But
+<strong>dropping the deepest line, or the three deepest, leaves φ where
+it was</strong>. The figure shows why: the deep lines are not special in
+their %pU.</p>
+<pre class="r"><code>ggplot(L, aes(n, 100 * y / n)) +
+  geom_point(colour = BLUE, size = 1.6, alpha = 0.75, shape = 16) +
+  facet_wrap(~ panel, ncol = 3) +
+  scale_x_log10(labels = scales::label_comma()) +
+  scale_y_continuous(limits = c(0, 100), breaks = c(0, 50, 100)) +
+  labs(x = &quot;reads in this cell line (log scale)&quot;, y = &quot;%pU in this cell line&quot;,
+       title = &quot;Each point is one cell line: its depth against its %pU&quot;,
+       subtitle = &quot;Deep lines (right) sit at 0% or at high %pU like the rest. What stands out is the gap: lines are near 0% or near 50-100%, rarely in between.&quot;) +
+  thm</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_problematic_sites_revisited.Rmd/depthfig-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="what-all-9-share-all-or-nothing-pu" class="section level1">
+<h1>4. What all 9 share: all-or-nothing %pU</h1>
+<pre class="r"><code>knitr::kable(rbind(
+  T[, .(site, `cell lines with &gt;=10 reads` = lines_ge10, `at ~0% (&lt; 5%)` = pc(frac_lines_zero),
+        `5-50%` = pc(frac_lines_mid), `above 50%` = pc(frac_lines_high))],
+  GM[, .(site = &quot;*genome-wide median*&quot;, `cell lines with &gt;=10 reads` = lines_ge10, `at ~0% (&lt; 5%)` = pc(frac_lines_zero),
+         `5-50%` = pc(frac_lines_mid), `above 50%` = pc(frac_lines_high))]),
+  caption = &quot;Share of cell lines (with at least 10 reads) in each %pU band.&quot;)</code></pre>
+<table>
+<caption>Share of cell lines (with at least 10 reads) in each %pU
+band.</caption>
+<colgroup>
+<col width="26%" />
+<col width="34%" />
+<col width="17%" />
+<col width="7%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="right">cell lines with &gt;=10 reads</th>
+<th align="left">at ~0% (&lt; 5%)</th>
+<th align="left">5-50%</th>
+<th align="left">above 50%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr3:37277733</td>
+<td align="right">50</td>
+<td align="left">50%</td>
+<td align="left">4%</td>
+<td align="left">46%</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:29943223</td>
+<td align="right">42</td>
+<td align="left">29%</td>
+<td align="left">7%</td>
+<td align="left">64%</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:89085177</td>
+<td align="right">18</td>
+<td align="left">83%</td>
+<td align="left">11%</td>
+<td align="left">6%</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106627394</td>
+<td align="right">22</td>
+<td align="left">68%</td>
+<td align="left">14%</td>
+<td align="left">18%</td>
+</tr>
+<tr class="odd">
+<td align="left">chr17:36212383</td>
+<td align="right">46</td>
+<td align="left">87%</td>
+<td align="left">9%</td>
+<td align="left">4%</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106639258</td>
+<td align="right">26</td>
+<td align="left">88%</td>
+<td align="left">0%</td>
+<td align="left">12%</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:90039467</td>
+<td align="right">31</td>
+<td align="left">94%</td>
+<td align="left">3%</td>
+<td align="left">3%</td>
+</tr>
+<tr class="even">
+<td align="left">chr17:53106304</td>
+<td align="right">45</td>
+<td align="left">87%</td>
+<td align="left">2%</td>
+<td align="left">11%</td>
+</tr>
+<tr class="odd">
+<td align="left">chr6:32643315</td>
+<td align="right">39</td>
+<td align="left">95%</td>
+<td align="left">0%</td>
+<td align="left">5%</td>
+</tr>
+<tr class="even">
+<td align="left"><em>genome-wide median</em></td>
+<td align="right">20</td>
+<td align="left">59%</td>
+<td align="left">36%</td>
+<td align="left">0%</td>
+</tr>
+</tbody>
+</table>
+<p>At a typical site essentially no cell line is above 50% pU; here
+3%–64% are, while the in-between band is nearly empty. People differing
+by “none vs most” is what a variant looks like, not a modification
+level.</p>
+</div>
+<div id="the-untreated-controls-inherited-c" class="section level1">
+<h1>5. The untreated controls: inherited C</h1>
+<p>Untreated input RNA has no chemical conversion, so a C at the pU base
+there is <strong>inherited</strong> (genomic) C. This was validated on
+known controls: a known U/C variant reads 0.51 C untreated, an ordinary
+modified site reads 0.00. If the high-%pU cell lines also read C
+untreated, the “modification” is a variant that the genotype calls
+missed.</p>
+<pre class="r"><code>U &lt;- L[n &gt;= 10 &amp; n_untreated &gt;= 10]
+R &lt;- T[, .(panel = factor(panel, levels = LV), r = r_treated_untreated)]
+ggplot(U, aes(y_untreated / n_untreated, y / n)) +
+  geom_abline(slope = 1, intercept = 0, colour = &quot;grey60&quot;, linewidth = 0.4) +
+  geom_point(colour = BLUE, size = 1.6, alpha = 0.75, shape = 16) +
+  geom_text(data = R, aes(x = 0.02, y = 0.97, label = ifelse(is.na(r), &quot;r = -&quot;, sprintf(&quot;r = %.2f&quot;, r))),
+            hjust = 0, vjust = 1, size = 3, colour = &quot;grey15&quot;, inherit.aes = FALSE) +
+  facet_wrap(~ panel, ncol = 3) +
+  scale_x_continuous(limits = c(0, 1), breaks = c(0, 0.5, 1), labels = scales::label_percent()) +
+  scale_y_continuous(limits = c(0, 1), breaks = c(0, 0.5, 1), labels = scales::label_percent()) +
+  coord_equal() +
+  labs(x = &quot;C at the pU base in UNTREATED RNA (inherited)&quot;, y = &quot;%pU in TREATED RNA&quot;,
+       title = &quot;Treated %pU against untreated C, per cell line (lines with &gt;= 10 reads in both)&quot;,
+       subtitle = &quot;Grey line: y = x. Points on it mean the treated signal is entirely inherited C. r = correlation across cell lines.&quot;) +
+  thm</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_problematic_sites_revisited.Rmd/untreatedfig-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>T[, verdict := fifelse(high_lines_both == 0, &quot;not testable&quot;,
+               fifelse(high_lines_inherited / high_lines_both &gt;= 0.9, &quot;inherited C&quot;,
+               fifelse(high_lines_inherited &gt; 0, &quot;partly inherited C&quot;, &quot;no inherited C&quot;)))]
+knitr::kable(T[, .(site, `high cell lines (treated &gt; 50%)` = high_lines_treated_only,
+                   `...with untreated data` = high_lines_both,
+                   `...carrying inherited C (untreated C &gt;= 10%)` = high_lines_inherited,
+                   `Spearman rho` = f2(rho_treated_untreated), `Pearson r` = f2(r_treated_untreated), verdict)],
+  caption = &quot;Cell lines with at least 10 reads. The count of high cell lines carrying inherited C is the main measure: with only a few high lines, a correlation is carried by one or two points.&quot;)</code></pre>
+<table>
+<caption>Cell lines with at least 10 reads. The count of high cell lines
+carrying inherited C is the main measure: with only a few high lines, a
+correlation is carried by one or two points.</caption>
+<colgroup>
+<col width="10%" />
+<col width="20%" />
+<col width="14%" />
+<col width="28%" />
+<col width="8%" />
+<col width="6%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="right">high cell lines (treated &gt; 50%)</th>
+<th align="right">…with untreated data</th>
+<th align="right">…carrying inherited C (untreated C &gt;= 10%)</th>
+<th align="left">Spearman rho</th>
+<th align="left">Pearson r</th>
+<th align="left">verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr3:37277733</td>
+<td align="right">23</td>
+<td align="right">20</td>
+<td align="right">18</td>
+<td align="left">0.83</td>
+<td align="left">0.75</td>
+<td align="left">inherited C</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:29943223</td>
+<td align="right">27</td>
+<td align="right">26</td>
+<td align="right">26</td>
+<td align="left">0.94</td>
+<td align="left">0.98</td>
+<td align="left">inherited C</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:89085177</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="left">0.78</td>
+<td align="left">0.48</td>
+<td align="left">no inherited C</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106627394</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">1</td>
+<td align="left">0.62</td>
+<td align="left">0.53</td>
+<td align="left">partly inherited C</td>
+</tr>
+<tr class="odd">
+<td align="left">chr17:36212383</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="left">0.29</td>
+<td align="left">0.59</td>
+<td align="left">partly inherited C</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106639258</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="left">0.42</td>
+<td align="left">0.60</td>
+<td align="left">partly inherited C</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:90039467</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">0.25</td>
+<td align="left">-0.040</td>
+<td align="left">not testable</td>
+</tr>
+<tr class="even">
+<td align="left">chr17:53106304</td>
+<td align="right">5</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="left">-0.042</td>
+<td align="left">-0.040</td>
+<td align="left">not testable</td>
+</tr>
+<tr class="odd">
+<td align="left">chr6:32643315</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="left">0.83</td>
+<td align="left">0.87</td>
+<td align="left">inherited C</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Inherited C at 3 sites.</strong> At chr6:29943223 all 26
+high cell lines carry C untreated, and they sit on the diagonal; at
+chr3:37277733, 18 of 20; at chr6:32643315 both high lines.</li>
+<li><strong>Partly, at 3</strong> (chr14:106627394, chr17:36212383,
+chr14:106639258): one high line carries inherited C, the other one or
+two do not. The correlations there (0.53–0.60) are carried by that one
+line.</li>
+<li><strong>chr2:89085177</strong>: its one high line has no inherited
+C, but two other lines are ~50% C untreated (heterozygous-looking) while
+reading only ~35% treated.</li>
+<li><strong>Not testable, 2 sites</strong> (chr2:90039467,
+chr17:53106304): their high-%pU cell lines have fewer than 10 untreated
+reads, so their correlations are computed on low cell lines only and say
+nothing.</li>
+</ul>
+</div>
+<div id="with-the-corrected-fitter-they-are-no-longer-hits"
+class="section level1">
+<h1>6. With the corrected fitter they are no longer hits</h1>
+<pre class="r"><code>knitr::kable(T[, .(site, `old fitter: real` = sprintf(&quot;%.1f&quot;, old_real_nlp),
+                   `old fitter: worst permutation` = sprintf(&quot;%.1f&quot;, old_worst_perm_nlp),
+                   `multi-start: real` = sprintf(&quot;%.1f&quot;, ms_real_nlp),
+                   `multi-start: worst permutation` = sprintf(&quot;%.1f&quot;, ms_worst_perm_nlp))],
+  caption = sprintf(&quot;Minimum p over cis-SNPs, as -log10 p. Multi-start permutation ceiling (best permuted site genome-wide): %.1f.&quot;,
+                    T$perm_ceiling_multistart[1]))</code></pre>
+<table>
+<caption>Minimum p over cis-SNPs, as -log10 p. Multi-start permutation
+ceiling (best permuted site genome-wide): 11.3.</caption>
+<colgroup>
+<col width="14%" />
+<col width="15%" />
+<col width="26%" />
+<col width="16%" />
+<col width="27%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">site</th>
+<th align="left">old fitter: real</th>
+<th align="left">old fitter: worst permutation</th>
+<th align="left">multi-start: real</th>
+<th align="left">multi-start: worst permutation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">chr3:37277733</td>
+<td align="left">141.3</td>
+<td align="left">142.6</td>
+<td align="left">1.4</td>
+<td align="left">2.8</td>
+</tr>
+<tr class="even">
+<td align="left">chr6:29943223</td>
+<td align="left">108.6</td>
+<td align="left">104.4</td>
+<td align="left">7.4</td>
+<td align="left">3.0</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:89085177</td>
+<td align="left">67.2</td>
+<td align="left">66.7</td>
+<td align="left">2.0</td>
+<td align="left">1.6</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106627394</td>
+<td align="left">64.1</td>
+<td align="left">65.0</td>
+<td align="left">1.5</td>
+<td align="left">2.5</td>
+</tr>
+<tr class="odd">
+<td align="left">chr17:36212383</td>
+<td align="left">48.8</td>
+<td align="left">49.8</td>
+<td align="left">0.7</td>
+<td align="left">1.8</td>
+</tr>
+<tr class="even">
+<td align="left">chr14:106639258</td>
+<td align="left">46.2</td>
+<td align="left">45.5</td>
+<td align="left">4.1</td>
+<td align="left">3.4</td>
+</tr>
+<tr class="odd">
+<td align="left">chr2:90039467</td>
+<td align="left">32.5</td>
+<td align="left">33.1</td>
+<td align="left">0.9</td>
+<td align="left">1.2</td>
+</tr>
+<tr class="even">
+<td align="left">chr17:53106304</td>
+<td align="left">15.3</td>
+<td align="left">15.3</td>
+<td align="left">1.4</td>
+<td align="left">1.4</td>
+</tr>
+<tr class="odd">
+<td align="left">chr6:32643315</td>
+<td align="left">12.6</td>
+<td align="left">12.7</td>
+<td align="left">2.9</td>
+<td align="left">3.0</td>
+</tr>
+</tbody>
+</table>
+<p>Under the old fitter the real and permuted p-values were
+<strong>equal</strong> — the extreme values had nothing to do with
+genotype; they came from the φ = 1 fit. With multi-start, real −log₁₀p
+falls to 0.7–7.4, all below the permutation ceiling of 11.3.</p>
+<!-- # 7. Beyond the 9: the high-φ tail -->
+<!-- The same count, applied to every site: of all cell lines with high %pU -->
+<!-- (treated > 50%, ≥ 10 reads treated and untreated), how many carry inherited C? -->
+<!-- ```{r bandfig, fig.width=7.5, fig.height=3.8} -->
+<!-- ggplot(PB, aes(band, high_lines_inherited_pct)) + -->
+<!--   geom_col(fill = BLUE, width = 0.68) + -->
+<!--   geom_text(aes(label = sprintf("%.0f%%", high_lines_inherited_pct)), vjust = -0.45, size = 3.2, colour = "grey15") + -->
+<!--   scale_y_continuous(limits = c(0, 100), expand = expansion(mult = c(0, 0.04))) + -->
+<!--   labs(x = expression("estimated " * varphi * " of the site (multi-start MLE)"), -->
+<!--        y = "% of high-%pU cell lines", -->
+<!--        title = "High-%pU cell lines that carry inherited C, by the site's estimated phi", -->
+<!--        subtitle = "High = treated %pU > 50%; inherited = untreated C >= 10%; lines with >= 10 reads in both. Counts in the table below.") + -->
+<!--   thm + theme(panel.grid.major.x = element_blank()) -->
+<!-- ``` -->
+<!-- ```{r bandtab} -->
+<!-- knitr::kable(PB[, .(`estimated phi` = band, sites = format(sites, big.mark = ","), -->
+<!--                     `sites with a high line` = sites_with_high_line, -->
+<!--                     `all high lines inherited C` = sprintf("%.0f%%", all_high_inherited_pct), -->
+<!--                     `some` = sprintf("%.0f%%", some_high_inherited_pct), -->
+<!--                     `none` = sprintf("%.0f%%", none_high_inherited_pct), -->
+<!--                     `high lines` = format(high_lines, big.mark = ","), -->
+<!--                     `high lines with inherited C` = sprintf("%.0f%%", high_lines_inherited_pct))], -->
+<!--   caption = "Most sites with small phi have no high-%pU cell line at all, which is why the counts are small in the upper rows.") -->
+<!-- ``` -->
+<!-- At sites with φ above 0.5, 87% of the -->
+<!-- high-%pU cell lines carry inherited C, against about -->
+<!-- 7% at sites with φ below 0.01. So -->
+<!-- most of the large-φ signal comes from inherited C rather than large differences -->
+<!-- in modification between people. This strengthens the reading -->
+<!-- that **genuine between-person φ is small**, and it means the untreated controls -->
+<!-- should be used to filter aliasing sites before the final QTL scan. -->
+<!-- # 8. Caveats -->
+<!-- - **Region labels are approximate**: hand-entered hg38 spans, not yet checked -->
+<!--   against the gene annotation. -->
+<!-- - **Correlations mislead here.** With one to three high cell lines, Pearson r is -->
+<!--   carried by those few points, so the page leads with the count of high lines -->
+<!--   carrying inherited C. -->
+<!-- - **"Inherited" uses a 10% untreated-C cut** in a line with ≥ 10 untreated reads; -->
+<!--   a heterozygous carrier reads about 50%, so the cut is permissive. -->
+<!-- - **Two sites (chr2:90039467, chr17:53106304) cannot be tested**: their high-%pU -->
+<!--   cell lines lack untreated coverage. -->
+<!-- - **Untreated depth limits section 7 too**: only cell lines with ≥ 10 reads in -->
+<!--   both treated and untreated RNA count, which leaves out many shallow sites. -->
+<!-- - At chr6:32643315 the refit without the three deepest lines failed; without the -->
+<!--   deepest line alone, φ is unchanged (0.86). -->
+<!-- # 9. Provenance -->
+<!-- - All tables and figures: `4.qtl_mapping_betabinomial/42.problematic_sites_stats.R` -->
+<!--   → `qtl_betabinomial/diagnostic_figures/problematic_sites_stats.tsv`, -->
+<!--   `problematic_sites_by_line.tsv`, `phi_band_untreated.tsv`. -->
+<!-- - Site list: `diagnostic_figures/pathological_sites_w5kb_pc3_auto_noUCcalled.txt` -->
+<!--   (old single-start calibration, ±5 kb, k = 3). -->
+<!-- - φ: single- and multi-start from `multistart_audit/multistart_by_site.txt.gz`; -->
+<!--   moment and MAP from `phi_recovery/real_phi_estimates.txt.gz` -->
+<!--   (`35.real_phi_moment_prior.R`). -->
+<!-- - Untreated controls: `untreated_counts/` (`12.untreated_counts_matrix.R`). -->
+<!-- - Multi-start p-values: `lrt_calibration/calib_siteres_w5kb_pc3_auto_noUCcalled_MS_pvals.txt.gz`. -->
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 7 (Core)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el7-x86_64/lib/libopenblas_haswellp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_4.0.3     data.table_1.14.2
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.12        highr_0.9          RColorBrewer_1.1-3 pillar_1.9.0      
+ [5] compiler_4.2.0     bslib_0.3.1        later_1.3.0        jquerylib_0.1.4   
+ [9] git2r_0.30.1       workflowr_1.7.0    tools_4.2.0        digest_0.6.29     
+[13] gtable_0.3.6       jsonlite_1.8.0     evaluate_0.15      lifecycle_1.0.4   
+[17] tibble_3.2.1       pkgconfig_2.0.3    rlang_1.1.2        cli_3.6.1         
+[21] rstudioapi_0.13    yaml_2.3.5         xfun_0.41          fastmap_1.1.0     
+[25] withr_2.5.0        dplyr_1.1.4        stringr_1.5.1      knitr_1.39        
+[29] generics_0.1.4     fs_1.5.2           vctrs_0.6.5        sass_0.4.1        
+[33] tidyselect_1.2.0   rprojroot_2.0.3    grid_4.2.0         glue_1.6.2        
+[37] R6_2.5.1           fansi_1.0.3        rmarkdown_2.25     farver_2.1.0      
+[41] magrittr_2.0.3     scales_1.4.0       promises_1.2.0.1   htmltools_0.5.2   
+[45] dichromat_2.0-0.1  httpuv_1.6.5       S7_0.2.0           utf8_1.2.2        
+[49] stringi_1.7.6     </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
