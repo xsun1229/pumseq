@@ -382,7 +382,7 @@ pU site?</h1>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
 <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-workflowr <span class="glyphicon glyphicon-ok text-success"
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
 aria-hidden="true"></span>
 </button>
 </p>
@@ -393,8 +393,8 @@ aria-hidden="true"></span>
 </li>
 <li>
 <a data-toggle="tab" href="#checks"> Checks <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-</a>
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -407,9 +407,9 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> 0
+aria-hidden="true"></span> 1
 </p>
 <p>
 <strong>Knit directory:</strong> <code>pumseq/</code> <span
@@ -432,18 +432,21 @@ versions</em> tab lists the development history.
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
-<span class="glyphicon glyphicon-ok text-success"
-aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
-</a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguptodate"
+<div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great! Since the R Markdown file has been committed to the Git
-repository, you know the exact version of the code that produced these
-results.</p>
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
 </div>
 </div>
 </div>
@@ -534,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree2b289ac864e3c06505c4da9875207b1c3eea72d1targetblank2b289aca">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree611d2ab419390447bbf265d932fee2fa71c1f7ddtargetblank611d2aba">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/2b289ac864e3c06505c4da9875207b1c3eea72d1" target="_blank">2b289ac</a>
+<a href="https://github.com/xsun1229/pumseq/tree/611d2ab419390447bbf265d932fee2fa71c1f7dd" target="_blank">611d2ab</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree2b289ac864e3c06505c4da9875207b1c3eea72d1targetblank2b289aca"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree611d2ab419390447bbf265d932fee2fa71c1f7ddtargetblank611d2aba"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -552,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/2b289ac864e3c06505c4da9875207b1c3eea72d1" target="_blank">2b289ac</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/611d2ab419390447bbf265d932fee2fa71c1f7dd" target="_blank">611d2ab</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -568,6 +571,12 @@ were generated:
 <pre><code>
 Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/qtl_mapping_betabinomial_phi_estimation.Rmd.bak_predepthplots_20260929
+
+Unstaged changes:
+    Modified:   analysis/qtl_mapping_betabinomial_phi_estimation.Rmd
 
 </code></pre>
 <p>
@@ -614,6 +623,23 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/611d2ab419390447bbf265d932fee2fa71c1f7dd/docs/qtl_mapping_betabinomial_phi_estimation.html" target="_blank">611d2ab</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-29
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -995,138 +1021,29 @@ estimates at individual sites.</caption>
 </div>
 <div id="read-depth-and-mean-pu-both-matter" class="section level1">
 <h1>2. Read depth and mean pU both matter</h1>
-<p>Deeper sites generally have more accurate estimates. The table below
-compares recovery across read-depth groups at true φ = 0.0126.</p>
-<table>
-<caption>Recovery at true phi = 0.0126, grouped by read depth.</caption>
-<colgroup>
-<col width="13%" />
-<col width="5%" />
-<col width="20%" />
-<col width="19%" />
-<col width="22%" />
-<col width="19%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">depth quintile</th>
-<th align="right">sites</th>
-<th align="right">median reads per line</th>
-<th align="left">% collapsed to floor</th>
-<th align="left">% more than 10x too low</th>
-<th align="left">% within 2x of truth</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">[1,4]</td>
-<td align="right">2640</td>
-<td align="right">3</td>
-<td align="left">13.6%</td>
-<td align="left">74.1%</td>
-<td align="left">5.9%</td>
-</tr>
-<tr class="even">
-<td align="left">(4,7]</td>
-<td align="right">1754</td>
-<td align="right">6</td>
-<td align="left">20.9%</td>
-<td align="left">65.8%</td>
-<td align="left">12.2%</td>
-</tr>
-<tr class="odd">
-<td align="left">(7,12]</td>
-<td align="right">1695</td>
-<td align="right">10</td>
-<td align="left">20.6%</td>
-<td align="left">50.4%</td>
-<td align="left">24.5%</td>
-</tr>
-<tr class="even">
-<td align="left">(12,26]</td>
-<td align="right">1984</td>
-<td align="right">17</td>
-<td align="left">14.6%</td>
-<td align="left">35.7%</td>
-<td align="left">40.7%</td>
-</tr>
-<tr class="odd">
-<td align="left">(26,1.467e+04]</td>
-<td align="right">1975</td>
-<td align="right">51</td>
-<td align="left">2.5%</td>
-<td align="left">9.0%</td>
-<td align="left">71.1%</td>
-</tr>
-</tbody>
-</table>
+<p>The simulations cover six true φ values, from 0.005 to 0.4. The
+heatmaps show how recovery changes with both dispersion and read depth.
+Depth groups are fixed across the six settings, using quintiles of
+median depth among covered cell lines in the real-data templates.</p>
+<p><img src="figure/qtl_mapping_betabinomial_phi_estimation.Rmd/depth_recovery_grid-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>Darker cells mean larger percentages in every panel: higher is better
+in the accuracy panel, but worse in the underestimation and failure
+panels. Read the failure panel alongside accuracy, since excluding
+failed fits can change which sites contribute to the comparison. More
+than tenfold underestimation is a relative error criterion; it is not
+the same as reaching the numerical floor.</p>
 <p>Low mean pU is also associated with estimates near zero. To examine
 it alongside depth, we group sites by their <strong>real-data pooled pU
 percentage</strong> (converted reads divided by total reads). This is a
 summary of the observed rate, not the full vector of fitted
 cell-line-specific means used to generate the simulations.</p>
-<table style="width:100%;">
-<caption>Near-zero estimates at true phi = 0.0126, by depth and pooled
-pU. Successful fits only.</caption>
-<colgroup>
-<col width="47%" />
-<col width="16%" />
-<col width="8%" />
-<col width="27%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">median reads per covered cell line</th>
-<th align="left">pooled pU</th>
-<th align="right">sites</th>
-<th align="left">near-zero estimates</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">Up to 5</td>
-<td align="left">Below 5%</td>
-<td align="right">1494</td>
-<td align="left">15.0%</td>
-</tr>
-<tr class="even">
-<td align="left">Up to 5</td>
-<td align="left">At least 5%</td>
-<td align="right">1845</td>
-<td align="left">15.0%</td>
-</tr>
-<tr class="odd">
-<td align="left">More than 5 to 15</td>
-<td align="left">Below 5%</td>
-<td align="right">2104</td>
-<td align="left">24.6%</td>
-</tr>
-<tr class="even">
-<td align="left">More than 5 to 15</td>
-<td align="left">At least 5%</td>
-<td align="right">1285</td>
-<td align="left">14.5%</td>
-</tr>
-<tr class="odd">
-<td align="left">More than 15</td>
-<td align="left">Below 5%</td>
-<td align="right">1655</td>
-<td align="left">9.1%</td>
-</tr>
-<tr class="even">
-<td align="left">More than 15</td>
-<td align="left">At least 5%</td>
-<td align="right">1665</td>
-<td align="left">3.6%</td>
-</tr>
-</tbody>
-</table>
-<p>These comparisons support a role for both depth and mean pU. They do
-not isolate causal effects: sites differ in their depth distributions
-and fitted means. A controlled simulation varying the mean while holding
-depth and φ fixed would separate those effects more directly. These
-results do not yet establish a universal depth cutoff for reporting
-per-site φ.</p>
+<p><img src="figure/qtl_mapping_betabinomial_phi_estimation.Rmd/mean_depth-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>The separation between the two pU groups can be compared across depth
+and true φ. These comparisons do not isolate causal effects: sites
+differ in their depth distributions and fitted means. A controlled
+simulation varying the mean while holding depth and φ fixed would
+separate those effects more directly. These results do not yet establish
+a universal depth cutoff for reporting per-site φ.</p>
 </div>
 <div id="does-shrinkage-improve-estimation" class="section level1">
 <h1>3. Does shrinkage improve estimation?</h1>

@@ -97,63 +97,20 @@ knitr::kable(RB[, { r <- phi_hat/phi_true[1]
 
 # 2. Read depth and mean pU both matter
 
-The simulations cover six true φ values, from 0.005 to 0.4. The heatmaps show
-how recovery changes with both dispersion and read depth. Depth groups are
-fixed across the six settings, using quintiles of median depth among covered
-cell lines in the real-data templates.
+Deeper sites generally have more accurate estimates. The table below compares
+recovery across read-depth groups at true φ = 0.0126.
 
-```{r depth_recovery_grid, fig.height=5, fig.width=13}
-depth_props <- fread(file.path(RC, "site_properties.txt.gz"))[, .(sid, med_depth)]
-stopifnot(!anyDuplicated(depth_props$sid),
-          all(all_recovery$sid %chin% depth_props$sid))
-depth_breaks <- unique(as.numeric(quantile(depth_props$med_depth, 0:5 / 5)))
-depth_props[, depth_band := cut(med_depth, depth_breaks, include.lowest = TRUE)]
-depth_labels <- depth_props[, .(median_reads = median(med_depth)), by = depth_band][order(depth_band)]
-depth_labels[, label := paste0("Q", seq_len(.N), ": median ", median_reads, " reads")]
-depth_props[, depth_label := factor(depth_labels$label[match(depth_band, depth_labels$depth_band)],
-                                   levels = depth_labels$label)]
-dr <- merge(all_recovery, depth_props, by = "sid")
-depth_stats <- dr[, {
-  ok <- is.finite(phi_hat)
-  ratio <- phi_hat[ok] / phi_true[1]
-  .(simulated = .N, successful = sum(ok),
-    accurate = if (any(ok)) 100 * mean(ratio > 0.5 & ratio < 2) else NA_real_,
-    too_low = if (any(ok)) 100 * mean(ratio < 0.1) else NA_real_,
-    failed = 100 * mean(!ok))
-}, by = .(phi_true, depth_label)]
-depth_long <- melt(depth_stats, id.vars = c("phi_true", "depth_label", "simulated", "successful"),
-                   measure.vars = c("accurate", "too_low", "failed"), value.name = "percent")
-depth_long[, metric := factor(variable, levels = c("accurate", "too_low", "failed"),
-  labels = c("Within 2x of truth", "More than 10x too low", "Failed fits"))]
-depth_long[, true_phi := factor(phi_true, levels = sort(unique(phi_true)))]
-ggplot(depth_long, aes(true_phi, depth_label, fill = percent)) +
-  geom_tile(colour = "white") +
-  geom_text(aes(label = sprintf("%.0f%%", percent),
-                colour = percent > 55), size = 3.3, show.legend = FALSE) +
-  scale_colour_manual(values = c("FALSE" = "black", "TRUE" = "white")) +
-  scale_fill_gradient(low = "#f7fbff", high = "#08306b", limits = c(0, 100),
-                      name = "Percent") +
-  facet_wrap(~ metric, nrow = 1) +
-  labs(x = "True phi", y = "Read-depth group (lowest to highest)",
-       title = "Dispersion recovery across all six true phi values",
-       subtitle = "Accuracy and underestimation: successful fits only. Failed fits: all simulated sites.") +
-  theme_minimal(base_size = 11) +
-  theme(panel.grid = element_blank(), legend.position = "bottom",
-        axis.text.x = element_text(angle = 45, hjust = 1))
+```{r accdepth}
+knitr::kable(fread(file.path(RC, "accuracy_by_depth.tsv")),
+  caption = "Recovery at true phi = 0.0126, grouped by read depth.")
 ```
-
-Darker cells mean larger percentages in every panel: higher is better in the
-accuracy panel, but worse in the underestimation and failure panels. Read the
-failure panel alongside accuracy, since excluding failed fits can change which
-sites contribute to the comparison. More than tenfold underestimation is a
-relative error criterion; it is not the same as reaching the numerical floor.
 
 Low mean pU is also associated with estimates near zero. To examine it alongside
 depth, we group sites by their **real-data pooled pU percentage** (converted reads
 divided by total reads). This is a summary of the observed rate, not the full
 vector of fitted cell-line-specific means used to generate the simulations.
 
-```{r mean_depth, fig.height=6, fig.width=11}
+```{r mean_depth}
 counts_dir <- file.path(PSI, "phenotype/fold5_union_auto_noUCcalled/counts")
 C <- fread(file.path(counts_dir, "C_matrix.txt.gz"))
 N <- fread(file.path(counts_dir, "N_matrix.txt.gz"))
@@ -165,33 +122,19 @@ props <- data.table(sid = paste(C$ref, C$pos),
   pooled_pu = rowSums(cm) / rowSums(nm),
   median_depth = apply(covered_depth, 1, median, na.rm = TRUE))
 stopifnot(!anyDuplicated(props$sid))
-md <- merge(all_recovery[is.finite(phi_hat)], props, by = "sid")
+md <- merge(all_recovery[phi_true == 0.0126 & is.finite(phi_hat)], props, by = "sid")
 md[, pu_group := factor(ifelse(pooled_pu < 0.05, "Below 5%", "At least 5%"),
                         levels = c("Below 5%", "At least 5%"))]
 md[, depth_group := cut(median_depth, c(0, 5, 15, Inf), include.lowest = TRUE,
                         labels = c("Up to 5", "More than 5 to 15", "More than 15"))]
-mu_depth_stats <- md[, .(sites = .N,
-  too_low = 100 * mean(phi_hat < phi_true[1] / 10)),
-  by = .(phi_true, depth_group, pu_group)]
-mu_depth_stats[, panel := factor(paste0("True phi = ", phi_true),
-  levels = paste0("True phi = ", sort(unique(phi_true))))]
-ggplot(mu_depth_stats, aes(depth_group, too_low, colour = pu_group, group = pu_group)) +
-  geom_line(linewidth = 0.7) +
-  geom_point(size = 2.3) +
-  facet_wrap(~ panel, nrow = 2) +
-  scale_colour_manual(values = c("Below 5%" = "#D55E00", "At least 5%" = "#0072B2"),
-                      name = "Real-data pooled pU") +
-  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 25)) +
-  scale_x_discrete(labels = c("Up to 5" = "≤5", "More than 5 to 15" = ">5–15", "More than 15" = ">15")) +
-  labs(x = "Median reads per covered cell line", y = "More than 10x too low (%)",
-       title = "Does lower pU accompany poorer recovery at similar depth?",
-       subtitle = "Each point summarises successful fits in one depth and pU group; lines connect group summaries.") +
-  theme_bw(base_size = 11) +
-  theme(legend.position = "top", panel.grid.minor = element_blank())
+knitr::kable(md[, .(sites = .N,
+  `near-zero estimates` = sprintf("%.1f%%", 100 * mean(phi_hat < 2e-6))),
+  by = .(`median reads per covered cell line` = depth_group,
+         `pooled pU` = pu_group)][order(`median reads per covered cell line`, `pooled pU`)],
+  caption = "Near-zero estimates at true phi = 0.0126, by depth and pooled pU. Successful fits only.")
 ```
 
-The separation between the two pU groups can be compared across depth and true φ.
-These comparisons do not isolate
+These comparisons support a role for both depth and mean pU. They do not isolate
 causal effects: sites differ in their depth distributions and fitted means.
 A controlled simulation varying the mean while holding depth and φ fixed would
 separate those effects more directly. These results do not yet establish a
