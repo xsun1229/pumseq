@@ -246,22 +246,22 @@ estimates respond only weakly to the true differences between sites. At larger
 φ, they track those differences more closely. The choice of prior centre matters:
 the median rule tends to set the centre below the simulated true median.
 
-# 4. What we can report
+<!-- # 4. What we can report -->
 
-The simulations support cautious interpretation of individual-site dispersion,
-especially at low depth and low pU rates. Shrinkage can stabilise estimates, but
-a stable estimate near the prior centre is not evidence that a site's φ is
-precisely measured.
+<!-- The simulations support cautious interpretation of individual-site dispersion, -->
+<!-- especially at low depth and low pU rates. Shrinkage can stabilise estimates, but -->
+<!-- a stable estimate near the prior centre is not evidence that a site's φ is -->
+<!-- precisely measured. -->
 
-The current real-data analysis uses mom-q60 as its headline prior and retains
-the other rules for comparison:
+<!-- The current real-data analysis uses mom-q60 as its headline prior and retains -->
+<!-- the other rules for comparison: -->
 
-```{r real_summary}
-rp <- fread(file.path(RC, "real_phi_summary.tsv"))
-knitr::kable(rp[, .(estimator, sites, mode, median)],
-  caption = "Real-data dispersion estimates. Modes are calculated on the log scale. These are summaries of estimates, not known population parameters.")
-```
+<!-- ```{r real_summary} -->
+<!-- rp <- fread(file.path(RC, "real_phi_summary.tsv")) -->
+<!-- knitr::kable(rp[, .(estimator, sites, mode, median)], -->
+<!--   caption = "Real-data dispersion estimates. Modes are calculated on the log scale. These are summaries of estimates, not known population parameters.") -->
+<!-- ``` -->
 
-Dispersion estimation and QTL significance are separate questions. The production
-QTL LRT uses unpenalized maximum-likelihood fits. The shrinkage results here do
-not establish calibration for a shrinkage-based QTL test.
+<!-- Dispersion estimation and QTL significance are separate questions. The production -->
+<!-- QTL LRT uses unpenalized maximum-likelihood fits. The shrinkage results here do -->
+<!-- not establish calibration for a shrinkage-based QTL test. -->

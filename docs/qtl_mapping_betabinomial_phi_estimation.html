@@ -11,11 +11,11 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-09-28" />
+<meta name="date" content="2026-09-29" />
 
-<title>Estimating phi per site: the problem, and six things we have tried</title>
+<title>How well can we estimate dispersion at each pU site?</title>
 
-<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
@@ -31,15 +31,15 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
-<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
-<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
 
 <link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
 <!-- Add a small amount of space between sections. -->
@@ -371,10 +371,10 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Estimating phi per site: the problem, and
-six things we have tried</h1>
+<h1 class="title toc-ignore">How well can we estimate dispersion at each
+pU site?</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-09-28</h4>
+<h4 class="date">2026-09-29</h4>
 
 </div>
 
@@ -403,7 +403,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-09-28
+<strong>Last updated:</strong> 2026-09-29
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree5c60be10bb04368c4ae6df28db7007857e77dd06targetblank5c60be1a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree728cb144d80c56a25077a665728be9652561ad2etargetblank728cb14a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/5c60be10bb04368c4ae6df28db7007857e77dd06" target="_blank">5c60be1</a>
+<a href="https://github.com/xsun1229/pumseq/tree/728cb144d80c56a25077a665728be9652561ad2e" target="_blank">728cb14</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree5c60be10bb04368c4ae6df28db7007857e77dd06targetblank5c60be1a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree728cb144d80c56a25077a665728be9652561ad2etargetblank728cb14a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/5c60be10bb04368c4ae6df28db7007857e77dd06" target="_blank">5c60be1</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/728cb144d80c56a25077a665728be9652561ad2e" target="_blank">728cb14</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -573,7 +573,6 @@ Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Unstaged changes:
-    Modified:   analysis/qtl_mapping_betabinomial_lowphi.Rmd
     Modified:   analysis/qtl_mapping_betabinomial_phi_estimation.Rmd
 
 </code></pre>
@@ -621,6 +620,57 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/728cb144d80c56a25077a665728be9652561ad2e/analysis/qtl_mapping_betabinomial_phi_estimation.Rmd" target="_blank">728cb14</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-29
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/4ecca41278ae760daa5e20e3ba08c54232c87ebd/analysis/qtl_mapping_betabinomial_phi_estimation.Rmd" target="_blank">4ecca41</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-29
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/4ecca41278ae760daa5e20e3ba08c54232c87ebd/docs/qtl_mapping_betabinomial_phi_estimation.html" target="_blank">4ecca41</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-29
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -697,319 +747,31 @@ update
 </div>
 </div>
 <pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2) })
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
                       fig.align = &quot;center&quot;, fig.width = 10)
 PSI &lt;- &quot;/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl&quot;
 RC  &lt;- file.path(PSI, &quot;qtl_betabinomial/phi_recovery&quot;)
 LP  &lt;- file.path(PSI, &quot;qtl_betabinomial/low_phi_validation&quot;)</code></pre>
-<blockquote>
-<p>This page records a problem with our per-site estimates of the
-overdispersion φ, and the six things we have tried against it.</p>
-</blockquote>
-<div id="the-problem-estimates-pile-up-at-zero-when-φ-is-small"
-class="section level1">
-<h1>1. The problem: estimates pile up at zero when φ is small</h1>
-<p>The test is simple: simulate data where we <em>know</em> φ, then
-refit with our usual estimator and see what comes back.</p>
-<p><strong>How the data were simulated.</strong> We reuse the real
-design rather than an idealised one. Fitting the null model to the real
-counts at every site gives, per site, a fitted mean μ̂ᵢ for each cell
-line (which varies across lines through the 3 phenotype PCs). Those
-means and the <strong>real read depths nᵢ</strong> are held fixed as
-templates; only φ is imposed. Then for a chosen true φ, at every site
-and every cell line:</p>
-<p><span class="math display">\[p_i \;\sim\;
-\mathrm{Beta}\!\left(\hat\mu_i\tfrac{1-\varphi}{\varphi},\;
-(1-\hat\mu_i)\tfrac{1-\varphi}{\varphi}\right), \qquad y_i \;\sim\;
-\mathrm{Binomial}(n_i,\, p_i)\]</span></p>
-<p>The simulated counts therefore have our actual depth distribution,
-our actual mean structure and our actual number of cell lines — so the
-estimation problem is the one we really face, with the single difference
-that we know the answer.</p>
-<p><strong>Scale of the simulation.</strong></p>
-<pre class="r"><code>RBx &lt;- fread(file.path(RC, &quot;recovery_by_site.txt.gz&quot;), sep = &quot;\t&quot;)
-knitr::kable(data.table(
-  quantity = c(&quot;true phi values imposed&quot;,
-               &quot;sites simulated per true phi&quot;,
-               &quot;cell lines per simulated site&quot;,
-               &quot;site-level datasets in total&quot;,
-               &quot;simulated count observations (y, n) in total&quot;,
-               &quot;random seed&quot;),
-  value = c(paste(sort(unique(RBx$phi_true)), collapse = &quot;, &quot;),
-            format(uniqueN(RBx$sid), big.mark = &quot;,&quot;),
-            &quot;median 49 (range 10-50)&quot;,
-            format(nrow(RBx), big.mark = &quot;,&quot;),
-            &quot;~3.08 million&quot;,
-            &quot;2026, set per site: SEED + 1e5 x (true-phi index) + site row&quot;)),
-  caption = &quot;One dataset per site per true phi. Each &#39;site-level dataset&#39; is ~49 paired counts (y_i, n_i), one per cell line, which is exactly what a real site provides. The histograms below pool the ~10,000 sites within each true-phi panel.&quot;)</code></pre>
-<table>
-<caption>One dataset per site per true phi. Each ‘site-level dataset’ is
-~49 paired counts (y_i, n_i), one per cell line, which is exactly what a
-real site provides. The histograms below pool the ~10,000 sites within
-each true-phi panel.</caption>
-<colgroup>
-<col width="42%" />
-<col width="57%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">quantity</th>
-<th align="left">value</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">true phi values imposed</td>
-<td align="left">0.005, 0.0126, 0.05, 0.1, 0.2, 0.4</td>
-</tr>
-<tr class="even">
-<td align="left">sites simulated per true phi</td>
-<td align="left">10,467</td>
-</tr>
-<tr class="odd">
-<td align="left">cell lines per simulated site</td>
-<td align="left">median 49 (range 10-50)</td>
-</tr>
-<tr class="even">
-<td align="left">site-level datasets in total</td>
-<td align="left">62,802</td>
-</tr>
-<tr class="odd">
-<td align="left">simulated count observations (y, n) in total</td>
-<td align="left">~3.08 million</td>
-</tr>
-<tr class="even">
-<td align="left">random seed</td>
-<td align="left">2026, set per site: SEED + 1e5 x (true-phi index) +
-site row</td>
-</tr>
-</tbody>
-</table>
-<p><strong>The design of one panel, step by step.</strong> Take a single
-true φ, say 0.0126. Give <strong>every one of the 10,467 sites that same
-φ</strong> — so within a panel there is exactly one true value, and it
-is the red line. Simulate that site’s ~49 paired counts. Estimate φ̂ at
-that site, using only that site’s own data, exactly as the production
-pipeline does. Repeat independently for all 10,467 sites, and plot the
-histogram of the resulting 10,467 estimates. Then repeat the whole
-procedure at each of the six true φ values to get the six panels.</p>
-<p><strong>What success would look like.</strong> If the estimator were
-perfect, all 10,467 estimates would equal 0.0126 and the histogram would
-be a single narrow spike on the red line. It cannot be that sharp in
-practice — each site has only ~49 cell lines at ~8 reads, so some
-scatter is unavoidable and expected. A <em>well-behaved</em> estimator
-would therefore give <strong>one hump centred on the red line</strong>,
-with its width reflecting nothing but sampling noise.</p>
-<p>What the figure actually shows at small φ is <strong>a hump on the
-red line plus a second spike jammed against the boundary</strong>. The
-hump is fine and expected. The second spike is the failure: those sites
-did not return a noisy version of 0.0126, they returned essentially
-zero.</p>
-<p>A handful of fits fail outright at each value (9,472 to 10,054
-succeed of 10,467) and are excluded from the panel. Note the failure
-rate itself rises with φ, so those exclusions are not random.</p>
-<div id="which-sites-are-estimated-badly" class="section level2">
-<h2>1.1 Which sites are estimated badly?</h2>
-<p>If the estimates are wrong at a large minority of sites, the natural
-question is whether those sites share anything. They do, and it is
-overwhelmingly <strong>read depth</strong>.</p>
-<pre class="r"><code>knitr::kable(fread(file.path(RC, &quot;accuracy_by_property.tsv&quot;), sep = &quot;\t&quot;),
-  caption = &quot;Sites at true phi = 0.0126, grouped by how accurate their estimate turned out. The accurate group has 9x more information (sum n(n-1)) and 3.7x lower predicted SE than the sites that collapsed to the floor. Cell-line count and pooled %pU barely differ between groups.&quot;)</code></pre>
-<table style="width:100%;">
-<caption>Sites at true phi = 0.0126, grouped by how accurate their
-estimate turned out. The accurate group has 9x more information (sum
-n(n-1)) and 3.7x lower predicted SE than the sites that collapsed to the
-floor. Cell-line count and pooled %pU barely differ between
-groups.</caption>
-<colgroup>
-<col width="17%" />
-<col width="3%" />
-<col width="6%" />
-<col width="13%" />
-<col width="12%" />
-<col width="11%" />
-<col width="11%" />
-<col width="11%" />
-<col width="11%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">grp</th>
-<th align="right">sites</th>
-<th align="left">% of sites</th>
-<th align="right">median reads per line</th>
-<th align="right">median total reads</th>
-<th align="right">median cell lines</th>
-<th align="left">median pooled %pU</th>
-<th align="left">median sum n(n-1)</th>
-<th align="right">predicted SE(phi)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">collapsed to the 1e-6 floor</td>
-<td align="right">1414</td>
-<td align="left">14.1%</td>
-<td align="right">7</td>
-<td align="right">472</td>
-<td align="right">48</td>
-<td align="left">4.1%</td>
-<td align="left">7,012</td>
-<td align="right">0.0218</td>
-</tr>
-<tr class="even">
-<td align="left">&gt;10x too low (not at floor)</td>
-<td align="right">3437</td>
-<td align="left">34.2%</td>
-<td align="right">5</td>
-<td align="right">272</td>
-<td align="right">47</td>
-<td align="left">4.6%</td>
-<td align="left">2,170</td>
-<td align="right">0.0438</td>
-</tr>
-<tr class="odd">
-<td align="left">wrong but not extreme</td>
-<td align="right">2198</td>
-<td align="left">21.9%</td>
-<td align="right">9</td>
-<td align="right">566</td>
-<td align="right">49</td>
-<td align="left">4.9%</td>
-<td align="left">9,366</td>
-<td align="right">0.0183</td>
-</tr>
-<tr class="even">
-<td align="left">accurate (within 2x)</td>
-<td align="right">2999</td>
-<td align="left">29.8%</td>
-<td align="right">24</td>
-<td align="right">1585</td>
-<td align="right">50</td>
-<td align="left">5.3%</td>
-<td align="left">74,310</td>
-<td align="right">0.0056</td>
-</tr>
-</tbody>
-</table>
-<pre class="r"><code>knitr::kable(fread(file.path(RC, &quot;accuracy_by_depth.tsv&quot;), sep = &quot;\t&quot;),
-  caption = &quot;Accuracy by read-depth quintile. This is the actionable result: at ~51 reads per cell line, only 3% of sites collapse and 68% land within 2x, whereas at ~3 reads only 7% are within 2x.&quot;)</code></pre>
-<table>
-<caption>Accuracy by read-depth quintile. This is the actionable result:
-at ~51 reads per cell line, only 3% of sites collapse and 68% land
-within 2x, whereas at ~3 reads only 7% are within 2x.</caption>
-<colgroup>
-<col width="13%" />
-<col width="5%" />
-<col width="20%" />
-<col width="19%" />
-<col width="22%" />
-<col width="19%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">depth quintile</th>
-<th align="right">sites</th>
-<th align="right">median reads per line</th>
-<th align="left">% collapsed to floor</th>
-<th align="left">% more than 10x too low</th>
-<th align="left">% within 2x of truth</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">[1,4]</td>
-<td align="right">2640</td>
-<td align="right">3</td>
-<td align="left">13.6%</td>
-<td align="left">74.1%</td>
-<td align="left">5.9%</td>
-</tr>
-<tr class="even">
-<td align="left">(4,7]</td>
-<td align="right">1754</td>
-<td align="right">6</td>
-<td align="left">20.9%</td>
-<td align="left">65.8%</td>
-<td align="left">12.2%</td>
-</tr>
-<tr class="odd">
-<td align="left">(7,12]</td>
-<td align="right">1695</td>
-<td align="right">10</td>
-<td align="left">20.6%</td>
-<td align="left">50.4%</td>
-<td align="left">24.5%</td>
-</tr>
-<tr class="even">
-<td align="left">(12,26]</td>
-<td align="right">1984</td>
-<td align="right">17</td>
-<td align="left">14.6%</td>
-<td align="left">35.7%</td>
-<td align="left">40.7%</td>
-</tr>
-<tr class="odd">
-<td align="left">(26,1.467e+04]</td>
-<td align="right">1975</td>
-<td align="right">51</td>
-<td align="left">2.5%</td>
-<td align="left">9.0%</td>
-<td align="left">71.1%</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Three things follow.</strong></p>
-<p><strong>Depth is the whole story, and it is actionable.</strong>
-Sites in the top depth quintile (~51 reads per cell line) collapse under
-3% of the time and are within 2x of the truth 71% of the time. Sites in
-the bottom quintile (~3 reads) are within 2x only 6% of the time. So a
-per-site φ <em>is</em> recoverable — for the deep sites. The obvious
-consequence is that φ should be reported only above a depth threshold,
-not genome-wide.</p>
-<p><strong>Cell-line count and %pU are not the problem.</strong> The
-four accuracy groups have essentially the same number of covered cell
-lines (47-50) and similar modification rates (4.1-5.3%). Only depth and
-the information summary sum n(n-1) separate them.</p>
-<p><strong>The boundary rate is not monotone in depth</strong> — it
-peaks at 6-10 reads (~21%) rather than at the lowest depth (13.6%). At
-very low depth the Pearson statistic is so noisy that estimates scatter
-in <em>both</em> directions rather than settling on the boundary, so the
-shallowest sites are wrong in both directions rather than specifically
-collapsed.</p>
-<pre class="r"><code>RB &lt;- fread(file.path(RC, &quot;recovery_by_site.txt.gz&quot;), sep = &quot;\t&quot;)[is.finite(phi_hat)]
-RS &lt;- fread(file.path(RC, &quot;recovery_summary.tsv&quot;), sep = &quot;\t&quot;)
-SP &lt;- fread(file.path(RC, &quot;site_properties.txt.gz&quot;), sep = &quot;\t&quot;)
-RB &lt;- merge(RB, SP[, .(sid, med_depth)], by = &quot;sid&quot;)
-PT &lt;- sort(unique(RB$phi_true))
-RB[, panel := factor(sprintf(&quot;true phi = %g&quot;, phi_true),
-                     levels = sprintf(&quot;true phi = %g&quot;, PT))]
-# colour by READ DEPTH quintile -- the point is that the boundary spike and the
-# hump on the truth are made of different sites
-qb &lt;- quantile(SP$med_depth, 0:5/5)
-RB[, dq := cut(med_depth, qb, include.lowest = TRUE,
-               labels = c(&quot;1-3 reads (shallowest 20%)&quot;, &quot;4-6&quot;, &quot;7-11&quot;, &quot;12-24&quot;,
-                          &quot;25+ reads (deepest 20%)&quot;))]
-vl &lt;- merge(unique(RB[, .(panel, phi_true)]), RS[, .(phi_true, mode = `mode phi_hat`)], by = &quot;phi_true&quot;)
-ggplot(RB, aes(phi_hat, fill = dq)) +
-  geom_histogram(bins = 60, colour = NA) +
-  geom_vline(xintercept = 1e-6, colour = &quot;grey35&quot;, linetype = &quot;dotted&quot;) +
-  geom_vline(data = vl, aes(xintercept = phi_true), colour = &quot;#c0392b&quot;, linewidth = 0.7) +
-  facet_wrap(~ panel, nrow = 2, scales = &quot;free_y&quot;) +
-  scale_x_log10(breaks = 10^seq(-6, 0, 2), labels = c(&quot;1e-6&quot;, &quot;1e-4&quot;, &quot;1e-2&quot;, &quot;1&quot;)) +
-  scale_fill_viridis_d(option = &quot;viridis&quot;, direction = -1,
-                       name = &quot;median reads per cell line&quot;) +
-  guides(fill = guide_legend(nrow = 1, reverse = TRUE)) +
-  labs(x = expression(hat(varphi)*&quot;, axis log-spaced&quot;), y = &quot;sites&quot;,
-       title = &quot;Simulated from a KNOWN phi, then refitted -- coloured by read depth&quot;,
-       subtitle = paste(
-         &quot;Red = the true phi used to simulate. Dotted grey = the 1e-6 numerical floor. Stacked bars, so colour shows COMPOSITION.&quot;,
-         &quot;A perfect estimator would give one narrow spike on the red line; a well-behaved one, a single hump centred there.&quot;,
-         &quot;The hump on the truth is built from the DEEP sites (yellow). Depth, not the value of phi, decides which a site lands in.&quot;,
-         sep = &quot;\n&quot;)) +
-  theme_bw(base_size = 11) +
-  theme(legend.position = &quot;top&quot;, panel.grid.minor = element_blank(),
-        plot.subtitle = element_text(size = 8))</code></pre>
+<p>Dispersion (φ) describes variation in pU rates beyond binomial
+read-sampling noise, after accounting for the covariates. We tested how
+well it can be estimated at individual sites using simulations based on
+our data.</p>
+<p><strong>Small φ is difficult to estimate at many sites.</strong>
+Estimates often approach zero, especially when the data contain little
+information. Shrinkage reduces this pile-up, but at small φ it often
+returns a value near the shared prior centre rather than distinguishing
+individual sites.</p>
+<div id="can-the-mle-recover-a-known-φ" class="section level1">
+<h1>1. Can the MLE recover a known φ?</h1>
+<p>For each site, we keep the real read depths and the expected pU rates
+fitted from the real data using three phenotype PCs. We choose a known
+φ, simulate counts from the beta-binomial model, and refit the model to
+those counts.</p>
+<p>Each panel below uses one true φ for all sites. We repeat this at six
+values from 0.005 to 0.4, with about 10,000 sites and typically 49
+covered cell lines per site. The generating means vary across sites and
+cell lines; the refit estimates the means and φ from the simulated
+counts.</p>
 <p><img src="figure/qtl_mapping_betabinomial_phi_estimation.Rmd/prob-1.png" width="1248" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-prob-1">
@@ -1033,6 +795,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/4ecca41278ae760daa5e20e3ba08c54232c87ebd/docs/figure/qtl_mapping_betabinomial_phi_estimation.Rmd/prob-1.png" target="_blank">4ecca41</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-29
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/5c60be10bb04368c4ae6df28db7007857e77dd06/docs/figure/qtl_mapping_betabinomial_phi_estimation.Rmd/prob-1.png" target="_blank">5c60be1</a>
@@ -1059,22 +832,66 @@ XSun
 </table>
 </div>
 </div>
-<p>At a true φ of 0.0126 — the value our real data suggest — <strong>14%
-of sites return essentially zero</strong> and about half are more than
-tenfold too low, even though the mode of the distribution sits correctly
-on the truth:</p>
-<pre class="r"><code>knitr::kable(RB[, { r &lt;- phi_hat/phi_true[1]
-  .(`within 2x of truth` = sprintf(&quot;%.1f%%&quot;, 100*mean(r &gt; 0.5 &amp; r &lt; 2)),
-    `&gt;10x too low`       = sprintf(&quot;%.1f%%&quot;, 100*mean(r &lt; 0.1)),
-    `at the 1e-6 floor`  = sprintf(&quot;%.1f%%&quot;, 100*mean(phi_hat &lt; 2e-6)),
-    `median fold error`  = round(median(pmax(r, 1/r)), 1)) },
-  by = .(`true phi` = phi_true)][order(`true phi`)],
-  caption = &quot;Per-site accuracy against known truth. The mode is nearly unbiased at every true phi &gt;= 0.0126, but individual sites are frequently wrong by orders of magnitude, and worst where phi is smallest.&quot;)</code></pre>
+<p>At small true φ, the estimates include a group near the truth and a
+pile-up at the numerical floor, 10⁻⁶. The pile-up becomes smaller as
+true φ increases. A boundary estimate can arise from limited
+information; it does not by itself show that the optimiser is broken or
+that the true dispersion is zero.</p>
+<p>The histogram and accuracy table include successful fits only. Failed
+fits are reported separately below.</p>
 <table>
-<caption>Per-site accuracy against known truth. The mode is nearly
-unbiased at every true phi &gt;= 0.0126, but individual sites are
-frequently wrong by orders of magnitude, and worst where phi is
-smallest.</caption>
+<caption>Fit success at each simulated dispersion.</caption>
+<thead>
+<tr class="header">
+<th align="right">true phi</th>
+<th align="right">simulated</th>
+<th align="right">successful</th>
+<th align="right">failed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.0050</td>
+<td align="right">10467</td>
+<td align="right">10054</td>
+<td align="right">413</td>
+</tr>
+<tr class="even">
+<td align="right">0.0126</td>
+<td align="right">10467</td>
+<td align="right">10048</td>
+<td align="right">419</td>
+</tr>
+<tr class="odd">
+<td align="right">0.0500</td>
+<td align="right">10467</td>
+<td align="right">9985</td>
+<td align="right">482</td>
+</tr>
+<tr class="even">
+<td align="right">0.1000</td>
+<td align="right">10467</td>
+<td align="right">9954</td>
+<td align="right">513</td>
+</tr>
+<tr class="odd">
+<td align="right">0.2000</td>
+<td align="right">10467</td>
+<td align="right">9785</td>
+<td align="right">682</td>
+</tr>
+<tr class="even">
+<td align="right">0.4000</td>
+<td align="right">10467</td>
+<td align="right">9472</td>
+<td align="right">995</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Per-site accuracy against known truth. Accuracy among
+successful fits. A reasonable population mode can coexist with poor
+estimates at individual sites.</caption>
 <colgroup>
 <col width="11%" />
 <col width="24%" />
@@ -1137,132 +954,233 @@ smallest.</caption>
 </tbody>
 </table>
 </div>
-</div>
-<div id="what-we-tried" class="section level1">
-<h1>2. What we tried</h1>
-<pre class="r"><code>knitr::kable(data.table(
-  approach = c(&quot;multi-start optimiser&quot;,
-               &quot;peak-proximity rule&quot;,
-               &quot;trend-based prior centre (DESeq2/edgeR style)&quot;,
-               &quot;Gaussian prior on log phi&quot;,
-               &quot;Student-t prior on log phi&quot;,
-               &quot;two-component mixture prior&quot;,
-               &quot;prior derived from the MOMENT estimator&quot;),
-  idea = c(&quot;start the optimiser from 3 values of phi, keep the best fit&quot;,
-           &quot;of the optima found, take the one nearest the population mode&quot;,
-           &quot;predict each site&#39;s phi from its mean and depth, shrink toward that&quot;,
-           &quot;penalise phi values far from 0.0126&quot;,
-           &quot;same, but with a heavy tail so distant sites escape&quot;,
-           &quot;two plausible centres (0.019 and 0.46) instead of one&quot;,
-           &quot;estimate the prior from an optimiser-free estimator, then MAP&quot;),
-  outcome = c(&quot;FIXED A DIFFERENT BUG: 13 sites where the likelihood is bimodal and one fixed start found the worse optimum. Did NOT touch the boundary spike.&quot;,
-              &quot;NO. Per-site tracking unchanged; it only moves the pile off the boundary to ~1e-4. A relocation, not a repair.&quot;,
-              &quot;RULED OUT before building: phi is not predictable from site features (R-squared = 0.058), so there is no trend to shrink toward.&quot;,
-              &quot;NO. Loses to a CONSTANT GUESS at 3 of 4 true phi, and tracks WORSE than the MLE at large phi (Spearman 0.69 vs 0.74).&quot;,
-              &quot;NO. Same failure -- at 2 log-units out the tail has not saturated enough to help.&quot;,
-              &quot;MARGINAL. Roughly ties the MLE on tracking at large phi; and its second component is not supported by an optimiser-free estimator (see 3.2).&quot;,
-              &quot;BEST OF THE SIX, but not a solution: two of its three pre-specified rules (mom-mode, mom-q60) are the only approaches that beat a constant guess at all four true phi, yet per-site tracking at the modal phi is still only Spearman 0.40-0.42. The third rule, mom-median, does not beat the constant guess there (see 4).&quot;)),
-  caption = &quot;Six attempts. Verdicts are by per-site tracking (see 3.1), not by the &#39;within 2x&#39; rate, which is misleading -- see below.&quot;)</code></pre>
+<div id="read-depth-and-mean-pu-both-matter" class="section level1">
+<h1>2. Read depth and mean pU both matter</h1>
+<p>Deeper sites generally have more accurate estimates. The table below
+compares recovery across read-depth groups at true φ = 0.0126.</p>
 <table>
-<caption>Six attempts. Verdicts are by per-site tracking (see 3.1), not
-by the ‘within 2x’ rate, which is misleading – see below.</caption>
+<caption>Recovery at true phi = 0.0126, grouped by read depth.</caption>
 <colgroup>
-<col width="10%" />
-<col width="15%" />
-<col width="73%" />
+<col width="13%" />
+<col width="5%" />
+<col width="20%" />
+<col width="19%" />
+<col width="22%" />
+<col width="19%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">approach</th>
-<th align="left">idea</th>
-<th align="left">outcome</th>
+<th align="left">depth quintile</th>
+<th align="right">sites</th>
+<th align="right">median reads per line</th>
+<th align="left">% collapsed to floor</th>
+<th align="left">% more than 10x too low</th>
+<th align="left">% within 2x of truth</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">multi-start optimiser</td>
-<td align="left">start the optimiser from 3 values of phi, keep the best
-fit</td>
-<td align="left">FIXED A DIFFERENT BUG: 13 sites where the likelihood is
-bimodal and one fixed start found the worse optimum. Did NOT touch the
-boundary spike.</td>
+<td align="left">[1,4]</td>
+<td align="right">2640</td>
+<td align="right">3</td>
+<td align="left">13.6%</td>
+<td align="left">74.1%</td>
+<td align="left">5.9%</td>
 </tr>
 <tr class="even">
-<td align="left">peak-proximity rule</td>
-<td align="left">of the optima found, take the one nearest the
-population mode</td>
-<td align="left">NO. Per-site tracking unchanged; it only moves the pile
-off the boundary to ~1e-4. A relocation, not a repair.</td>
+<td align="left">(4,7]</td>
+<td align="right">1754</td>
+<td align="right">6</td>
+<td align="left">20.9%</td>
+<td align="left">65.8%</td>
+<td align="left">12.2%</td>
 </tr>
 <tr class="odd">
-<td align="left">trend-based prior centre (DESeq2/edgeR style)</td>
-<td align="left">predict each site’s phi from its mean and depth, shrink
-toward that</td>
-<td align="left">RULED OUT before building: phi is not predictable from
-site features (R-squared = 0.058), so there is no trend to shrink
-toward.</td>
+<td align="left">(7,12]</td>
+<td align="right">1695</td>
+<td align="right">10</td>
+<td align="left">20.6%</td>
+<td align="left">50.4%</td>
+<td align="left">24.5%</td>
 </tr>
 <tr class="even">
-<td align="left">Gaussian prior on log phi</td>
-<td align="left">penalise phi values far from 0.0126</td>
-<td align="left">NO. Loses to a CONSTANT GUESS at 3 of 4 true phi, and
-tracks WORSE than the MLE at large phi (Spearman 0.69 vs 0.74).</td>
+<td align="left">(12,26]</td>
+<td align="right">1984</td>
+<td align="right">17</td>
+<td align="left">14.6%</td>
+<td align="left">35.7%</td>
+<td align="left">40.7%</td>
 </tr>
 <tr class="odd">
-<td align="left">Student-t prior on log phi</td>
-<td align="left">same, but with a heavy tail so distant sites
-escape</td>
-<td align="left">NO. Same failure – at 2 log-units out the tail has not
-saturated enough to help.</td>
-</tr>
-<tr class="even">
-<td align="left">two-component mixture prior</td>
-<td align="left">two plausible centres (0.019 and 0.46) instead of
-one</td>
-<td align="left">MARGINAL. Roughly ties the MLE on tracking at large
-phi; and its second component is not supported by an optimiser-free
-estimator (see 3.2).</td>
-</tr>
-<tr class="odd">
-<td align="left">prior derived from the MOMENT estimator</td>
-<td align="left">estimate the prior from an optimiser-free estimator,
-then MAP</td>
-<td align="left">BEST OF THE SIX, but not a solution: two of its three
-pre-specified rules (mom-mode, mom-q60) are the only approaches that
-beat a constant guess at all four true phi, yet per-site tracking at the
-modal phi is still only Spearman 0.40-0.42. The third rule, mom-median,
-does not beat the constant guess there (see 4).</td>
+<td align="left">(26,1.467e+04]</td>
+<td align="right">1975</td>
+<td align="right">51</td>
+<td align="left">2.5%</td>
+<td align="left">9.0%</td>
+<td align="left">71.1%</td>
 </tr>
 </tbody>
 </table>
-<div id="how-we-judge-worked-per-site-tracking-not-the-hit-rate"
-class="section level2">
-<h2>2.1 How we judge “worked”: per-site tracking, not the hit rate</h2>
-<p>We first scored these by the fraction of sites within 2x of the
-truth. <strong>That metric is misleading, and it flattered every
-method.</strong> If the true phi values are tightly clustered, then
-simply returning a constant near the middle scores well without using
-the data at all. So the table below adds two honest criteria:</p>
-<ul>
-<li><strong>slope</strong> of log(estimate) on log(truth). 1 means the
-estimate tracks each site; 0 means it returns a constant regardless of
-the data.</li>
-<li><strong>Spearman</strong> correlation between true and estimated
-phi, per site.</li>
-<li>a <strong>constant-guess benchmark</strong>: ignore the data
-entirely and return the true median at every site. Any method that
-cannot beat this is not measuring anything.</li>
-</ul>
-<pre class="r"><code>TR &lt;- fread(file.path(RC, &quot;approach_tracking.tsv&quot;), sep = &quot;\t&quot;)
-LV &lt;- c(&quot;(constant guess)&quot;, &quot;MLE&quot;, &quot;gauss sd=0.83&quot;, &quot;t df=2 sd=0.83&quot;,
-        &quot;t df=1 sd=0.4&quot;, &quot;MIXTURE&quot;, &quot;MAP: mom-median&quot;, &quot;MAP: mom-mode&quot;, &quot;MAP: mom-q60&quot;)
-TR &lt;- TR[est %chin% LV][, est := factor(est, levels = LV)]
-knitr::kable(dcast(TR, est ~ truth_centre, value.var = &quot;spearman&quot;)[order(est)],
-  caption = &quot;SPEARMAN correlation between true and estimated phi, per site, by the centre of the true phi distribution. Higher is better; the constant guess is 0 by construction.&quot;)</code></pre>
+<p>Low mean pU is also associated with estimates near zero. To examine
+it alongside depth, we group sites by their <strong>real-data pooled pU
+percentage</strong> (converted reads divided by total reads). This is a
+summary of the observed rate, not the full vector of fitted
+cell-line-specific means used to generate the simulations.</p>
+<table style="width:100%;">
+<caption>Near-zero estimates at true phi = 0.0126, by depth and pooled
+pU. Successful fits only.</caption>
+<colgroup>
+<col width="47%" />
+<col width="16%" />
+<col width="8%" />
+<col width="27%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">median reads per covered cell line</th>
+<th align="left">pooled pU</th>
+<th align="right">sites</th>
+<th align="left">near-zero estimates</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Up to 5</td>
+<td align="left">Below 5%</td>
+<td align="right">1494</td>
+<td align="left">15.0%</td>
+</tr>
+<tr class="even">
+<td align="left">Up to 5</td>
+<td align="left">At least 5%</td>
+<td align="right">1845</td>
+<td align="left">15.0%</td>
+</tr>
+<tr class="odd">
+<td align="left">More than 5 to 15</td>
+<td align="left">Below 5%</td>
+<td align="right">2104</td>
+<td align="left">24.6%</td>
+</tr>
+<tr class="even">
+<td align="left">More than 5 to 15</td>
+<td align="left">At least 5%</td>
+<td align="right">1285</td>
+<td align="left">14.5%</td>
+</tr>
+<tr class="odd">
+<td align="left">More than 15</td>
+<td align="left">Below 5%</td>
+<td align="right">1655</td>
+<td align="left">9.1%</td>
+</tr>
+<tr class="even">
+<td align="left">More than 15</td>
+<td align="left">At least 5%</td>
+<td align="right">1665</td>
+<td align="left">3.6%</td>
+</tr>
+</tbody>
+</table>
+<p>These comparisons support a role for both depth and mean pU. They do
+not isolate causal effects: sites differ in their depth distributions
+and fitted means. A controlled simulation varying the mean while holding
+depth and φ fixed would separate those effects more directly. These
+results do not yet establish a universal depth cutoff for reporting
+per-site φ.</p>
+</div>
+<div id="does-shrinkage-improve-estimation" class="section level1">
+<h1>3. Does shrinkage improve estimation?</h1>
+<p>We compared ordinary maximum likelihood (MLE) with several ways to
+stabilise φ. MAP estimation maximises the likelihood plus a log prior,
+pulling weakly supported estimates toward a shared distribution.</p>
 <table>
-<caption>SPEARMAN correlation between true and estimated phi, per site,
-by the centre of the true phi distribution. Higher is better; the
-constant guess is 0 by construction.</caption>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Approach</th>
+<th>Purpose</th>
+<th>Main observation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Multiple optimiser starts</td>
+<td>Find a better likelihood optimum</td>
+<td>Helps with local optima; does not remove the small-φ pile-up.</td>
+</tr>
+<tr class="even">
+<td>Select an optimum near the population mode</td>
+<td>Move estimates away from the boundary</td>
+<td>Does little to improve per-site tracking.</td>
+</tr>
+<tr class="odd">
+<td>Predict a prior centre from site properties</td>
+<td>Allow the centre to vary by site</td>
+<td>The explored predictors explained little variation in estimated
+φ.</td>
+</tr>
+<tr class="even">
+<td>Fixed-centre Gaussian or Student-t prior</td>
+<td>Shrink extreme estimates</td>
+<td>Reduces boundary estimates, but can pull genuinely large φ
+downward.</td>
+</tr>
+<tr class="odd">
+<td>Two-component prior</td>
+<td>Allow low- and high-dispersion groups</td>
+<td>Tracking at large φ is similar to MLE.</td>
+</tr>
+<tr class="even">
+<td>Moment-derived prior</td>
+<td>Learn the prior from moment estimates</td>
+<td>Gives the strongest tracking at larger φ among the approaches
+tested; tracking remains weak at small φ.</td>
+</tr>
+</tbody>
+</table>
+<p>For this comparison, <strong>true φ varies between sites</strong>. We
+draw site-specific values from log-normal distributions centred at
+0.0126, 0.05, 0.2, or 0.4, restricted to [10⁻⁵, 0.9]. Counts again use
+the real depths and fitted means.</p>
+<p>The moment-derived approach estimates the mean anew from each
+simulated dataset, calculates a moment estimate of φ, and uses the
+collection of estimates to build a Student-t prior on log₁₀φ. We compare
+three rules for the prior centre:</p>
+<ul>
+<li><strong>mom-median:</strong> median of all finite moment estimates,
+including negatives.</li>
+<li><strong>mom-mode:</strong> density mode on the log scale among
+positive estimates.</li>
+<li><strong>mom-q60:</strong> 60th percentile of all finite moment
+estimates.</li>
+</ul>
+<p>The prior width uses the spread of positive log-moment estimates. The
+prior is rebuilt for each simulation setting before the MAP refits. The
+moment calculation is closed form, but it uses means from a fitted
+model.</p>
+<div id="how-we-compare-methods" class="section level2">
+<h2>How we compare methods</h2>
+<p>Being within a factor of two of the truth is useful, but
+insufficient: if true values are tightly clustered, a constant guess can
+score well. We also report:</p>
+<ul>
+<li><strong>Spearman correlation:</strong> whether estimates rank sites
+in the right order.</li>
+<li><strong>Log–log slope:</strong> how strongly estimates change with
+truth; a slope near zero indicates little response, while a slope near
+one indicates similar scaling.</li>
+</ul>
+<p>Neither measure alone establishes accurate estimates. The constant
+benchmark uses the true median, which is available only in simulation;
+its correlation is undefined.</p>
+<table>
+<caption>Spearman correlation by simulation setting. The constant
+benchmark has no rank variation.</caption>
 <thead>
 <tr class="header">
 <th align="left">est</th>
@@ -1275,10 +1193,10 @@ constant guess is 0 by construction.</caption>
 <tbody>
 <tr class="odd">
 <td align="left">(constant guess)</td>
-<td align="right">0.000</td>
-<td align="right">0.000</td>
-<td align="right">0.000</td>
-<td align="right">0.000</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
 </tr>
 <tr class="even">
 <td align="left">MLE</td>
@@ -1338,12 +1256,9 @@ constant guess is 0 by construction.</caption>
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>knitr::kable(dcast(TR, est ~ truth_centre, value.var = &quot;slope&quot;)[order(est)],
-  caption = &quot;SLOPE of log(estimate) on log(truth). 1 = tracks each site; 0 = returns a constant; above 1 = spreads estimates more widely than the truth.&quot;)</code></pre>
 <table>
-<caption>SLOPE of log(estimate) on log(truth). 1 = tracks each site; 0 =
-returns a constant; above 1 = spreads estimates more widely than the
-truth.</caption>
+<caption>Slope of log estimate against log truth. Assess alongside
+correlation and estimation error.</caption>
 <thead>
 <tr class="header">
 <th align="left">est</th>
@@ -1419,12 +1334,10 @@ truth.</caption>
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>knitr::kable(dcast(TR, est ~ truth_centre, value.var = &quot;within2x&quot;)[order(est)],
-  caption = &quot;The &#39;within 2x&#39; rate, shown for comparison. Note the constant guess scores 68.7% at the smallest true phi -- which is why this metric cannot be used on its own.&quot;)</code></pre>
 <table>
-<caption>The ‘within 2x’ rate, shown for comparison. Note the constant
-guess scores 68.7% at the smallest true phi – which is why this metric
-cannot be used on its own.</caption>
+<caption>Percentage within a factor of two of truth, compared with the
+constant benchmark. Methods are summarised over their own successful
+fits.</caption>
 <thead>
 <tr class="header">
 <th align="left">est</th>
@@ -1500,161 +1413,12 @@ cannot be used on its own.</caption>
 </tr>
 </tbody>
 </table>
-<p>Three things follow, and they change the verdicts.</p>
-<p><strong>The MLE spreads estimates too widely, not too
-narrowly.</strong> Its slope is 1.55-1.92 everywhere, well above 1. The
-boundary collapse is the cause: sites pushed to 1e-6 create extreme low
-values that stretch the range.</p>
-<p><strong>The fixed-centre priors do not work.</strong> The Gaussian
-scores 62.3% within 2x at the smallest true phi, which looked like a
-large gain over the MLE’s 30.1% – but a constant guess scores 68.6%, so
-it is worse than not using the data. It loses to the constant at three
-of the four true phi values, and at large phi it tracks worse than the
-plain MLE (Spearman 0.685 against 0.740). The Student-t behaves the same
-way. The mixture is better but only ties the MLE on tracking at large
-phi.</p>
-<p><strong>The moment-derived prior is the best of the six, but it does
-not solve the problem.</strong> Three rules for building the prior were
-fixed in advance. At larger phi they track clearly best: mom-q60 reaches
-Spearman 0.69 / 0.82 / 0.78 at phi = 0.05 / 0.2 / 0.4, against at most
-0.64 / 0.76 / 0.74 for every other approach. mom-q60 and mom-mode are
-the only approaches that beat the constant guess at all four true phi,
-and the slope rises toward 1 as information increases (0.35 -&gt; 0.59
--&gt; 0.80 -&gt; 0.87), which is the behaviour a shrinkage estimator
-should have. At the modal phi, though, every prior – fixed-centre or
-moment-derived – lands at Spearman 0.40-0.42, within simulation noise of
-the others. The third rule, mom-median, is weaker at small phi (59.3%
-within 2x against the constant guess’s 68.6%) – a ranking that changed
-when the simulation was corrected (see 4). And <strong>0.40-0.42 at the
-phi our data actually suggest is weak per-site agreement</strong>, and
-no approach we tried does better there. Where information is plentiful
-(phi ~ 0.2-0.4) the tracking is respectable; at the modal phi it is
-not.</p>
-<!-- ## 2.2 A caveat we had to correct ourselves on -->
-<!-- The mixture prior's two components were fitted to the subset of sites where all -->
-<!-- three optimiser starts agree on φ. But that subset is **defined by the estimator -->
-<!-- under suspicion**, so it cannot be used to decide whether the estimator's -->
-<!-- bimodality is real. Using an optimiser-free, covariate-adjusted estimator -->
-<!-- instead, the second peak largely disappears: -->
-<!-- ```{r bimod, fig.height=7, fig.width=12} -->
-<!-- MA <- file.path(PSI, "qtl_betabinomial/multistart_audit") -->
-<!-- ms <- fread(file.path(MA, "multistart_by_site.txt.gz"), sep = "\t") -->
-<!-- ag <- fread(file.path(MA, "agreement_by_site.txt.gz"), sep = "\t") -->
-<!-- mo <- fread(file.path(LP, "moment_by_site.txt.gz"), sep = "\t") -->
-<!-- LV <- c("MLE, all sites\n(has the boundary spike)", -->
-<!--         "MLE, 'reliable' subset\n(selected BY the MLE - circular)", -->
-<!--         "moments, pooled mean\n(no optimiser, NO covariates)", -->
-<!--         "moments, covariate-adjusted\n(no optimiser, WITH covariates)") -->
-<!-- bd <- rbindlist(list( -->
-<!--   data.table(phi = ms[is.finite(phi_3start)]$phi_3start,   src = LV[1]), -->
-<!--   data.table(phi = ag[n_ok == 3L & n_opt_phi == 1L]$phi_1, src = LV[2]), -->
-<!--   data.table(phi = mo$phi_mom_pooled,                      src = LV[3]), -->
-<!--   data.table(phi = mo$phi_mom_adjusted,                    src = LV[4]))) -->
-<!-- bd <- bd[is.finite(phi) & phi > 0][, src := factor(src, levels = LV)] -->
-<!-- bann <- bd[, .(n = .N, hi = mean(phi > 0.128), -->
-<!--                mode = { k <- density(log10(phi)); 10^k$x[which.max(k$y)] }), by = src] -->
-<!-- bann[, lab := sprintf("n = %s\nmode = %.4f\n%.1f%% above 0.128", -->
-<!--                       format(n, big.mark = ","), mode, 100 * hi)] -->
-<!-- ggplot(bd, aes(phi)) + -->
-<!--   geom_histogram(bins = 70, fill = "#4a7fbf", colour = NA) + -->
-<!--   geom_vline(xintercept = 0.128, colour = "#c0392b", linetype = "dashed", linewidth = 0.5) + -->
-<!--   geom_vline(xintercept = 1e-6, colour = "grey35", linetype = "dotted") + -->
-<!--   geom_text(data = bann, aes(x = 1.3e-6, y = Inf, label = lab), hjust = 0, vjust = 1.2, -->
-<!--             size = 2.7, colour = "grey15", lineheight = 0.95) + -->
-<!--   facet_wrap(~ src, nrow = 2, scales = "free_y") + -->
-<!--   scale_x_log10(breaks = 10^c(-6, -4, -2, 0), labels = c("1e-6", "1e-4", "1e-2", "1")) + -->
-<!--   labs(x = expression(hat(varphi)*", axis log-spaced"), y = "sites", -->
-<!--        title = "Is the phi distribution really two-humped? Four estimators, same data", -->
-<!--        subtitle = paste( -->
-<!--          "Red dashed = 0.128, where the Beta prior turns U-shaped. Dotted = the 1e-6 floor.", -->
-<!--          "The two-humped shape is clear in the MLE-based views and in the unadjusted moment estimator,", -->
-<!--          "but LARGELY DISAPPEARS in the covariate-adjusted moment estimator -- the fairest optimiser-free comparison.", -->
-<!--          sep = "\n")) + -->
-<!--   theme_bw(base_size = 10) + -->
-<!--   theme(panel.grid.minor = element_blank(), strip.text = element_text(size = 8), -->
-<!--         plot.subtitle = element_text(size = 7.5)) -->
-<!-- ``` -->
-</div>
-</div>
-<div id="the-best-of-the-six-a-prior-built-from-the-moment-estimator"
-class="section level1">
-<h1>3. The best of the six: a prior built from the moment estimator</h1>
-<p>Three passes, and the key point is that <strong>nothing is assumed
-about where φ sits</strong>:</p>
-<ol style="list-style-type: decimal">
-<li>compute the moment estimate at every site — closed form, no
-optimiser, no prior</li>
-<li>derive the prior’s centre and scale from those estimates by a fixed
-rule</li>
-<li>refit each site by MAP with that prior</li>
-</ol>
-<p><strong>How this simulation differs from the one in §1.</strong> In
-§1 a single true φ was imposed on every site, which is the right way to
-ask “does the estimator recover a known value”. It cannot be used to
-test a <em>prior</em>, because with one true value the best possible
-prior is a spike on that value — it would score perfectly while learning
-nothing. A prior describes how φ varies <em>between</em> sites, so the
-truth has to vary. So here:</p>
-<ol style="list-style-type: decimal">
-<li><strong>invent a per-site truth</strong>:
-<code>log10(φᵢ) ~ Normal(log10(centre), sd)</code>, clipped to [1e-5,
-0.9]. Four centres are used — 0.0126, 0.05, 0.2, 0.4 — so the method is
-tested where our data suggest φ sits <em>and</em> well away from
-it.</li>
-<li><strong>simulate counts</strong> as in §1, reusing the real depths
-nᵢ and real fitted μ̂ᵢ.</li>
-<li><strong>moment estimate</strong> at every site from those simulated
-counts, with the mean re-estimated from the same counts – exactly as on
-the real data (see 4).</li>
-<li><strong>derive the prior</strong> from those estimates — median of
-all of them (negatives included) for the centre, MAD of log10 of the
-positives for the width.</li>
-<li><strong>MAP refit</strong> per site with that prior.</li>
-<li><strong>score</strong> against the per-site truth from step 1.</li>
-</ol>
-<p>The prior is rebuilt from scratch inside every truth setting, so what
-is being tested is the whole procedure rather than a prior that happened
-to suit one answer. That is what makes the comparison fair: the derived
-centre had to find the truth at four different values. It follows the
-truth across a 32-fold range, but sits <strong>consistently about 40%
-low</strong> (median rule: truth 0.0126 → derived 0.0071; 0.05 → 0.0326;
-0.2 → 0.121; 0.4 → 0.246). That offset is a property of the moment
-estimator itself, explained in §4. A fixed-centre prior would have been
-right in one column and wrong in three.</p>
-<pre class="r"><code>sc &lt;- fread(file.path(RC, &quot;moment_prior_by_site.txt.gz&quot;), sep = &quot;\t&quot;)
-sc &lt;- sc[is.finite(phi_hat) &amp; phi_hat &gt; 0 &amp; is.finite(phi_true) &amp;
-         est %chin% c(&quot;MLE&quot;, &quot;MAP: mom-median&quot;)]
-# defined here rather than in an earlier chunk so this figure stands alone
-EL &lt;- c(&quot;MLE&quot; = &quot;MLE (no prior)&quot;, &quot;MAP: mom-median&quot; = &quot;MAP, prior from moment estimates&quot;)
-CT &lt;- c(0.0126, 0.05, 0.2, 0.4)
-sc[, rl := factor(EL[est], levels = EL)]
-sc[, cl := factor(sprintf(&quot;true phi centred at %g&quot;, truth_centre),
-                  levels = sprintf(&quot;true phi centred at %g&quot;, CT))]
-sann &lt;- sc[, .(sp = cor(log10(phi_true), log10(phi_hat), method = &quot;spearman&quot;),
-               sl = coef(lm(log10(phi_hat) ~ log10(phi_true)))[2]), by = .(rl, cl)]
-sann[, lab := sprintf(&quot;Spearman %.2f\nslope %.2f&quot;, sp, sl)]
-ggplot(sc, aes(phi_true, phi_hat)) +
-  geom_abline(slope = 1, intercept = 0, colour = &quot;#c0392b&quot;, linewidth = 0.5) +
-  geom_point(size = 0.25, alpha = 0.15, shape = 16, colour = &quot;#1f4e9c&quot;) +
-  geom_smooth(method = &quot;gam&quot;, formula = y ~ s(x, bs = &quot;cs&quot;), se = FALSE,
-              colour = &quot;#f5a623&quot;, linewidth = 0.7) +
-  geom_text(data = sann, aes(x = 1.5e-5, y = 1.3, label = lab), hjust = 0, vjust = 1,
-            size = 2.7, colour = &quot;grey15&quot;, lineheight = 0.95) +
-  facet_grid(rl ~ cl, labeller = label_wrap_gen(width = 28)) +
-  scale_x_log10() + scale_y_log10() +
-  labs(x = expression(TRUE~varphi[i]~&quot;(one point per site)&quot;),
-       y = expression(estimated~hat(varphi)[i]),
-       title = &quot;Estimated against TRUE phi, site by site&quot;,
-       subtitle = paste(
-  &quot;Red = y = x, perfect recovery. Orange = a smooth fit through the points. One point per site.&quot;,
-  &quot;This is the honest test: matching histograms can hide a wrong pairing, a scatter cannot.&quot;,
-  &quot;TOP (MLE): the vertical smear at the bottom is the boundary collapse -- sites whose truth varies over a decade all returned ~1e-6.&quot;,
-  &quot;BOTTOM (MAP): the collapse is gone, but at the LEFT-hand columns the cloud is nearly FLAT -- the estimate barely responds to the truth (slope 0.37).&quot;,
-  &quot;Only at large phi (right-hand columns) does the cloud approach the red line, which is where a per-site phi means something.&quot;,
-  sep = &quot;\n&quot;)) +
-  theme_bw(base_size = 10) +
-  theme(panel.grid.minor = element_blank(), strip.text = element_text(size = 8),
-        plot.subtitle = element_text(size = 7.5))</code></pre>
+<p>At the smallest centre, shrinkage methods have correlations of about
+0.40–0.42: they improve on MLE, but still distinguish sites poorly. The
+moment-derived mom-mode and mom-q60 rules perform better at larger φ,
+reaching correlations around 0.77–0.78 in the setting centred at 0.4.
+Differences between nearby scores should not be overinterpreted without
+repeated simulations.</p>
 <p><img src="figure/qtl_mapping_betabinomial_phi_estimation.Rmd/workedscatter-1.png" width="1248" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-workedscatter-1">
@@ -1678,6 +1442,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/4ecca41278ae760daa5e20e3ba08c54232c87ebd/docs/figure/qtl_mapping_betabinomial_phi_estimation.Rmd/workedscatter-1.png" target="_blank">4ecca41</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-29
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/5c60be10bb04368c4ae6df28db7007857e77dd06/docs/figure/qtl_mapping_betabinomial_phi_estimation.Rmd/workedscatter-1.png" target="_blank">5c60be1</a>
@@ -1704,223 +1479,26 @@ XSun
 </table>
 </div>
 </div>
-<p>The scatter is a stricter test than the histogram above it, and it
-shows two things the histogram could not.</p>
-<p><strong>The MLE’s surviving estimates are unbiased.</strong> In the
-top row the main cloud sits squarely <em>on</em> the red line at every
-truth centre. The MLE’s problem is not that it estimates φ badly — it is
-that a detached blob of sites falls off the bottom entirely, spanning
-the whole range of truth and all returning ~10⁻⁶. So the MLE is really
-two estimators: an unbiased one, and a failure mode. That is a more
-favourable reading of the MLE than the pooled accuracy figures give
-it.</p>
-<p><strong>The MAP trades collapse for flattening, and the scatter makes
-the direction visible.</strong> In the bottom row the blob is gone, but
-in the <code>0.0126</code> panel the cloud is nearly flat at φ̂ ≈
-0.006–0.010 whatever the truth. It sits slightly <em>above</em> the red
-line only for the lowest-truth sites (about 1.5× in the bottom tenth)
-and crosses it near φ ≈ 0.006 — below the true centre of 0.0126 — so
-most sites are pulled <strong>down</strong>, to about 0.2× the truth in
-the top tenth. That is shrinkage toward a prior centre that sits too low
-(§4). Near-horizontal at small φ (slope 0.37), approaching the line by φ
-= 0.4 (slope 0.89).</p>
-</div>
-<div
-id="correction-the-simulation-gave-the-moment-estimator-the-true-mean"
-class="section level1">
-<h1>4. Correction: the simulation gave the moment estimator the true
-mean</h1>
-<p>A reviewer pointed out that the §3 simulation did not run the same
-procedure as the real data. In step 3 the moment estimator was handed
-the mean that <em>generated</em> the simulated counts, not a mean
-re-estimated from them — while still subtracting (m − q), the
-degrees-of-freedom correction that applies only when q mean parameters
-<em>were</em> estimated. With a known mean the Pearson statistic has</p>
-<p><span class="math display">\[E[S] = \sum_i \big[1 + (n_i -
-1)\varphi\big] = m + \varphi \sum_i (n_i - 1),\]</span></p>
-<p>so subtracting (m − q) leaves <span
-class="math inline">\(E[\hat\varphi] = \varphi + q / \sum_i (n_i -
-1)\)</span>: an upward bias of about 0.016 on average, larger than φ
-itself at the low end. The real-data estimator re-estimates the mean, so
-it was never affected; only the simulation was.</p>
-<p><strong>Fix.</strong> The mean is now re-estimated on every simulated
-dataset before the prior is derived, so the simulation runs the
-real-data procedure. Everything in §2 and §3 above uses the corrected
-run.</p>
-<p><strong>Checks that the diagnosis is right.</strong> Putting
-identical simulated counts through a known-mean and a refit-mean
-version, the two degrees-of-freedom conventions differ by exactly 0.0160
-at every true φ — the predicted q / Σ(nᵢ − 1). And the corrected
-simulation now matches the real data: at a true φ of 0.0126 it gives
-36.9% negative moment estimates, against 39.1% observed (the uncorrected
-version gave 31.1%).</p>
-<pre class="r"><code>OP &lt;- fread(file.path(RC, &quot;moment_prior_params_knownmean_OLD.tsv&quot;))
-NP &lt;- fread(file.path(RC, &quot;moment_prior_params.tsv&quot;))
-OA &lt;- fread(file.path(RC, &quot;moment_prior_accuracy_knownmean_OLD.tsv&quot;))
-NW &lt;- fread(file.path(RC, &quot;moment_prior_accuracy.tsv&quot;))
-cen &lt;- merge(OP[grepl(&quot;^sim&quot;, source) &amp; rule == &quot;mom-median&quot;, .(source, old = centre)],
-             NP[grepl(&quot;^sim&quot;, source) &amp; rule == &quot;mom-median&quot;, .(source, new = centre)],
-             by = &quot;source&quot;)
-cen[, truth := as.numeric(sub(&quot;sim, truth &quot;, &quot;&quot;, source))]
-acc &lt;- merge(OA[, .(truth = truth_centre, est, before = `within 2x`)],
-             NW[, .(truth = truth_centre, est, after = `within 2x`)], by = c(&quot;truth&quot;, &quot;est&quot;))
-acc &lt;- dcast(acc[grepl(&quot;^MAP&quot;, est)], truth ~ est, value.var = c(&quot;before&quot;, &quot;after&quot;))
-T4 &lt;- merge(cen[, .(truth, old, new)], acc, by = &quot;truth&quot;)
-knitr::kable(T4[order(truth), .(
-    `true phi centre` = truth,
-    `derived centre: before` = old, `after` = new, `after / truth` = round(new / truth, 2),
-    `mom-median: before` = `before_MAP: mom-median`, `after ` = `after_MAP: mom-median`,
-    `mom-mode after` = `after_MAP: mom-mode`, `mom-q60 after` = `after_MAP: mom-q60`)],
-  caption = &quot;Before and after the fix. Derived centre = the prior centre the median rule reads off the simulated moment estimates. The four right-hand columns are % of sites within 2x of the truth; the constant guess scores 68.7 / 54.4 / 54.1 / 76.9%.&quot;)</code></pre>
-<table>
-<caption>Before and after the fix. Derived centre = the prior centre the
-median rule reads off the simulated moment estimates. The four
-right-hand columns are % of sites within 2x of the truth; the constant
-guess scores 68.7 / 54.4 / 54.1 / 76.9%.</caption>
-<colgroup>
-<col width="13%" />
-<col width="19%" />
-<col width="7%" />
-<col width="11%" />
-<col width="16%" />
-<col width="5%" />
-<col width="12%" />
-<col width="11%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="right">true phi centre</th>
-<th align="right">derived centre: before</th>
-<th align="right">after</th>
-<th align="right">after / truth</th>
-<th align="left">mom-median: before</th>
-<th align="left">after</th>
-<th align="left">mom-mode after</th>
-<th align="left">mom-q60 after</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="right">0.0126</td>
-<td align="right">0.01241</td>
-<td align="right">0.007101</td>
-<td align="right">0.56</td>
-<td align="left">71.2%</td>
-<td align="left">59.3%</td>
-<td align="left">72.2%</td>
-<td align="left">72.1%</td>
-</tr>
-<tr class="even">
-<td align="right">0.0500</td>
-<td align="right">0.04328</td>
-<td align="right">0.032570</td>
-<td align="right">0.65</td>
-<td align="left">73.1%</td>
-<td align="left">69.8%</td>
-<td align="left">74.0%</td>
-<td align="left">73.6%</td>
-</tr>
-<tr class="odd">
-<td align="right">0.2000</td>
-<td align="right">0.14000</td>
-<td align="right">0.120700</td>
-<td align="right">0.60</td>
-<td align="left">80.8%</td>
-<td align="left">81.2%</td>
-<td align="left">83.4%</td>
-<td align="left">83.5%</td>
-</tr>
-<tr class="even">
-<td align="right">0.4000</td>
-<td align="right">0.28130</td>
-<td align="right">0.246000</td>
-<td align="right">0.62</td>
-<td align="left">89.0%</td>
-<td align="left">87.6%</td>
-<td align="left">90.0%</td>
-<td align="left">90.7%</td>
-</tr>
-</tbody>
-</table>
-<p><strong>What the fix changed.</strong></p>
-<ul>
-<li><strong>The ranking of the three prior rules.</strong> mom-median
-fell from 71.2% to 59.3% within 2x at the modal φ and no longer beats
-the constant guess (68.6%); mom-mode (72.2%) and mom-q60 (72.1%) still
-do. The uncorrected simulation had inflated mom-median’s derived centre
-1.7-fold, landing it near the truth by accident.</li>
-<li><strong>The derived prior centres</strong>, which now sit
-consistently about 40% below the truth rather than on it.</li>
-<li><strong>Per-site tracking only slightly.</strong> Spearman for
-mom-median moved 0.41 → 0.40 at the modal φ and 0.77 → 0.76 at φ = 0.4;
-the rule-to-rule differences are small.</li>
-</ul>
-<p>The “after” run also uses per-site random seeds, introduced at the
-same time because the earlier runs could not be reproduced (a seed set
-in the parent process does not reach the parallel workers). So each
-before/after difference includes simulation noise of about ±1 point,
-small against the 12-point change for mom-median.</p>
-<p><strong>What it did not change.</strong> §1 (the MLE’s boundary spike
-and the depth diagnosis), the multi-start, peak-proximity, Gaussian,
-Student-t and mixture results in §2, and the QTL calibration — none of
-these involve the moment estimator.</p>
-<p><strong>A second problem the fix exposed.</strong> The refit-mean
-moment estimator — the one used on the real data — is itself biased
-<strong>downward</strong>: its median sits at 0.55–0.65 of the true
-median, stable across a 32-fold range of φ and across two independent
-simulation runs. The (m − q) correction is exact for a quasi-likelihood
-fit with known weights, but here the mean is estimated <em>jointly with
-φ</em> by beta-binomial maximum likelihood, so the fitted means follow
-the observed proportions more closely than q parameters’ worth and the
-correction subtracts too much. Two consequences:</p>
-<ul>
-<li>The real-data moment median of <strong>0.0052 is an
-underestimate</strong>. Divided by the simulated ratio at φ = 0.0126
-(0.55 and 0.59 in two independent runs), it implies a true median φ of
-about <strong>0.009</strong>, much closer to the MLE mode of 0.0126 than
-the raw figure — so most of the gap between the two estimators is this
-bias.</li>
-<li>The <strong>real-data MAP estimates have not yet been
-redone.</strong> Their prior is centred on that 0.0052, so every site is
-shrunk toward a centre that is too low, using the rule (mom-median) that
-the corrected simulation ranks weakest.</li>
-</ul>
-<!-- NB 2026-09-28: the paragraph below is now WRONG on two counts; do not uncomment it as is. -->
-<!-- (1) After the moment-estimator fix (section 4) the MAP mostly UNDER-estimates phi, -->
-<!--     the anti-conservative direction. (2) MAP fits cannot feed the LRT: they are not -->
-<!--     maximum-likelihood, so ll_full >= ll_null fails (betabin_lib.R now refuses). A shrunk -->
-<!--     phi can enter a test only if it is held FIXED in both the null and full fits. -->
-<!-- Worth noting which direction of error is safer. Overestimating φ widens the null -->
-<!-- and is conservative for testing; the MLE's collapse to zero narrows it and is -->
-<!-- anti-conservative. So although the MAP is biased at the low end, it is biased the -->
-<!-- less dangerous way — which matters if these φ ever feed a test rather than being -->
-<!-- reported. -->
-<!-- ```{r workedtab} -->
-<!-- M <- fread(file.path(RC, "moment_prior_accuracy.tsv"), sep = "\t") -->
-<!-- knitr::kable(dcast(M[est %in% c("MLE", "MAP: mom-median", "MAP: mom-mode")], -->
-<!--                    truth_centre ~ est, value.var = "within 2x")[ -->
-<!--   , .(`true phi centre` = truth_centre, MLE, `MAP: mom-median`, `MAP: mom-mode`)], -->
-<!--   caption = "Percent within 2x of truth. Unlike every fixed-centre prior, this beats the MLE at EVERY true phi, including 0.2 and 0.4.") -->
+<p>Shrinkage removes much of the boundary pile-up. At small φ, however,
+the estimates respond only weakly to the true differences between sites.
+At larger φ, they track those differences more closely. The choice of
+prior centre matters: the median rule tends to set the centre below the
+simulated true median.</p>
+<!-- # 4. What we can report -->
+<!-- The simulations support cautious interpretation of individual-site dispersion, -->
+<!-- especially at low depth and low pU rates. Shrinkage can stabilise estimates, but -->
+<!-- a stable estimate near the prior centre is not evidence that a site's φ is -->
+<!-- precisely measured. -->
+<!-- The current real-data analysis uses mom-q60 as its headline prior and retains -->
+<!-- the other rules for comparison: -->
+<!-- ```{r real_summary} -->
+<!-- rp <- fread(file.path(RC, "real_phi_summary.tsv")) -->
+<!-- knitr::kable(rp[, .(estimator, sites, mode, median)], -->
+<!--   caption = "Real-data dispersion estimates. Modes are calculated on the log scale. These are summaries of estimates, not known population parameters.") -->
 <!-- ``` -->
-<!-- The boundary spike is eliminated (>10× too low falls from 47.6% to 0.1% at small -->
-<!-- φ) **and** large-φ sites improve rather than degrade (80.4% → 89–92%). -->
-<!-- **But it is not recovering per-site φ at the low end, and that must be said -->
-<!-- plainly.** At the smallest true φ the slope of estimate on truth is **0.36** and -->
-<!-- the Spearman correlation **0.41** — near the centre the method is largely -->
-<!-- returning the prior rather than measuring the site. On the real data the effect -->
-<!-- is visible directly: the estimated distribution collapses to a spike at the prior -->
-<!-- centre, mode and median both 0.0048, and **57.8% of sites move by more than -->
-<!-- five-fold** from their MLE value. Tracking is genuinely good where information -->
-<!-- exists (slope 0.90, Spearman 0.77 at φ = 0.4), and that is where a reported -->
-<!-- per-site φ means something. -->
-<!-- So the defensible summary is: **the best available estimator of the population -->
-<!-- distribution and of the well-informed sites, and a shrunk summary rather than a -->
-<!-- measurement everywhere else. It is not a per-site measurement of phi at the low -->
-<!-- end, and we do not think any of the six approaches achieves that.** -->
-<!-- Applied to our real counts, the same calibrated rule puts the central φ at -->
-<!-- **0.0052** — about 2.4× below the 0.0126 we had been quoting from the mode of the -->
-<!-- MLE distribution. Worth noting these are different statistics (a median versus a -->
-<!-- mode), but the direction is consistent. -->
+<!-- Dispersion estimation and QTL significance are separate questions. The production -->
+<!-- QTL LRT uses unpenalized maximum-likelihood fits. The shrinkage results here do -->
+<!-- not establish calibration for a shrinkage-based QTL test. -->
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -1929,13 +1507,12 @@ Session information
 </button>
 </p>
 <div id="workflowr-sessioninfo" class="collapse">
-<pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.2.0 (2022-04-22)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: CentOS Linux 8
+Running under: CentOS Linux 7 (Core)
 
 Matrix products: default
-BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
+BLAS/LAPACK: /software/openblas-0.3.13-el7-x86_64/lib/libopenblas_haswellp-r0.3.13.so
 
 locale:
 [1] C
@@ -1944,26 +1521,26 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.0  
+[1] ggplot2_4.0.3     data.table_1.14.2
 
 loaded via a namespace (and not attached):
- [1] tidyselect_1.2.0  xfun_0.38         bslib_0.3.1       lattice_0.20-45  
- [5] splines_4.2.0     colorspace_2.0-3  vctrs_0.6.1       generics_0.1.3   
- [9] viridisLite_0.4.0 htmltools_0.5.7   mgcv_1.8-40       yaml_2.3.5       
-[13] utf8_1.2.2        rlang_1.1.2       R.oo_1.24.0       jquerylib_0.1.4  
-[17] later_1.3.0       pillar_1.9.0      glue_1.6.2        withr_2.5.0      
-[21] R.utils_2.11.0    bit64_4.0.5       lifecycle_1.0.4   stringr_1.5.0    
-[25] munsell_0.5.0     gtable_0.3.0      R.methodsS3_1.8.1 evaluate_0.15    
-[29] labeling_0.4.2    knitr_1.42        callr_3.7.0       fastmap_1.1.0    
-[33] httpuv_1.6.5      ps_1.7.0          fansi_1.0.3       highr_0.9        
-[37] Rcpp_1.0.11       promises_1.2.0.1  scales_1.2.0      jsonlite_1.8.7   
-[41] farver_2.1.0      fs_1.5.2          bit_4.0.4         digest_0.6.29    
-[45] stringi_1.7.6     processx_3.5.3    dplyr_1.1.2       getPass_0.2-2    
-[49] rprojroot_2.0.3   grid_4.2.0        cli_3.6.2         tools_4.2.0      
-[53] magrittr_2.0.3    sass_0.4.1        tibble_3.2.1      whisker_0.4      
-[57] pkgconfig_2.0.3   Matrix_1.6-4      rmarkdown_2.21    httr_1.4.5       
-[61] rstudioapi_0.14   R6_2.5.1          nlme_3.1-157      git2r_0.30.1     
-[65] compiler_4.2.0   </code></pre>
+ [1] tidyselect_1.2.0   xfun_0.41          bslib_0.3.1        lattice_0.20-45   
+ [5] splines_4.2.0      vctrs_0.6.5        generics_0.1.4     htmltools_0.5.2   
+ [9] viridisLite_0.4.0  mgcv_1.8-40        yaml_2.3.5         utf8_1.2.2        
+[13] rlang_1.1.2        R.oo_1.24.0        jquerylib_0.1.4    later_1.3.0       
+[17] pillar_1.9.0       glue_1.6.2         withr_2.5.0        R.utils_2.11.0    
+[21] bit64_4.0.5        RColorBrewer_1.1-3 S7_0.2.0           lifecycle_1.0.4   
+[25] stringr_1.5.1      gtable_0.3.6       workflowr_1.7.0    R.methodsS3_1.8.1 
+[29] evaluate_0.15      labeling_0.4.2     knitr_1.39         fastmap_1.1.0     
+[33] httpuv_1.6.5       fansi_1.0.3        highr_0.9          Rcpp_1.0.12       
+[37] promises_1.2.0.1   scales_1.4.0       jsonlite_1.8.0     farver_2.1.0      
+[41] fs_1.5.2           bit_4.0.4          digest_0.6.29      stringi_1.7.6     
+[45] dplyr_1.1.4        rprojroot_2.0.3    grid_4.2.0         cli_3.6.1         
+[49] tools_4.2.0        magrittr_2.0.3     sass_0.4.1         tibble_3.2.1      
+[53] dichromat_2.0-0.1  whisker_0.4        pkgconfig_2.0.3    Matrix_1.5-3      
+[57] rmarkdown_2.25     rstudioapi_0.13    R6_2.5.1           nlme_3.1-157      
+[61] git2r_0.30.1       compiler_4.2.0    </code></pre>
+</div>
 </div>
 </div>
 
@@ -2035,7 +1612,7 @@ $(document).ready(function ()  {
 
     // establish options
     var options = {
-      selectors: "h1,h2,h3",
+      selectors: "h1,h2",
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
