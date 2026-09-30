@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreed04dc6512a610b1b404e675786c57749e3fa7d92targetblankd04dc65a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee9eedeb2e2b0007c7bf9e132d950097d6a10fca5targetblanke9eedeba">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/d04dc6512a610b1b404e675786c57749e3fa7d92" target="_blank">d04dc65</a>
+<a href="https://github.com/xsun1229/pumseq/tree/e9eedeb2e2b0007c7bf9e132d950097d6a10fca5" target="_blank">e9eedeb</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreed04dc6512a610b1b404e675786c57749e3fa7d92targetblankd04dc65a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee9eedeb2e2b0007c7bf9e132d950097d6a10fca5targetblanke9eedeba"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/d04dc6512a610b1b404e675786c57749e3fa7d92" target="_blank">d04dc65</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/e9eedeb2e2b0007c7bf9e132d950097d6a10fca5" target="_blank">e9eedeb</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -573,7 +573,6 @@ Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Unstaged changes:
-    Modified:   analysis/index.Rmd
     Modified:   analysis/qtl_mapping_betabinomial_null_simulation.Rmd
 
 </code></pre>
@@ -621,6 +620,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/e9eedeb2e2b0007c7bf9e132d950097d6a10fca5/analysis/qtl_mapping_betabinomial_null_simulation.Rmd" target="_blank">e9eedeb</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-30
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/e9eedeb2e2b0007c7bf9e132d950097d6a10fca5/docs/qtl_mapping_betabinomial_null_simulation.html" target="_blank">e9eedeb</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-30
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -720,12 +753,14 @@ optimization starts, maximum likelihood, and no phi prior.</li>
 phi, valid SNP p-values, and any failed fits or dropped tests.</li>
 </ol>
 <p>We repeated this workflow with phi fixed at <strong>0.0126</strong>,
-phi varying across sites with a log-normal distribution centred at
-<strong>0.0126</strong>, and phi fixed at <strong>0.3</strong>. Each
-setting used 10,051 eligible sites and 320,967 attempted SNP tests. We
-call a fit <em>near-zero</em> when its fitted null phi is less than
-one-tenth of the known true phi. This is a practical threshold, not a
-separate biological class.</p>
+phi varying across sites, and phi fixed at <strong>0.3</strong>. In the
+variable-phi setting, each site gets one independent true-phi draw:</p>
+<p><span class="math display">\[\log_{10}(\phi_{\mathrm{true}}) \sim
+N\!\left(\log_{10}(0.0126),\;0.3^2\right).\]</span></p>
+<p>The draw is limited to the range 0.00001 to 0.9. Thus 0.0126 is the
+median true phi on the original scale, while 0.3 is the standard
+deviation on the log10 scale. Each setting used 10,051 eligible sites
+and 320,967 attempted SNP tests.</p>
 <p>The simulation was run by 43.null_simulation_fp.R through
 run_null_simulation.sbatch. Its output tables are in the project’s
 pumseq_processed/psi_qtl/qtl_betabinomial/null_simulation/
@@ -757,6 +792,19 @@ not counted as significant calls.</p>
 </div>
 <div id="false-positives-per-site" class="section level1">
 <h1>False positives per site</h1>
+<p>The bars split testable sites by the phi estimated when the
+<strong>simulated counts are fitted under the null model</strong>:</p>
+<ul>
+<li><strong>Near-zero fit:</strong> fitted null phi is less than
+one-tenth of that site’s known true phi. For example, if true phi =
+0.0126, the cutoff is 0.00126.</li>
+<li><strong>Other fit:</strong> fitted null phi is at least one-tenth of
+that site’s true phi.</li>
+</ul>
+<p>For the variable-phi setting, each site’s own generated true phi sets
+its cutoff. Sites whose null fit failed, or that had no valid SNP tests,
+are not in either bar. “Near-zero” is a practical threshold; the
+estimate need not be exactly zero.</p>
 <p><img src="figure/qtl_mapping_betabinomial_null_simulation.Rmd/site-rates-1.png" alt="" width="864" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-site-rates-1">

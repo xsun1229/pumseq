@@ -68,11 +68,15 @@ For each eligible pU site, we followed the same steps:
    p-values, and any failed fits or dropped tests.
 
 We repeated this workflow with phi fixed at **0.0126**, phi varying across
-sites with a log-normal distribution centred at **0.0126**, and phi fixed at
-**0.3**. Each setting used 10,051 eligible sites and 320,967 attempted SNP
-tests. We call a fit *near-zero* when its fitted null phi is less than one-tenth
-of the known true phi. This is a practical threshold, not a separate
-biological class.
+sites, and phi fixed at **0.3**. In the variable-phi setting, each site gets
+one independent true-phi draw:
+
+$$\log_{10}(\phi_{\mathrm{true}}) \sim N\!\left(\log_{10}(0.0126),\;0.3^2\right).$$
+
+The draw is limited to the range 0.00001 to 0.9. Thus 0.0126 is the median
+true phi on the original scale, while 0.3 is the standard deviation on the
+log10 scale. Each setting used 10,051 eligible sites and 320,967 attempted
+SNP tests.
 
 The simulation was run by 43.null_simulation_fp.R through
 run_null_simulation.sbatch. Its output tables are in the project's
@@ -102,6 +106,18 @@ Fits without a valid p-value are reported separately below; they are not
 counted as significant calls.
 
 # False positives per site
+
+The bars split testable sites by the phi estimated when the **simulated counts
+are fitted under the null model**:
+
+- **Near-zero fit:** fitted null phi is less than one-tenth of that site's
+  known true phi. For example, if true phi = 0.0126, the cutoff is 0.00126.
+- **Other fit:** fitted null phi is at least one-tenth of that site's true phi.
+
+For the variable-phi setting, each site's own generated true phi sets its
+cutoff. Sites whose null fit failed, or that had no valid SNP tests, are not
+in either bar. "Near-zero" is a practical threshold; the estimate need not
+be exactly zero.
 
 ```{r site-rates, fig.width=9, fig.height=4.8}
 ggplot(site_rate, aes(scenario_label, 100 * rate, fill = collapsed)) +
