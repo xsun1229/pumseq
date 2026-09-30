@@ -403,7 +403,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-09-29
+<strong>Last updated:</strong> 2026-09-30
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -441,10 +441,10 @@ changes </a>
 <div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown is untracked by Git. To know which version of the R
-Markdown file created these results, you’ll want to first commit it to
-the Git repo. If you’re still working on the analysis, you can ignore
-this warning. When you’re finished, you can run
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
 <code>wflow_publish</code> to commit the R Markdown file and build the
 HTML.</p>
 </div>
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreec3f8f5ac5cd8ba138a50e0761ff1db9fb36323e6targetblankc3f8f5aa">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreed04dc6512a610b1b404e675786c57749e3fa7d92targetblankd04dc65a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/c3f8f5ac5cd8ba138a50e0761ff1db9fb36323e6" target="_blank">c3f8f5a</a>
+<a href="https://github.com/xsun1229/pumseq/tree/d04dc6512a610b1b404e675786c57749e3fa7d92" target="_blank">d04dc65</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreec3f8f5ac5cd8ba138a50e0761ff1db9fb36323e6targetblankc3f8f5aa"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreed04dc6512a610b1b404e675786c57749e3fa7d92targetblankd04dc65a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/c3f8f5ac5cd8ba138a50e0761ff1db9fb36323e6" target="_blank">c3f8f5a</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/d04dc6512a610b1b404e675786c57749e3fa7d92" target="_blank">d04dc65</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -572,11 +572,9 @@ were generated:
 Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
-Untracked files:
-    Untracked:  analysis/qtl_mapping_betabinomial_null_simulation.Rmd
-
 Unstaged changes:
     Modified:   analysis/index.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_null_simulation.Rmd
 
 </code></pre>
 <p>
@@ -591,10 +589,75 @@ have uncommitted changes.
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
+
 <p>
-There are no past versions. Publish this analysis with
-<code>wflow_publish()</code> to start tracking its development.
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>analysis/qtl_mapping_betabinomial_null_simulation.Rmd</code>) and
+HTML (<code>docs/qtl_mapping_betabinomial_null_simulation.html</code>)
+files. If you’ve configured a remote Git repository (see
+<code>?wflow_git_remote</code>), click on the hyperlinks in the table
+below to view the files as they were in that past version.
 </p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/d04dc6512a610b1b404e675786c57749e3fa7d92/analysis/qtl_mapping_betabinomial_null_simulation.Rmd" target="_blank">d04dc65</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-29
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/d04dc6512a610b1b404e675786c57749e3fa7d92/docs/qtl_mapping_betabinomial_null_simulation.html" target="_blank">d04dc65</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-29
+</td>
+<td>
+update
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <hr>
 </div>
 </div>
@@ -628,50 +691,110 @@ fmt_n &lt;- function(x) format(x, big.mark = &quot;,&quot;, trim = TRUE, scienti
 <p>In the <a
 href="qtl_mapping_betabinomial_phi_estimation.html">dispersion-recovery
 analysis</a>, we found that the estimated beta-binomial dispersion (phi)
-can be close to zero at a site even when the true phi is positive. Xin’s
-question is whether those sites then produce <strong>false-positive
-pU-QTLs</strong>. We tested that directly by simulating counts with
-<strong>no genotype effect</strong> and running the production QTL
-test.</p>
-<p><strong>Main result:</strong> At true phi = 0.0126, the sites with a
-near-zero fitted phi had <em>fewer</em> significant QTLs than the
-nominal 5% site-level benchmark: <strong>1.35%</strong> (62 of 4,595
-testable sites). The other sites were at <strong>5.32%</strong> (265 of
-4,982). A near-zero phi estimate therefore did <strong>not</strong>
-produce the false-positive excess we feared in this simulation. The
-beta-binomial test still showed some excess in the aggregate small-p
-tail, especially in the large-phi scenario; that deserves separate
-investigation.</p>
+can be close to zero at a site even when the true phi is positive. Could
+those sites produce false pU-QTLs? We generated counts <strong>without
+using genotype</strong>, then tested those counts against the real
+genotypes using the production QTL test.</p>
+<p><strong>Main result:</strong> Near-zero phi fits had fewer site-level
+false positives than other fits in all three settings: <strong>1.35% vs
+5.32%</strong> with phi fixed at 0.0126, <strong>1.46% vs 5.47%</strong>
+with phi varying across sites, and <strong>2.68% vs 5.85%</strong> with
+phi fixed at 0.3. The nominal site-level benchmark is at most 5%. Thus,
+these simulations do not implicate near-zero phi estimates as the source
+of false positives. The SNP-level small-p tail is still inflated, most
+strongly at phi = 0.3; this is a separate calibration concern.</p>
 <div id="how-the-null-was-made" class="section level1">
 <h1>How the null was made</h1>
-<p>For each eligible pU site, we retained its real per-cell-line read
-depths and the mean pU probabilities fitted under the <em>null</em>
-model with an intercept and three phenotype PCs. We simulated
-beta-binomial counts at a known phi, without using genotype to generate
-the counts. We then tested every real cis-SNP within 5 kb using the
-production beta-binomial likelihood-ratio test: three optimization
-starts, maximum likelihood, and no phi prior.</p>
-<p>There were three settings: phi fixed at <strong>0.0126</strong>, phi
-varying across sites with a log-normal distribution centred at
+<p>For each eligible pU site, we followed the same steps:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Keep the real data structure:</strong> the read depth of
+each cell line and its expected pU rate from the fitted null model
+(intercept plus three phenotype PCs).</li>
+<li><strong>Generate new counts:</strong> choose a known true phi and
+simulate beta-binomial counts. Genotypes play no part in this step, so
+there is no true QTL.</li>
+<li><strong>Run the production QTL test:</strong> test the real cis-SNPs
+within 5 kb using the beta-binomial likelihood-ratio test with three
+optimization starts, maximum likelihood, and no phi prior.</li>
+<li><strong>Compare with the known null:</strong> record the fitted null
+phi, valid SNP p-values, and any failed fits or dropped tests.</li>
+</ol>
+<p>We repeated this workflow with phi fixed at <strong>0.0126</strong>,
+phi varying across sites with a log-normal distribution centred at
 <strong>0.0126</strong>, and phi fixed at <strong>0.3</strong>. Each
 setting used 10,051 eligible sites and 320,967 attempted SNP tests. We
 call a fit <em>near-zero</em> when its fitted null phi is less than
-one-tenth of the known true phi. This includes small fitted values above
-the numerical floor; it is a practical threshold, not a separate
-biological class.</p>
+one-tenth of the known true phi. This is a practical threshold, not a
+separate biological class.</p>
 <p>The simulation was run by 43.null_simulation_fp.R through
 run_null_simulation.sbatch. Its output tables are in the project’s
 pumseq_processed/psi_qtl/qtl_betabinomial/null_simulation/
 directory.</p>
 </div>
+<div id="how-we-count-false-positives" class="section level1">
+<h1>How we count false positives</h1>
+<p>Genotype is not used to generate the simulated counts: the generator
+uses each cell line’s read depth, its expected pU rate from a model with
+no SNP term, and the chosen true phi. Genotype enters only afterward, in
+the QTL test. The true genotype effect in these simulated data is
+therefore zero, so any significant QTL call is a false positive. We
+summarize those calls in two ways:</p>
+<ul>
+<li><strong>Per site (the main answer):</strong> Among sites with at
+least one valid test, call a site positive if its smallest cis-SNP
+p-value is below <strong>0.05 / number of valid SNP tests at that
+site</strong>. For example, with 20 valid SNP tests, the cutoff is
+0.0025. The false-positive rate is the fraction of testable sites that
+pass this cutoff. Under a calibrated null, <strong>5% is an upper
+bound</strong> on this rate; correlated SNPs can make it lower.</li>
+<li><strong>Per SNP (a calibration check):</strong> Among valid tests,
+compare the observed fraction with p &lt; 0.0001 to the 0.0001 expected
+from uniform null p-values. A ratio above 1 means an excess of small
+p-values. The QQ plots show the full p-value distribution.</li>
+</ul>
+<p>Fits without a valid p-value are reported separately below; they are
+not counted as significant calls.</p>
+</div>
 <div id="false-positives-per-site" class="section level1">
 <h1>False positives per site</h1>
-<p>For each site with at least one valid beta-binomial test, we asked
-whether its smallest cis-SNP p-value passed a within-site Bonferroni
-threshold of 0.05 / number of valid tests. Under a well-calibrated null,
-5% is an <strong>upper bound</strong> on this site-level rate, not an
-exact target, because cis-SNPs are correlated.</p>
 <p><img src="figure/qtl_mapping_betabinomial_null_simulation.Rmd/site-rates-1.png" alt="" width="864" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-site-rates-1">
+Past versions of site-rates-1.png
+</button>
+</p>
+<div id="fig-site-rates-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/d04dc6512a610b1b404e675786c57749e3fa7d92/docs/figure/qtl_mapping_betabinomial_null_simulation.Rmd/site-rates-1.png" target="_blank">d04dc65</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-29
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <table>
 <caption>A site is testable here if it has at least one finite
 beta-binomial p-value.</caption>
@@ -741,6 +864,43 @@ diagonal indicate more small p-values than expected. These plots use
 every <em>valid</em> beta-binomial test; only plotting points are
 thinned.</p>
 <p><img src="figure/qtl_mapping_betabinomial_null_simulation.Rmd/qq-1.png" alt="" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq-1">
+Past versions of qq-1.png
+</button>
+</p>
+<div id="fig-qq-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/d04dc6512a610b1b404e675786c57749e3fa7d92/docs/figure/qtl_mapping_betabinomial_null_simulation.Rmd/qq-1.png" target="_blank">d04dc65</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-29
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <table>
 <caption>SNP-level tail rates are among valid beta-binomial tests. With
 300,000 tests, a uniform null predicts about 30 p-values below
@@ -893,11 +1053,11 @@ scenario, so a small difference from 5% should not be overinterpreted.
 It tests genotype-free data under the fitted beta-binomial mean
 structure and the observed coverage and cis-SNP patterns. It does not
 address every form of model misspecification in real pU counts.</p>
-<p>The practical answer to Xin’s question is that <strong>phi collapse
-itself did not generate excess false positives in these null
-simulations</strong>. We still need to understand the excess among
-non-collapsed fits, particularly when true phi is large, before
-describing the full QTL test as calibrated under all conditions.</p>
+<p>In these null simulations, <strong>phi collapse itself did not
+generate excess false positives</strong>. We still need to understand
+the excess among non-collapsed fits, particularly when true phi is
+large, before describing the full QTL test as calibrated under all
+conditions.</p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">

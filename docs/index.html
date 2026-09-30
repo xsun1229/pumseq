@@ -13,7 +13,7 @@
 
 <title>PUM-seq</title>
 
-<script src="site_libs/header-attrs-2.31/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
@@ -32,8 +32,8 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
-<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
 
 <link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
 <!-- Add a small amount of space between sections. -->
@@ -328,7 +328,7 @@ title="This is the local directory in which the code in this file was executed."
 This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
 analysis was created with <a
   href="https://github.com/workflowr/workflowr">workflowr</a> (version
-1.7.1). The <em>Checks</em> tab describes the reproducibility checks
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
 that were applied when the results were created. The <em>Past
 versions</em> tab lists the development history.
 </p>
@@ -360,15 +360,15 @@ HTML.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreec3f8f5ac5cd8ba138a50e0761ff1db9fb36323e6targetblankc3f8f5aa">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreed04dc6512a610b1b404e675786c57749e3fa7d92targetblankd04dc65a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/c3f8f5ac5cd8ba138a50e0761ff1db9fb36323e6" target="_blank">c3f8f5a</a>
+<a href="https://github.com/xsun1229/pumseq/tree/d04dc6512a610b1b404e675786c57749e3fa7d92" target="_blank">d04dc65</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreec3f8f5ac5cd8ba138a50e0761ff1db9fb36323e6targetblankc3f8f5aa"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreed04dc6512a610b1b404e675786c57749e3fa7d92targetblankd04dc65a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -378,7 +378,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/c3f8f5ac5cd8ba138a50e0761ff1db9fb36323e6" target="_blank">c3f8f5a</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/d04dc6512a610b1b404e675786c57749e3fa7d92" target="_blank">d04dc65</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -395,11 +395,9 @@ were generated:
 Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
-Untracked files:
-    Untracked:  analysis/qtl_mapping_betabinomial_null_simulation.Rmd
-
 Unstaged changes:
     Modified:   analysis/index.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_null_simulation.Rmd
 
 </code></pre>
 <p>
@@ -444,6 +442,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/d04dc6512a610b1b404e675786c57749e3fa7d92/analysis/index.Rmd" target="_blank">d04dc65</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-29
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/d04dc6512a610b1b404e675786c57749e3fa7d92/docs/index.html" target="_blank">d04dc65</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-29
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1582,63 +1614,88 @@ reproducibility filtering of joint-pooled pU site calling</a></li>
 </div>
 <div id="qtl-mapping" class="section level1">
 <h1>QTL mapping</h1>
-<p>linear regression</p>
+<div id="linear-regression" class="section level2">
+<h2>Linear regression</h2>
 <ul>
 <li><a href="qtl_mapping_summary_floor0_quantile.html">QTL mapping
 summary: Treated - input, floor0, quantile normalization, linear
 regression</a></li>
 </ul>
-<p>Binomial</p>
+</div>
+<div id="binomial" class="section level2">
+<h2>Binomial</h2>
 <ul>
 <li><a href="qtl_mapping_binomial_model.html">Binomial GLM
 model</a></li>
 <li><a href="qtl_mapping_summary_binomial.html">QTL mapping summary:
 binomial GLM on the 5-fold union sites</a></li>
 </ul>
-<p>Beta Binomial</p>
+</div>
+<div id="beta-binomial" class="section level2">
+<h2>Beta-binomial</h2>
+<p>These pages follow the analysis from the model and fitter through
+calibration and the latest null simulations. Earlier exploratory pages
+are kept below for context; their superseded conclusions are
+identified.</p>
+<div id="model-and-fitter" class="section level3">
+<h3>1. Model and fitter</h3>
 <ul>
-<li><a href="qtl_mapping_betabinomial_model.html">Beta Binomial GLM
-model</a></li>
-<li><a href="qtl_mapping_summary_betabinomial.html">QTL mapping summary:
-beta binomial GLM on the 5-fold union sites</a></li>
-<li><a href="qtl_mapping_betabinomial_diagnostic.html">Beta-binomial
-top-hit diagnostic: genotype vs. %pU for the top 20 QTLs</a></li>
-<li><a href="qtl_mapping_betabinomial_strategy.html">Filtering strategy
-and its calibration (real + 5 permutations)</a> – <em>superseded: its
-phi &gt; 0.99 filter is no longer needed, see <a
-href="qtl_mapping_betabinomial_optimiser.html">the optimiser
-page</a></em></li>
-<li><a href="qtl_mapping_betabinomial_gof_failed.html">A goodness-of-fit
-test that did not work, and what it revealed</a></li>
-<li><a href="qtl_mapping_betabinomial_npcs_tradeoff.html">How many
-covariate PCs? The phi-boundary / fittability trade-off</a> – <em>the
-phi-boundary part is superseded by <a
-href="qtl_mapping_betabinomial_optimiser.html">the optimiser page</a>;
-the PC choice is settled on <a
-href="qtl_mapping_betabinomial_grid.html">the calibration
-grid</a></em></li>
-<li><a
-href="qtl_mapping_betabinomial_problematic_diagnosis.html">Diagnosing
-the problematic sites: %pU by genotype, phi, and the fitted prior on
-p_i</a> – <em>old single-start fitter; superseded by <a
-href="qtl_mapping_betabinomial_problematic_sites_revisited.html">the 9
-problematic sites, revisited</a></em></li>
-<li><a href="qtl_mapping_betabinomial_optimiser.html">The phi pathology
-is an optimiser failure (multi-start audit)</a></li>
-<li><a href="qtl_mapping_betabinomial_grid.html">Window x nPC
-calibration grid: 24 cells, real + 5 permutations</a></li>
-<li><a href="qtl_mapping_betabinomial_lowphi.html">Is the overdispersion
-really that small? Validating the phi peak</a></li>
-<li><a href="qtl_mapping_betabinomial_phi_estimation.html">How well can
-we estimate dispersion at each pU site?</a></li>
-<li><a href="qtl_mapping_betabinomial_null_simulation.html">Does a
-near-zero dispersion estimate create false pU-QTLs? (Null
-simulation)</a></li>
+<li><a href="qtl_mapping_betabinomial_model.html">Beta-binomial model
+and likelihood-ratio test</a></li>
+<li><a href="qtl_mapping_betabinomial_optimiser.html">Why the
+single-start fitter failed, and the multi-start correction</a></li>
+</ul>
+</div>
+<div id="calibration-and-site-diagnostics" class="section level3">
+<h3>2. Calibration and site diagnostics</h3>
+<ul>
+<li><a href="qtl_mapping_betabinomial_grid.html">Choosing the cis window
+and number of PCs: calibration grid</a></li>
 <li><a
 href="qtl_mapping_betabinomial_problematic_sites_revisited.html">The 9
-problematic sites, revisited: large phi, all-or-nothing %pU, and
-inherited C</a></li>
+problematic sites revisited: large phi, pU patterns, and inherited
+C</a></li>
 </ul>
+</div>
+<div id="dispersion-and-false-positives" class="section level3">
+<h3>3. Dispersion and false positives</h3>
+<ul>
+<li><a href="qtl_mapping_betabinomial_lowphi.html">Is the small
+dispersion peak real?</a></li>
+<li><a href="qtl_mapping_betabinomial_phi_estimation.html">How well can
+we estimate dispersion at each site?</a></li>
+<li><a href="qtl_mapping_betabinomial_null_simulation.html">Do near-zero
+dispersion estimates create false pU-QTLs? Null simulation</a></li>
+</ul>
+</div>
+<div id="earlier-exploratory-analyses" class="section level3">
+<h3>Earlier exploratory analyses</h3>
+<p>These document how the current approach was reached. Read them with
+the later fitter and calibration results above in mind.</p>
+<ul>
+<li><a href="qtl_mapping_summary_betabinomial.html">Initial
+beta-binomial QTL scan across PC counts and windows</a> — preliminary
+100-permutation scan, before the multi-start correction.</li>
+<li><a href="qtl_mapping_betabinomial_diagnostic.html">Top-hit
+diagnostic: genotype versus pU rate</a> — investigates hits from the
+initial scan.</li>
+<li><a href="qtl_mapping_betabinomial_strategy.html">Initial filtering
+strategy and permutation calibration</a> — the phi &gt; 0.99 filter was
+made unnecessary by the multi-start fitter.</li>
+<li><a href="qtl_mapping_betabinomial_gof_failed.html">An unsuccessful
+goodness-of-fit test and what it revealed</a> — a diagnostic
+investigation, not a recommended test.</li>
+<li><a href="qtl_mapping_betabinomial_npcs_tradeoff.html">Initial
+PC-count and fit-boundary trade-off</a> — the boundary issue was an
+optimiser artifact; the calibration grid above settles the PC
+choice.</li>
+<li><a
+href="qtl_mapping_betabinomial_problematic_diagnosis.html">Initial
+diagnosis of the problematic sites</a> — uses the old single-start
+fitter; the revised site analysis is above.</li>
+</ul>
+</div>
+</div>
 </div>
 
 

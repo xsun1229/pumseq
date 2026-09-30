@@ -40,46 +40,68 @@ fmt_n <- function(x) format(x, big.mark = ",", trim = TRUE, scientific = FALSE)
 
 In the [dispersion-recovery analysis](qtl_mapping_betabinomial_phi_estimation.html),
 we found that the estimated beta-binomial dispersion (phi) can be close to zero
-at a site even when the true phi is positive. Xin's question is whether those
-sites then produce **false-positive pU-QTLs**. We tested that directly by
-simulating counts with **no genotype effect** and running the production QTL
-test.
+at a site even when the true phi is positive. Could those sites produce false
+pU-QTLs? We generated counts **without using genotype**, then tested those
+counts against the real genotypes using the production QTL test.
 
-**Main result:** At true phi = 0.0126, the sites with a near-zero fitted phi
-had *fewer* significant QTLs than the nominal 5% site-level benchmark:
-**1.35%** (62 of 4,595 testable sites). The other sites were at **5.32%**
-(265 of 4,982). A near-zero phi estimate therefore did **not** produce the
-false-positive excess we feared in this simulation. The beta-binomial test
-still showed some excess in the aggregate small-p tail, especially in the
-large-phi scenario; that deserves separate investigation.
+**Main result:** Near-zero phi fits had fewer site-level false positives than
+other fits in all three settings: **1.35% vs 5.32%** with phi fixed at 0.0126,
+**1.46% vs 5.47%** with phi varying across sites, and **2.68% vs 5.85%** with
+phi fixed at 0.3. The nominal site-level benchmark is at most 5%. Thus, these
+simulations do not implicate near-zero phi estimates as the source of false
+positives. The SNP-level small-p tail is still inflated, most strongly at
+phi = 0.3; this is a separate calibration concern.
 
 # How the null was made
 
-For each eligible pU site, we retained its real per-cell-line read depths and
-the mean pU probabilities fitted under the *null* model with an intercept and
-three phenotype PCs. We simulated beta-binomial counts at a known phi, without
-using genotype to generate the counts. We then tested every real cis-SNP within
-5 kb using the production beta-binomial likelihood-ratio test: three
-optimization starts, maximum likelihood, and no phi prior.
+For each eligible pU site, we followed the same steps:
 
-There were three settings: phi fixed at **0.0126**, phi varying across sites
-with a log-normal distribution centred at **0.0126**, and phi fixed at **0.3**.
-Each setting used 10,051 eligible sites and 320,967 attempted SNP tests.
-We call a fit *near-zero* when its fitted null phi is less than one-tenth of
-the known true phi. This includes small fitted values above the numerical
-floor; it is a practical threshold, not a separate biological class.
+1. **Keep the real data structure:** the read depth of each cell line and its
+   expected pU rate from the fitted null model (intercept plus three phenotype
+   PCs).
+2. **Generate new counts:** choose a known true phi and simulate beta-binomial
+   counts. Genotypes play no part in this step, so there is no true QTL.
+3. **Run the production QTL test:** test the real cis-SNPs within 5 kb using
+   the beta-binomial likelihood-ratio test with three optimization starts,
+   maximum likelihood, and no phi prior.
+4. **Compare with the known null:** record the fitted null phi, valid SNP
+   p-values, and any failed fits or dropped tests.
+
+We repeated this workflow with phi fixed at **0.0126**, phi varying across
+sites with a log-normal distribution centred at **0.0126**, and phi fixed at
+**0.3**. Each setting used 10,051 eligible sites and 320,967 attempted SNP
+tests. We call a fit *near-zero* when its fitted null phi is less than one-tenth
+of the known true phi. This is a practical threshold, not a separate
+biological class.
 
 The simulation was run by 43.null_simulation_fp.R through
 run_null_simulation.sbatch. Its output tables are in the project's
 pumseq_processed/psi_qtl/qtl_betabinomial/null_simulation/ directory.
 
-# False positives per site
+# How we count false positives
 
-For each site with at least one valid beta-binomial test, we asked whether its
-smallest cis-SNP p-value passed a within-site Bonferroni threshold of
-0.05 / number of valid tests. Under a well-calibrated null, 5% is an
-**upper bound** on this site-level rate, not an exact target, because cis-SNPs
-are correlated.
+Genotype is not used to generate the simulated counts: the generator uses
+each cell line's read depth, its expected pU rate from a model with no SNP
+term, and the chosen true phi. Genotype enters only afterward, in the QTL
+test. The true genotype effect in these simulated data is therefore zero,
+so any significant QTL call is a false positive. We summarize those calls
+in two ways:
+
+- **Per site (the main answer):** Among sites with at least one valid test,
+  call a site positive if its smallest cis-SNP p-value is below
+  **0.05 / number of valid SNP tests at that site**. For example, with 20
+  valid SNP tests, the cutoff is 0.0025. The false-positive rate is the
+  fraction of testable sites that pass this cutoff. Under a calibrated null,
+  **5% is an upper bound** on this rate; correlated SNPs can make it lower.
+- **Per SNP (a calibration check):** Among valid tests, compare the observed
+  fraction with p < 0.0001 to the 0.0001 expected from uniform null
+  p-values. A ratio above 1 means an excess of small p-values. The QQ plots
+  show the full p-value distribution.
+
+Fits without a valid p-value are reported separately below; they are not
+counted as significant calls.
+
+# False positives per site
 
 ```{r site-rates, fig.width=9, fig.height=4.8}
 ggplot(site_rate, aes(scenario_label, 100 * rate, fill = collapsed)) +
@@ -202,7 +224,7 @@ under the fitted beta-binomial mean structure and the observed coverage and
 cis-SNP patterns. It does not address every form of model misspecification in
 real pU counts.
 
-The practical answer to Xin's question is that **phi collapse itself did not
-generate excess false positives in these null simulations**. We still need to
+In these null simulations, **phi collapse itself did not generate excess
+false positives**. We still need to
 understand the excess among non-collapsed fits, particularly when true phi is
 large, before describing the full QTL test as calibrated under all conditions.

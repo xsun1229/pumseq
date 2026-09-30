@@ -37,30 +37,45 @@ editor_options:
 
 # QTL mapping
 
-linear regression
+## Linear regression
 
 * [QTL mapping summary: Treated - input, floor0, quantile normalization, linear regression](qtl_mapping_summary_floor0_quantile.html)
 
-Binomial
+## Binomial
 
 * [Binomial GLM model](qtl_mapping_binomial_model.html)
 * [QTL mapping summary: binomial GLM on the 5-fold union sites](qtl_mapping_summary_binomial.html)
 
-Beta Binomial
+## Beta-binomial
 
-* [Beta Binomial GLM model](qtl_mapping_betabinomial_model.html)
-* [QTL mapping summary: beta binomial GLM on the 5-fold union sites](qtl_mapping_summary_betabinomial.html)
-* [Beta-binomial top-hit diagnostic: genotype vs. %pU for the top 20 QTLs](qtl_mapping_betabinomial_diagnostic.html)
-* [Filtering strategy and its calibration (real + 5 permutations)](qtl_mapping_betabinomial_strategy.html) -- *superseded: its phi > 0.99 filter is no longer needed, see [the optimiser page](qtl_mapping_betabinomial_optimiser.html)*
-* [A goodness-of-fit test that did not work, and what it revealed](qtl_mapping_betabinomial_gof_failed.html)
-* [How many covariate PCs? The phi-boundary / fittability trade-off](qtl_mapping_betabinomial_npcs_tradeoff.html) -- *the phi-boundary part is superseded by [the optimiser page](qtl_mapping_betabinomial_optimiser.html); the PC choice is settled on [the calibration grid](qtl_mapping_betabinomial_grid.html)*
-* [Diagnosing the problematic sites: %pU by genotype, phi, and the fitted prior on p_i](qtl_mapping_betabinomial_problematic_diagnosis.html) -- *old single-start fitter; superseded by [the 9 problematic sites, revisited](qtl_mapping_betabinomial_problematic_sites_revisited.html)*
-* [The phi pathology is an optimiser failure (multi-start audit)](qtl_mapping_betabinomial_optimiser.html)
-* [Window x nPC calibration grid: 24 cells, real + 5 permutations](qtl_mapping_betabinomial_grid.html)
-* [Is the overdispersion really that small? Validating the phi peak](qtl_mapping_betabinomial_lowphi.html)
-* [How well can we estimate dispersion at each pU site?](qtl_mapping_betabinomial_phi_estimation.html)
-* [Does a near-zero dispersion estimate create false pU-QTLs? (Null simulation)](qtl_mapping_betabinomial_null_simulation.html)
-* [The 9 problematic sites, revisited: large phi, all-or-nothing %pU, and inherited C](qtl_mapping_betabinomial_problematic_sites_revisited.html)
+These pages follow the analysis from the model and fitter through calibration
+and the latest null simulations. Earlier exploratory pages are kept below for
+context; their superseded conclusions are identified.
 
+### 1. Model and fitter
 
+* [Beta-binomial model and likelihood-ratio test](qtl_mapping_betabinomial_model.html)
+* [Why the single-start fitter failed, and the multi-start correction](qtl_mapping_betabinomial_optimiser.html)
 
+### 2. Calibration and site diagnostics
+
+* [Choosing the cis window and number of PCs: calibration grid](qtl_mapping_betabinomial_grid.html)
+* [The 9 problematic sites revisited: large phi, pU patterns, and inherited C](qtl_mapping_betabinomial_problematic_sites_revisited.html)
+
+### 3. Dispersion and false positives
+
+* [Is the small dispersion peak real?](qtl_mapping_betabinomial_lowphi.html)
+* [How well can we estimate dispersion at each site?](qtl_mapping_betabinomial_phi_estimation.html)
+* [Do near-zero dispersion estimates create false pU-QTLs? Null simulation](qtl_mapping_betabinomial_null_simulation.html)
+
+### Earlier exploratory analyses
+
+These document how the current approach was reached. Read them with the later
+fitter and calibration results above in mind.
+
+* [Initial beta-binomial QTL scan across PC counts and windows](qtl_mapping_summary_betabinomial.html) — preliminary 100-permutation scan, before the multi-start correction.
+* [Top-hit diagnostic: genotype versus pU rate](qtl_mapping_betabinomial_diagnostic.html) — investigates hits from the initial scan.
+* [Initial filtering strategy and permutation calibration](qtl_mapping_betabinomial_strategy.html) — the phi > 0.99 filter was made unnecessary by the multi-start fitter.
+* [An unsuccessful goodness-of-fit test and what it revealed](qtl_mapping_betabinomial_gof_failed.html) — a diagnostic investigation, not a recommended test.
+* [Initial PC-count and fit-boundary trade-off](qtl_mapping_betabinomial_npcs_tradeoff.html) — the boundary issue was an optimiser artifact; the calibration grid above settles the PC choice.
+* [Initial diagnosis of the problematic sites](qtl_mapping_betabinomial_problematic_diagnosis.html) — uses the old single-start fitter; the revised site analysis is above.
