@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-10-05" />
+
+<title>Beta-binomial QTL mapping: phenotype and genotype data</title>
+
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Beta-binomial QTL mapping: phenotype and
+genotype data</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-10-05</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-10-05
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreed47131dcd425a34bf814ace0d05d6774fd865810targetblankd47131da">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/d47131dcd425a34bf814ace0d05d6774fd865810" target="_blank">d47131d</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreed47131dcd425a34bf814ace0d05d6774fd865810targetblankd47131da"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/d47131dcd425a34bf814ace0d05d6774fd865810" target="_blank">d47131d</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/qtl_mapping_betabinomial_data.Rmd
+    Untracked:  analysis/qtl_mapping_binomial_data.Rmd
+    Untracked:  analysis/qtl_mapping_linear_data.Rmd
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>suppressMessages(library(data.table))
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+PR    &lt;- &quot;/project/xinhe/xsun/pumseq/pumseq_processed&quot;
+PH    &lt;- file.path(PR, &quot;psi_qtl/phenotype&quot;)
+FINAL &lt;- file.path(PH, &quot;fold5_union_auto_noUCcalled&quot;)
+GENO  &lt;- file.path(PR, &quot;psi_qtl/genotype&quot;)
+fmt &lt;- function(x) format(x, big.mark = &quot;,&quot;, trim = TRUE, scientific = FALSE)
+nrows &lt;- function(d) nrow(fread(file.path(PH, d, &quot;counts/C_matrix.txt.gz&quot;), select = 1))
+
+C  &lt;- fread(file.path(FINAL, &quot;counts/C_matrix.txt.gz&quot;)); N &lt;- fread(file.path(FINAL, &quot;counts/N_matrix.txt.gz&quot;))
+cls &lt;- setdiff(names(C), c(&quot;ref&quot;, &quot;pos&quot;, &quot;strand&quot;))
+Nm &lt;- as.matrix(N[, ..cls])
+ri &lt;- fread(file.path(FINAL, &quot;runinfo.txt&quot;)); rv &lt;- function(k) ri[parameter == k, value]
+man &lt;- fread(file.path(FINAL, &quot;site_exclusion_manifest.txt.gz&quot;))
+pc_old &lt;- fread(file.path(PH, &quot;fold5_union/mvalue_pcs.txt&quot;)); pc_new &lt;- fread(file.path(FINAL, &quot;mvalue_pcs.txt&quot;))
+stopifnot(identical(pc_old$sample, pc_new$sample))
+
+tlog &lt;- readLines(file.path(GENO, &quot;qtl_binomial/genotype_common.log&quot;))
+n_snp &lt;- as.numeric(sub(&quot;^\\D*?(\\d+).*&quot;, &quot;\\1&quot;, grep(&quot;variants remaining after main filters&quot;, tlog, value = TRUE)[1]))</code></pre>
+<p>This page describes the inputs to the beta-binomial pU-QTL analysis:
+the calibration runs, the window x PC grid, and the scans that follow.
+The model is on the <a
+href="qtl_mapping_betabinomial_model.html">beta-binomial model
+page</a>.</p>
+<pre class="r"><code>knitr::kable(data.table(
+  item = c(&quot;cell lines&quot;, &quot;pU sites&quot;, &quot;phenotype&quot;, &quot;covariates&quot;, &quot;genotypes&quot;, &quot;cis window&quot;, &quot;fitter&quot;),
+  value = c(sprintf(&quot;%d (CL19039 has no genotype and is excluded)&quot;, length(cls)),
+            sprintf(&quot;%s: the 5-fold union sites on chr1-22, minus sites with a called U/C variant&quot;, fmt(nrow(C))),
+            &quot;raw read counts: converted reads C out of depth N = C + T, per site and cell line&quot;,
+            &quot;M-value PCs recomputed on the filtered sites; k = 3&quot;,
+            sprintf(&quot;%s biallelic SNPs with MAF &gt;= 0.05 (same as the binomial model)&quot;, fmt(n_snp)),
+            &quot;+/-5 kb for calibration; 5 to 100 kb compared on the grid&quot;,
+            &quot;beta-binomial maximum likelihood, multi-start, likelihood-ratio test&quot;)),
+  col.names = c(&quot;&quot;, &quot;&quot;), caption = &quot;What the beta-binomial model sees.&quot;)</code></pre>
+<table>
+<caption>What the beta-binomial model sees.</caption>
+<colgroup>
+<col width="11%" />
+<col width="88%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td align="left">cell lines</td>
+<td align="left">50 (CL19039 has no genotype and is excluded)</td>
+</tr>
+<tr class="even">
+<td align="left">pU sites</td>
+<td align="left">10,738: the 5-fold union sites on chr1-22, minus sites
+with a called U/C variant</td>
+</tr>
+<tr class="odd">
+<td align="left">phenotype</td>
+<td align="left">raw read counts: converted reads C out of depth N = C +
+T, per site and cell line</td>
+</tr>
+<tr class="even">
+<td align="left">covariates</td>
+<td align="left">M-value PCs recomputed on the filtered sites; k =
+3</td>
+</tr>
+<tr class="odd">
+<td align="left">genotypes</td>
+<td align="left">8,538,509 biallelic SNPs with MAF &gt;= 0.05 (same as
+the binomial model)</td>
+</tr>
+<tr class="even">
+<td align="left">cis window</td>
+<td align="left">+/-5 kb for calibration; 5 to 100 kb compared on the
+grid</td>
+</tr>
+<tr class="odd">
+<td align="left">fitter</td>
+<td align="left">beta-binomial maximum likelihood, multi-start,
+likelihood-ratio test</td>
+</tr>
+</tbody>
+</table>
+<div id="sites" class="section level1">
+<h1>1. Sites</h1>
+<p>The starting point is the same <strong>5-fold union</strong> site set
+as the binomial model (see its <a
+href="qtl_mapping_binomial_data.html">data page</a> and the <a
+href="mRNA_5fold_union_site_calling.html">5-fold site-calling page</a>).
+Two filters are applied by <code>13.filtered_phenotype.R</code>:</p>
+<pre class="r"><code>knitr::kable(data.table(
+  step = c(&quot;5-fold union sites&quot;, &quot;on chr1-22 (the genotype panel is autosomal)&quot;,
+           &quot;minus sites with a U/C variant called on the pU base&quot;),
+  sites = fmt(c(nrows(&quot;fold5_union&quot;), as.numeric(rv(&quot;n_sites_in&quot;)), as.numeric(rv(&quot;n_retained&quot;))))),
+  caption = sprintf(&quot;%s sites removed by the U/C filter.&quot;, fmt(as.numeric(rv(&quot;n_excluded&quot;)))))</code></pre>
+<table>
+<caption>1,118 sites removed by the U/C filter.</caption>
+<thead>
+<tr class="header">
+<th align="left">step</th>
+<th align="left">sites</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">5-fold union sites</td>
+<td align="left">12,416</td>
+</tr>
+<tr class="even">
+<td align="left">on chr1-22 (the genotype panel is autosomal)</td>
+<td align="left">11,856</td>
+</tr>
+<tr class="odd">
+<td align="left">minus sites with a U/C variant called on the pU
+base</td>
+<td align="left">10,738</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why the U/C filter.</strong> pU is read out as a T-to-C
+change. If a cell line carries a C (or, on the minus strand, a G) at the
+pU base in its genome, its reads show “conversion” without any
+modification, and the site’s %pU tracks genotype. Such sites look like
+strong pU-QTLs but are genotype read-outs. A site is removed if a
+<strong>C/T variant (plus strand) or A/G variant (minus strand) was
+called on the pU base</strong>.</p>
+<p><strong>What the untreated controls add.</strong> Untreated RNA has
+no chemical conversion, so a C there is inherited. The exclusion record
+cross-tabulates the two signals:</p>
+<pre class="r"><code>man[, called := fifelse(annotated_UC, &quot;U/C variant called&quot;, &quot;no U/C variant called&quot;)]
+man[, untreated := fifelse(!judgeable_untreated, &quot;too few untreated reads to judge&quot;,
+                   fifelse(measured_alias, &quot;inherited C seen in untreated RNA&quot;, &quot;no inherited C&quot;))]
+x &lt;- dcast(man[, .N, by = .(called, untreated)], untreated ~ called, value.var = &quot;N&quot;, fill = 0)
+knitr::kable(x[order(untreated)], caption = sprintf(
+  &quot;The %s autosomal sites. Sites with a called U/C variant are removed; all others are kept. &#39;Inherited C&#39; means some cell line with &gt;= 10 untreated reads shows &gt;= 10%% C at the pU base (backed by &gt;= 2 C reads).&quot;,
+  fmt(nrow(man))))</code></pre>
+<table>
+<caption>The 11,856 autosomal sites. Sites with a called U/C variant are
+removed; all others are kept. ‘Inherited C’ means some cell line with
+&gt;= 10 untreated reads shows &gt;= 10% C at the pU base (backed by
+&gt;= 2 C reads).</caption>
+<colgroup>
+<col width="45%" />
+<col width="25%" />
+<col width="29%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">untreated</th>
+<th align="right">U/C variant called</th>
+<th align="right">no U/C variant called</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">inherited C seen in untreated RNA</td>
+<td align="right">1069</td>
+<td align="right">1057</td>
+</tr>
+<tr class="even">
+<td align="left">no inherited C</td>
+<td align="right">45</td>
+<td align="right">9473</td>
+</tr>
+<tr class="odd">
+<td align="left">too few untreated reads to judge</td>
+<td align="right">4</td>
+<td align="right">208</td>
+</tr>
+</tbody>
+</table>
+<p>So <strong>1,057 sites with inherited C in the untreated controls but
+no called variant are still in this phenotype</strong>. These are
+variants missing from the genotype calls. A stricter version that also
+removes them exists (<code>fold5_union_noUC</code>, built with
+<code>--criterion both</code>; calibrated on the <a
+href="qtl_mapping_betabinomial_calibration_noUC.html">U/C-aliasing
+calibration page</a>) but is not the one used here.</p>
+</div>
+<div id="phenotype" class="section level1">
+<h1>2. Phenotype</h1>
+<p>The <strong>raw counts</strong>, as for the binomial model: for each
+site and cell line, <strong>C</strong> converted reads and <strong>N = C
++ T</strong> total reads at the pU base in the treated library, with
+treated replicates summed. No normalisation or imputation. The matrix is
+10,738 sites x 50 cell lines, with 92.7% of entries covered by at least
+one read (median depth 9 reads where covered).</p>
+</div>
+<div id="covariates" class="section level1">
+<h1>3. Covariates</h1>
+<p>M-value PCs, computed as for the binomial model (<span
+class="math inline">\(M = \log_2[(C + \pi_s)/(T + 1 - \pi_s)]\)</span>
+per site and cell line, standardised per site, PCA across cell lines),
+but <strong>recomputed on the filtered sites</strong>. The original PCs
+were derived from all sites, including the genotype read-outs, so they
+could partly encode genetic structure. The recomputed PCs are close to
+the originals:</p>
+<pre class="r"><code>r &lt;- abs(diag(cor(as.matrix(pc_old[, paste0(&quot;PC&quot;, 1:5), with = FALSE]), as.matrix(pc_new[, paste0(&quot;PC&quot;, 1:5), with = FALSE]))))
+knitr::kable(data.table(PC = paste0(&quot;PC&quot;, 1:5), `|correlation|, original vs recomputed` = sprintf(&quot;%.2f&quot;, r)),
+             caption = &quot;Original PCs from all 12,416 sites; recomputed PCs from the filtered sites.&quot;)</code></pre>
+<table>
+<caption>Original PCs from all 12,416 sites; recomputed PCs from the
+filtered sites.</caption>
+<thead>
+<tr class="header">
+<th align="left">PC</th>
+<th align="left">|correlation|, original vs recomputed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">PC1</td>
+<td align="left">1.00</td>
+</tr>
+<tr class="even">
+<td align="left">PC2</td>
+<td align="left">0.94</td>
+</tr>
+<tr class="odd">
+<td align="left">PC3</td>
+<td align="left">0.95</td>
+</tr>
+<tr class="even">
+<td align="left">PC4</td>
+<td align="left">0.98</td>
+</tr>
+<tr class="odd">
+<td align="left">PC5</td>
+<td align="left">0.96</td>
+</tr>
+</tbody>
+</table>
+<p><strong>k = 3 PCs</strong> are used, chosen on the <a
+href="qtl_mapping_betabinomial_grid.html">window x PC calibration
+grid</a>.</p>
+</div>
+<div id="genotypes" class="section level1">
+<h1>4. Genotypes</h1>
+<p>The <strong>same SNP set as the binomial model</strong>: imputed YRI
+genotypes from <a href="https://zenodo.org/records/3870952">Zenodo
+record 3870952</a>, lifted to hg38, restricted to the 50 sequenced cell
+lines, then filtered to 8,538,509 biallelic SNPs with minor-allele
+frequency &gt;= 0.05 (dosages in <code>genotype_common.traw</code>). The
+full processing is on the <a href="qtl_mapping_linear_data.html">linear
+model’s data page</a> and the filter on the <a
+href="qtl_mapping_binomial_data.html">binomial model’s data
+page</a>.</p>
+<p>At each site the SNPs within the cis window are taken, missing
+dosages are filled with the SNP’s mean, and the MAF &gt;= 0.05 filter is
+applied again.</p>
+</div>
+<div id="fitting-choices-that-affect-the-data-used"
+class="section level1">
+<h1>5. Fitting choices that affect the data used</h1>
+<ul>
+<li><strong>Fitter:</strong> multi-start maximum likelihood (starts at
+phi = 0.01, 0.1, 0.5; the best fit is kept). This is the default for all
+analyses; see the <a
+href="qtl_mapping_betabinomial_optimiser.html">optimiser page</a>.</li>
+<li><strong>Cell lines per test:</strong> every cell line with at least
+one read at the site is used.</li>
+<li><strong>Tests that cannot be fitted</strong> (separation, or a mean
+of exactly 0 or 1) are dropped; about 11% of cis tests at +/-5 kb.</li>
+</ul>
+</div>
+<div id="files-and-scripts" class="section level1">
+<h1>6. Files and scripts</h1>
+<pre class="r"><code>knitr::kable(data.table(
+  what = c(&quot;converted-read counts C&quot;, &quot;depth N&quot;, &quot;covariates (recomputed M-value PCs)&quot;,
+           &quot;site exclusion record&quot;, &quot;run parameters&quot;, &quot;genotype dosages&quot;),
+  path = c(file.path(FINAL, &quot;counts/C_matrix.txt.gz&quot;), file.path(FINAL, &quot;counts/N_matrix.txt.gz&quot;),
+           file.path(FINAL, &quot;mvalue_pcs.txt&quot;), file.path(FINAL, &quot;site_exclusion_manifest.txt.gz&quot;),
+           file.path(FINAL, &quot;runinfo.txt&quot;), file.path(GENO, &quot;qtl_binomial/genotype_common.traw  (+ by_chr/)&quot;))),
+  caption = &quot;Scripts: 1.site_calling/extract_treated_counts_matrix.py (counts); 3.qtl_mapping_binomial/0.export_genotypes.sbatch (genotypes); 4.qtl_mapping_betabinomial/13.filtered_phenotype.R (filters and PCs); 12.untreated_counts_matrix.R (untreated controls).&quot;)</code></pre>
+<table>
+<caption>Scripts: 1.site_calling/extract_treated_counts_matrix.py
+(counts); 3.qtl_mapping_binomial/0.export_genotypes.sbatch (genotypes);
+4.qtl_mapping_betabinomial/13.filtered_phenotype.R (filters and PCs);
+12.untreated_counts_matrix.R (untreated controls).</caption>
+<colgroup>
+<col width="22%" />
+<col width="77%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">what</th>
+<th align="left">path</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">converted-read counts C</td>
+<td
+align="left">/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl/phenotype/fold5_union_auto_noUCcalled/counts/C_matrix.txt.gz</td>
+</tr>
+<tr class="even">
+<td align="left">depth N</td>
+<td
+align="left">/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl/phenotype/fold5_union_auto_noUCcalled/counts/N_matrix.txt.gz</td>
+</tr>
+<tr class="odd">
+<td align="left">covariates (recomputed M-value PCs)</td>
+<td
+align="left">/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl/phenotype/fold5_union_auto_noUCcalled/mvalue_pcs.txt</td>
+</tr>
+<tr class="even">
+<td align="left">site exclusion record</td>
+<td
+align="left">/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl/phenotype/fold5_union_auto_noUCcalled/site_exclusion_manifest.txt.gz</td>
+</tr>
+<tr class="odd">
+<td align="left">run parameters</td>
+<td
+align="left">/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl/phenotype/fold5_union_auto_noUCcalled/runinfo.txt</td>
+</tr>
+<tr class="even">
+<td align="left">genotype dosages</td>
+<td
+align="left">/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl/genotype/qtl_binomial/genotype_common.traw
+(+ by_chr/)</td>
+</tr>
+</tbody>
+</table>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 8
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] data.table_1.14.4 workflowr_1.7.0  
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.11       compiler_4.2.0    pillar_1.9.0      bslib_0.3.1      
+ [5] later_1.3.0       git2r_0.30.1      jquerylib_0.1.4   R.methodsS3_1.8.1
+ [9] R.utils_2.11.0    tools_4.2.0       getPass_0.2-2     digest_0.6.29    
+[13] jsonlite_1.8.7    evaluate_0.15     lifecycle_1.0.4   tibble_3.2.1     
+[17] pkgconfig_2.0.3   rlang_1.1.2       cli_3.6.2         rstudioapi_0.14  
+[21] yaml_2.3.5        xfun_0.38         fastmap_1.1.0     httr_1.4.5       
+[25] stringr_1.5.0     knitr_1.42        sass_0.4.1        fs_1.5.2         
+[29] vctrs_0.6.1       rprojroot_2.0.3   glue_1.6.2        R6_2.5.1         
+[33] processx_3.5.3    fansi_1.0.3       rmarkdown_2.21    callr_3.7.0      
+[37] magrittr_2.0.3    whisker_0.4       ps_1.7.0          promises_1.2.0.1 
+[41] htmltools_0.5.7   httpuv_1.6.5      utf8_1.2.2        stringi_1.7.6    
+[45] R.oo_1.24.0      </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

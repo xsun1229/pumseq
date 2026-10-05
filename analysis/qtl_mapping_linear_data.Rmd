@@ -1,0 +1,137 @@
+---
+title: "Linear-regression QTL mapping: phenotype and genotype data"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages(library(data.table))
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+PR    <- "/project/xinhe/xsun/pumseq/pumseq_processed"
+UNION <- file.path(PR, "union/all51_mRNA")
+PHENO <- file.path(PR, "psi_qtl/phenotype/union_ncalled2/treated_minus_input_floor0/quantile")
+GENO  <- file.path(PR, "psi_qtl/genotype")
+fmt <- function(x) format(x, big.mark = ",", trim = TRUE, scientific = FALSE)
+
+# sites: the union call set, then the two filters applied for QTL mapping
+allsites <- fread(file.path(UNION, "union_mRNA.global_sites.txt.gz"), colClasses = list(character = c("ref", "strand")))
+allsites[, n_called := lengths(strsplit(called_in, ","))]
+final <- fread(file.path(PHENO, "sites_info.txt.gz"), colClasses = list(character = c("ref", "strand")))
+pm    <- fread(file.path(PHENO, "phenotype_matrix.txt.gz"))
+cls   <- setdiff(names(pm), "site_id")
+
+# raw treated and input %pU at the final sites, to report the floor and the imputation
+key <- function(d) paste(d$ref, d$pos, d$strand)
+trt <- fread(file.path(UNION, "union_mRNA.global_sites.ratio_matrix.txt.gz"), colClasses = list(character = c("ref", "strand")))
+inp <- fread(file.path(UNION, "union_mRNA.global_sites.ratio_matrix_unt.txt.gz"), colClasses = list(character = c("ref", "strand")))
+i <- match(key(final), key(trt)); stopifnot(!anyNA(i), identical(key(trt), key(inp)))
+D <- as.matrix(trt[i, ..cls]) - as.matrix(inp[i, ..cls])
+pct_missing <- 100 * mean(is.na(D))
+pct_floored <- 100 * mean(D[!is.na(D)] < 0)
+pct_zero    <- 100 * mean(D[!is.na(D)] == 0)
+
+# genotype count: variants in the PLINK2 file
+pvar_n <- length(grep("^#", readLines(file.path(GENO, "plink2/pumseq_genotype.hg38.chr1-22.pvar")), invert = TRUE))
+map <- fread(file.path(GENO, "sample_id_map.txt"))
+```
+
+This page describes the inputs to the linear-regression (tensorQTL) pU-QTL scan
+summarised on the [linear QTL mapping page](qtl_mapping_summary_floor0_quantile.html).
+
+```{r overview}
+knitr::kable(data.table(
+  item = c("cell lines", "pU sites", "phenotype", "covariates", "genotypes", "cis window", "test"),
+  value = c(sprintf("%d (CL19039 has no genotype and is excluded)", length(cls)),
+            fmt(nrow(final)),
+            "quantile-normalised (treated - input) %pU, negative differences set to 0",
+            "phenotype PCs, 3 to 30 swept",
+            sprintf("%s autosomal variants (hg38), no allele-frequency filter", fmt(pvar_n)),
+            "+/-5, 20, 50 and 100 kb",
+            "linear regression of the phenotype on genotype dosage (tensorQTL)")),
+  col.names = c("", ""), caption = "What the linear model sees.")
+```
+
+# 1. Sites
+
+The sites come from **union site calling**. Each of the 51 sequenced cell lines
+is called on its own (chi-squared test against pooled input, FDR < 0.01, rate
+difference > 0.05, depth >= 20), and a site enters the list if any cell line
+calls it. Details are on the
+[union site-calling QC page](qc_union_all51_mRNA.html).
+
+Two filters are then applied for QTL mapping:
+
+```{r sitefunnel}
+knitr::kable(data.table(
+  step = c("union call set (any of 51 cell lines)",
+           "called independently in >= 2 cell lines",
+           "on chr1-22 (the genotype panel is autosomal)"),
+  sites = fmt(c(nrow(allsites), allsites[n_called >= 2, .N], allsites[n_called >= 2 & ref %in% as.character(1:22), .N]))),
+  caption = "Site counts at each step.")
+```
+
+The last count, `r fmt(nrow(final))`, is the number of sites in the phenotype matrix.
+
+# 2. Phenotype
+
+For each site and cell line:
+
+1. **Treated %pU**: converted reads C / (C + T) in the treated library, with
+   treated replicates pooled.
+2. **Input %pU**: the same ratio in the cell line's pooled input (untreated)
+   library. This is the background conversion rate.
+3. **Treated minus input.** Negative differences are set to 0, since treatment
+   should only add signal on top of background. This changes
+   `r sprintf("%.1f%%", pct_floored)` of the measured values at these sites; with the
+   `r sprintf("%.1f%%", pct_zero)` that are exactly 0 already, `r sprintf("%.1f%%", pct_floored + pct_zero)`
+   of values end up at 0.
+4. **Missing values** (no coverage in a cell line, `r sprintf("%.1f%%", pct_missing)` of
+   entries) are filled with the site's median across cell lines.
+5. **Quantile normalisation** across cell lines, so every cell line has the same
+   distribution of values.
+
+The result is a `r fmt(nrow(pm))` x `r length(cls)` matrix (sites x cell lines),
+written as a BED file for tensorQTL.
+
+# 3. Covariates
+
+Principal components of the normalised phenotype matrix (cell lines as
+observations, sites as features, centred). Covariate files with 3, 5, 7, 10,
+15, 20, 25 and 30 PCs are produced; the scans sweep 3 to 30.
+
+# 4. Genotypes
+
+**Source.** Imputed genotypes for 60 Yoruba (YRI) lymphoblastoid cell lines,
+downloaded from [Zenodo record 3870952](https://zenodo.org/records/3870952), on
+hg19. They were lifted to hg38 with GATK `LiftoverVcf` (4.5.0, UCSC
+hg19ToHg38 chain); variants that could not be lifted were dropped.
+
+**Processing** (`2.qtl_mapping_linear/1.run_merge_genotype_vcf.sbatch`, then
+`4.convert_genotype_plink2.sbatch`):
+
+- chromosomes 1-22 merged into one VCF (chrX excluded);
+- subset to the `r nrow(map)` sequenced cell lines that have genotypes, and
+  renamed from `NA#####` to `CL#####` to match the phenotype;
+- converted to PLINK2 format, keeping chr1-22 only, with every variant ID reset
+  to `chrom:pos:ref:alt` (the VCF has missing and duplicated rsIDs) and half-calls
+  set to missing.
+
+**What the linear model uses:** all `r fmt(pvar_n)` variants in that PLINK2 file.
+No minor-allele-frequency filter is set, which is tensorQTL's default. (The
+binomial and beta-binomial models use a filtered SNP set; see their data pages.)
+
+# 5. Files and scripts
+
+```{r files}
+knitr::kable(data.table(
+  what = c("phenotype matrix (BED for tensorQTL)", "site metadata", "covariates", "genotypes (PLINK2)", "sample ID map"),
+  path = c(file.path(PHENO, "phenotype_matrix.bed.gz"), file.path(PHENO, "sites_info.txt.gz"),
+           file.path(PHENO, "pca/covariates_<N>PCs.txt"), file.path(GENO, "plink2/pumseq_genotype.hg38.chr1-22.{pgen,pvar,psam}"),
+           file.path(GENO, "sample_id_map.txt"))),
+  caption = "Scripts: 2.qtl_mapping_linear/ -- 1.run_merge_genotype_vcf.sbatch, 2.prepare_phenotype.R (metric treated_minus_input_floor0), 3.compute_phenotype_pcs.R, 4.convert_genotype_plink2.sbatch, 5.run_tensorqtl.sbatch.")
+```

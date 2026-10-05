@@ -39,30 +39,50 @@ editor_options:
 
 ## Linear regression
 
+* [Data: phenotype and genotypes](qtl_mapping_linear_data.html)
 * [QTL mapping summary: Treated - input, floor0, quantile normalization, linear regression](qtl_mapping_summary_floor0_quantile.html)
 
 ## Binomial
 
+* [Data: phenotype and genotypes](qtl_mapping_binomial_data.html)
 * [Binomial GLM model](qtl_mapping_binomial_model.html)
 * [QTL mapping summary: binomial GLM on the 5-fold union sites](qtl_mapping_summary_binomial.html)
 
 ## Beta-binomial
 
-These pages follow the analysis from the model and fitter through calibration
-and the latest null simulations. Earlier exploratory pages are kept below for
-context; their superseded conclusions are identified.
+These pages follow the analysis in the order it happened: the data and model, the first
+scan and its U/C problem, the problematic sites in calibration, the optimiser
+failure behind them and its fix, and then the work on estimating dispersion.
+Pages whose conclusions were later superseded are marked.
 
-### 1. Model and fitter
+### 1. Data and model
 
+* [Data: phenotype and genotypes](qtl_mapping_betabinomial_data.html)
 * [Beta-binomial model and likelihood-ratio test](qtl_mapping_betabinomial_model.html)
-* [Why the single-start fitter failed, and the multi-start correction](qtl_mapping_betabinomial_optimiser.html)
 
-### 2. Calibration and site diagnostics
+### 2. First scan: top hits that are U/C genotype read-outs
 
-* [Choosing the cis window and number of PCs: calibration grid](qtl_mapping_betabinomial_grid.html)
+* [Initial beta-binomial QTL scan across PC counts and windows](qtl_mapping_summary_betabinomial.html) — preliminary 100-permutation scan, before the multi-start correction.
+* [Top-hit diagnostic: genotype versus pU rate](qtl_mapping_betabinomial_diagnostic.html) — investigates hits from the initial scan.
+* [Why permutation did not remove the top hits](qtl_mapping_betabinomial_pathology_summary.html) — 26 sites where the null model cannot fit the data; 14 have a U/C variant on the pU base.
+* [The 26 sites that survive permutation](qtl_mapping_betabinomial_site26.html)
+* [Calibration after removing sites with a called U/C variant](qtl_mapping_betabinomial_calibration_noUCcalled.html) — the U/C filter used from here on.
+
+### 3. Calibration at ±5 kb, k = 3: the 9 problematic sites
+
+* [Initial diagnosis of the problematic sites](qtl_mapping_betabinomial_problematic_diagnosis.html) — phi pinned at 1; uses the old single-start fitter, revised in step 4.
+* Workarounds tried before the cause was found (superseded):
+    * [Initial filtering strategy and permutation calibration](qtl_mapping_betabinomial_strategy.html) — the phi > 0.99 filter was made unnecessary by the multi-start fitter.
+    * [Initial PC-count and fit-boundary trade-off](qtl_mapping_betabinomial_npcs_tradeoff.html) — the boundary issue was an optimiser artifact; the calibration grid settles the PC choice.
+    * [An unsuccessful goodness-of-fit test and what it revealed](qtl_mapping_betabinomial_gof_failed.html) — a diagnostic investigation, not a recommended test.
+
+### 4. The cause: an optimiser failure, fixed by multi-start
+
+* [Why the single-start fitter failed, and the multi-start correction](qtl_mapping_betabinomial_optimiser.html) — problematic sites go from 9 to 0 with no data removed.
 * [The 9 problematic sites revisited: large phi, pU patterns, and inherited C](qtl_mapping_betabinomial_problematic_sites_revisited.html)
+* [Choosing the cis window and number of PCs: calibration grid](qtl_mapping_betabinomial_grid.html) — run with the multi-start fitter; settles k = 3.
 
-### 3. Dispersion and false positives
+### 5. Estimating dispersion, and whether it matters
 
 * [Is the small dispersion peak real?](qtl_mapping_betabinomial_lowphi.html)
 * [How well can we estimate dispersion at each site?](qtl_mapping_betabinomial_phi_estimation.html)
@@ -70,12 +90,5 @@ context; their superseded conclusions are identified.
 
 ### Earlier exploratory analyses
 
-These document how the current approach was reached. Read them with the later
-fitter and calibration results above in mind.
-
-* [Initial beta-binomial QTL scan across PC counts and windows](qtl_mapping_summary_betabinomial.html) — preliminary 100-permutation scan, before the multi-start correction.
-* [Top-hit diagnostic: genotype versus pU rate](qtl_mapping_betabinomial_diagnostic.html) — investigates hits from the initial scan.
-* [Initial filtering strategy and permutation calibration](qtl_mapping_betabinomial_strategy.html) — the phi > 0.99 filter was made unnecessary by the multi-start fitter.
-* [An unsuccessful goodness-of-fit test and what it revealed](qtl_mapping_betabinomial_gof_failed.html) — a diagnostic investigation, not a recommended test.
-* [Initial PC-count and fit-boundary trade-off](qtl_mapping_betabinomial_npcs_tradeoff.html) — the boundary issue was an optimiser artifact; the calibration grid above settles the PC choice.
-* [Initial diagnosis of the problematic sites](qtl_mapping_betabinomial_problematic_diagnosis.html) — uses the old single-start fitter; the revised site analysis is above.
+* [Why do permuted and real data return the same top hits?](qtl_mapping_betabinomial_why_same_tophits.html) — the first look at the permutation problem, before the 26-site analysis.
+* [Calibration after removing the U/C-aliasing sites](qtl_mapping_betabinomial_calibration_noUC.html) — an earlier, narrower U/C filter, replaced by the called-variant filter in step 2.

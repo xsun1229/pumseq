@@ -1,0 +1,135 @@
+---
+title: "Binomial GLM QTL mapping: phenotype and genotype data"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages(library(data.table))
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+PR    <- "/project/xinhe/xsun/pumseq/pumseq_processed"
+PHENO <- file.path(PR, "psi_qtl/phenotype/fold5_union")
+GENO  <- file.path(PR, "psi_qtl/genotype")
+fmt <- function(x) format(x, big.mark = ",", trim = TRUE, scientific = FALSE)
+
+S  <- fread(file.path(PR, "joint/fold5_union_analysis/fold5_union_sites_annotated.txt.gz"))
+C  <- fread(file.path(PHENO, "counts/C_matrix.txt.gz")); N <- fread(file.path(PHENO, "counts/N_matrix.txt.gz"))
+cls <- setdiff(names(C), c("ref", "pos", "strand"))
+Cm <- as.matrix(C[, ..cls]); Nm <- as.matrix(N[, ..cls])
+pcs <- fread(file.path(PHENO, "mvalue_pcs.txt"))
+
+# genotype counts, read from the plink2 export log
+tlog <- readLines(file.path(GENO, "qtl_binomial/genotype_common.log"))
+num  <- function(pat) as.numeric(sub("^\\D*?(\\d+).*", "\\1", grep(pat, tlog, value = TRUE)[1]))
+n_loaded <- num("variants loaded from")                 # biallelic SNPs, before the MAF filter
+n_maf    <- num("removed due to allele frequency")
+n_kept   <- num("variants remaining after main filters")
+n_all    <- length(grep("^#", readLines(file.path(GENO, "plink2/pumseq_genotype.hg38.chr1-22.pvar")), invert = TRUE))
+```
+
+This page describes the inputs to the binomial GLM pU-QTL scan summarised on the
+[binomial QTL mapping page](qtl_mapping_summary_binomial.html). The model itself
+is described on the [binomial model page](qtl_mapping_binomial_model.html).
+
+```{r overview}
+knitr::kable(data.table(
+  item = c("cell lines", "pU sites", "phenotype", "covariates", "genotypes", "cis window", "test"),
+  value = c(sprintf("%d (CL19039 has no genotype and is excluded)", length(cls)),
+            sprintf("%s (the 5-fold union sites)", fmt(nrow(C))),
+            "raw read counts: converted reads C out of depth N = C + T, per site and cell line",
+            "M-value phenotype PCs, 3 to 20 swept",
+            sprintf("%s biallelic SNPs with MAF >= 0.05, chr1-22, hg38", fmt(n_kept)),
+            "+/-5, 20, 50 and 100 kb",
+            "binomial GLM, score test of the genotype effect")),
+  col.names = c("", ""), caption = "What the binomial model sees.")
+```
+
+# 1. Sites
+
+The sites are the **5-fold union sites**. The `r length(cls)` genotyped cell lines
+are split into 5 disjoint folds of 10 (seed 2026). Within each fold the cell
+lines' reads are pooled and sites are called jointly (chi-squared test,
+FDR < 0.01, rate difference > 0.05, depth >= 20). A site is kept if it is called
+in at least one fold. Details are on the
+[5-fold site-calling page](mRNA_5fold_union_site_calling.html).
+
+```{r folds}
+knitr::kable(S[, .(sites = fmt(.N)), by = .(`folds calling the site` = n_folds)][order(`folds calling the site`)],
+             caption = sprintf("All %s sites by how many of the 5 folds called them.", fmt(nrow(S))))
+```
+
+All `r fmt(nrow(S))` sites enter the phenotype, including the
+`r fmt(sum(!S$ref %in% as.character(1:22)))` off the autosomes, which have no cis-SNPs
+in the autosomal genotype panel and so are never tested.
+
+# 2. Phenotype
+
+The phenotype is the **raw counts**, not a ratio. For each site and cell line:
+
+- **C**: converted reads at the pU base in the treated library (the pU signal);
+- **N = C + T**: total reads there (the binomial trial count).
+
+Treated replicates are summed within each cell line. No normalisation or
+imputation is applied: the model takes the counts directly, so a cell line with
+no reads at a site simply contributes nothing.
+
+```{r counts}
+cov <- Nm > 0
+knitr::kable(data.table(
+  quantity = c("sites x cell lines", "entries with at least one read", "median depth per covered entry",
+               "median cell lines covered per site", "median pooled %pU per site"),
+  value = c(sprintf("%s x %d", fmt(nrow(Nm)), ncol(Nm)), sprintf("%.1f%%", 100 * mean(cov, na.rm = TRUE)),
+            fmt(median(Nm[cov], na.rm = TRUE)), fmt(median(rowSums(cov, na.rm = TRUE))),
+            sprintf("%.1f%%", 100 * median(rowSums(Cm, na.rm = TRUE) / pmax(rowSums(Nm, na.rm = TRUE), 1))))),
+  col.names = c("", ""), caption = "The count matrices.")
+```
+
+# 3. Covariates
+
+Principal components of an **M-value** transform of the counts, computed per site
+and cell line as
+
+$$M = \log_2 \frac{C + \pi_s}{T + 1 - \pi_s},$$
+
+where $\pi_s$ is the site's pooled %pU across cell lines. Using the site's own
+rate as the pseudocount keeps sparse entries from being pulled to an arbitrary
+value. Each site's M-values are standardised, sites with fewer than 5 covered
+cell lines or no variation are dropped, and PCA is run across cell lines. The top
+`r ncol(pcs) - 1` PCs are stored; the scans sweep 3 to 20.
+
+# 4. Genotypes
+
+**Source.** Imputed genotypes for 60 Yoruba (YRI) lymphoblastoid cell lines,
+downloaded from [Zenodo record 3870952](https://zenodo.org/records/3870952), on
+hg19, lifted to hg38 with GATK `LiftoverVcf`. They were merged across chr1-22,
+subset to the 50 sequenced cell lines, renamed to `CL#####` and converted to
+PLINK2, as described on the [linear model's data page](qtl_mapping_linear_data.html).
+
+**Filter for this model** (`3.qtl_mapping_binomial/0.export_genotypes.sbatch`):
+
+```{r genofilter}
+knitr::kable(data.table(
+  step = c("all variants in the PLINK2 file", "biallelic SNPs only", "minor-allele frequency >= 0.05 (among the 50 cell lines)"),
+  variants = fmt(c(n_all, n_loaded, n_kept))),
+  caption = sprintf("%s SNPs removed by the frequency filter. Output: allele dosages (0/1/2) in genotype_common.traw, also split by chromosome.", fmt(n_maf)))
+```
+
+At each site, the SNPs within the cis window are taken, missing dosages are
+filled with the SNP's mean across the 50 cell lines, and the MAF >= 0.05 filter is
+applied again to the filled-in dosages.
+
+# 5. Files and scripts
+
+```{r files}
+knitr::kable(data.table(
+  what = c("converted-read counts C", "depth N", "covariates (M-value PCs)", "genotype dosages", "site list"),
+  path = c(file.path(PHENO, "counts/C_matrix.txt.gz"), file.path(PHENO, "counts/N_matrix.txt.gz"),
+           file.path(PHENO, "mvalue_pcs.txt"), file.path(GENO, "qtl_binomial/genotype_common.traw  (+ by_chr/)"),
+           file.path(PR, "joint/fold5_union_analysis/fold5_union_sites_annotated.txt.gz"))),
+  caption = "Scripts: 1.site_calling/extract_treated_counts_matrix.py (counts); 3.qtl_mapping_binomial/ -- 0.export_genotypes.sbatch, 1.compute_covariates.R, 2.run_qtl_scan.R.")
+```

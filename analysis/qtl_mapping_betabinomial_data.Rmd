@@ -1,0 +1,152 @@
+---
+title: "Beta-binomial QTL mapping: phenotype and genotype data"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages(library(data.table))
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+PR    <- "/project/xinhe/xsun/pumseq/pumseq_processed"
+PH    <- file.path(PR, "psi_qtl/phenotype")
+FINAL <- file.path(PH, "fold5_union_auto_noUCcalled")
+GENO  <- file.path(PR, "psi_qtl/genotype")
+fmt <- function(x) format(x, big.mark = ",", trim = TRUE, scientific = FALSE)
+nrows <- function(d) nrow(fread(file.path(PH, d, "counts/C_matrix.txt.gz"), select = 1))
+
+C  <- fread(file.path(FINAL, "counts/C_matrix.txt.gz")); N <- fread(file.path(FINAL, "counts/N_matrix.txt.gz"))
+cls <- setdiff(names(C), c("ref", "pos", "strand"))
+Nm <- as.matrix(N[, ..cls])
+ri <- fread(file.path(FINAL, "runinfo.txt")); rv <- function(k) ri[parameter == k, value]
+man <- fread(file.path(FINAL, "site_exclusion_manifest.txt.gz"))
+pc_old <- fread(file.path(PH, "fold5_union/mvalue_pcs.txt")); pc_new <- fread(file.path(FINAL, "mvalue_pcs.txt"))
+stopifnot(identical(pc_old$sample, pc_new$sample))
+
+tlog <- readLines(file.path(GENO, "qtl_binomial/genotype_common.log"))
+n_snp <- as.numeric(sub("^\\D*?(\\d+).*", "\\1", grep("variants remaining after main filters", tlog, value = TRUE)[1]))
+```
+
+This page describes the inputs to the beta-binomial pU-QTL analysis: the
+calibration runs, the window x PC grid, and the scans that follow. The model is
+on the [beta-binomial model page](qtl_mapping_betabinomial_model.html).
+
+```{r overview}
+knitr::kable(data.table(
+  item = c("cell lines", "pU sites", "phenotype", "covariates", "genotypes", "cis window", "fitter"),
+  value = c(sprintf("%d (CL19039 has no genotype and is excluded)", length(cls)),
+            sprintf("%s: the 5-fold union sites on chr1-22, minus sites with a called U/C variant", fmt(nrow(C))),
+            "raw read counts: converted reads C out of depth N = C + T, per site and cell line",
+            "M-value PCs recomputed on the filtered sites; k = 3",
+            sprintf("%s biallelic SNPs with MAF >= 0.05 (same as the binomial model)", fmt(n_snp)),
+            "+/-5 kb for calibration; 5 to 100 kb compared on the grid",
+            "beta-binomial maximum likelihood, multi-start, likelihood-ratio test")),
+  col.names = c("", ""), caption = "What the beta-binomial model sees.")
+```
+
+# 1. Sites
+
+The starting point is the same **5-fold union** site set as the binomial model
+(see its [data page](qtl_mapping_binomial_data.html) and the
+[5-fold site-calling page](mRNA_5fold_union_site_calling.html)). Two filters are
+applied by `13.filtered_phenotype.R`:
+
+```{r funnel}
+knitr::kable(data.table(
+  step = c("5-fold union sites", "on chr1-22 (the genotype panel is autosomal)",
+           "minus sites with a U/C variant called on the pU base"),
+  sites = fmt(c(nrows("fold5_union"), as.numeric(rv("n_sites_in")), as.numeric(rv("n_retained"))))),
+  caption = sprintf("%s sites removed by the U/C filter.", fmt(as.numeric(rv("n_excluded")))))
+```
+
+**Why the U/C filter.** pU is read out as a T-to-C change. If a cell line
+carries a C (or, on the minus strand, a G) at the pU base in its genome, its reads
+show "conversion" without any modification, and the site's %pU tracks genotype.
+Such sites look like strong pU-QTLs but are genotype read-outs. A site is removed
+if a **C/T variant (plus strand) or A/G variant (minus strand) was called on the
+pU base**.
+
+**What the untreated controls add.** Untreated RNA has no chemical conversion, so
+a C there is inherited. The exclusion record cross-tabulates the two signals:
+
+```{r crosstab}
+man[, called := fifelse(annotated_UC, "U/C variant called", "no U/C variant called")]
+man[, untreated := fifelse(!judgeable_untreated, "too few untreated reads to judge",
+                   fifelse(measured_alias, "inherited C seen in untreated RNA", "no inherited C"))]
+x <- dcast(man[, .N, by = .(called, untreated)], untreated ~ called, value.var = "N", fill = 0)
+knitr::kable(x[order(untreated)], caption = sprintf(
+  "The %s autosomal sites. Sites with a called U/C variant are removed; all others are kept. 'Inherited C' means some cell line with >= 10 untreated reads shows >= 10%% C at the pU base (backed by >= 2 C reads).",
+  fmt(nrow(man))))
+```
+
+So **`r fmt(man[measured_alias & !annotated_UC, .N])` sites with inherited C in the
+untreated controls but no called variant are still in this phenotype**. These are
+variants missing from the genotype calls. A stricter version that also removes
+them exists (`fold5_union_noUC`, built with `--criterion both`; calibrated on the
+[U/C-aliasing calibration page](qtl_mapping_betabinomial_calibration_noUC.html))
+but is not the one used here.
+
+# 2. Phenotype
+
+The **raw counts**, as for the binomial model: for each site and cell line,
+**C** converted reads and **N = C + T** total reads at the pU base in the treated
+library, with treated replicates summed. No normalisation or imputation. The
+matrix is `r fmt(nrow(Nm))` sites x `r ncol(Nm)` cell lines, with
+`r sprintf("%.1f%%", 100 * mean(Nm > 0, na.rm = TRUE))` of entries covered by at
+least one read (median depth `r fmt(median(Nm[Nm > 0], na.rm = TRUE))` reads where
+covered).
+
+# 3. Covariates
+
+M-value PCs, computed as for the binomial model ($M = \log_2[(C + \pi_s)/(T + 1 - \pi_s)]$
+per site and cell line, standardised per site, PCA across cell lines), but
+**recomputed on the filtered sites**. The original PCs were derived from all
+sites, including the genotype read-outs, so they could partly encode genetic
+structure. The recomputed PCs are close to the originals:
+
+```{r pccor}
+r <- abs(diag(cor(as.matrix(pc_old[, paste0("PC", 1:5), with = FALSE]), as.matrix(pc_new[, paste0("PC", 1:5), with = FALSE]))))
+knitr::kable(data.table(PC = paste0("PC", 1:5), `|correlation|, original vs recomputed` = sprintf("%.2f", r)),
+             caption = "Original PCs from all 12,416 sites; recomputed PCs from the filtered sites.")
+```
+
+**k = 3 PCs** are used, chosen on the [window x PC calibration grid](qtl_mapping_betabinomial_grid.html).
+
+# 4. Genotypes
+
+The **same SNP set as the binomial model**: imputed YRI genotypes from
+[Zenodo record 3870952](https://zenodo.org/records/3870952), lifted to hg38,
+restricted to the 50 sequenced cell lines, then filtered to
+`r fmt(n_snp)` biallelic SNPs with minor-allele frequency >= 0.05 (dosages in
+`genotype_common.traw`). The full processing is on the
+[linear model's data page](qtl_mapping_linear_data.html) and the filter on the
+[binomial model's data page](qtl_mapping_binomial_data.html).
+
+At each site the SNPs within the cis window are taken, missing dosages are
+filled with the SNP's mean, and the MAF >= 0.05 filter is applied again.
+
+# 5. Fitting choices that affect the data used
+
+- **Fitter:** multi-start maximum likelihood (starts at phi = 0.01, 0.1, 0.5;
+  the best fit is kept). This is the default for all analyses; see the
+  [optimiser page](qtl_mapping_betabinomial_optimiser.html).
+- **Cell lines per test:** every cell line with at least one read at the site is
+  used.
+- **Tests that cannot be fitted** (separation, or a mean of exactly 0 or 1) are
+  dropped; about 11% of cis tests at +/-5 kb.
+
+# 6. Files and scripts
+
+```{r files}
+knitr::kable(data.table(
+  what = c("converted-read counts C", "depth N", "covariates (recomputed M-value PCs)",
+           "site exclusion record", "run parameters", "genotype dosages"),
+  path = c(file.path(FINAL, "counts/C_matrix.txt.gz"), file.path(FINAL, "counts/N_matrix.txt.gz"),
+           file.path(FINAL, "mvalue_pcs.txt"), file.path(FINAL, "site_exclusion_manifest.txt.gz"),
+           file.path(FINAL, "runinfo.txt"), file.path(GENO, "qtl_binomial/genotype_common.traw  (+ by_chr/)"))),
+  caption = "Scripts: 1.site_calling/extract_treated_counts_matrix.py (counts); 3.qtl_mapping_binomial/0.export_genotypes.sbatch (genotypes); 4.qtl_mapping_betabinomial/13.filtered_phenotype.R (filters and PCs); 12.untreated_counts_matrix.R (untreated controls).")
+```
