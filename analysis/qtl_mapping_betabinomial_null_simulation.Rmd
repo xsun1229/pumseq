@@ -186,6 +186,59 @@ ggplot(qq, aes(expected, observed, colour = collapsed)) +
   theme(legend.position = "top", panel.grid.minor = element_blank())
 ```
 
+What do the small-p tests at phi = 0.3 have in common? Each test fits two
+models: a **null** model without the SNP (one fit per site, shared by all its
+SNPs) and a **full** model with it (one fit per SNP). Both estimate phi. The
+histogram compares the two estimates for every test with p < 1e-4 against
+1,000 random tests with p >= 1e-4.
+
+```{r hitphi, fig.width=10, fig.height=6.2}
+H <- fread(file.path(BASE, "phi03_hit_tests_phi.tsv"))
+HL <- melt(H, id.vars = c("sid", "snp", "grp"), measure.vars = c("phi_null", "phi_full"),
+           variable.name = "model", value.name = "phi_hat")
+HL[, model := factor(model, levels = c("phi_null", "phi_full"),
+                     labels = c("null model (no SNP)", "full model (with this SNP)"))]
+HL[, grp := factor(grp, levels = c("hit", "reference"),
+                   labels = c(sprintf("tests with p < 1e-4 (n = %d, from %d sites)", H[grp == "hit", .N], H[grp == "hit", uniqueN(sid)]),
+                              sprintf("random tests with p >= 1e-4 (n = %d)", H[grp == "reference", .N])))]
+HL[, phi_plot := pmin(phi_hat, 0.8)]                    # the few above 0.8 go in the last bin
+HMED <- HL[, .(m = median(phi_hat)), by = .(model, grp)]
+ggplot(HL, aes(phi_plot)) +
+  geom_histogram(aes(y = after_stat(100 * count / tapply(count, PANEL, sum)[PANEL])),
+                 binwidth = 0.025, boundary = 0, fill = "#276f9e", colour = "white", linewidth = 0.2) +
+  geom_vline(xintercept = 0.3, colour = "grey35", linewidth = 0.5) +
+  geom_text(data = HMED, aes(x = 0.79, y = Inf, label = sprintf("median %.3f", m)),
+            hjust = 1, vjust = 1.6, size = 3.2, colour = "grey15", inherit.aes = FALSE) +
+  annotate("text", x = 0.305, y = Inf, label = "true phi = 0.3", hjust = 0, vjust = 3.6, size = 2.9, colour = "grey35") +
+  facet_grid(model ~ grp) +
+  scale_x_continuous(limits = c(0, 0.8), breaks = seq(0, 0.8, 0.2), expand = c(0.01, 0)) +
+  labs(x = expression("estimated " * varphi), y = "% of tests in the panel",
+       title = "Estimated phi for each SNP test, fixed phi = 0.3",
+       subtitle = "Grey line: the true phi. Values above 0.8 are drawn in the last bin.") +
+  theme_bw(base_size = 10.5) +
+  theme(panel.grid.minor = element_blank(), panel.spacing.x = unit(1.4, "lines"))
+hit <- H[grp == "hit"]; ref <- H[grp == "reference"]
+top3 <- hit[, .N, by = sid][order(-N)][1:3]
+rest <- hit[!sid %chin% top3$sid]
+```
+
+For ordinary tests the two estimates agree (median `r sprintf("%.3f", median(ref$phi_null))`
+null vs `r sprintf("%.3f", median(ref$phi_full))` full). For the small-p tests
+the null estimate is only slightly low (median `r sprintf("%.3f", median(hit$phi_null))`),
+but the **full** estimate collapses: median `r sprintf("%.3f", median(hit$phi_full))`,
+with `r sprintf("%.0f%%", 100 * mean(hit$phi_full < 0.025))` below 0.025 against
+`r sprintf("%.0f%%", 100 * mean(ref$phi_full < 0.025))` for ordinary tests. When a SNP
+happens to line up with the few cell lines that read high, the full model
+explains them with a genotype effect instead of dispersion, so its phi drops and
+the likelihood ratio grows beyond what the chi-square reference allows.
+
+The tall bars in the null panel come from linkage: all tests at a site share one
+null fit, and three sites contribute `r sum(top3$N)` of the `r nrow(hit)` tests.
+Without them the full estimate is even lower (median
+`r sprintf("%.3f", median(rest$phi_full))`, `r sprintf("%.0f%%", 100 * mean(rest$phi_full < 0.025))`
+below 0.025). Data from `46.null_hit_tests_phi.R`, which regenerates the
+simulated counts from their seeds and refits each test.
+
 ```{r tail-table}
 lambda_bb <- function(p) median(qchisq(p, 1, lower.tail = FALSE)) / qchisq(0.5, 1)
 summarize_tail <- function(d, groups) {
