@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree006b3a633f0b6b5222418d4ec4031caf4abb5390targetblank006b3a6a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree92a3e64bdf4ac4c9d7f17ede3e8a1cdb93e81a0atargetblank92a3e64a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/006b3a633f0b6b5222418d4ec4031caf4abb5390" target="_blank">006b3a6</a>
+<a href="https://github.com/xsun1229/pumseq/tree/92a3e64bdf4ac4c9d7f17ede3e8a1cdb93e81a0a" target="_blank">92a3e64</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree006b3a633f0b6b5222418d4ec4031caf4abb5390targetblank006b3a6a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree92a3e64bdf4ac4c9d7f17ede3e8a1cdb93e81a0atargetblank92a3e64a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/006b3a633f0b6b5222418d4ec4031caf4abb5390" target="_blank">006b3a6</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/92a3e64bdf4ac4c9d7f17ede3e8a1cdb93e81a0a" target="_blank">92a3e64</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -621,6 +621,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/92a3e64bdf4ac4c9d7f17ede3e8a1cdb93e81a0a/analysis/qtl_mapping_betabinomial_pc_window_permutation.Rmd" target="_blank">92a3e64</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-10-12
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/92a3e64bdf4ac4c9d7f17ede3e8a1cdb93e81a0a/docs/qtl_mapping_betabinomial_pc_window_permutation.html" target="_blank">92a3e64</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-10-12
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1129,22 +1163,33 @@ XSun
 </div>
 <div id="how-failures-are-distributed" class="section level3 tabset">
 <h3 class="tabset">How failures are distributed</h3>
-<p>These plots describe <strong>the failed sites only</strong>: sites
-whose null fit was rejected or for which all SNP fits failed within 50
-kb. Sites skipped because no suitable cis SNP exists are not
-included.</p>
-<p>Each cell shows the number of failed sites in that bin and its
-percentage of <strong>all failed sites at the same PC setting</strong>.
-Each column sums to 100% before rounding. These distributions describe
-where failed sites occur; they do not measure the probability of failure
-among all sites in a bin.</p>
+<p>The left panel shows <strong>all eligible sites</strong>; the right
+panel shows <strong>failed sites at each PC setting</strong>. A failed
+site has a rejected null fit or no successful SNP fit within 50 kb.
+Sites skipped because no suitable cis SNP exists are excluded from both
+groups.</p>
+<p>Each cell shows the number of sites and their percentage within that
+column. Every column sums to 100% before rounding. The eligible-site
+distribution is the same for all PC settings and is shown once. A bin is
+overrepresented among failures when its percentage in a failed-site
+column exceeds the percentage in the eligible-site column. This compares
+distributions, rather than the probability that a site in that bin
+fails.</p>
+<p>For example, sites with 40-49 covered cell lines account for
+<strong>46.9% of all eligible sites</strong>, but <strong>65.9% of
+failures at 15 PCs</strong> (1.41 times their baseline share). Sites
+covered in all 50 cell lines account for 43.6% of eligible sites and
+11.3% of failures at 15 PCs. Thus, the large failure count in the 40-49
+bin reflects both its size and its overrepresentation among failures.
+These comparisons do not separate sample coverage from read depth or
+other site characteristics.</p>
 <p>Read depth is total reads divided by the number of covered cell
 lines. The failure set is determined separately for each PC setting.</p>
 <div id="read-depth" class="section level4">
 <h4>Read depth</h4>
 <pre class="r"><code>distribution_plot(&quot;depth_bin&quot;,c(&quot;&lt;=5&quot;,&quot;5-10&quot;,&quot;10-20&quot;,&quot;20-50&quot;,&quot;50-100&quot;,&quot;&gt;100&quot;),
- &quot;Read-depth distribution among failed sites&quot;, &quot;Reads per covered cell line&quot;)</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-depth-1.png" alt="" width="864" style="display: block; margin: auto;" /></p>
+ &quot;Read depth: eligible sites compared with failed sites&quot;, &quot;Reads per covered cell line&quot;)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-depth-1.png" alt="" width="1056" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-failures-depth-1">
 Past versions of failures-depth-1.png
@@ -1169,6 +1214,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/92a3e64bdf4ac4c9d7f17ede3e8a1cdb93e81a0a/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-depth-1.png" target="_blank">92a3e64</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-10-12
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-depth-1.png" target="_blank">006b3a6</a>
 </td>
 <td>
@@ -1186,8 +1242,8 @@ XSun
 <div id="number-of-covered-cell-lines" class="section level4">
 <h4>Number of covered cell lines</h4>
 <pre class="r"><code>distribution_plot(&quot;cells_bin&quot;,c(&quot;1-9&quot;,&quot;10-19&quot;,&quot;20-29&quot;,&quot;30-39&quot;,&quot;40-49&quot;,&quot;50&quot;),
- &quot;Covered-cell-line distribution among failed sites&quot;, &quot;Covered cell lines&quot;)</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-cells-1.png" alt="" width="864" style="display: block; margin: auto;" /></p>
+ &quot;Covered cell lines: eligible sites compared with failed sites&quot;, &quot;Covered cell lines&quot;)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-cells-1.png" alt="" width="1056" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-failures-cells-1">
 Past versions of failures-cells-1.png
@@ -1210,6 +1266,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/92a3e64bdf4ac4c9d7f17ede3e8a1cdb93e81a0a/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-cells-1.png" target="_blank">92a3e64</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-10-12
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-cells-1.png" target="_blank">006b3a6</a>
