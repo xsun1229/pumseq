@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree92a3e64bdf4ac4c9d7f17ede3e8a1cdb93e81a0atargetblank92a3e64a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree718715e66d744ea054658770fef452a55aff4aa4targetblank718715ea">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/92a3e64bdf4ac4c9d7f17ede3e8a1cdb93e81a0a" target="_blank">92a3e64</a>
+<a href="https://github.com/xsun1229/pumseq/tree/718715e66d744ea054658770fef452a55aff4aa4" target="_blank">718715e</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree92a3e64bdf4ac4c9d7f17ede3e8a1cdb93e81a0atargetblank92a3e64a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree718715e66d744ea054658770fef452a55aff4aa4targetblank718715ea"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/92a3e64bdf4ac4c9d7f17ede3e8a1cdb93e81a0a" target="_blank">92a3e64</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/718715e66d744ea054658770fef452a55aff4aa4" target="_blank">718715e</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -621,6 +621,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/718715e66d744ea054658770fef452a55aff4aa4/analysis/qtl_mapping_betabinomial_pc_window_permutation.Rmd" target="_blank">718715e</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-10-12
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/718715e66d744ea054658770fef452a55aff4aa4/docs/qtl_mapping_betabinomial_pc_window_permutation.html" target="_blank">718715e</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-10-12
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -745,7 +779,6 @@ QQ &lt;- fread(file.path(CG, &quot;grid_qq_thinned.tsv.gz&quot;))[window_kb %in%
 QA &lt;- fread(file.path(CG, &quot;grid_qq_allpoints_merged.tsv.gz&quot;))[window_kb %in% WINDOWS &amp; npcs %in% KS]
 source(&quot;code/qq_full_style.R&quot;)
 ST &lt;- fread(file.path(SEL, &quot;selection_table.tsv&quot;))
-NI &lt;- fread(file.path(SEL, &quot;selection_no_inheritedC.tsv&quot;))
 stopifnot(nrow(G) == 15, QQ[, uniqueN(dataset), by = .(window_kb, npcs)]$V1 == 6)
 
 QQ[, kind := ifelse(dataset == &quot;real&quot;, &quot;real data&quot;, &quot;5 permutations&quot;)]
@@ -762,9 +795,9 @@ band &lt;- function(n, expected) {
 qq_plot &lt;- function(w, k) {
   g &lt;- G[window_kb == w &amp; npcs == k]
   qq_panel(QA[window_kb == w &amp; npcs == k], sprintf(&quot;+/-%d kb, k = %d PCs&quot;, w, k)) +
-    labs(subtitle = sprintf(&quot;%s cis tests | permutation lambda %.3f-%.3f, real %.3f\nworst permuted -log10 p %.1f | eSites (q &lt; 0.05): %d (%d without inherited-C sites)&quot;,
+    labs(subtitle = sprintf(&quot;%s cis tests | permutation lambda %.3f-%.3f, real %.3f\nworst permuted -log10 p %.1f | eSites (q &lt; 0.05): %d&quot;,
                             fmt(g$tests), g$perm_lambda_min, g$perm_lambda_max, g$real_lambda, g$worst_perm_tail,
-                            ST[window_kb == w &amp; npcs == k]$disc_q05, NI[window_kb == w &amp; npcs == k]$eSites_clean)) +
+                            ST[window_kb == w &amp; npcs == k]$disc_q05)) +
     theme(plot.subtitle = element_text(size = 9, hjust = 0.5))
 }</code></pre>
 <div id="what-this-page-shows" class="section level1">
@@ -800,19 +833,10 @@ full selection pipeline has not been done.</p>
 <h1>2. Summary</h1>
 <div id="discoveries-across-configurations" class="section level2">
 <h2>Discoveries across configurations</h2>
-<p>The heatmaps show <strong>numbers of eSites</strong>, using Storey
-q-values from the 100 within-site permutations. The top row includes all
-tested sites; the bottom row sets aside sites flagged by untreated C
-reads and recalculates q-values. This is a sensitivity analysis, not an
-additional fitting failure.</p>
-<p>An <strong>untreated-C flag</strong> means at least one untreated
-cell line has &gt;=10 reads, &gt;=2 C reads, and C/read fraction
-&gt;=10%. These flags differ from the called U/C sites already excluded
-before this scan, and do not by themselves prove that a site is an
-artifact.</p>
-<pre class="r"><code>tab &lt;- merge(G, ST[, .(window_kb, npcs, disc_q05, disc_q10,
-                       incomplete_permutations, min_valid_permutations)], by=c(&quot;window_kb&quot;,&quot;npcs&quot;))
-tab &lt;- merge(tab, NI[, .(window_kb,npcs,eSites_clean,eSites_clean_q10)], by=c(&quot;window_kb&quot;,&quot;npcs&quot;))
+<p>The heatmaps show <strong>numbers of eSites</strong> among all tested
+sites, using Storey q-values from the 100 within-site permutations, at q
+&lt; 0.05 and q &lt; 0.10.</p>
+<pre class="r"><code>tab &lt;- merge(G, ST[, .(window_kb, npcs, disc_q05, disc_q10)], by=c(&quot;window_kb&quot;,&quot;npcs&quot;))
 setorder(tab,window_kb,npcs)
 FD &lt;- file.path(SEL,&quot;fit_diagnostics&quot;)
 FS &lt;- fread(file.path(FD,&quot;real_snp_fits.tsv&quot;))
@@ -831,12 +855,9 @@ heat &lt;- function(d, title, fill=&quot;Sites&quot;, columns=NULL) {
       strip.text=element_text(face=&quot;bold&quot;),plot.title=element_text(face=&quot;bold&quot;))
 }
 E &lt;- rbindlist(list(
- tab[,.(window_kb,npcs,value=disc_q05,cutoff=&quot;q &lt; 0.05&quot;,set=&quot;All tested sites&quot;)],
- tab[,.(window_kb,npcs,value=disc_q10,cutoff=&quot;q &lt; 0.10&quot;,set=&quot;All tested sites&quot;)],
- tab[,.(window_kb,npcs,value=eSites_clean,cutoff=&quot;q &lt; 0.05&quot;,set=&quot;Untreated-C flags set aside&quot;)],
- tab[,.(window_kb,npcs,value=eSites_clean_q10,cutoff=&quot;q &lt; 0.10&quot;,set=&quot;Untreated-C flags set aside&quot;)]))
-E[,set:=factor(set,levels=c(&quot;All tested sites&quot;,&quot;Untreated-C flags set aside&quot;))]
-heat(E,&quot;eSites by window, PC count and q-value cutoff&quot;,&quot;eSites&quot;) + facet_grid(set~cutoff)</code></pre>
+ tab[,.(window_kb,npcs,value=disc_q05,cutoff=&quot;q &lt; 0.05&quot;)],
+ tab[,.(window_kb,npcs,value=disc_q10,cutoff=&quot;q &lt; 0.10&quot;)]))
+heat(E,&quot;eSites by window, PC count and q-value cutoff&quot;,&quot;eSites&quot;) + facet_wrap(~cutoff,nrow=1)</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/summary-1.png" alt="" width="864" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-summary-1">
@@ -937,20 +958,15 @@ rejected. The site cannot be tested. This fit is shared across windows,
 so its count is shown once per PC setting.</li>
 <li><strong>All SNP fits failed:</strong> the null fit succeeded but no
 SNP in the indicated window produced a finite nominal p-value. The site
-has no result in that window.</li>
-<li><strong>Any SNP fit failed:</strong> at least one genotype-model fit
-failed. This includes the all-failed sites; other affected sites can
-still have a valid result.</li>
-<li><strong>Incomplete permutations:</strong> a tested site had fewer
-than 100 finite within-site permutation minima. This is a separate
-diagnostic, not a count of failed individual permutation-SNP fits.</li>
+has no result in that window. These two groups do not overlap: SNP
+models are tested only after the null fit succeeds. Their sum is the
+number of sites with no usable QTL result due to fitting failure. Sites
+with at least one successful SNP fit are not counted as failed sites,
+even if other SNP fits were rejected.</li>
 </ul>
-<p>SNP-fit counts are conditional on the null fit succeeding. Fewer
-failed SNP fits at higher PC counts therefore do not mean fitting
-improved: more sites have already been lost at the null-fit stage.</p>
-<p>Sites skipped because no suitable cis SNP exists are not fitting
-failures. These diagnostics describe the selection scan, rather than the
-separate five genome-wide calibration runs.</p>
+<p>Null-fit failures are shared across the windows; all-SNP-fit failures
+depend on the window. These diagnostics describe the selection scan,
+rather than the separate five genome-wide calibration runs.</p>
 <pre class="r"><code>NS &lt;- SS[,.(total=sum(N),null_failed=sum(N[status==&quot;null_fit_failed&quot;]),
             skipped=sum(N[status %in% c(&quot;no_cis_snp&quot;,&quot;no_common_cis_snp&quot;,&quot;too_few_cell_lines&quot;)])),by=npcs]
 NS[,eligible:=total-skipped]
@@ -1000,13 +1016,16 @@ XSun
 </table>
 </div>
 </div>
-<pre class="r"><code>F &lt;- rbindlist(list(
- FS[,.(window_kb,npcs,value=sites_all_failed,metric=&quot;Sites: all SNP fits failed&quot;)],
- FS[,.(window_kb,npcs,value=sites_any_failed,metric=&quot;Sites: any SNP fit failed&quot;)],
- FS[,.(window_kb,npcs,value=failed,metric=&quot;Failed SNP fits&quot;)],
- tab[,.(window_kb,npcs,value=incomplete_permutations,metric=&quot;Sites: incomplete permutations&quot;)]))
+<pre class="r"><code>SF &lt;- merge(FS[,.(window_kb,npcs,sites_all_failed)],
+            NS[,.(npcs,null_failed)],by=&quot;npcs&quot;)
+SF[,total_failed:=null_failed+sites_all_failed]
+# At 50 kb the total must equal the failed sites used in the distribution plots.
+check &lt;- merge(SF[window_kb==50],DD[variable==&quot;depth_bin&quot;,.(failed=sum(failed)),by=npcs],by=&quot;npcs&quot;)
+stopifnot(nrow(check)==length(KS),all(check$total_failed==check$failed))
+F &lt;- rbindlist(list(
+ SF[,.(window_kb,npcs,value=sites_all_failed,metric=&quot;Sites: all SNP fits failed (null fit succeeded)&quot;)],
+ SF[,.(window_kb,npcs,value=total_failed,metric=&quot;Total failed sites: null + all SNP fits failed&quot;)]))
 F[,metric:=factor(metric,levels=unique(metric))]
-# Each panel gets a separate colour scale because counts have different units.
 for (m in levels(F$metric)) print(heat(F[metric==m],m) +
   theme(plot.title=element_text(size=12)))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failure-heatmaps-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
@@ -1085,82 +1104,6 @@ XSun
 </table>
 </div>
 </div>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failure-heatmaps-3.png" alt="" width="768" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-failure-heatmaps-3">
-Past versions of failure-heatmaps-3.png
-</button>
-</p>
-<div id="fig-failure-heatmaps-3" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failure-heatmaps-3.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failure-heatmaps-4.png" alt="" width="768" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-failure-heatmaps-4">
-Past versions of failure-heatmaps-4.png
-</button>
-</p>
-<div id="fig-failure-heatmaps-4" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failure-heatmaps-4.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
 <div id="how-failures-are-distributed" class="section level3 tabset">
 <h3 class="tabset">How failures are distributed</h3>
 <p>The left panel shows <strong>all eligible sites</strong>; the right
@@ -1212,6 +1155,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/718715e66d744ea054658770fef452a55aff4aa4/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-depth-1.png" target="_blank">718715e</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-10-12
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/92a3e64bdf4ac4c9d7f17ede3e8a1cdb93e81a0a/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-depth-1.png" target="_blank">92a3e64</a>
@@ -1268,6 +1222,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/718715e66d744ea054658770fef452a55aff4aa4/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-cells-1.png" target="_blank">718715e</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-10-12
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/92a3e64bdf4ac4c9d7f17ede3e8a1cdb93e81a0a/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-cells-1.png" target="_blank">92a3e64</a>
 </td>
 <td>
@@ -1294,171 +1259,28 @@ XSun
 </div>
 </div>
 </div>
-<div id="rejection-reasons" class="section level3">
-<h3>Rejection reasons</h3>
-<p>These are diagnostic rejection reasons, not a proof of a single
-underlying biological cause. The SNP-fit counts count model fits; the
-null-fit counts count sites. Incomplete permutations are not included
-here.</p>
-<pre class="r"><code>NR &lt;- fread(file.path(FD,&quot;null_failure_reasons.tsv&quot;))
-SR &lt;- fread(file.path(FD,&quot;real_snp_failure_reasons.tsv&quot;))[window_kb==50]
-setnames(NR,c(&quot;null_fail_code&quot;,&quot;N&quot;),c(&quot;fail_code&quot;,&quot;n&quot;))
-R &lt;- rbindlist(list(NR[,.(npcs,fail_code,n,type=&quot;Null fits (sites)&quot;)],
-                   SR[,.(npcs,fail_code,n,type=&quot;SNP fits (50 kb)&quot;)]))
-reason_labels &lt;- c(`1`=&quot;Starting binomial GLM rejected&quot;,`2`=&quot;All optimizer starts discarded&quot;,
- `3`=&quot;Degenerate optimum&quot;,`4`=&quot;Coefficient exceeded limit&quot;,
- `5`=&quot;Iteration limit near phi=0 (binomial boundary diagnostic)&quot;,
- `8`=&quot;Diagnostic rerun succeeded&quot;,`9`=&quot;Diagnostic rerun errored&quot;)
-R[,reason:=unname(reason_labels[as.character(fail_code)])]
-stopifnot(!anyNA(R$reason))
-knitr::kable(dcast(R,type+reason~npcs,value.var=&quot;n&quot;,fill=0),
- caption=&quot;Rejected fits by reason and number of PCs. SNP models use the widest window.&quot;)</code></pre>
-<table style="width:100%;">
-<caption>Rejected fits by reason and number of PCs. SNP models use the
-widest window.</caption>
-<colgroup>
-<col width="16%" />
-<col width="52%" />
-<col width="6%" />
-<col width="6%" />
-<col width="6%" />
-<col width="6%" />
-<col width="5%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">type</th>
-<th align="left">reason</th>
-<th align="right">3</th>
-<th align="right">5</th>
-<th align="right">7</th>
-<th align="right">10</th>
-<th align="right">15</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">Null fits (sites)</td>
-<td align="left">All optimizer starts discarded</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">Null fits (sites)</td>
-<td align="left">Coefficient exceeded limit</td>
-<td align="right">125</td>
-<td align="right">552</td>
-<td align="right">830</td>
-<td align="right">1398</td>
-<td align="right">2008</td>
-</tr>
-<tr class="odd">
-<td align="left">Null fits (sites)</td>
-<td align="left">Degenerate optimum</td>
-<td align="right">131</td>
-<td align="right">205</td>
-<td align="right">391</td>
-<td align="right">514</td>
-<td align="right">977</td>
-</tr>
-<tr class="even">
-<td align="left">Null fits (sites)</td>
-<td align="left">Iteration limit near phi=0 (binomial boundary
-diagnostic)</td>
-<td align="right">4</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">Null fits (sites)</td>
-<td align="left">Starting binomial GLM rejected</td>
-<td align="right">1</td>
-<td align="right">3</td>
-<td align="right">6</td>
-<td align="right">17</td>
-<td align="right">40</td>
-</tr>
-<tr class="even">
-<td align="left">SNP fits (50 kb)</td>
-<td align="left">All optimizer starts discarded</td>
-<td align="right">3</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">SNP fits (50 kb)</td>
-<td align="left">Coefficient exceeded limit</td>
-<td align="right">282334</td>
-<td align="right">216648</td>
-<td align="right">174027</td>
-<td align="right">121319</td>
-<td align="right">74678</td>
-</tr>
-<tr class="even">
-<td align="left">SNP fits (50 kb)</td>
-<td align="left">Degenerate optimum</td>
-<td align="right">19935</td>
-<td align="right">24968</td>
-<td align="right">36004</td>
-<td align="right">39911</td>
-<td align="right">56435</td>
-</tr>
-<tr class="odd">
-<td align="left">SNP fits (50 kb)</td>
-<td align="left">Iteration limit near phi=0 (binomial boundary
-diagnostic)</td>
-<td align="right">10</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">SNP fits (50 kb)</td>
-<td align="left">Starting binomial GLM rejected</td>
-<td align="right">772</td>
-<td align="right">721</td>
-<td align="right">400</td>
-<td align="right">292</td>
-<td align="right">134</td>
-</tr>
-</tbody>
-</table>
-</div>
 <div id="configuration-counts" class="section level3">
 <h3>Configuration counts</h3>
 <details>
 <summary>
 Show the numerical summary
 </summary>
-<pre class="r"><code>T &lt;- merge(tab,FS[,.(window_kb,npcs,sites_all_failed,sites_any_failed,failed)],by=c(&quot;window_kb&quot;,&quot;npcs&quot;))
+<pre class="r"><code>T &lt;- merge(tab,SF,by=c(&quot;window_kb&quot;,&quot;npcs&quot;))
 knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
  `q&lt;0.05`=disc_q05,`q&lt;0.10`=disc_q10,
- `q&lt;0.05 (C flags set aside)`=eSites_clean,`q&lt;0.10 (C flags set aside)`=eSites_clean_q10,
- `Extreme sites`=problematic,`All SNP fits failed (sites)`=sites_all_failed,
- `Any SNP fit failed (sites)`=sites_any_failed,`Failed SNP fits`=failed,
- `Incomplete permutations (sites)`=incomplete_permutations)])</code></pre>
+ `Extreme sites`=problematic,`Null fit failed (sites)`=null_failed,
+ `All SNP fits failed (sites)`=sites_all_failed,`Total failed sites`=total_failed)])</code></pre>
 <table>
 <colgroup>
-<col width="4%" />
-<col width="2%" />
-<col width="6%" />
-<col width="3%" />
-<col width="3%" />
-<col width="12%" />
-<col width="12%" />
-<col width="6%" />
-<col width="13%" />
-<col width="12%" />
 <col width="7%" />
-<col width="15%" />
+<col width="3%" />
+<col width="10%" />
+<col width="5%" />
+<col width="5%" />
+<col width="11%" />
+<col width="18%" />
+<col width="22%" />
+<col width="14%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -1467,13 +1289,10 @@ knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
 <th align="right">Tested sites</th>
 <th align="right">q&lt;0.05</th>
 <th align="right">q&lt;0.10</th>
-<th align="right">q&lt;0.05 (C flags set aside)</th>
-<th align="right">q&lt;0.10 (C flags set aside)</th>
 <th align="right">Extreme sites</th>
+<th align="right">Null fit failed (sites)</th>
 <th align="right">All SNP fits failed (sites)</th>
-<th align="right">Any SNP fit failed (sites)</th>
-<th align="right">Failed SNP fits</th>
-<th align="right">Incomplete permutations (sites)</th>
+<th align="right">Total failed sites</th>
 </tr>
 </thead>
 <tbody>
@@ -1483,13 +1302,10 @@ knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
 <td align="right">9991</td>
 <td align="right">204</td>
 <td align="right">249</td>
-<td align="right">61</td>
-<td align="right">79</td>
 <td align="right">0</td>
+<td align="right">262</td>
 <td align="right">60</td>
-<td align="right">3818</td>
-<td align="right">29178</td>
-<td align="right">519</td>
+<td align="right">322</td>
 </tr>
 <tr class="even">
 <td align="right">5</td>
@@ -1497,13 +1313,10 @@ knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
 <td align="right">9518</td>
 <td align="right">197</td>
 <td align="right">227</td>
-<td align="right">64</td>
-<td align="right">79</td>
 <td align="right">0</td>
+<td align="right">760</td>
 <td align="right">48</td>
-<td align="right">3363</td>
-<td align="right">23899</td>
-<td align="right">380</td>
+<td align="right">808</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
@@ -1511,13 +1324,10 @@ knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
 <td align="right">9083</td>
 <td align="right">163</td>
 <td align="right">206</td>
-<td align="right">54</td>
-<td align="right">64</td>
 <td align="right">0</td>
+<td align="right">1227</td>
 <td align="right">35</td>
-<td align="right">2972</td>
-<td align="right">20798</td>
-<td align="right">296</td>
+<td align="right">1262</td>
 </tr>
 <tr class="even">
 <td align="right">5</td>
@@ -1525,13 +1335,10 @@ knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
 <td align="right">8399</td>
 <td align="right">135</td>
 <td align="right">155</td>
-<td align="right">42</td>
-<td align="right">50</td>
 <td align="right">1</td>
+<td align="right">1929</td>
 <td align="right">29</td>
-<td align="right">2393</td>
-<td align="right">15924</td>
-<td align="right">217</td>
+<td align="right">1958</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
@@ -1539,13 +1346,10 @@ knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
 <td align="right">7340</td>
 <td align="right">78</td>
 <td align="right">91</td>
-<td align="right">21</td>
-<td align="right">25</td>
 <td align="right">2</td>
+<td align="right">3025</td>
 <td align="right">22</td>
-<td align="right">1784</td>
-<td align="right">13107</td>
-<td align="right">167</td>
+<td align="right">3047</td>
 </tr>
 <tr class="even">
 <td align="right">20</td>
@@ -1553,13 +1357,10 @@ knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
 <td align="right">10123</td>
 <td align="right">191</td>
 <td align="right">242</td>
-<td align="right">51</td>
-<td align="right">64</td>
 <td align="right">0</td>
+<td align="right">262</td>
 <td align="right">29</td>
-<td align="right">5066</td>
-<td align="right">119436</td>
-<td align="right">230</td>
+<td align="right">291</td>
 </tr>
 <tr class="odd">
 <td align="right">20</td>
@@ -1567,13 +1368,10 @@ knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
 <td align="right">9637</td>
 <td align="right">168</td>
 <td align="right">200</td>
-<td align="right">50</td>
-<td align="right">56</td>
 <td align="right">0</td>
+<td align="right">760</td>
 <td align="right">22</td>
-<td align="right">4577</td>
-<td align="right">96778</td>
-<td align="right">155</td>
+<td align="right">782</td>
 </tr>
 <tr class="even">
 <td align="right">20</td>
@@ -1581,13 +1379,10 @@ knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
 <td align="right">9182</td>
 <td align="right">148</td>
 <td align="right">164</td>
-<td align="right">40</td>
-<td align="right">45</td>
 <td align="right">0</td>
+<td align="right">1227</td>
 <td align="right">12</td>
-<td align="right">4128</td>
-<td align="right">83691</td>
-<td align="right">113</td>
+<td align="right">1239</td>
 </tr>
 <tr class="odd">
 <td align="right">20</td>
@@ -1595,13 +1390,10 @@ knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
 <td align="right">8480</td>
 <td align="right">118</td>
 <td align="right">138</td>
-<td align="right">32</td>
-<td align="right">36</td>
 <td align="right">4</td>
+<td align="right">1929</td>
 <td align="right">12</td>
-<td align="right">3460</td>
-<td align="right">64636</td>
-<td align="right">67</td>
+<td align="right">1941</td>
 </tr>
 <tr class="even">
 <td align="right">20</td>
@@ -1609,13 +1401,10 @@ knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
 <td align="right">7407</td>
 <td align="right">66</td>
 <td align="right">82</td>
-<td align="right">15</td>
-<td align="right">21</td>
 <td align="right">6</td>
+<td align="right">3025</td>
 <td align="right">6</td>
-<td align="right">2634</td>
-<td align="right">52622</td>
-<td align="right">61</td>
+<td align="right">3031</td>
 </tr>
 <tr class="odd">
 <td align="right">50</td>
@@ -1623,13 +1412,10 @@ knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
 <td align="right">10199</td>
 <td align="right">177</td>
 <td align="right">200</td>
-<td align="right">50</td>
-<td align="right">60</td>
 <td align="right">0</td>
+<td align="right">262</td>
 <td align="right">5</td>
-<td align="right">5872</td>
-<td align="right">303054</td>
-<td align="right">100</td>
+<td align="right">267</td>
 </tr>
 <tr class="even">
 <td align="right">50</td>
@@ -1637,13 +1423,10 @@ knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
 <td align="right">9699</td>
 <td align="right">160</td>
 <td align="right">176</td>
-<td align="right">44</td>
-<td align="right">52</td>
 <td align="right">0</td>
+<td align="right">760</td>
 <td align="right">7</td>
-<td align="right">5378</td>
-<td align="right">242338</td>
-<td align="right">57</td>
+<td align="right">767</td>
 </tr>
 <tr class="odd">
 <td align="right">50</td>
@@ -1651,13 +1434,10 @@ knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
 <td align="right">9236</td>
 <td align="right">134</td>
 <td align="right">149</td>
-<td align="right">40</td>
-<td align="right">46</td>
 <td align="right">3</td>
+<td align="right">1227</td>
 <td align="right">3</td>
-<td align="right">4923</td>
-<td align="right">210431</td>
-<td align="right">42</td>
+<td align="right">1230</td>
 </tr>
 <tr class="even">
 <td align="right">50</td>
@@ -1665,13 +1445,10 @@ knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
 <td align="right">8534</td>
 <td align="right">110</td>
 <td align="right">121</td>
-<td align="right">33</td>
-<td align="right">36</td>
 <td align="right">10</td>
+<td align="right">1929</td>
 <td align="right">3</td>
-<td align="right">4235</td>
-<td align="right">161522</td>
-<td align="right">33</td>
+<td align="right">1932</td>
 </tr>
 <tr class="odd">
 <td align="right">50</td>
@@ -1679,13 +1456,10 @@ knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
 <td align="right">7441</td>
 <td align="right">64</td>
 <td align="right">72</td>
-<td align="right">18</td>
-<td align="right">21</td>
 <td align="right">13</td>
+<td align="right">3025</td>
 <td align="right">0</td>
-<td align="right">3305</td>
-<td align="right">131247</td>
-<td align="right">23</td>
+<td align="right">3025</td>
 </tr>
 </tbody>
 </table>
@@ -2575,17 +2349,14 @@ with the window, as do the sites extreme in both real and permuted data
 (13 at ±50 kb, k = 15).</li>
 <li><strong>The real data separate clearly from the
 permutations</strong> in every configuration, with real −log10 p up to
-33. But about 60% of the eSites have untreated-C flags. These may
-include genotype-associated background conversion, so the real-data tail
-should not automatically be interpreted as pU-QTL signal.</li>
+33.</li>
 </ul>
 <p>Data: <code>calibration_grid/grid_calibration.tsv</code>,
 <code>grid_by_dataset.tsv</code> and <code>grid_qq_thinned.tsv.gz</code>
 (built by <code>27.calibration_grid_summary.R</code> from
 <code>8.calibration_site_resolved.R</code> runs). eSites come from
 <code>pc_window_selection/fold5_union_auto_noUCcalled/summary/</code>
-(<code>48.pc_window_selection_summary.R</code> and
-<code>50.selection_inheritedC_setaside.R</code>).</p>
+(<code>48.pc_window_selection_summary.R</code>).</p>
 <p>Fit diagnostics are reconstructed by
 <code>55.pc_window_failure_summary.R</code> from the saved real-data
 <code>_sites</code> and <code>_snps</code> logs. Aggregated tables and

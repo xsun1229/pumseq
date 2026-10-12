@@ -25,7 +25,6 @@ QQ <- fread(file.path(CG, "grid_qq_thinned.tsv.gz"))[window_kb %in% WINDOWS & np
 QA <- fread(file.path(CG, "grid_qq_allpoints_merged.tsv.gz"))[window_kb %in% WINDOWS & npcs %in% KS]
 source("code/qq_full_style.R")
 ST <- fread(file.path(SEL, "selection_table.tsv"))
-NI <- fread(file.path(SEL, "selection_no_inheritedC.tsv"))
 stopifnot(nrow(G) == 15, QQ[, uniqueN(dataset), by = .(window_kb, npcs)]$V1 == 6)
 
 QQ[, kind := ifelse(dataset == "real", "real data", "5 permutations")]
@@ -42,9 +41,9 @@ band <- function(n, expected) {
 qq_plot <- function(w, k) {
   g <- G[window_kb == w & npcs == k]
   qq_panel(QA[window_kb == w & npcs == k], sprintf("+/-%d kb, k = %d PCs", w, k)) +
-    labs(subtitle = sprintf("%s cis tests | permutation lambda %.3f-%.3f, real %.3f\nworst permuted -log10 p %.1f | eSites (q < 0.05): %d (%d without inherited-C sites)",
+    labs(subtitle = sprintf("%s cis tests | permutation lambda %.3f-%.3f, real %.3f\nworst permuted -log10 p %.1f | eSites (q < 0.05): %d",
                             fmt(g$tests), g$perm_lambda_min, g$perm_lambda_max, g$real_lambda, g$worst_perm_tail,
-                            ST[window_kb == w & npcs == k]$disc_q05, NI[window_kb == w & npcs == k]$eSites_clean)) +
+                            ST[window_kb == w & npcs == k]$disc_q05)) +
     theme(plot.subtitle = element_text(size = 9, hjust = 0.5))
 }
 ```
@@ -82,20 +81,11 @@ been done.
 
 ## Discoveries across configurations
 
-The heatmaps show **numbers of eSites**, using Storey q-values from the
-100 within-site permutations. The top row includes all tested sites; the
-bottom row sets aside sites flagged by untreated C reads and recalculates
-q-values. This is a sensitivity analysis, not an additional fitting failure.
+The heatmaps show **numbers of eSites** among all tested sites, using Storey
+q-values from the 100 within-site permutations, at q < 0.05 and q < 0.10.
 
-An **untreated-C flag** means at least one untreated cell line has >=10 reads,
->=2 C reads, and C/read fraction >=10%. These flags differ from the called
-U/C sites already excluded before this scan, and do not by themselves prove
-that a site is an artifact.
-
-```{r summary, fig.width=9, fig.height=6.5}
-tab <- merge(G, ST[, .(window_kb, npcs, disc_q05, disc_q10,
-                       incomplete_permutations, min_valid_permutations)], by=c("window_kb","npcs"))
-tab <- merge(tab, NI[, .(window_kb,npcs,eSites_clean,eSites_clean_q10)], by=c("window_kb","npcs"))
+```{r summary, fig.width=9, fig.height=3.8}
+tab <- merge(G, ST[, .(window_kb, npcs, disc_q05, disc_q10)], by=c("window_kb","npcs"))
 setorder(tab,window_kb,npcs)
 FD <- file.path(SEL,"fit_diagnostics")
 FS <- fread(file.path(FD,"real_snp_fits.tsv"))
@@ -114,12 +104,9 @@ heat <- function(d, title, fill="Sites", columns=NULL) {
       strip.text=element_text(face="bold"),plot.title=element_text(face="bold"))
 }
 E <- rbindlist(list(
- tab[,.(window_kb,npcs,value=disc_q05,cutoff="q < 0.05",set="All tested sites")],
- tab[,.(window_kb,npcs,value=disc_q10,cutoff="q < 0.10",set="All tested sites")],
- tab[,.(window_kb,npcs,value=eSites_clean,cutoff="q < 0.05",set="Untreated-C flags set aside")],
- tab[,.(window_kb,npcs,value=eSites_clean_q10,cutoff="q < 0.10",set="Untreated-C flags set aside")]))
-E[,set:=factor(set,levels=c("All tested sites","Untreated-C flags set aside"))]
-heat(E,"eSites by window, PC count and q-value cutoff","eSites") + facet_grid(set~cutoff)
+ tab[,.(window_kb,npcs,value=disc_q05,cutoff="q < 0.05")],
+ tab[,.(window_kb,npcs,value=disc_q10,cutoff="q < 0.10")]))
+heat(E,"eSites by window, PC count and q-value cutoff","eSites") + facet_wrap(~cutoff,nrow=1)
 ```
 
 ## Sites extreme in both real and permuted data
@@ -145,19 +132,14 @@ estimate. A near-zero phi can be a valid fitted result.
   shown once per PC setting.
 - **All SNP fits failed:** the null fit succeeded but no SNP in the indicated
   window produced a finite nominal p-value. The site has no result in that window.
-- **Any SNP fit failed:** at least one genotype-model fit failed. This includes
-  the all-failed sites; other affected sites can still have a valid result.
-- **Incomplete permutations:** a tested site had fewer than 100 finite
-  within-site permutation minima. This is a separate diagnostic, not a count
-  of failed individual permutation-SNP fits.
+These two groups do not overlap: SNP models are tested only after the null
+fit succeeds. Their sum is the number of sites with no usable QTL result due
+to fitting failure. Sites with at least one successful SNP fit are not counted
+as failed sites, even if other SNP fits were rejected.
 
-SNP-fit counts are conditional on the null fit succeeding. Fewer failed SNP
-fits at higher PC counts therefore do not mean fitting improved: more sites
-have already been lost at the null-fit stage.
-
-Sites skipped because no suitable cis SNP exists are not fitting failures.
-These diagnostics describe the selection scan, rather than the separate
-five genome-wide calibration runs.
+Null-fit failures are shared across the windows; all-SNP-fit failures depend
+on the window. These diagnostics describe the selection scan, rather than
+the separate five genome-wide calibration runs.
 
 ```{r null-fit-failures, fig.width=8, fig.height=3.5}
 NS <- SS[,.(total=sum(N),null_failed=sum(N[status=="null_fit_failed"]),
@@ -174,13 +156,16 @@ ggplot(NS,aes(factor(npcs,levels=KS),100*null_failed/eligible)) +
 ```
 
 ```{r failure-heatmaps, fig.width=8, fig.height=3.2}
+SF <- merge(FS[,.(window_kb,npcs,sites_all_failed)],
+            NS[,.(npcs,null_failed)],by="npcs")
+SF[,total_failed:=null_failed+sites_all_failed]
+# At 50 kb the total must equal the failed sites used in the distribution plots.
+check <- merge(SF[window_kb==50],DD[variable=="depth_bin",.(failed=sum(failed)),by=npcs],by="npcs")
+stopifnot(nrow(check)==length(KS),all(check$total_failed==check$failed))
 F <- rbindlist(list(
- FS[,.(window_kb,npcs,value=sites_all_failed,metric="Sites: all SNP fits failed")],
- FS[,.(window_kb,npcs,value=sites_any_failed,metric="Sites: any SNP fit failed")],
- FS[,.(window_kb,npcs,value=failed,metric="Failed SNP fits")],
- tab[,.(window_kb,npcs,value=incomplete_permutations,metric="Sites: incomplete permutations")]))
+ SF[,.(window_kb,npcs,value=sites_all_failed,metric="Sites: all SNP fits failed (null fit succeeded)")],
+ SF[,.(window_kb,npcs,value=total_failed,metric="Total failed sites: null + all SNP fits failed")]))
 F[,metric:=factor(metric,levels=unique(metric))]
-# Each panel gets a separate colour scale because counts have different units.
 for (m in levels(F$metric)) print(heat(F[metric==m],m) +
   theme(plot.title=element_text(size=12)))
 ```
@@ -253,41 +238,17 @@ distribution_plot("cells_bin",c("1-9","10-19","20-29","30-39","40-49","50"),
  "Covered cell lines: eligible sites compared with failed sites", "Covered cell lines")
 ```
 
-### Rejection reasons
-
-These are diagnostic rejection reasons, not a proof of a single underlying
-biological cause. The SNP-fit counts count model fits; the null-fit counts
-count sites. Incomplete permutations are not included here.
-
-```{r failure-reasons}
-NR <- fread(file.path(FD,"null_failure_reasons.tsv"))
-SR <- fread(file.path(FD,"real_snp_failure_reasons.tsv"))[window_kb==50]
-setnames(NR,c("null_fail_code","N"),c("fail_code","n"))
-R <- rbindlist(list(NR[,.(npcs,fail_code,n,type="Null fits (sites)")],
-                   SR[,.(npcs,fail_code,n,type="SNP fits (50 kb)")]))
-reason_labels <- c(`1`="Starting binomial GLM rejected",`2`="All optimizer starts discarded",
- `3`="Degenerate optimum",`4`="Coefficient exceeded limit",
- `5`="Iteration limit near phi=0 (binomial boundary diagnostic)",
- `8`="Diagnostic rerun succeeded",`9`="Diagnostic rerun errored")
-R[,reason:=unname(reason_labels[as.character(fail_code)])]
-stopifnot(!anyNA(R$reason))
-knitr::kable(dcast(R,type+reason~npcs,value.var="n",fill=0),
- caption="Rejected fits by reason and number of PCs. SNP models use the widest window.")
-```
-
 ### Configuration counts
 
 <details>
 <summary>Show the numerical summary</summary>
 
 ```{r summary-table}
-T <- merge(tab,FS[,.(window_kb,npcs,sites_all_failed,sites_any_failed,failed)],by=c("window_kb","npcs"))
+T <- merge(tab,SF,by=c("window_kb","npcs"))
 knitr::kable(T[,.(window_kb,npcs,`Tested sites`=tested_sites,
  `q<0.05`=disc_q05,`q<0.10`=disc_q10,
- `q<0.05 (C flags set aside)`=eSites_clean,`q<0.10 (C flags set aside)`=eSites_clean_q10,
- `Extreme sites`=problematic,`All SNP fits failed (sites)`=sites_all_failed,
- `Any SNP fit failed (sites)`=sites_any_failed,`Failed SNP fits`=failed,
- `Incomplete permutations (sites)`=incomplete_permutations)])
+ `Extreme sites`=problematic,`Null fit failed (sites)`=null_failed,
+ `All SNP fits failed (sites)`=sites_all_failed,`Total failed sites`=total_failed)])
 ```
 
 </details>
@@ -355,15 +316,11 @@ r <- G[, .(lam = sprintf("%.2f-%.2f", min(perm_lambda_min), max(perm_lambda_max)
   k = 15).
 - **The real data separate clearly from the permutations** in every
   configuration, with real −log10 p up to `r sprintf("%.0f", max(G$real_tail))`.
-  But about 60% of the eSites have untreated-C flags. These may include
-  genotype-associated background conversion, so the real-data tail should
-  not automatically be interpreted as pU-QTL signal.
 
 Data: `calibration_grid/grid_calibration.tsv`, `grid_by_dataset.tsv` and
 `grid_qq_thinned.tsv.gz` (built by `27.calibration_grid_summary.R` from
 `8.calibration_site_resolved.R` runs). eSites come from
-`pc_window_selection/fold5_union_auto_noUCcalled/summary/` (`48.pc_window_selection_summary.R`
-and `50.selection_inheritedC_setaside.R`).
+`pc_window_selection/fold5_union_auto_noUCcalled/summary/` (`48.pc_window_selection_summary.R`).
 
 Fit diagnostics are reconstructed by `55.pc_window_failure_summary.R` from
 the saved real-data `_sites` and `_snps` logs. Aggregated tables and per-site
