@@ -187,30 +187,32 @@ for (m in levels(F$metric)) print(heat(F[metric==m],m) +
 
 ### How failures are distributed {.tabset}
 
-Failures concentrate among shallow sites and sites with fewer covered cell
-lines. At 15 PCs, 61.0% of sites averaging <=5 reads per covered cell line have
-an unusable fit, compared with 9.4% at 10-20 reads. These are descriptive
-comparisons; coverage and conversion fraction can vary together.
+These plots describe **the failed sites only**: sites whose null fit was
+rejected or for which all SNP fits failed within 50 kb. Sites skipped because
+no suitable cis SNP exists are not included.
 
-These plots show the **percentage of eligible sites with an unusable fit**
-(null fit rejected or all SNP fits failed within 50 kb). Each cell gives
-failed / eligible sites, so bins with different numbers of sites can be
-compared. Sites with no suitable cis SNP are excluded from the denominator.
-The same sites recur at each PC setting; these are not independent cohorts.
+Each cell shows the number of failed sites in that bin and its percentage of
+**all failed sites at the same PC setting**. Each column sums to 100% before
+rounding. These distributions describe where failed sites occur; they do not
+measure the probability of failure among all sites in a bin.
 
 Read depth is total reads divided by the number of covered cell lines.
-The pooled C fraction is total converted reads divided by total reads in
-the analyzed phenotype; it is an observed proportion, not a fitted mu.
+The failure set is determined separately for each PC setting.
 
 ```{r distribution-helper, include=FALSE}
 distribution_plot <- function(v, bins, title, ylab) {
  d <- copy(DD[variable==v])
  d[, `:=`(pc=factor(npcs,levels=KS),bin=factor(bin,levels=rev(bins)))]
- d[,label:=sprintf("%d/%d\n%.1f%%",failed,sites,rate)]
- ggplot(d,aes(pc,bin,fill=rate)) + geom_tile(colour="white",linewidth=.8) +
+ d[,total_failed:=sum(failed),by=npcs]
+ stopifnot(all(d$total_failed>0), !anyNA(d$bin))
+ d[,share:=100*failed/total_failed]
+ stopifnot(all(abs(d[,sum(share),by=npcs]$V1-100)<1e-8))
+ d[,label:=sprintf("%d sites\n%.1f%%",failed,share)]
+ ggplot(d,aes(pc,bin,fill=share)) + geom_tile(colour="white",linewidth=.8) +
  geom_text(aes(label=label),size=3.1) +
- scale_fill_gradient(low="#fff7ec",high="#d66a36",limits=c(0,100),name="Failed (%)") +
- labs(x="Number of phenotype PCs",y=ylab,title=title) +
+ scale_fill_gradient(low="#fff7ec",high="#d66a36",limits=c(0,100),name="Share of failed sites (%)") +
+ labs(x="Number of phenotype PCs",y=ylab,title=title,
+      subtitle="Each column sums to 100% (before rounding)") +
  theme_minimal(base_size=11) + theme(panel.grid=element_blank())
 }
 ```
@@ -219,30 +221,17 @@ distribution_plot <- function(v, bins, title, ylab) {
 
 ```{r failures-depth, fig.width=9, fig.height=5}
 distribution_plot("depth_bin",c("<=5","5-10","10-20","20-50","50-100",">100"),
- "Failure rate by mean read depth", "Reads per covered cell line")
-```
-
-#### Converted-read fraction
-
-```{r failures-fraction, fig.width=9, fig.height=5}
-distribution_plot("fraction_bin",c("0%","0-1%","1-5%","5-10%","10-50%",">50%"),
- "Failure rate by pooled C fraction", "Pooled C fraction")
+ "Read-depth distribution among failed sites", "Reads per covered cell line")
 ```
 
 #### Number of covered cell lines
 
 ```{r failures-cells, fig.width=9, fig.height=5}
 distribution_plot("cells_bin",c("1-9","10-19","20-29","30-39","40-49","50"),
- "Failure rate by sample coverage", "Covered cell lines")
+ "Covered-cell-line distribution among failed sites", "Covered cell lines")
 ```
 
-#### Chromosome
-
-```{r failures-chromosome, fig.width=9, fig.height=10}
-distribution_plot("ref",as.character(1:22),"Failure rate by chromosome", "Chromosome")
-```
-
-#### Rejection reasons
+### Rejection reasons
 
 These are diagnostic rejection reasons, not a proof of a single underlying
 biological cause. The SNP-fit counts count model fits; the null-fit counts
