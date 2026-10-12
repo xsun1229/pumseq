@@ -11,7 +11,7 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-09-01" />
+<meta name="date" content="2026-10-12" />
 
 <title>Beta-binomial pU-QTL: the current filtering strategy and its calibration</title>
 
@@ -374,7 +374,7 @@ div.tocify {
 <h1 class="title toc-ignore">Beta-binomial pU-QTL: the current filtering
 strategy and its calibration</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-09-01</h4>
+<h4 class="date">2026-10-12</h4>
 
 </div>
 
@@ -403,7 +403,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-09-01
+<strong>Last updated:</strong> 2026-10-12
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee959c87528654bc09d037974a248cd0daf8d6286targetblanke959c87a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree7416f4c8bb595d837d9cd5cd43c36bd432e137d1targetblank7416f4ca">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/e959c87528654bc09d037974a248cd0daf8d6286" target="_blank">e959c87</a>
+<a href="https://github.com/xsun1229/pumseq/tree/7416f4c8bb595d837d9cd5cd43c36bd432e137d1" target="_blank">7416f4c</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee959c87528654bc09d037974a248cd0daf8d6286targetblanke959c87a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree7416f4c8bb595d837d9cd5cd43c36bd432e137d1targetblank7416f4ca"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/e959c87528654bc09d037974a248cd0daf8d6286" target="_blank">e959c87</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/7416f4c8bb595d837d9cd5cd43c36bd432e137d1" target="_blank">7416f4c</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -572,8 +572,22 @@ were generated:
 Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
+Untracked files:
+    Untracked:  analysis/qtl_mapping_betabinomial_pc_window_permutation.Rmd
+    Untracked:  code/qq_full_style.R
+
 Unstaged changes:
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_calibration_noUC.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_calibration_noUCcalled.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_grid.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_npcs_tradeoff.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_null_simulation.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_optimiser.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_pathology_summary.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_site26.Rmd
     Modified:   analysis/qtl_mapping_betabinomial_strategy.Rmd
+    Modified:   analysis/qtl_mapping_summary_betabinomial.Rmd
 
 </code></pre>
 <p>
@@ -620,6 +634,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/8b7e398f92549f6366bf7c7bc7cf5c26f82c85e5/analysis/qtl_mapping_betabinomial_strategy.Rmd" target="_blank">8b7e398</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-01
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/8b7e398f92549f6366bf7c7bc7cf5c26f82c85e5/docs/qtl_mapping_betabinomial_strategy.html" target="_blank">8b7e398</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-01
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -703,6 +751,8 @@ PSI &lt;- &quot;/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl&quot;
 DAT &lt;- file.path(PSI, &quot;qtl_betabinomial/strategy_page_data_auto&quot;)
 
 qq   &lt;- fread(file.path(DAT, &quot;qq_all_runs.tsv.gz&quot;))
+qa   &lt;- fread(file.path(DAT, &quot;qq_all_runs_allpoints.tsv.gz&quot;))   # every p-value (53.qq_full_page_data.R)
+source(&quot;code/qq_full_style.R&quot;)   # the full-QQ plot style
 lam  &lt;- fread(file.path(DAT, &quot;lambda_all_runs.tsv&quot;))
 phid &lt;- fread(file.path(DAT, &quot;phi_distribution.tsv&quot;))
 phis &lt;- fread(file.path(DAT, &quot;phi_per_site.tsv.gz&quot;))
@@ -778,6 +828,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/8b7e398f92549f6366bf7c7bc7cf5c26f82c85e5/docs/figure/qtl_mapping_betabinomial_strategy.Rmd/phi-dist-1.png" target="_blank">8b7e398</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-01
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/2bdf3080b1355adf364ca86cb13ea96b72393ca0/docs/figure/qtl_mapping_betabinomial_strategy.Rmd/phi-dist-1.png" target="_blank">2bdf308</a>
@@ -945,17 +1006,9 @@ permutation series carries the information: shuffling the phenotype
 destroys any genotype–phenotype relationship, so those points must lie
 on the dashed line. Where they rise above it, the test is manufacturing
 signal out of nothing.</p>
-<pre class="r"><code>ggplot(qq, aes(expected, observed, colour = dataset)) +
-  geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, colour = &quot;grey45&quot;) +
-  geom_point(size = 0.55, alpha = 0.75) +
-  scale_colour_manual(values = COLS, name = NULL) +
-  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
-  facet_wrap(~ run, nrow = 1, scales = &quot;free_y&quot;) +
-  labs(x = expression(-log[10](&quot;expected p&quot;)), y = expression(-log[10](&quot;observed p&quot;)),
-       title = &quot;Beta-binomial LRT calibration at each filtering stage&quot;,
-       subtitle = &quot;Note the free y-axis -- the left panel reaches ~290, the right ~28. The blues are what matter.&quot;) +
-  theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_strategy.Rmd/qq-facets-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># every p-value, no thinning; each panel has its own y-axis
+qq_panels(qa, &quot;run&quot;, RUN_LV, ncol = 3)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_strategy.Rmd/qq-facets-1.png" width="1440" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq-facets-1">
 Past versions of qq-facets-1.png
@@ -978,6 +1031,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/8b7e398f92549f6366bf7c7bc7cf5c26f82c85e5/docs/figure/qtl_mapping_betabinomial_strategy.Rmd/qq-facets-1.png" target="_blank">8b7e398</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-01
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/2bdf3080b1355adf364ca86cb13ea96b72393ca0/docs/figure/qtl_mapping_betabinomial_strategy.Rmd/qq-facets-1.png" target="_blank">2bdf308</a>
@@ -1324,9 +1388,9 @@ loaded via a namespace (and not attached):
 [37] fs_1.5.2          digest_0.6.29     stringi_1.7.6     processx_3.5.3   
 [41] dplyr_1.1.2       getPass_0.2-2     rprojroot_2.0.3   grid_4.2.0       
 [45] cli_3.6.2         tools_4.2.0       magrittr_2.0.3    sass_0.4.1       
-[49] tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3   rmarkdown_2.21   
-[53] httr_1.4.5        rstudioapi_0.14   R6_2.5.1          git2r_0.30.1     
-[57] compiler_4.2.0   </code></pre>
+[49] patchwork_1.1.1   tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3  
+[53] rmarkdown_2.21    httr_1.4.5        rstudioapi_0.14   R6_2.5.1         
+[57] git2r_0.30.1      compiler_4.2.0   </code></pre>
 </div>
 </div>
 </div>

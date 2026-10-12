@@ -23,6 +23,8 @@ ms   <- fread(file.path(MA, "multistart_by_site.txt.gz"), sep = "\t")
 agr  <- fread(file.path(MA, "agreement_by_site.txt.gz"), sep = "\t")
 idn  <- fread(file.path(MA, "identifiability.txt.gz"), sep = "\t")
 qqd  <- fread(file.path(MA, "qq_thinned_multistart.tsv.gz"), sep = "\t")
+qa_ms <- fread(file.path(MA, "qq_multistart_allpoints.tsv.gz"), sep = "\t")  # every p-value (53.qq_full_page_data.R)
+source("code/qq_full_style.R")                                               # the full-QQ plot style
 bad9 <- fread(file.path(DIAG, "pathological_sites_w5kb_pc3_auto_noUCcalled.txt"),
               sep = "\t")$sid
 
@@ -259,50 +261,18 @@ knitr::kable(CALTAB[, .(run, `real lambda` = real_lambda,
 ## The QQ plots
 
 The table above is easier to believe as a picture. Under permutation there is no
-genotype–phenotype relationship, so the **blue** series must lie on the diagonal;
-where they climb above it the test is manufacturing signal from nothing.
+genotype–phenotype relationship, so the **light-blue** series must lie on the diagonal;
+where they climb above it the test is manufacturing signal from nothing. Every
+p-value is plotted, with no thinning, and each panel has its own y-axis.
 
-```{r qq-ms, fig.height=5.2, fig.width=13}
+```{r qq-ms, fig.height=4.6, fig.width=11}
 RUNLV <- c("1 start, phi sites KEPT", "3 starts, phi sites KEPT (no filter)")
-ORD  <- c("real", paste0("perm", 1:5))
-CQ   <- c(real = "#e34948", perm1 = "#9ec5f4", perm2 = "#6da7ec",
-          perm3 = "#3987e5", perm4 = "#256abf", perm5 = "#0d366b")
-q <- copy(qqd)[run %in% RUNLV]     # the phi-filter run is not shown
-q[, run := factor(run, levels = RUNLV)][, dataset := factor(dataset, levels = ORD)]
-
-ggplot(q, aes(expected, observed, colour = dataset)) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey45") +
-  geom_point(size = 0.55, alpha = 0.8) +
-  scale_colour_manual(values = CQ, name = NULL) +
-  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
-  facet_wrap(~ run, nrow = 1) +
-  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
-       title = "Calibration QQ: single start vs multi-start",
-       subtitle = paste("Red = real scan, blues = 5 phenotype permutations. Axes SHARED, so the panels are directly comparable.",
-                        "\nLEFT: the blues climb to 142 -- pure artefact, since permuted data contain no signal.",
-                        "\nRIGHT: the same sites, none removed, just fitted properly -- the blues collapse onto the diagonal.")) +
-  theme_bw(base_size = 12) + theme(legend.position = "bottom",
-                                   strip.text = element_text(size = 9))
+qq_panels(qa_ms[run %in% RUNLV], "run", RUNLV, ncol = 2)
 ```
 
-```{r qq-ms-zoom, fig.height=5.2, fig.width=13}
-# clipped companion: the left panel's artefact tail compresses everything else,
-# so the bulk behaviour near the diagonal is invisible without clipping.
-YM <- 12
-ggplot(q, aes(expected, observed, colour = dataset)) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey45") +
-  geom_point(size = 0.55, alpha = 0.8) +
-  scale_colour_manual(values = CQ, name = NULL) +
-  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
-  facet_wrap(~ run, nrow = 1) +
-  coord_cartesian(ylim = c(0, YM)) +
-  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
-       title = sprintf("Same data, y clipped at %d to show the bulk", YM),
-       subtitle = paste("With the artefact tail out of view the two panels look much the same near the diagonal --",
-                        "which is the point:\nthe fix removes a pathology confined to a handful of sites and leaves",
-                        "everything else alone. Clipped points are\noutside the view, not deleted.")) +
-  theme_bw(base_size = 12) + theme(legend.position = "bottom",
-                                   strip.text = element_text(size = 9))
+```{r qq-ms-zoom, fig.height=4.6, fig.width=11}
+# the same data, y clipped at 12 to show the bulk; clipped points are outside the view, not deleted
+qq_panels(qa_ms[run %in% RUNLV], "run", RUNLV, ncol = 2, ylim = c(0, 12))
 ```
 
 **λ barely moves** (1.401 → 1.399, permutation 1.034–1.070 → 1.029–1.063), and
@@ -437,26 +407,10 @@ the criterion. The 63 sites where the rule overrules the likelihood are nowhere
 near the tail, so the log-likelihood given up there never converts into a false
 positive.
 
-```{r qqphisel, fig.height=4.6, fig.width=13}
-qs <- fread(file.path(PS, "qq_thinned_phisel.tsv.gz"), sep = "\t")[run %chin% RL]
-qs[, run := factor(run, levels = RL)]
-qs[, kind := ifelse(dataset == "real", "real", "permuted")]
-ggplot(qs, aes(expected, observed, group = dataset, colour = kind, shape = kind)) +
-  geom_abline(slope = 1, intercept = 0, colour = "grey55", linewidth = 0.3) +
-  geom_point(size = 0.5, alpha = 0.55) +
-  facet_wrap(~ run, nrow = 1) +
-  scale_colour_manual(values = c(real = "#1f4e9c", permuted = "#c0392b"), name = NULL) +
-  scale_shape_manual(values = c(real = 16, permuted = 17), name = NULL) +
-  coord_cartesian(ylim = c(0, 45)) +
-  guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
-  labs(x = expression(Expected~-log[10](p)), y = expression(Observed~-log[10](p)),
-       title = "Calibration: single start vs the MLE vs the peak rule (y clipped at 45)",
-       subtitle = paste("Every p-value in the tail is drawn -- all 2,000 smallest per dataset; the bulk is thinned. Points, not lines:",
-                        "a line interpolates across the gaps and renders the artefact tail as a smooth ramp, hiding that it is a few",
-                        "discrete clusters of SNPs at a handful of broken sites. Clipped points are outside the view, not deleted.", sep = "\n")) +
-  theme_bw(base_size = 11) +
-  theme(legend.position = "top", panel.grid.minor = element_blank(),
-        strip.text = element_text(size = 9))
+```{r qqphisel, fig.height=4.4, fig.width=15}
+# every p-value (53.qq_full_page_data.R), each panel with its own y-axis
+qs <- fread(file.path(PS, "qq_phisel_allpoints.tsv.gz"), sep = "\t")[run %chin% RL]
+qq_panels(qs, "run", RL, ncol = 3)
 ```
 
 The counts behind those tails:

@@ -11,7 +11,7 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-09-10" />
+<meta name="date" content="2026-10-12" />
 
 <title>Beta-binomial pU-QTL: the window × nPC calibration grid</title>
 
@@ -374,7 +374,7 @@ div.tocify {
 <h1 class="title toc-ignore">Beta-binomial pU-QTL: the window × nPC
 calibration grid</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-09-10</h4>
+<h4 class="date">2026-10-12</h4>
 
 </div>
 
@@ -403,7 +403,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-09-10
+<strong>Last updated:</strong> 2026-10-12
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -441,10 +441,10 @@ changes </a>
 <div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown is untracked by Git. To know which version of the R
-Markdown file created these results, you’ll want to first commit it to
-the Git repo. If you’re still working on the analysis, you can ignore
-this warning. When you’re finished, you can run
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
 <code>wflow_publish</code> to commit the R Markdown file and build the
 HTML.</p>
 </div>
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreededb4c8b928278e7a96f6fede5d03f5769499150targetblankdedb4c8a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree7416f4c8bb595d837d9cd5cd43c36bd432e137d1targetblank7416f4ca">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/dedb4c8b928278e7a96f6fede5d03f5769499150" target="_blank">dedb4c8</a>
+<a href="https://github.com/xsun1229/pumseq/tree/7416f4c8bb595d837d9cd5cd43c36bd432e137d1" target="_blank">7416f4c</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreededb4c8b928278e7a96f6fede5d03f5769499150targetblankdedb4c8a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree7416f4c8bb595d837d9cd5cd43c36bd432e137d1targetblank7416f4ca"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/dedb4c8b928278e7a96f6fede5d03f5769499150" target="_blank">dedb4c8</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/7416f4c8bb595d837d9cd5cd43c36bd432e137d1" target="_blank">7416f4c</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -573,10 +573,21 @@ Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Untracked files:
-    Untracked:  analysis/qtl_mapping_betabinomial_grid.Rmd
+    Untracked:  analysis/qtl_mapping_betabinomial_pc_window_permutation.Rmd
+    Untracked:  code/qq_full_style.R
 
 Unstaged changes:
     Modified:   analysis/index.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_calibration_noUC.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_calibration_noUCcalled.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_grid.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_npcs_tradeoff.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_null_simulation.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_optimiser.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_pathology_summary.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_site26.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_strategy.Rmd
+    Modified:   analysis/qtl_mapping_summary_betabinomial.Rmd
 
 </code></pre>
 <p>
@@ -591,10 +602,75 @@ have uncommitted changes.
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
+
 <p>
-There are no past versions. Publish this analysis with
-<code>wflow_publish()</code> to start tracking its development.
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>analysis/qtl_mapping_betabinomial_grid.Rmd</code>) and HTML
+(<code>docs/qtl_mapping_betabinomial_grid.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
 </p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cb6168907f22f43f300e4364dee666a8e3d73395/analysis/qtl_mapping_betabinomial_grid.Rmd" target="_blank">cb61689</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/cb6168907f22f43f300e4364dee666a8e3d73395/docs/qtl_mapping_betabinomial_grid.html" target="_blank">cb61689</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+<td>
+update
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <hr>
 </div>
 </div>
@@ -609,6 +685,9 @@ CG  &lt;- file.path(PSI, &quot;qtl_betabinomial/calibration_grid&quot;)
 G  &lt;- fread(file.path(CG, &quot;grid_calibration.tsv&quot;), sep = &quot;\t&quot;)
 PB &lt;- fread(file.path(CG, &quot;grid_problematic.tsv&quot;), sep = &quot;\t&quot;)
 QQ &lt;- fread(file.path(CG, &quot;grid_qq_thinned.tsv.gz&quot;), sep = &quot;\t&quot;)
+# every p-value, overlapping points merged at a third of a pixel (53.qq_full_page_data.R)
+QA &lt;- fread(file.path(CG, &quot;grid_qq_allpoints_merged.tsv.gz&quot;), sep = &quot;\t&quot;)
+source(&quot;code/qq_full_style.R&quot;); qq_kind(QA)
 
 WINDOWS &lt;- c(5, 20, 50, 100); KS &lt;- c(3, 5, 7, 10, 15, 20)
 wlab &lt;- function(x) factor(sprintf(&quot;%d kb&quot;, x), levels = sprintf(&quot;%d kb&quot;, WINDOWS))
@@ -1033,6 +1112,43 @@ move.</caption>
        subtitle = &quot;The four lines nearly coincide: lambda depends on k and hardly at all on window size.&quot;) +
   theme_bw(base_size = 11) + theme(panel.grid.minor = element_blank())</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_grid.Rmd/lamfig-1.png" width="806.4" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-lamfig-1">
+Past versions of lamfig-1.png
+</button>
+</p>
+<div id="fig-lamfig-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cb6168907f22f43f300e4364dee666a8e3d73395/docs/figure/qtl_mapping_betabinomial_grid.Rmd/lamfig-1.png" target="_blank">cb61689</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Quantitatively, the spread of permutation λ <strong>across windows at
 fixed k is 0.012–0.100</strong>, while <strong>across k at fixed window
 it is 0.357–0.465</strong> — a factor of 4 to 40. This is the result
@@ -1313,60 +1429,173 @@ window.</caption>
 </div>
 <div id="qq-plots-for-all-24-cells" class="section level1">
 <h1>5. QQ plots for all 24 cells</h1>
-<p>Blue = real data, red = the 5 permutations. Every red point above the
-diagonal is a false positive by construction, so <strong>a taller red
-cloud is a worse-calibrated cell</strong>. Rows are windows, columns are
-k.</p>
-<p>Points rather than lines, and the thinning keeps every one of the
-2,000 smallest p-values per dataset and thins only the bulk —
-uniform-in-rank thinning would discard most of the tail, which is the
-only part that carries the conclusion.</p>
-<pre class="r"><code>QQ[, kind := ifelse(dataset == &quot;real&quot;, &quot;real&quot;, &quot;permuted&quot;)]
-QQ[, `:=`(window = wlab(window_kb), kk = klab(npcs))]
-ggplot(QQ, aes(expected, observed, group = dataset, colour = kind)) +
-  geom_abline(slope = 1, intercept = 0, colour = &quot;grey55&quot;, linewidth = 0.25) +
-  geom_point(size = 0.25, alpha = 0.5, shape = 16) +
-  facet_grid(window ~ kk) +
-  scale_colour_manual(values = c(real = &quot;#1f4e9c&quot;, permuted = &quot;#c0392b&quot;), name = NULL) +
+<p>Teal = real data, light blue = the 5 permutations. Every light-blue
+point above the diagonal is a false positive by construction, so
+<strong>a taller light-blue cloud is a worse-calibrated cell</strong>.
+Rows are windows, columns are k.</p>
+<p>Every p-value is included. A cell has 1.5 to 35 million of them, so
+points that would land on the same spot of the figure (within a third of
+a pixel) are drawn once; the picture is the same as plotting each one.
+In the first figure each row has its own y-axis.</p>
+<pre class="r"><code>QA[, `:=`(window = wlab(window_kb), kk = klab(npcs))]
+ggplot(QA, aes(expected, observed, colour = kind)) +
+  geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, colour = &quot;black&quot;, linewidth = 0.3) +
+  geom_point(data = QA[kind == &quot;Observed data&quot;], size = 0.3, shape = 16) +
+  geom_point(data = QA[kind == &quot;Permutation&quot;], size = 0.3, shape = 16, alpha = 0.8) +
+  scale_colour_manual(values = QQCOL, breaks = names(QQCOL), name = NULL) +
   guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
+  facet_grid(window ~ kk, scales = &quot;free_y&quot;) +
   labs(x = expression(Expected~-log[10](p)), y = expression(Observed~-log[10](p)),
        title = &quot;Calibration across the whole grid&quot;,
-       subtitle = &quot;Red = 5 permutations (false positives by construction). Reading across a row shows the effect of k; down a column, the effect of window.&quot;) +
-  theme_bw(base_size = 10) +
-  theme(legend.position = &quot;top&quot;, panel.grid.minor = element_blank(),
-        strip.text = element_text(size = 9))</code></pre>
+       subtitle = &quot;Light blue = 5 permutations (false positives by construction). Each row has its own y-axis.&quot;) +
+  theme_classic(base_size = 10) +
+  theme(legend.position = &quot;top&quot;, panel.grid.major = element_line(colour = &quot;grey93&quot;, linewidth = 0.3),
+        strip.background = element_blank(), strip.text = element_text(size = 9))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_grid.Rmd/qqgrid-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qqgrid-1">
+Past versions of qqgrid-1.png
+</button>
+</p>
+<div id="fig-qqgrid-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cb6168907f22f43f300e4364dee666a8e3d73395/docs/figure/qtl_mapping_betabinomial_grid.Rmd/qqgrid-1.png" target="_blank">cb61689</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>The same figure with the y-axis clipped, so the permuted clouds —
 which are what the comparison turns on — are not compressed by the
 real-data tail:</p>
-<pre class="r"><code>ggplot(QQ, aes(expected, observed, group = dataset, colour = kind)) +
-  geom_abline(slope = 1, intercept = 0, colour = &quot;grey55&quot;, linewidth = 0.25) +
-  geom_point(size = 0.25, alpha = 0.5, shape = 16) +
+<pre class="r"><code>ggplot(QA, aes(expected, observed, colour = kind)) +
+  geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, colour = &quot;black&quot;, linewidth = 0.3) +
+  geom_point(data = QA[kind == &quot;Observed data&quot;], size = 0.3, shape = 16) +
+  geom_point(data = QA[kind == &quot;Permutation&quot;], size = 0.3, shape = 16, alpha = 0.8) +
+  scale_colour_manual(values = QQCOL, breaks = names(QQCOL), name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
   facet_grid(window ~ kk) +
   coord_cartesian(ylim = c(0, 35)) +
-  scale_colour_manual(values = c(real = &quot;#1f4e9c&quot;, permuted = &quot;#c0392b&quot;), name = NULL) +
-  guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
   labs(x = expression(Expected~-log[10](p)), y = expression(Observed~-log[10](p)),
-       title = &quot;Same grid, y-axis clipped to 35&quot;,
+       title = &quot;Same grid, common y-axis clipped to 35&quot;,
        subtitle = &quot;Clipped points are outside the view, not deleted.&quot;) +
-  theme_bw(base_size = 10) +
-  theme(legend.position = &quot;top&quot;, panel.grid.minor = element_blank(),
-        strip.text = element_text(size = 9))</code></pre>
+  theme_classic(base_size = 10) +
+  theme(legend.position = &quot;top&quot;, panel.grid.major = element_line(colour = &quot;grey93&quot;, linewidth = 0.3),
+        strip.background = element_blank(), strip.text = element_text(size = 9))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_grid.Rmd/qqgridclip-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qqgridclip-1">
+Past versions of qqgridclip-1.png
+</button>
+</p>
+<div id="fig-qqgridclip-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cb6168907f22f43f300e4364dee666a8e3d73395/docs/figure/qtl_mapping_betabinomial_grid.Rmd/qqgridclip-1.png" target="_blank">cb61689</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Permuted-only, at a common scale, which is the cleanest way to rank
 the cells:</p>
-<pre class="r"><code>ggplot(QQ[kind == &quot;permuted&quot;], aes(expected, observed, group = dataset)) +
-  geom_abline(slope = 1, intercept = 0, colour = &quot;grey55&quot;, linewidth = 0.25) +
-  geom_point(size = 0.25, alpha = 0.5, shape = 16, colour = &quot;#c0392b&quot;) +
+<pre class="r"><code>ggplot(QA[kind == &quot;Permutation&quot;], aes(expected, observed)) +
+  geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, colour = &quot;black&quot;, linewidth = 0.3) +
+  geom_point(size = 0.3, shape = 16, alpha = 0.8, colour = QQCOL[[&quot;Permutation&quot;]]) +
   facet_grid(window ~ kk) +
   coord_cartesian(ylim = c(0, 20)) +
   labs(x = expression(Expected~-log[10](p)), y = expression(Observed~-log[10](p)),
        title = &quot;Permutations only: pure false positives, common y-axis&quot;,
-       subtitle = paste(&quot;The k = 3 column hugs the diagonal at every window. Departure grows to the right, hardly at all downwards.&quot;,
+       subtitle = paste(&quot;The k = 3 column departs least from the diagonal at every window. Departure grows to the right, hardly at all downwards.&quot;,
                         &quot;y-axis clipped to 20; the k = 20 cells reach 29-31 at the wider windows, so their topmost points are outside the view, not deleted.&quot;, sep = &quot;\n&quot;)) +
-  theme_bw(base_size = 10) +
-  theme(panel.grid.minor = element_blank(), strip.text = element_text(size = 9))</code></pre>
+  theme_classic(base_size = 10) +
+  theme(legend.position = &quot;top&quot;, panel.grid.major = element_line(colour = &quot;grey93&quot;, linewidth = 0.3),
+        strip.background = element_blank(), strip.text = element_text(size = 9))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_grid.Rmd/qqperm-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qqperm-1">
+Past versions of qqperm-1.png
+</button>
+</p>
+<div id="fig-qqperm-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cb6168907f22f43f300e4364dee666a8e3d73395/docs/figure/qtl_mapping_betabinomial_grid.Rmd/qqperm-1.png" target="_blank">cb61689</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="what-the-grid-decides-and-what-it-does-not"
 class="section level1">

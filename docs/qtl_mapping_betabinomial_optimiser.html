@@ -11,7 +11,7 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-09-10" />
+<meta name="date" content="2026-10-12" />
 
 <title>Beta-binomial pU-QTL: the φ pathology is an optimiser failure</title>
 
@@ -374,7 +374,7 @@ div.tocify {
 <h1 class="title toc-ignore">Beta-binomial pU-QTL: the φ pathology is an
 optimiser failure</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-09-10</h4>
+<h4 class="date">2026-10-12</h4>
 
 </div>
 
@@ -403,7 +403,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-09-10
+<strong>Last updated:</strong> 2026-10-12
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreededb4c8b928278e7a96f6fede5d03f5769499150targetblankdedb4c8a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree7416f4c8bb595d837d9cd5cd43c36bd432e137d1targetblank7416f4ca">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/dedb4c8b928278e7a96f6fede5d03f5769499150" target="_blank">dedb4c8</a>
+<a href="https://github.com/xsun1229/pumseq/tree/7416f4c8bb595d837d9cd5cd43c36bd432e137d1" target="_blank">7416f4c</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreededb4c8b928278e7a96f6fede5d03f5769499150targetblankdedb4c8a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree7416f4c8bb595d837d9cd5cd43c36bd432e137d1targetblank7416f4ca"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/dedb4c8b928278e7a96f6fede5d03f5769499150" target="_blank">dedb4c8</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/7416f4c8bb595d837d9cd5cd43c36bd432e137d1" target="_blank">7416f4c</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -573,11 +573,21 @@ Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
 Untracked files:
-    Untracked:  analysis/qtl_mapping_betabinomial_grid.Rmd
+    Untracked:  analysis/qtl_mapping_betabinomial_pc_window_permutation.Rmd
+    Untracked:  code/qq_full_style.R
 
 Unstaged changes:
     Modified:   analysis/index.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_calibration_noUC.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_calibration_noUCcalled.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_grid.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_npcs_tradeoff.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_null_simulation.Rmd
     Modified:   analysis/qtl_mapping_betabinomial_optimiser.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_pathology_summary.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_site26.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_strategy.Rmd
+    Modified:   analysis/qtl_mapping_summary_betabinomial.Rmd
 
 </code></pre>
 <p>
@@ -624,6 +634,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cb6168907f22f43f300e4364dee666a8e3d73395/analysis/qtl_mapping_betabinomial_optimiser.Rmd" target="_blank">cb61689</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/cb6168907f22f43f300e4364dee666a8e3d73395/docs/qtl_mapping_betabinomial_optimiser.html" target="_blank">cb61689</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -712,6 +756,8 @@ ms   &lt;- fread(file.path(MA, &quot;multistart_by_site.txt.gz&quot;), sep = &qu
 agr  &lt;- fread(file.path(MA, &quot;agreement_by_site.txt.gz&quot;), sep = &quot;\t&quot;)
 idn  &lt;- fread(file.path(MA, &quot;identifiability.txt.gz&quot;), sep = &quot;\t&quot;)
 qqd  &lt;- fread(file.path(MA, &quot;qq_thinned_multistart.tsv.gz&quot;), sep = &quot;\t&quot;)
+qa_ms &lt;- fread(file.path(MA, &quot;qq_multistart_allpoints.tsv.gz&quot;), sep = &quot;\t&quot;)  # every p-value (53.qq_full_page_data.R)
+source(&quot;code/qq_full_style.R&quot;)                                               # the full-QQ plot style
 bad9 &lt;- fread(file.path(DIAG, &quot;pathological_sites_w5kb_pc3_auto_noUCcalled.txt&quot;),
               sep = &quot;\t&quot;)$sid
 
@@ -1414,29 +1460,13 @@ near zero.</li>
 <h2>The QQ plots</h2>
 <p>The table above is easier to believe as a picture. Under permutation
 there is no genotype–phenotype relationship, so the
-<strong>blue</strong> series must lie on the diagonal; where they climb
-above it the test is manufacturing signal from nothing.</p>
+<strong>light-blue</strong> series must lie on the diagonal; where they
+climb above it the test is manufacturing signal from nothing. Every
+p-value is plotted, with no thinning, and each panel has its own
+y-axis.</p>
 <pre class="r"><code>RUNLV &lt;- c(&quot;1 start, phi sites KEPT&quot;, &quot;3 starts, phi sites KEPT (no filter)&quot;)
-ORD  &lt;- c(&quot;real&quot;, paste0(&quot;perm&quot;, 1:5))
-CQ   &lt;- c(real = &quot;#e34948&quot;, perm1 = &quot;#9ec5f4&quot;, perm2 = &quot;#6da7ec&quot;,
-          perm3 = &quot;#3987e5&quot;, perm4 = &quot;#256abf&quot;, perm5 = &quot;#0d366b&quot;)
-q &lt;- copy(qqd)[run %in% RUNLV]     # the phi-filter run is not shown
-q[, run := factor(run, levels = RUNLV)][, dataset := factor(dataset, levels = ORD)]
-
-ggplot(q, aes(expected, observed, colour = dataset)) +
-  geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, colour = &quot;grey45&quot;) +
-  geom_point(size = 0.55, alpha = 0.8) +
-  scale_colour_manual(values = CQ, name = NULL) +
-  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
-  facet_wrap(~ run, nrow = 1) +
-  labs(x = expression(-log[10](&quot;expected p&quot;)), y = expression(-log[10](&quot;observed p&quot;)),
-       title = &quot;Calibration QQ: single start vs multi-start&quot;,
-       subtitle = paste(&quot;Red = real scan, blues = 5 phenotype permutations. Axes SHARED, so the panels are directly comparable.&quot;,
-                        &quot;\nLEFT: the blues climb to 142 -- pure artefact, since permuted data contain no signal.&quot;,
-                        &quot;\nRIGHT: the same sites, none removed, just fitted properly -- the blues collapse onto the diagonal.&quot;)) +
-  theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;,
-                                   strip.text = element_text(size = 9))</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_optimiser.Rmd/qq-ms-1.png" width="1248" style="display: block; margin: auto;" /></p>
+qq_panels(qa_ms[run %in% RUNLV], &quot;run&quot;, RUNLV, ncol = 2)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_optimiser.Rmd/qq-ms-1.png" width="1056" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq-ms-1">
 Past versions of qq-ms-1.png
@@ -1485,24 +1515,9 @@ XSun
 </table>
 </div>
 </div>
-<pre class="r"><code># clipped companion: the left panel&#39;s artefact tail compresses everything else,
-# so the bulk behaviour near the diagonal is invisible without clipping.
-YM &lt;- 12
-ggplot(q, aes(expected, observed, colour = dataset)) +
-  geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, colour = &quot;grey45&quot;) +
-  geom_point(size = 0.55, alpha = 0.8) +
-  scale_colour_manual(values = CQ, name = NULL) +
-  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
-  facet_wrap(~ run, nrow = 1) +
-  coord_cartesian(ylim = c(0, YM)) +
-  labs(x = expression(-log[10](&quot;expected p&quot;)), y = expression(-log[10](&quot;observed p&quot;)),
-       title = sprintf(&quot;Same data, y clipped at %d to show the bulk&quot;, YM),
-       subtitle = paste(&quot;With the artefact tail out of view the two panels look much the same near the diagonal --&quot;,
-                        &quot;which is the point:\nthe fix removes a pathology confined to a handful of sites and leaves&quot;,
-                        &quot;everything else alone. Clipped points are\noutside the view, not deleted.&quot;)) +
-  theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;,
-                                   strip.text = element_text(size = 9))</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_optimiser.Rmd/qq-ms-zoom-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># the same data, y clipped at 12 to show the bulk; clipped points are outside the view, not deleted
+qq_panels(qa_ms[run %in% RUNLV], &quot;run&quot;, RUNLV, ncol = 2, ylim = c(0, 12))</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_optimiser.Rmd/qq-ms-zoom-1.png" width="1056" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq-ms-zoom-1">
 Past versions of qq-ms-zoom-1.png
@@ -1741,6 +1756,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/cb6168907f22f43f300e4364dee666a8e3d73395/docs/figure/qtl_mapping_betabinomial_optimiser.Rmd/phidist-1.png" target="_blank">cb61689</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-09-14
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/dedb4c8b928278e7a96f6fede5d03f5769499150/docs/figure/qtl_mapping_betabinomial_optimiser.Rmd/phidist-1.png" target="_blank">dedb4c8</a>
@@ -2070,26 +2096,10 @@ candidate that fails the real-data half of the criterion. The 63 sites
 where the rule overrules the likelihood are nowhere near the tail, so
 the log-likelihood given up there never converts into a false
 positive.</p>
-<pre class="r"><code>qs &lt;- fread(file.path(PS, &quot;qq_thinned_phisel.tsv.gz&quot;), sep = &quot;\t&quot;)[run %chin% RL]
-qs[, run := factor(run, levels = RL)]
-qs[, kind := ifelse(dataset == &quot;real&quot;, &quot;real&quot;, &quot;permuted&quot;)]
-ggplot(qs, aes(expected, observed, group = dataset, colour = kind, shape = kind)) +
-  geom_abline(slope = 1, intercept = 0, colour = &quot;grey55&quot;, linewidth = 0.3) +
-  geom_point(size = 0.5, alpha = 0.55) +
-  facet_wrap(~ run, nrow = 1) +
-  scale_colour_manual(values = c(real = &quot;#1f4e9c&quot;, permuted = &quot;#c0392b&quot;), name = NULL) +
-  scale_shape_manual(values = c(real = 16, permuted = 17), name = NULL) +
-  coord_cartesian(ylim = c(0, 45)) +
-  guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
-  labs(x = expression(Expected~-log[10](p)), y = expression(Observed~-log[10](p)),
-       title = &quot;Calibration: single start vs the MLE vs the peak rule (y clipped at 45)&quot;,
-       subtitle = paste(&quot;Every p-value in the tail is drawn -- all 2,000 smallest per dataset; the bulk is thinned. Points, not lines:&quot;,
-                        &quot;a line interpolates across the gaps and renders the artefact tail as a smooth ramp, hiding that it is a few&quot;,
-                        &quot;discrete clusters of SNPs at a handful of broken sites. Clipped points are outside the view, not deleted.&quot;, sep = &quot;\n&quot;)) +
-  theme_bw(base_size = 11) +
-  theme(legend.position = &quot;top&quot;, panel.grid.minor = element_blank(),
-        strip.text = element_text(size = 9))</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_optimiser.Rmd/qqphisel-1.png" width="1248" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># every p-value (53.qq_full_page_data.R), each panel with its own y-axis
+qs &lt;- fread(file.path(PS, &quot;qq_phisel_allpoints.tsv.gz&quot;), sep = &quot;\t&quot;)[run %chin% RL]
+qq_panels(qs, &quot;run&quot;, RL, ncol = 3)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_optimiser.Rmd/qqphisel-1.png" width="1440" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qqphisel-1">
 Past versions of qqphisel-1.png
@@ -2256,9 +2266,9 @@ loaded via a namespace (and not attached):
 [37] fs_1.5.2          digest_0.6.29     stringi_1.7.6     processx_3.5.3   
 [41] dplyr_1.1.2       getPass_0.2-2     rprojroot_2.0.3   grid_4.2.0       
 [45] cli_3.6.2         tools_4.2.0       magrittr_2.0.3    sass_0.4.1       
-[49] tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3   rmarkdown_2.21   
-[53] httr_1.4.5        rstudioapi_0.14   R6_2.5.1          git2r_0.30.1     
-[57] compiler_4.2.0   </code></pre>
+[49] patchwork_1.1.1   tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3  
+[53] rmarkdown_2.21    httr_1.4.5        rstudioapi_0.14   R6_2.5.1         
+[57] git2r_0.30.1      compiler_4.2.0   </code></pre>
 </div>
 </div>
 </div>

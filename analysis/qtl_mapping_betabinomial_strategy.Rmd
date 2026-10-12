@@ -18,6 +18,8 @@ PSI <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl"
 DAT <- file.path(PSI, "qtl_betabinomial/strategy_page_data_auto")
 
 qq   <- fread(file.path(DAT, "qq_all_runs.tsv.gz"))
+qa   <- fread(file.path(DAT, "qq_all_runs_allpoints.tsv.gz"))   # every p-value (53.qq_full_page_data.R)
+source("code/qq_full_style.R")   # the full-QQ plot style
 lam  <- fread(file.path(DAT, "lambda_all_runs.tsv"))
 phid <- fread(file.path(DAT, "phi_distribution.tsv"))
 phis <- fread(file.path(DAT, "phi_per_site.tsv.gz"))
@@ -138,17 +140,9 @@ information: shuffling the phenotype destroys any genotype–phenotype
 relationship, so those points must lie on the dashed line. Where they rise above
 it, the test is manufacturing signal out of nothing.
 
-```{r qq-facets, fig.height=4.8}
-ggplot(qq, aes(expected, observed, colour = dataset)) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey45") +
-  geom_point(size = 0.55, alpha = 0.75) +
-  scale_colour_manual(values = COLS, name = NULL) +
-  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
-  facet_wrap(~ run, nrow = 1, scales = "free_y") +
-  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
-       title = "Beta-binomial LRT calibration at each filtering stage",
-       subtitle = "Note the free y-axis -- the left panel reaches ~290, the right ~28. The blues are what matter.") +
-  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+```{r qq-facets, fig.height=4.4, fig.width=15}
+# every p-value, no thinning; each panel has its own y-axis
+qq_panels(qa, "run", RUN_LV, ncol = 3)
 ```
 
 ```{r lam-tab}

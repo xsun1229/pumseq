@@ -1,0 +1,172 @@
+---
+title: "Beta-binomial pU-QTL: permutation check for each window and number of PCs"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.align = "center")
+
+PSI <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl"
+CG  <- file.path(PSI, "qtl_betabinomial/calibration_grid")
+SEL <- file.path(PSI, "qtl_betabinomial/pc_window_selection/fold5_union_auto_noUCcalled/summary")
+
+WINDOWS <- c(5, 20, 50); KS <- c(3, 5, 7, 10, 15)
+G  <- fread(file.path(CG, "grid_calibration.tsv"))[window_kb %in% WINDOWS & npcs %in% KS]
+BD <- fread(file.path(CG, "grid_by_dataset.tsv"))[window_kb %in% WINDOWS & npcs %in% KS]
+QQ <- fread(file.path(CG, "grid_qq_thinned.tsv.gz"))[window_kb %in% WINDOWS & npcs %in% KS]
+# every p-value, overlapping points merged at a third of a pixel (53.qq_full_page_data.R)
+QA <- fread(file.path(CG, "grid_qq_allpoints_merged.tsv.gz"))[window_kb %in% WINDOWS & npcs %in% KS]
+source("code/qq_full_style.R")
+ST <- fread(file.path(SEL, "selection_table.tsv"))
+NI <- fread(file.path(SEL, "selection_no_inheritedC.tsv"))
+stopifnot(nrow(G) == 15, QQ[, uniqueN(dataset), by = .(window_kb, npcs)]$V1 == 6)
+
+QQ[, kind := ifelse(dataset == "real", "real data", "5 permutations")]
+YMAX <- max(QQ$observed); XMAX <- max(QQ$expected)
+fmt <- function(x) format(x, big.mark = ",", trim = TRUE)
+
+# pointwise 95% band for the order statistics of n uniform p-values, on the QQ axes
+band <- function(n, expected) {
+  i <- pmin(pmax(round(n * 10^(-expected) + 0.5), 1), n)
+  data.table(expected = expected,
+             lo = -log10(qbeta(0.975, i, n - i + 1)), hi = -log10(qbeta(0.025, i, n - i + 1)))
+}
+
+qq_plot <- function(w, k) {
+  g <- G[window_kb == w & npcs == k]
+  qq_panel(QA[window_kb == w & npcs == k], sprintf("+/-%d kb, k = %d PCs", w, k)) +
+    labs(subtitle = sprintf("%s cis tests | permutation lambda %.3f-%.3f, real %.3f\nworst permuted -log10 p %.1f | eSites (q < 0.05): %d (%d without inherited-C sites)",
+                            fmt(g$tests), g$perm_lambda_min, g$perm_lambda_max, g$real_lambda, g$worst_perm_tail,
+                            ST[window_kb == w & npcs == k]$disc_q05, NI[window_kb == w & npcs == k]$eSites_clean)) +
+    theme(plot.subtitle = element_text(size = 9, hjust = 0.5))
+}
+```
+
+# 1. What this page shows
+
+This page checks how well the likelihood-ratio test is calibrated for each of
+the 15 configurations considered for the real-data analysis: cis windows of
+±5, 20 and 50 kb, and k = 3, 5, 7, 10 and 15 phenotype PCs.
+
+**The test.** Beta-binomial LRT, with each fit started from φ = 0.01, 0.1 and
+0.5 and the best kept. Covariates are the first k M-value PCs, and the
+phenotype is `fold5_union_auto_noUCcalled` (10,738 sites).
+
+**The permutations.** Each configuration was run on the real data and on 5
+genome-wide permutations. A permutation shuffles each site's phenotype and PCs
+together across cell lines and keeps the genotypes fixed. The same 5
+permutation orders are used in every configuration. A permuted data set
+contains no pU-QTL, so its p-values should follow the diagonal, and any excess
+is a false positive.
+
+**Same fits as the eSite counts.** The real-data p-values here are identical
+to those of the window and PC selection scan (`47.scan_pc_window_selection.R`).
+That was checked at every chr21–22 site for ±5 kb with k = 3 (466 sites) and
+for ±50 kb with k = 15 (336 sites).
+
+**What this checks, and what it does not.** These are the nominal LRT
+p-values. The eSite counts in the table and plot subtitles use a different
+p-value: a per-site permutation p-value under the same k. That p-value absorbs
+the per-test miscalibration shown here. So this page checks the test itself,
+not the eSite counts. A null run of the full selection pipeline has not been
+done.
+
+# 2. Summary
+
+```{r summary}
+tab <- merge(G, ST[, .(window_kb, npcs, disc_q05)], by = c("window_kb", "npcs"))
+tab <- merge(tab, NI[, .(window_kb, npcs, eSites_clean)], by = c("window_kb", "npcs"))
+nperm <- BD[dataset != "real", .(n_perm_tests = median(n_pvalues)), by = .(window_kb, npcs)]
+tab <- merge(tab, nperm, by = c("window_kb", "npcs"))
+setorder(tab, window_kb, npcs)
+knitr::kable(tab[, .(window = sprintf("%d kb", window_kb), k = npcs, `cis tests` = fmt(tests),
+                     `real lambda` = sprintf("%.3f", real_lambda),
+                     `permutation lambda` = sprintf("%.3f-%.3f", perm_lambda_min, perm_lambda_max),
+                     `worst permuted -log10 p` = sprintf("%.1f", worst_perm_tail),
+                     `expected max over 5 permutations` = sprintf("%.1f", log10(5 * n_perm_tests)),
+                     `sites extreme in real and permuted data` = problematic,
+                     `eSites (q < 0.05)` = disc_q05, `eSites without inherited-C sites` = eSites_clean)],
+             align = "lrrrrrrrrr",
+             caption = paste("Permutation lambda is the median-based genomic-control lambda of each permuted data set (range over the 5).",
+                             "'Expected max' is -log10 of the smallest p expected among all permuted tests if they were uniform.",
+                             "'Sites extreme in real and permuted data': permuted min p < 1e-10 and real min p < 1e-10.",
+                             "eSites come from the selection scan's per-site permutation p-values (Storey q < 0.05)."))
+```
+
+```{r lambdaplot, fig.width=8, fig.height=4.2}
+L <- BD[dataset != "real", .(lo = min(lambda), hi = max(lambda), mid = median(lambda)), by = .(window_kb, npcs)]
+L[, window := factor(sprintf("%d kb", window_kb), levels = sprintf("%d kb", WINDOWS))]
+ggplot(L, aes(npcs, mid, colour = window)) +
+  geom_hline(yintercept = 1, colour = "grey55", linetype = "dashed", linewidth = 0.4) +
+  geom_errorbar(aes(ymin = lo, ymax = hi), width = 0.35, position = position_dodge(width = 0.8)) +
+  geom_point(size = 2, position = position_dodge(width = 0.8)) +
+  scale_colour_manual(values = c("5 kb" = "#1f4e9c", "20 kb" = "#2c8a4a", "50 kb" = "#d98c00"), name = "cis window") +
+  scale_x_continuous(breaks = KS) +
+  labs(x = "phenotype PCs (k)", y = "genomic-control lambda",
+       title = "Calibration under permutation",
+       subtitle = "Point = median over the 5 permutations, bar = range. Dashed line = 1 (perfect calibration).") +
+  theme_bw(base_size = 11) + theme(panel.grid.minor = element_blank())
+```
+
+# 3. QQ plots, one per configuration {.tabset}
+
+Each panel shows every cis test on the real data (teal) and on the 5
+permutations (light blue), and has its own y-axis. Every p-value is included.
+There are 1.75 to 17.6 million per configuration, so points that would land on
+the same spot of the figure (within a third of a pixel) are drawn once; the
+picture is the same as plotting each one.
+
+## ±5 kb
+
+```{r qq5, results="asis", fig.width=7, fig.height=5.6}
+for (k in KS) { cat(sprintf("\n\n### k = %d\n\n", k)); print(qq_plot(5, k)); cat("\n\n") }
+```
+
+## ±20 kb
+
+```{r qq20, results="asis", fig.width=7, fig.height=5.6}
+for (k in KS) { cat(sprintf("\n\n### k = %d\n\n", k)); print(qq_plot(20, k)); cat("\n\n") }
+```
+
+## ±50 kb
+
+```{r qq50, results="asis", fig.width=7, fig.height=5.6}
+for (k in KS) { cat(sprintf("\n\n### k = %d\n\n", k)); print(qq_plot(50, k)); cat("\n\n") }
+```
+
+# 4. Reading the plots
+
+```{r reading}
+r <- G[, .(lam = sprintf("%.2f-%.2f", min(perm_lambda_min), max(perm_lambda_max))), by = npcs][order(npcs)]
+```
+
+- **The bulk of the test is inflated as k grows, in every window.** Permutation
+  lambda is `r r[npcs == 3]$lam` at k = 3, `r r[npcs == 5]$lam` at k = 5,
+  `r r[npcs == 7]$lam` at k = 7, `r r[npcs == 10]$lam` at k = 10 and
+  `r r[npcs == 15]$lam` at k = 15. The window changes it very little.
+- **Every configuration has a permuted tail beyond chance.** The worst
+  permuted −log10 p is 11.3–25.9, against an expected maximum of about 6–7. At
+  ±5 kb with k = 3, those permuted outliers are sites where one cell line
+  supplies most of the converted reads; many are in the immunoglobulin and MHC
+  regions. The tail is lowest at k = 3, at 11.3 in all three windows. At k = 10
+  and 15 it grows with the window, as do the sites extreme in both real and
+  permuted data (`r tab[npcs == 15 & window_kb == 50]$problematic` at ±50 kb,
+  k = 15).
+- **The real data separate clearly from the permutations** in every
+  configuration, with real −log10 p up to `r sprintf("%.0f", max(G$real_tail))`.
+  But about 60% of the eSites are inherited-C sites. Those are probable
+  genotype read-outs from variants the genotype calls missed, so the real-data
+  tail is not all pU-QTL signal.
+
+Data: `calibration_grid/grid_calibration.tsv`, `grid_by_dataset.tsv` and
+`grid_qq_thinned.tsv.gz` (built by `27.calibration_grid_summary.R` from
+`8.calibration_site_resolved.R` runs). eSites come from
+`pc_window_selection/fold5_union_auto_noUCcalled/summary/` (`48.pc_window_selection_summary.R`
+and `50.selection_inheritedC_setaside.R`).

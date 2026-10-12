@@ -81,6 +81,7 @@ Pages whose conclusions were later superseded are marked.
 * [Why the single-start fitter failed, and the multi-start correction](qtl_mapping_betabinomial_optimiser.html) — problematic sites go from 9 to 0 with no data removed.
 * [The 9 problematic sites revisited: large phi, pU patterns, and inherited C](qtl_mapping_betabinomial_problematic_sites_revisited.html)
 * [Choosing the cis window and number of PCs: calibration grid](qtl_mapping_betabinomial_grid.html) — run with the multi-start fitter; settles k = 3.
+* [Permutation check for each window and number of PCs](qtl_mapping_betabinomial_pc_window_permutation.html) — one QQ plot per configuration (±5/20/50 kb × k = 3–15), real data and 5 genome-wide permutations, with the eSite counts.
 
 ### 5. Estimating dispersion, and whether it matters
 

@@ -21,6 +21,8 @@ DIAG <- file.path(BASE, "qtl_betabinomial/diagnostic_figures")
 pan   <- fread(file.path(DAT, "geno_panels.tsv.gz"))
 labs  <- fread(file.path(DAT, "site_labels.tsv"))
 qq    <- fread(file.path(DAT, "qq2.tsv.gz"))
+qa    <- fread(file.path(DAT, "qq2_allpoints.tsv.gz"))   # every p-value (53.qq_full_page_data.R)
+source("code/qq_full_style.R")   # the full-QQ plot style
 lam   <- fread(file.path(DAT, "lambda2.tsv"))
 cnt   <- fread(file.path(DAT, "counts.tsv"))
 patho <- fread(file.path(DIAG, "pathological_sites.txt"))
@@ -147,7 +149,7 @@ knitr::kable(data.table(
                 "and real -log10(p) > 10"),
   `sites` = c("27", as.character(nrow(patho)))),
   caption = paste("Selection used the PERMUTED data only, so looking at the real",
-                  "QQ plot afterwards (§3) is not circular."))
+                  "QQ plot afterwards (section 3) is not circular."))
 ```
 
 Of the 27 candidates, one was extreme in a single permutation by chance. The other
@@ -398,23 +400,9 @@ plot_pu_geno(dE, "Random non-significant sites: %pU against genotype",
 Two exclusions, each shown against the unfiltered scan. The 26 were selected from
 the permuted data alone (§1), so the real panels are not circular.
 
-```{r sec3-qq, fig.height=9}
-qq[, condition := factor(condition, levels = COND_LV)]
-qq[, dataset := factor(dataset, levels = c("real", paste0("perm", 1:5)))]
-COLS <- c(real = "#e34948", perm1 = "#9ec5f4", perm2 = "#6da7ec",
-          perm3 = "#3987e5", perm4 = "#256abf", perm5 = "#0d366b")
-ggplot(qq, aes(expected, observed, colour = dataset)) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey45") +
-  geom_point(size = 0.6, alpha = 0.75) +
-  scale_colour_manual(values = COLS, name = NULL) +
-  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
-  facet_wrap(~ condition, ncol = 1, scales = "free_y") +
-  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
-       title = "Beta-binomial LRT calibration, before and after each exclusion",
-       subtitle = paste("Note the free y-axis. The permutation series (blues) should",
-                        "hug the dashed line; where they rise above it the test is",
-                        "producing signal from shuffled data.")) +
-  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+```{r sec3-qq, fig.height=12}
+# every p-value, no thinning; each panel has its own y-axis
+qq_panels(qa, "condition", COND_LV, ncol = 1)
 ```
 
 ```{r sec3-tab}

@@ -27,6 +27,8 @@ lev    <- fread(file.path(DAT, "leverage_demo.tsv"))
 aud    <- fread(file.path(DAT, "sig_audit.tsv"))
 c10    <- fread(file.path(DAT, "clean10_pearson.tsv"))
 qq     <- fread(file.path(DAT, "qq_conditions.tsv.gz"))
+qa     <- fread(file.path(DAT, "qq_conditions_allpoints.tsv.gz"))   # every p-value (53.qq_full_page_data.R)
+source("code/qq_full_style.R")   # the full-QQ plot style
 lam    <- fread(file.path(DAT, "lambda_conditions.tsv"))
 exc    <- fread(file.path(DAT, "exclusion_counts.tsv"))
 patho  <- fread(file.path(DIAG, "pathological_sites.txt"))
@@ -765,25 +767,8 @@ knitr::kable(sens[, .(
 using the permuted data only, so the real panels are not circular.
 
 ```{r sec4-qq, fig.height=12}
-qq[, condition := factor(condition, levels = COND_LV)]
-qq[, dataset := factor(dataset, levels = c("real", paste0("perm", 1:5)))]
-COLS <- c(real = "#e34948", perm1 = "#9ec5f4", perm2 = "#6da7ec",
-          perm3 = "#3987e5", perm4 = "#256abf", perm5 = "#0d366b")
-lab <- lam[, .(t = paste(sprintf("%s=%.2f", dataset, lambda), collapse = "  ")),
-           by = condition]
-ggplot(qq, aes(expected, observed, colour = dataset)) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey45") +
-  geom_point(size = 0.6, alpha = 0.75) +
-  scale_colour_manual(values = COLS, name = NULL) +
-  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
-  facet_wrap(~ condition, ncol = 2, scales = "free_y") +
-  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
-       title = sprintf("Beta-binomial LRT calibration under %d exclusion conditions",
-                       length(COND_LV)),
-       subtitle = paste("Note the free y-axis -- the tail height is what changes, not the bulk.",
-                        "\nThe permutation series (blues) should hug the dashed line; where they do",
-                        "not, the test is manufacturing signal from shuffled data.")) +
-  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+# every p-value, no thinning; each panel has its own y-axis
+qq_panels(qa, "condition", COND_LV, ncol = 2)
 ```
 
 ## 4.3 What actually changed

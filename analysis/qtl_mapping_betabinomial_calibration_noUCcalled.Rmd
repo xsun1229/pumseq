@@ -105,24 +105,38 @@ sites, not by the U/C sites themselves.)
 
 # 2. Calibration before and after
 
-Each panel shows the real scan in red and the five phenotype permutations in
-blue. The permutation series is the diagnostic: with the phenotype shuffled
-there is nothing to find, so those points should lie on the dashed line.
+Each panel shows every p-value, with no thinning: the real scan (teal) and the
+five phenotype permutations (light blue). The permutation series is the
+diagnostic: with the phenotype shuffled there is nothing to find, so those
+points should lie on the dashed line. The y-axis differs between the panels.
+Both runs used the single-start fitter, before the
+[multi-start fix](qtl_mapping_betabinomial_optimiser.html).
 
-```{r qq, fig.height=5.6}
-ggplot(qq, aes(expected, observed, colour = dataset)) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey45") +
-  geom_point(size = 0.6, alpha = 0.75) +
-  scale_colour_manual(values = COLS, name = NULL) +
-  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
-  facet_wrap(~ run, scales = "free_y") +
-  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
-       title = "Beta-binomial LRT calibration, before and after the U/C filter",
-       subtitle = paste("Note the free y-axis: the left panel reaches ~",
-                        round(lv(RUN_LV[1], "real", "max_nlp")),
-                        "and the right panel ~",
-                        round(lv(RUN_LV[2], "real", "max_nlp")), "on -log10(p).")) +
-  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+```{r qq, fig.height=4.6, fig.width=11}
+# every p-value, no thinning (written by 51.qq_allpoints_page_data.R)
+qa <- fread(file.path(DAT, "qq_before_after_allpoints.tsv.gz"))
+qa[, kind := factor(ifelse(dataset == "real", "Observed data", "Permutation"),
+                    levels = c("Permutation", "Observed data"))]
+QQCOL <- c("Permutation" = "#8fb0e6", "Observed data" = "#14998e")
+qq_panel <- function(r) {
+  d <- qa[run == r]
+  ggplot(d, aes(expected, observed, colour = kind)) +
+    geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "black", linewidth = 0.4) +
+    geom_point(data = d[kind == "Observed data"], size = 0.6, shape = 16) +
+    geom_point(data = d[kind == "Permutation"], size = 0.6, shape = 16, alpha = 0.8) +
+    scale_colour_manual(values = QQCOL, breaks = names(QQCOL), name = NULL, drop = FALSE) +
+    guides(colour = guide_legend(override.aes = list(size = 2.2, alpha = 1))) +
+    scale_x_continuous(expand = expansion(mult = c(0, 0.02))) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.03))) +
+    labs(x = expression(Expected ~ -log[10](p)), y = expression(Observed ~ -log[10](p)), title = r) +
+    theme_classic(base_size = 12) +
+    theme(plot.title = element_text(hjust = 0.5, size = 13),
+          panel.grid.major = element_line(colour = "grey93", linewidth = 0.3),
+          legend.position = c(0.02, 0.98), legend.justification = c(0, 1),
+          legend.background = element_blank(), legend.key = element_blank(),
+          legend.text = element_text(size = 9))
+}
+patchwork::wrap_plots(lapply(RUN_LV, qq_panel), nrow = 1)
 ```
 
 ```{r lam-tab}

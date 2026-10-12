@@ -45,6 +45,8 @@ iter3 <- fread(file.path(G, paste0("phi_filter_iteration_history", SUF, ".txt"))
 # calibration: each k on its OWN phi-filtered phenotype
 lam <- fread(file.path(FIG, "lambda_by_npcs_auto_filtered.tsv"), sep = "\t")
 qqd <- fread(file.path(FIG, "qq_thinned_filtered.tsv.gz"), sep = "\t")
+qa  <- fread(file.path(FIG, "qq_filtered_allpoints.tsv.gz"), sep = "\t")   # every p-value (53.qq_full_page_data.R)
+source("code/qq_full_style.R")   # the full-QQ plot style
 cal <- merge(lam[dataset != "real", .(perm_lo = min(lambda), perm_hi = max(lambda),
                                       perm_mid = median(lambda),
                                       worst_perm_tail = max(max_nlp)), by = npcs],
@@ -250,43 +252,17 @@ use.
 ## The QQ plots
 
 ```{r qq, fig.height=8.6, fig.width=13}
-q <- copy(qqd)[npcs %in% KS]
-q[, dataset := factor(dataset, levels = ORD)]
+# every p-value, no thinning; each panel has its own y-axis
 sub <- cal[, .(npcs, lab = sprintf("k = %d PCs\nreal %.3f | perm %.3f-%.3f",
                                    npcs, real_lambda, perm_lo, perm_hi))]
-q <- merge(q, sub, by = "npcs")
-q[, panel := factor(lab, levels = sub[order(npcs)]$lab)]
-
-ggplot(q, aes(expected, observed, colour = dataset)) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey45") +
-  geom_point(size = 0.5, alpha = 0.8) +
-  scale_colour_manual(values = COLS, name = NULL) +
-  guides(colour = guide_legend(override.aes = list(size = 2.8, alpha = 1), nrow = 1)) +
-  facet_wrap(~ panel, nrow = 2) +
-  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
-       title = "Calibration QQ after per-k phi filtering (autosomes only)",
-       subtitle = paste("Red = real scan, blues = 5 phenotype permutations.",
-                        "READ THE BLUES: with the phenotype shuffled there is no signal,",
-                        "\nso they must lie on the dashed line. Axes shared across panels.")) +
-  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+qq_panels(qa[npcs %in% KS], "npcs", as.character(KS), ncol = 3, legend = "first",
+          titles = setNames(sub[order(npcs)]$lab, sub[order(npcs)]$npcs), base_size = 11)
 ```
 
 ```{r qq-zoom, fig.height=8.6, fig.width=13}
-YMAX <- 20
-ggplot(q, aes(expected, observed, colour = dataset)) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "grey45") +
-  geom_point(size = 0.5, alpha = 0.8) +
-  scale_colour_manual(values = COLS, name = NULL) +
-  guides(colour = guide_legend(override.aes = list(size = 2.8, alpha = 1), nrow = 1)) +
-  facet_wrap(~ panel, nrow = 2) +
-  coord_cartesian(ylim = c(0, YMAX)) +
-  labs(x = expression(-log[10]("expected p")), y = expression(-log[10]("observed p")),
-       title = sprintf("Same data, y clipped at %d to show the bulk", YMAX),
-       subtitle = paste("At k = 3 the permutations stay near the diagonal through the bulk.",
-                        "As k rises the WHOLE permutation curve lifts off it --",
-                        "\ninflation with no signal to explain it, on every surviving site at once.",
-                        "Clipped points are outside the view, not deleted.")) +
-  theme_bw(base_size = 12) + theme(legend.position = "bottom")
+# the same data, y clipped at 20 to show the bulk; clipped points are outside the view, not deleted
+qq_panels(qa[npcs %in% KS], "npcs", as.character(KS), ncol = 3, legend = "first", ylim = c(0, 20),
+          titles = setNames(sub[order(npcs)]$lab, sub[order(npcs)]$npcs), base_size = 11)
 ```
 
 **Why high k can look better and is not.** The real-data QQ tail height is

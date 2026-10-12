@@ -11,7 +11,7 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-08-17" />
+<meta name="date" content="2026-10-12" />
 
 <title>Beta-binomial pU-QTL: why permutation did not remove the top hits</title>
 
@@ -374,7 +374,7 @@ div.tocify {
 <h1 class="title toc-ignore">Beta-binomial pU-QTL: why permutation did
 not remove the top hits</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-08-17</h4>
+<h4 class="date">2026-10-12</h4>
 
 </div>
 
@@ -403,7 +403,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-08-17
+<strong>Last updated:</strong> 2026-10-12
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree9b5f28eb8e5284009de0649277424a5def3e3ad7targetblank9b5f28ea">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree7416f4c8bb595d837d9cd5cd43c36bd432e137d1targetblank7416f4ca">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/9b5f28eb8e5284009de0649277424a5def3e3ad7" target="_blank">9b5f28e</a>
+<a href="https://github.com/xsun1229/pumseq/tree/7416f4c8bb595d837d9cd5cd43c36bd432e137d1" target="_blank">7416f4c</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree9b5f28eb8e5284009de0649277424a5def3e3ad7targetblank9b5f28ea"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree7416f4c8bb595d837d9cd5cd43c36bd432e137d1targetblank7416f4ca"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/9b5f28eb8e5284009de0649277424a5def3e3ad7" target="_blank">9b5f28e</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/7416f4c8bb595d837d9cd5cd43c36bd432e137d1" target="_blank">7416f4c</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -572,8 +572,22 @@ were generated:
 Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
+Untracked files:
+    Untracked:  analysis/qtl_mapping_betabinomial_pc_window_permutation.Rmd
+    Untracked:  code/qq_full_style.R
+
 Unstaged changes:
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_calibration_noUC.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_calibration_noUCcalled.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_grid.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_npcs_tradeoff.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_null_simulation.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_optimiser.Rmd
     Modified:   analysis/qtl_mapping_betabinomial_pathology_summary.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_site26.Rmd
+    Modified:   analysis/qtl_mapping_betabinomial_strategy.Rmd
+    Modified:   analysis/qtl_mapping_summary_betabinomial.Rmd
 
 </code></pre>
 <p>
@@ -621,6 +635,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6ab3165a744d13b80bdc0cddca04fd23d04de5c2/analysis/qtl_mapping_betabinomial_pathology_summary.Rmd" target="_blank">6ab3165</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/6ab3165a744d13b80bdc0cddca04fd23d04de5c2/docs/qtl_mapping_betabinomial_pathology_summary.html" target="_blank">6ab3165</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -713,6 +761,8 @@ lev    &lt;- fread(file.path(DAT, &quot;leverage_demo.tsv&quot;))
 aud    &lt;- fread(file.path(DAT, &quot;sig_audit.tsv&quot;))
 c10    &lt;- fread(file.path(DAT, &quot;clean10_pearson.tsv&quot;))
 qq     &lt;- fread(file.path(DAT, &quot;qq_conditions.tsv.gz&quot;))
+qa     &lt;- fread(file.path(DAT, &quot;qq_conditions_allpoints.tsv.gz&quot;))   # every p-value (53.qq_full_page_data.R)
+source(&quot;code/qq_full_style.R&quot;)   # the full-QQ plot style
 lam    &lt;- fread(file.path(DAT, &quot;lambda_conditions.tsv&quot;))
 exc    &lt;- fread(file.path(DAT, &quot;exclusion_counts.tsv&quot;))
 patho  &lt;- fread(file.path(DIAG, &quot;pathological_sites.txt&quot;))
@@ -1595,6 +1645,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/6ab3165a744d13b80bdc0cddca04fd23d04de5c2/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-uc-1.png" target="_blank">6ab3165</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/9b5f28eb8e5284009de0649277424a5def3e3ad7/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-uc-1.png" target="_blank">9b5f28e</a>
 </td>
 <td>
@@ -1860,6 +1921,43 @@ class="section level3">
         &quot;\nOthers (chr5, chr15, chr16) look banded -- see the caveat below. The banded&quot;,
         &quot;appearance alone does not separate a real large-effect QTL from an artefact.&quot;))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-surv-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-sec2-surv-1">
+Past versions of sec2-surv-1.png
+</button>
+</p>
+<div id="fig-sec2-surv-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6ab3165a744d13b80bdc0cddca04fd23d04de5c2/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-surv-1.png" target="_blank">6ab3165</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="random-sites-never-significant" class="section level3">
 <h3>Random sites, never significant</h3>
@@ -1869,6 +1967,43 @@ class="section level3">
         &quot;no structure. Note how much shallower these are than the&quot;,
         &quot;pathological panels -- low depth is the norm here, not the defect.&quot;))</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-rand-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-sec2-rand-1">
+Past versions of sec2-rand-1.png
+</button>
+</p>
+<div id="fig-sec2-rand-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/6ab3165a744d13b80bdc0cddca04fd23d04de5c2/docs/figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec2-rand-1.png" target="_blank">6ab3165</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-08-17
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="the-banded-pattern-is-not-diagnostic-on-its-own"
 class="section level3">
@@ -2768,25 +2903,8 @@ reported here rather than tuned against the QQ plot:</p>
 <p><code>all sites</code> is the calibration as originally run. Recall
 that the 26 were chosen using the permuted data only, so the real panels
 are not circular.</p>
-<pre class="r"><code>qq[, condition := factor(condition, levels = COND_LV)]
-qq[, dataset := factor(dataset, levels = c(&quot;real&quot;, paste0(&quot;perm&quot;, 1:5)))]
-COLS &lt;- c(real = &quot;#e34948&quot;, perm1 = &quot;#9ec5f4&quot;, perm2 = &quot;#6da7ec&quot;,
-          perm3 = &quot;#3987e5&quot;, perm4 = &quot;#256abf&quot;, perm5 = &quot;#0d366b&quot;)
-lab &lt;- lam[, .(t = paste(sprintf(&quot;%s=%.2f&quot;, dataset, lambda), collapse = &quot;  &quot;)),
-           by = condition]
-ggplot(qq, aes(expected, observed, colour = dataset)) +
-  geom_abline(slope = 1, intercept = 0, linetype = &quot;dashed&quot;, colour = &quot;grey45&quot;) +
-  geom_point(size = 0.6, alpha = 0.75) +
-  scale_colour_manual(values = COLS, name = NULL) +
-  guides(colour = guide_legend(override.aes = list(size = 2.6, alpha = 1), nrow = 1)) +
-  facet_wrap(~ condition, ncol = 2, scales = &quot;free_y&quot;) +
-  labs(x = expression(-log[10](&quot;expected p&quot;)), y = expression(-log[10](&quot;observed p&quot;)),
-       title = sprintf(&quot;Beta-binomial LRT calibration under %d exclusion conditions&quot;,
-                       length(COND_LV)),
-       subtitle = paste(&quot;Note the free y-axis -- the tail height is what changes, not the bulk.&quot;,
-                        &quot;\nThe permutation series (blues) should hug the dashed line; where they do&quot;,
-                        &quot;not, the test is manufacturing signal from shuffled data.&quot;)) +
-  theme_bw(base_size = 12) + theme(legend.position = &quot;bottom&quot;)</code></pre>
+<pre class="r"><code># every p-value, no thinning; each panel has its own y-axis
+qq_panels(qa, &quot;condition&quot;, COND_LV, ncol = 2)</code></pre>
 <p><img src="figure/qtl_mapping_betabinomial_pathology_summary.Rmd/sec4-qq-1.png" width="1056" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-sec4-qq-1">
@@ -3922,9 +4040,9 @@ loaded via a namespace (and not attached):
 [37] fs_1.5.2          digest_0.6.29     stringi_1.7.6     processx_3.5.3   
 [41] dplyr_1.1.2       getPass_0.2-2     rprojroot_2.0.3   grid_4.2.0       
 [45] cli_3.6.2         tools_4.2.0       magrittr_2.0.3    sass_0.4.1       
-[49] tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3   rmarkdown_2.21   
-[53] httr_1.4.5        rstudioapi_0.14   R6_2.5.1          git2r_0.30.1     
-[57] compiler_4.2.0   </code></pre>
+[49] patchwork_1.1.1   tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3  
+[53] rmarkdown_2.21    httr_1.4.5        rstudioapi_0.14   R6_2.5.1         
+[57] git2r_0.30.1      compiler_4.2.0   </code></pre>
 </div>
 </div>
 

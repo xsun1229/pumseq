@@ -158,9 +158,11 @@ knitr::kable(lam, digits = 2,
              caption = "Genomic-inflation lambda (5kb, 3 PCs): real vs. 5 permuted nulls (beta-binomial LRT)")
 ```
 
-```{r bb-calib-qq, results='asis'}
-cat(sprintf('<img src="%s" style="max-width:70%%;">',
-            knitr::image_uri(file.path(CAL, "calib_lrt_w5kb_pc3_qq.png"))))
+```{r bb-calib-qq, fig.width=6.5, fig.height=5.2}
+# every p-value, no thinning (53.qq_full_page_data.R; the same run as the earlier
+# calib_lrt_w5kb_pc3_qq.png image, which was drawn from 5,000 thinned points)
+source("code/qq_full_style.R")
+qq_panel(fread(file.path(CAL, "calib_lrt_w5kb_pc3_qq_allpoints.tsv.gz")), "+/-5 kb, 3 PCs, single-start fitter")
 ```
 
 ```{r bb-calib-compare}

@@ -165,7 +165,7 @@ points are thinned.
 qq_one <- function(d) {
   x <- sort(d$p_bb)
   n <- length(x)
-  ix <- unique(as.integer(round(exp(seq(0, log(n), length.out = 700)))))
+  ix <- seq_len(n)                       # every p-value, no thinning
   data.table(expected = -log10((ix - 0.5) / n),
              observed = -log10(pmax(x[ix], .Machine$double.xmin)))
 }
@@ -174,14 +174,15 @@ qq <- P[, qq_one(.SD), by = .(scenario_label, collapsed),
 ggplot(qq, aes(expected, observed, colour = collapsed)) +
   geom_abline(slope = 1, intercept = 0, colour = "grey50",
               linetype = "dashed", linewidth = 0.4) +
-  geom_line(linewidth = 0.75) +
+  geom_point(size = 0.5, shape = 16) +
+  guides(colour = guide_legend(override.aes = list(size = 2.2))) +
   facet_wrap(~ scenario_label, nrow = 1) +
   scale_colour_manual(values = c("Near-zero fit" = "#276f9e",
                                  "Other fit" = "#da8243"), name = NULL) +
   coord_cartesian(xlim = c(0, 6), ylim = c(0, 9)) +
   labs(x = "Expected -log10(p)", y = "Observed -log10(p)",
        title = "Valid beta-binomial SNP tests under a true genotype null",
-       subtitle = "Dashed line: uniform p-values; curves are grouped by the fitted null phi") +
+       subtitle = "Dashed line: uniform p-values; points are grouped by the fitted null phi") +
   theme_bw(base_size = 10.5) +
   theme(legend.position = "top", panel.grid.minor = element_blank())
 ```

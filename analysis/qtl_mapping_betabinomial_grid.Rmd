@@ -20,6 +20,9 @@ CG  <- file.path(PSI, "qtl_betabinomial/calibration_grid")
 G  <- fread(file.path(CG, "grid_calibration.tsv"), sep = "\t")
 PB <- fread(file.path(CG, "grid_problematic.tsv"), sep = "\t")
 QQ <- fread(file.path(CG, "grid_qq_thinned.tsv.gz"), sep = "\t")
+# every p-value, overlapping points merged at a third of a pixel (53.qq_full_page_data.R)
+QA <- fread(file.path(CG, "grid_qq_allpoints_merged.tsv.gz"), sep = "\t")
+source("code/qq_full_style.R"); qq_kind(QA)
 
 WINDOWS <- c(5, 20, 50, 100); KS <- c(3, 5, 7, 10, 15, 20)
 wlab <- function(x) factor(sprintf("%d kb", x), levels = sprintf("%d kb", WINDOWS))
@@ -128,64 +131,67 @@ if (nrow(PB)) knitr::kable(
 
 # 5. QQ plots for all 24 cells
 
-Blue = real data, red = the 5 permutations. Every red point above the diagonal
-is a false positive by construction, so **a taller red cloud is a worse-calibrated
-cell**. Rows are windows, columns are k.
+Teal = real data, light blue = the 5 permutations. Every light-blue point above
+the diagonal is a false positive by construction, so **a taller light-blue cloud is a
+worse-calibrated cell**. Rows are windows, columns are k.
 
-Points rather than lines, and the thinning keeps every one of the 2,000 smallest
-p-values per dataset and thins only the bulk — uniform-in-rank thinning would
-discard most of the tail, which is the only part that carries the conclusion.
+Every p-value is included. A cell has 1.5 to 35 million of them, so points that
+would land on the same spot of the figure (within a third of a pixel) are drawn
+once; the picture is the same as plotting each one. In the first figure each
+row has its own y-axis.
 
 ```{r qqgrid, fig.height=9.5, fig.width=13}
-QQ[, kind := ifelse(dataset == "real", "real", "permuted")]
-QQ[, `:=`(window = wlab(window_kb), kk = klab(npcs))]
-ggplot(QQ, aes(expected, observed, group = dataset, colour = kind)) +
-  geom_abline(slope = 1, intercept = 0, colour = "grey55", linewidth = 0.25) +
-  geom_point(size = 0.25, alpha = 0.5, shape = 16) +
-  facet_grid(window ~ kk) +
-  scale_colour_manual(values = c(real = "#1f4e9c", permuted = "#c0392b"), name = NULL) +
+QA[, `:=`(window = wlab(window_kb), kk = klab(npcs))]
+ggplot(QA, aes(expected, observed, colour = kind)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "black", linewidth = 0.3) +
+  geom_point(data = QA[kind == "Observed data"], size = 0.3, shape = 16) +
+  geom_point(data = QA[kind == "Permutation"], size = 0.3, shape = 16, alpha = 0.8) +
+  scale_colour_manual(values = QQCOL, breaks = names(QQCOL), name = NULL) +
   guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
+  facet_grid(window ~ kk, scales = "free_y") +
   labs(x = expression(Expected~-log[10](p)), y = expression(Observed~-log[10](p)),
        title = "Calibration across the whole grid",
-       subtitle = "Red = 5 permutations (false positives by construction). Reading across a row shows the effect of k; down a column, the effect of window.") +
-  theme_bw(base_size = 10) +
-  theme(legend.position = "top", panel.grid.minor = element_blank(),
-        strip.text = element_text(size = 9))
+       subtitle = "Light blue = 5 permutations (false positives by construction). Each row has its own y-axis.") +
+  theme_classic(base_size = 10) +
+  theme(legend.position = "top", panel.grid.major = element_line(colour = "grey93", linewidth = 0.3),
+        strip.background = element_blank(), strip.text = element_text(size = 9))
 ```
 
 The same figure with the y-axis clipped, so the permuted clouds — which are what
 the comparison turns on — are not compressed by the real-data tail:
 
 ```{r qqgridclip, fig.height=9.5, fig.width=13}
-ggplot(QQ, aes(expected, observed, group = dataset, colour = kind)) +
-  geom_abline(slope = 1, intercept = 0, colour = "grey55", linewidth = 0.25) +
-  geom_point(size = 0.25, alpha = 0.5, shape = 16) +
+ggplot(QA, aes(expected, observed, colour = kind)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "black", linewidth = 0.3) +
+  geom_point(data = QA[kind == "Observed data"], size = 0.3, shape = 16) +
+  geom_point(data = QA[kind == "Permutation"], size = 0.3, shape = 16, alpha = 0.8) +
+  scale_colour_manual(values = QQCOL, breaks = names(QQCOL), name = NULL) +
+  guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
   facet_grid(window ~ kk) +
   coord_cartesian(ylim = c(0, 35)) +
-  scale_colour_manual(values = c(real = "#1f4e9c", permuted = "#c0392b"), name = NULL) +
-  guides(colour = guide_legend(override.aes = list(size = 2.5, alpha = 1))) +
   labs(x = expression(Expected~-log[10](p)), y = expression(Observed~-log[10](p)),
-       title = "Same grid, y-axis clipped to 35",
+       title = "Same grid, common y-axis clipped to 35",
        subtitle = "Clipped points are outside the view, not deleted.") +
-  theme_bw(base_size = 10) +
-  theme(legend.position = "top", panel.grid.minor = element_blank(),
-        strip.text = element_text(size = 9))
+  theme_classic(base_size = 10) +
+  theme(legend.position = "top", panel.grid.major = element_line(colour = "grey93", linewidth = 0.3),
+        strip.background = element_blank(), strip.text = element_text(size = 9))
 ```
 
 Permuted-only, at a common scale, which is the cleanest way to rank the cells:
 
 ```{r qqperm, fig.height=9.5, fig.width=13}
-ggplot(QQ[kind == "permuted"], aes(expected, observed, group = dataset)) +
-  geom_abline(slope = 1, intercept = 0, colour = "grey55", linewidth = 0.25) +
-  geom_point(size = 0.25, alpha = 0.5, shape = 16, colour = "#c0392b") +
+ggplot(QA[kind == "Permutation"], aes(expected, observed)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", colour = "black", linewidth = 0.3) +
+  geom_point(size = 0.3, shape = 16, alpha = 0.8, colour = QQCOL[["Permutation"]]) +
   facet_grid(window ~ kk) +
   coord_cartesian(ylim = c(0, 20)) +
   labs(x = expression(Expected~-log[10](p)), y = expression(Observed~-log[10](p)),
        title = "Permutations only: pure false positives, common y-axis",
-       subtitle = paste("The k = 3 column hugs the diagonal at every window. Departure grows to the right, hardly at all downwards.",
+       subtitle = paste("The k = 3 column departs least from the diagonal at every window. Departure grows to the right, hardly at all downwards.",
                         "y-axis clipped to 20; the k = 20 cells reach 29-31 at the wider windows, so their topmost points are outside the view, not deleted.", sep = "\n")) +
-  theme_bw(base_size = 10) +
-  theme(panel.grid.minor = element_blank(), strip.text = element_text(size = 9))
+  theme_classic(base_size = 10) +
+  theme(legend.position = "top", panel.grid.major = element_line(colour = "grey93", linewidth = 0.3),
+        strip.background = element_blank(), strip.text = element_text(size = 9))
 ```
 
 # 6. What the grid decides, and what it does not
