@@ -192,7 +192,7 @@ distribution_plot <- function(v, bins, title, ylab, mode) {
    stopifnot(mode=="rate")
    d[,percent:=100*failed/sites]
    stopifnot(all(d$percent>=0 & d$percent<=100))
-   d[,label:=sprintf("%.1f%%",percent)]
+   d[,label:=sprintf("%d/%d\n%.1f%%",failed,sites,percent)]
    legend <- "Failure rate (%)"
    subtitle <- "Failed / eligible sites within each bin; columns do not sum to 100%"
  }
@@ -217,12 +217,12 @@ distribution_plot("depth_bin",c("<=5","5-10","10-20","20-50","50-100",">100"),
 
 #### Number of covered cell lines
 
-Each cell shows the **failure percentage within that coverage bin**, calculated
-as failed sites / eligible sites x 100, separately for each PC setting.
+Each cell shows **failed sites / total eligible sites** in that coverage bin,
+followed by the failure percentage, separately for each PC setting.
 These percentages measure the chance of failure within each bin and do not
 sum to 100% down a column. Eligible sites have a suitable cis SNP within 50 kb.
 
-```{r failures-cells-within-bin, fig.width=10, fig.height=5}
+```{r failures-cells-counts, fig.width=10, fig.height=5}
 distribution_plot("cells_bin",c("1-9","10-19","20-29","30-39","40-49","50"),
  "Failure rate by covered cell lines", "Covered cell lines", "rate")
 ```
