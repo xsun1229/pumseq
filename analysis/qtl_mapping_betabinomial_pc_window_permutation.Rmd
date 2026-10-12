@@ -172,70 +172,59 @@ for (m in levels(F$metric)) print(heat(F[metric==m],m) +
 
 ### How failures are distributed {.tabset}
 
-The left panel shows **all eligible sites**; the right panel shows **failed
-sites at each PC setting**. A failed site has a rejected null fit or no
-successful SNP fit within 50 kb. Sites skipped because no suitable cis SNP
-exists are excluded from both groups.
-
-Each cell shows the number of sites and their percentage within that column.
-Every column sums to 100% before rounding. The eligible-site distribution is
-the same for all PC settings and is shown once. A bin is overrepresented among
-failures when its percentage in a failed-site column exceeds the percentage
-in the eligible-site column. This compares distributions, rather than the
-probability that a site in that bin fails.
-
-For example, sites with 40-49 covered cell lines account for **46.9% of all
-eligible sites**, but **65.9% of failures at 15 PCs** (1.41 times their baseline
-share). Sites covered in all 50 cell lines account for 43.6% of eligible sites
-and 11.3% of failures at 15 PCs. Thus, the large failure count in the 40-49 bin
-reflects both its size and its overrepresentation among failures. These
-comparisons do not separate sample coverage from read depth or other site
-characteristics.
-
-Read depth is total reads divided by the number of covered cell lines.
+A failed site has a rejected null fit or no successful SNP fit within 50 kb.
 The failure set is determined separately for each PC setting.
 
+The two heatmaps use different denominators, explained below each tab.
+
 ```{r distribution-helper, include=FALSE}
-distribution_plot <- function(v, bins, title, ylab) {
+distribution_plot <- function(v, bins, title, ylab, mode) {
  d <- copy(DD[variable==v])
- # The same eligible sites were considered under each PC configuration.
- stopifnot(all(d[,uniqueN(sites),by=bin]$V1==1L))
- d[,total_failed:=sum(failed),by=npcs]
- stopifnot(all(d$total_failed>0), !anyNA(d$bin))
- failures <- d[,.(bin,column=as.character(npcs),count=failed,
-                 share=100*failed/total_failed,group="Failed sites")]
- baseline <- d[npcs==KS[1],.(bin,column="All",count=sites,
-                            share=100*sites/sum(sites),group="All eligible sites")]
- plot_data <- rbindlist(list(baseline,failures))
- stopifnot(all(abs(plot_data[,sum(share),by=.(group,column)]$V1-100)<1e-8))
- plot_data[,`:=`(column=factor(column,levels=c("All",as.character(KS))),
-                 bin=factor(bin,levels=rev(bins)),
-                 group=factor(group,levels=c("All eligible sites","Failed sites")))]
- stopifnot(!anyNA(plot_data$bin))
- plot_data[,label:=sprintf("%d sites\n%.1f%%",count,share)]
- ggplot(plot_data,aes(column,bin,fill=share)) + geom_tile(colour="white",linewidth=.8) +
+ d[,`:=`(pc=factor(npcs,levels=KS),bin=factor(bin,levels=rev(bins)))]
+ stopifnot(!anyNA(d$bin), all(d$sites>0))
+ if (mode=="distribution") {
+   d[,percent:=100*failed/sum(failed),by=npcs]
+   stopifnot(all(abs(d[,sum(percent),by=npcs]$V1-100)<1e-8))
+   d[,label:=sprintf("%d sites\n%.1f%%",failed,percent)]
+   legend <- "Share of failed sites (%)"
+   subtitle <- "Percentage of all failed sites at each PC setting; columns sum to 100% before rounding"
+ } else {
+   stopifnot(mode=="rate")
+   d[,percent:=100*failed/sites]
+   stopifnot(all(d$percent>=0 & d$percent<=100))
+   d[,label:=sprintf("%d/%d\n%.1f%%",failed,sites,percent)]
+   legend <- "Failure rate (%)"
+   subtitle <- "Failed / eligible sites within each bin; columns do not sum to 100%"
+ }
+ ggplot(d,aes(pc,bin,fill=percent)) + geom_tile(colour="white",linewidth=.8) +
  geom_text(aes(label=label),size=3.1) +
- facet_grid(~group,scales="free_x",space="free_x") +
- scale_fill_gradient(low="#fff7ec",high="#d66a36",limits=c(0,100),name="Share of sites (%)") +
- labs(x="All eligible sites / failed sites by number of phenotype PCs",y=ylab,title=title,
-      subtitle="Each column sums to 100%; compare failed-site shares with the eligible-site baseline") +
- theme_minimal(base_size=11) + theme(panel.grid=element_blank(),
-      strip.text=element_text(face="bold"),panel.spacing.x=grid::unit(.6,"lines"))
+ scale_fill_gradient(low="#fff7ec",high="#d66a36",limits=c(0,100),name=legend) +
+ labs(x="Number of phenotype PCs",y=ylab,title=title,subtitle=subtitle) +
+ theme_minimal(base_size=11) + theme(panel.grid=element_blank())
 }
 ```
 
 #### Read depth
 
-```{r failures-depth, fig.width=11, fig.height=5}
+Each cell shows the count and percentage of **all failed sites** in that
+depth bin. Each PC column sums to 100% before rounding. Mean depth is total
+reads divided by the number of covered cell lines.
+
+```{r failures-depth, fig.width=10, fig.height=5}
 distribution_plot("depth_bin",c("<=5","5-10","10-20","20-50","50-100",">100"),
- "Read depth: eligible sites compared with failed sites", "Reads per covered cell line")
+ "Read-depth distribution among failed sites", "Reads per covered cell line", "distribution")
 ```
 
 #### Number of covered cell lines
 
-```{r failures-cells, fig.width=11, fig.height=5}
+Each cell shows **failed sites / eligible sites within that coverage bin**
+and the resulting failure percentage, separately for each PC setting.
+These percentages measure the chance of failure within each bin and do not
+sum to 100% down a column. Eligible sites have a suitable cis SNP within 50 kb.
+
+```{r failures-cells, fig.width=10, fig.height=5}
 distribution_plot("cells_bin",c("1-9","10-19","20-29","30-39","40-49","50"),
- "Covered cell lines: eligible sites compared with failed sites", "Covered cell lines")
+ "Failure rate by number of covered cell lines", "Covered cell lines", "rate")
 ```
 
 ### Configuration counts
