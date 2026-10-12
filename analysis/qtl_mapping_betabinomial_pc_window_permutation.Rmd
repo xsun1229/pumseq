@@ -84,7 +84,7 @@ been done.
 The heatmaps show **numbers of eSites** among all tested sites, using Storey
 q-values from the 100 within-site permutations, at q < 0.05 and q < 0.10.
 
-```{r summary, fig.width=9, fig.height=3.8}
+```{r summary-all-sites, fig.width=9, fig.height=3.8}
 tab <- merge(G, ST[, .(window_kb, npcs, disc_q05, disc_q10)], by=c("window_kb","npcs"))
 setorder(tab,window_kb,npcs)
 FD <- file.path(SEL,"fit_diagnostics")
@@ -192,7 +192,7 @@ distribution_plot <- function(v, bins, title, ylab, mode) {
    stopifnot(mode=="rate")
    d[,percent:=100*failed/sites]
    stopifnot(all(d$percent>=0 & d$percent<=100))
-   d[,label:=sprintf("%d/%d\n%.1f%%",failed,sites,percent)]
+   d[,label:=sprintf("%.1f%%",percent)]
    legend <- "Failure rate (%)"
    subtitle <- "Failed / eligible sites within each bin; columns do not sum to 100%"
  }
@@ -200,7 +200,7 @@ distribution_plot <- function(v, bins, title, ylab, mode) {
  geom_text(aes(label=label),size=3.1) +
  scale_fill_gradient(low="#fff7ec",high="#d66a36",limits=c(0,100),name=legend) +
  labs(x="Number of phenotype PCs",y=ylab,title=title,subtitle=subtitle) +
- theme_minimal(base_size=11) + theme(panel.grid=element_blank())
+ theme_minimal(base_size=11) + theme(panel.grid=element_blank(),legend.position="bottom")
 }
 ```
 
@@ -210,21 +210,21 @@ Each cell shows the count and percentage of **all failed sites** in that
 depth bin. Each PC column sums to 100% before rounding. Mean depth is total
 reads divided by the number of covered cell lines.
 
-```{r failures-depth, fig.width=10, fig.height=5}
+```{r failures-depth-pc-only, fig.width=10, fig.height=5}
 distribution_plot("depth_bin",c("<=5","5-10","10-20","20-50","50-100",">100"),
  "Read-depth distribution among failed sites", "Reads per covered cell line", "distribution")
 ```
 
 #### Number of covered cell lines
 
-Each cell shows **failed sites / eligible sites within that coverage bin**
-and the resulting failure percentage, separately for each PC setting.
+Each cell shows the **failure percentage within that coverage bin**, calculated
+as failed sites / eligible sites x 100, separately for each PC setting.
 These percentages measure the chance of failure within each bin and do not
 sum to 100% down a column. Eligible sites have a suitable cis SNP within 50 kb.
 
-```{r failures-cells, fig.width=10, fig.height=5}
+```{r failures-cells-within-bin, fig.width=10, fig.height=5}
 distribution_plot("cells_bin",c("1-9","10-19","20-29","30-39","40-49","50"),
- "Failure rate by number of covered cell lines", "Covered cell lines", "rate")
+ "Failure rate by covered cell lines", "Covered cell lines", "rate")
 ```
 
 ### Configuration counts
@@ -269,19 +269,19 @@ picture is the same as plotting each one.
 
 ## ±5 kb
 
-```{r qq5, results="asis", fig.width=7, fig.height=5.6}
+```{r qq5-all-sites, results="asis", fig.width=7, fig.height=5.6}
 for (k in KS) { cat(sprintf("\n\n### k = %d\n\n", k)); print(qq_plot(5, k)); cat("\n\n") }
 ```
 
 ## ±20 kb
 
-```{r qq20, results="asis", fig.width=7, fig.height=5.6}
+```{r qq20-all-sites, results="asis", fig.width=7, fig.height=5.6}
 for (k in KS) { cat(sprintf("\n\n### k = %d\n\n", k)); print(qq_plot(20, k)); cat("\n\n") }
 ```
 
 ## ±50 kb
 
-```{r qq50, results="asis", fig.width=7, fig.height=5.6}
+```{r qq50-all-sites, results="asis", fig.width=7, fig.height=5.6}
 for (k in KS) { cat(sprintf("\n\n### k = %d\n\n", k)); print(qq_plot(50, k)); cat("\n\n") }
 ```
 

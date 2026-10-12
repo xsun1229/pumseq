@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeacbd430f7141f72ac59c91d7d158f6b3ad1f445btargetblankacbd430a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreef6be622d3f25a14c7fb691e81c50931fac3f88c4targetblankf6be622a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/acbd430f7141f72ac59c91d7d158f6b3ad1f445b" target="_blank">acbd430</a>
+<a href="https://github.com/xsun1229/pumseq/tree/f6be622d3f25a14c7fb691e81c50931fac3f88c4" target="_blank">f6be622</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreeacbd430f7141f72ac59c91d7d158f6b3ad1f445btargetblankacbd430a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreef6be622d3f25a14c7fb691e81c50931fac3f88c4targetblankf6be622a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/acbd430f7141f72ac59c91d7d158f6b3ad1f445b" target="_blank">acbd430</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/f6be622d3f25a14c7fb691e81c50931fac3f88c4" target="_blank">f6be622</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -621,6 +621,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/f6be622d3f25a14c7fb691e81c50931fac3f88c4/analysis/qtl_mapping_betabinomial_pc_window_permutation.Rmd" target="_blank">f6be622</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-10-12
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/f6be622d3f25a14c7fb691e81c50931fac3f88c4/docs/qtl_mapping_betabinomial_pc_window_permutation.html" target="_blank">f6be622</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-10-12
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -892,55 +926,7 @@ E &lt;- rbindlist(list(
  tab[,.(window_kb,npcs,value=disc_q05,cutoff=&quot;q &lt; 0.05&quot;)],
  tab[,.(window_kb,npcs,value=disc_q10,cutoff=&quot;q &lt; 0.10&quot;)]))
 heat(E,&quot;eSites by window, PC count and q-value cutoff&quot;,&quot;eSites&quot;) + facet_wrap(~cutoff,nrow=1)</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/summary-1.png" alt="" width="864" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-summary-1">
-Past versions of summary-1.png
-</button>
-</p>
-<div id="fig-summary-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/acbd430f7141f72ac59c91d7d158f6b3ad1f445b/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/summary-1.png" target="_blank">acbd430</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/summary-1.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/summary-all-sites-1.png" alt="" width="864" style="display: block; margin: auto;" /></p>
 </div>
 <div id="sites-extreme-in-both-real-and-permuted-data"
 class="section level2">
@@ -1185,136 +1171,18 @@ rounding. Mean depth is total reads divided by the number of covered
 cell lines.</p>
 <pre class="r"><code>distribution_plot(&quot;depth_bin&quot;,c(&quot;&lt;=5&quot;,&quot;5-10&quot;,&quot;10-20&quot;,&quot;20-50&quot;,&quot;50-100&quot;,&quot;&gt;100&quot;),
  &quot;Read-depth distribution among failed sites&quot;, &quot;Reads per covered cell line&quot;, &quot;distribution&quot;)</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-depth-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-failures-depth-1">
-Past versions of failures-depth-1.png
-</button>
-</p>
-<div id="fig-failures-depth-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/718715e66d744ea054658770fef452a55aff4aa4/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-depth-1.png" target="_blank">718715e</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/92a3e64bdf4ac4c9d7f17ede3e8a1cdb93e81a0a/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-depth-1.png" target="_blank">92a3e64</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-depth-1.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-depth-pc-only-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
 </div>
 <div id="number-of-covered-cell-lines" class="section level4">
 <h4>Number of covered cell lines</h4>
-<p>Each cell shows <strong>failed sites / eligible sites within that
-coverage bin</strong> and the resulting failure percentage, separately
-for each PC setting. These percentages measure the chance of failure
-within each bin and do not sum to 100% down a column. Eligible sites
-have a suitable cis SNP within 50 kb.</p>
+<p>Each cell shows the <strong>failure percentage within that coverage
+bin</strong>, calculated as failed sites / eligible sites x 100,
+separately for each PC setting. These percentages measure the chance of
+failure within each bin and do not sum to 100% down a column. Eligible
+sites have a suitable cis SNP within 50 kb.</p>
 <pre class="r"><code>distribution_plot(&quot;cells_bin&quot;,c(&quot;1-9&quot;,&quot;10-19&quot;,&quot;20-29&quot;,&quot;30-39&quot;,&quot;40-49&quot;,&quot;50&quot;),
- &quot;Failure rate by number of covered cell lines&quot;, &quot;Covered cell lines&quot;, &quot;rate&quot;)</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-cells-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-failures-cells-1">
-Past versions of failures-cells-1.png
-</button>
-</p>
-<div id="fig-failures-cells-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/718715e66d744ea054658770fef452a55aff4aa4/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-cells-1.png" target="_blank">718715e</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/92a3e64bdf4ac4c9d7f17ede3e8a1cdb93e81a0a/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-cells-1.png" target="_blank">92a3e64</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-cells-1.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+ &quot;Failure rate by covered cell lines&quot;, &quot;Covered cell lines&quot;, &quot;rate&quot;)</code></pre>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-cells-within-bin-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="configuration-counts" class="section level3">
@@ -1601,318 +1469,23 @@ pixel) are drawn once; the picture is the same as plotting each one.</p>
 <pre class="r"><code>for (k in KS) { cat(sprintf(&quot;\n\n### k = %d\n\n&quot;, k)); print(qq_plot(5, k)); cat(&quot;\n\n&quot;) }</code></pre>
 <div id="k-3" class="section level3">
 <h3>k = 3</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq5-1">
-Past versions of qq5-1.png
-</button>
-</p>
-<div id="fig-qq5-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/acbd430f7141f72ac59c91d7d158f6b3ad1f445b/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-1.png" target="_blank">acbd430</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-1.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/6bf86226279a44855fe01fe4e1f44f9f17765892/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-1.png" target="_blank">6bf8622</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="k-5" class="section level3">
 <h3>k = 5</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-2.png" alt="" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq5-2">
-Past versions of qq5-2.png
-</button>
-</p>
-<div id="fig-qq5-2" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/acbd430f7141f72ac59c91d7d158f6b3ad1f445b/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-2.png" target="_blank">acbd430</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-2.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/6bf86226279a44855fe01fe4e1f44f9f17765892/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-2.png" target="_blank">6bf8622</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-2.png" alt="" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="k-7" class="section level3">
 <h3>k = 7</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-3.png" alt="" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq5-3">
-Past versions of qq5-3.png
-</button>
-</p>
-<div id="fig-qq5-3" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/acbd430f7141f72ac59c91d7d158f6b3ad1f445b/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-3.png" target="_blank">acbd430</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-3.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/6bf86226279a44855fe01fe4e1f44f9f17765892/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-3.png" target="_blank">6bf8622</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-3.png" alt="" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="k-10" class="section level3">
 <h3>k = 10</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-4.png" alt="" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq5-4">
-Past versions of qq5-4.png
-</button>
-</p>
-<div id="fig-qq5-4" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/acbd430f7141f72ac59c91d7d158f6b3ad1f445b/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-4.png" target="_blank">acbd430</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-4.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/6bf86226279a44855fe01fe4e1f44f9f17765892/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-4.png" target="_blank">6bf8622</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-4.png" alt="" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="k-15" class="section level3">
 <h3>k = 15</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-5.png" alt="" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq5-5">
-Past versions of qq5-5.png
-</button>
-</p>
-<div id="fig-qq5-5" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/acbd430f7141f72ac59c91d7d158f6b3ad1f445b/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-5.png" target="_blank">acbd430</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-5.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/6bf86226279a44855fe01fe4e1f44f9f17765892/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-5.png" target="_blank">6bf8622</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-5.png" alt="" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="kb-1" class="section level2">
@@ -1920,318 +1493,23 @@ XSun
 <pre class="r"><code>for (k in KS) { cat(sprintf(&quot;\n\n### k = %d\n\n&quot;, k)); print(qq_plot(20, k)); cat(&quot;\n\n&quot;) }</code></pre>
 <div id="k-3-1" class="section level3">
 <h3>k = 3</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq20-1">
-Past versions of qq20-1.png
-</button>
-</p>
-<div id="fig-qq20-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/acbd430f7141f72ac59c91d7d158f6b3ad1f445b/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-1.png" target="_blank">acbd430</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-1.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/6bf86226279a44855fe01fe4e1f44f9f17765892/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-1.png" target="_blank">6bf8622</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="k-5-1" class="section level3">
 <h3>k = 5</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-2.png" alt="" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq20-2">
-Past versions of qq20-2.png
-</button>
-</p>
-<div id="fig-qq20-2" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/acbd430f7141f72ac59c91d7d158f6b3ad1f445b/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-2.png" target="_blank">acbd430</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-2.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/6bf86226279a44855fe01fe4e1f44f9f17765892/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-2.png" target="_blank">6bf8622</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-2.png" alt="" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="k-7-1" class="section level3">
 <h3>k = 7</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-3.png" alt="" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq20-3">
-Past versions of qq20-3.png
-</button>
-</p>
-<div id="fig-qq20-3" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/acbd430f7141f72ac59c91d7d158f6b3ad1f445b/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-3.png" target="_blank">acbd430</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-3.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/6bf86226279a44855fe01fe4e1f44f9f17765892/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-3.png" target="_blank">6bf8622</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-3.png" alt="" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="k-10-1" class="section level3">
 <h3>k = 10</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-4.png" alt="" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq20-4">
-Past versions of qq20-4.png
-</button>
-</p>
-<div id="fig-qq20-4" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/acbd430f7141f72ac59c91d7d158f6b3ad1f445b/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-4.png" target="_blank">acbd430</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-4.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/6bf86226279a44855fe01fe4e1f44f9f17765892/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-4.png" target="_blank">6bf8622</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-4.png" alt="" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="k-15-1" class="section level3">
 <h3>k = 15</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-5.png" alt="" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq20-5">
-Past versions of qq20-5.png
-</button>
-</p>
-<div id="fig-qq20-5" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/acbd430f7141f72ac59c91d7d158f6b3ad1f445b/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-5.png" target="_blank">acbd430</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-5.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/6bf86226279a44855fe01fe4e1f44f9f17765892/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-5.png" target="_blank">6bf8622</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-5.png" alt="" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="kb-2" class="section level2">
@@ -2239,318 +1517,23 @@ XSun
 <pre class="r"><code>for (k in KS) { cat(sprintf(&quot;\n\n### k = %d\n\n&quot;, k)); print(qq_plot(50, k)); cat(&quot;\n\n&quot;) }</code></pre>
 <div id="k-3-2" class="section level3">
 <h3>k = 3</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq50-1">
-Past versions of qq50-1.png
-</button>
-</p>
-<div id="fig-qq50-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/acbd430f7141f72ac59c91d7d158f6b3ad1f445b/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-1.png" target="_blank">acbd430</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-1.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/6bf86226279a44855fe01fe4e1f44f9f17765892/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-1.png" target="_blank">6bf8622</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-all-sites-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="k-5-2" class="section level3">
 <h3>k = 5</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-2.png" alt="" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq50-2">
-Past versions of qq50-2.png
-</button>
-</p>
-<div id="fig-qq50-2" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/acbd430f7141f72ac59c91d7d158f6b3ad1f445b/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-2.png" target="_blank">acbd430</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-2.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/6bf86226279a44855fe01fe4e1f44f9f17765892/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-2.png" target="_blank">6bf8622</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-all-sites-2.png" alt="" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="k-7-2" class="section level3">
 <h3>k = 7</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-3.png" alt="" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq50-3">
-Past versions of qq50-3.png
-</button>
-</p>
-<div id="fig-qq50-3" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/acbd430f7141f72ac59c91d7d158f6b3ad1f445b/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-3.png" target="_blank">acbd430</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-3.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/6bf86226279a44855fe01fe4e1f44f9f17765892/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-3.png" target="_blank">6bf8622</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-all-sites-3.png" alt="" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="k-10-2" class="section level3">
 <h3>k = 10</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-4.png" alt="" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq50-4">
-Past versions of qq50-4.png
-</button>
-</p>
-<div id="fig-qq50-4" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/acbd430f7141f72ac59c91d7d158f6b3ad1f445b/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-4.png" target="_blank">acbd430</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-4.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/6bf86226279a44855fe01fe4e1f44f9f17765892/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-4.png" target="_blank">6bf8622</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-all-sites-4.png" alt="" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="k-15-2" class="section level3">
 <h3>k = 15</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-5.png" alt="" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq50-5">
-Past versions of qq50-5.png
-</button>
-</p>
-<div id="fig-qq50-5" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/acbd430f7141f72ac59c91d7d158f6b3ad1f445b/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-5.png" target="_blank">acbd430</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/006b3a633f0b6b5222418d4ec4031caf4abb5390/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-5.png" target="_blank">006b3a6</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/xsun1229/pumseq/blob/6bf86226279a44855fe01fe4e1f44f9f17765892/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-5.png" target="_blank">6bf8622</a>
-</td>
-<td>
-XSun
-</td>
-<td>
-2026-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-all-sites-5.png" alt="" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 </div>
