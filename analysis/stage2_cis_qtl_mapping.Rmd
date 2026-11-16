@@ -1,0 +1,210 @@
+---
+title: "Stage 2: cis-QTL mapping"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+Q    <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl/qtl_betabinomial"
+OLD  <- file.path(Q, "pc_window_selection/fold5_union_auto_noUCcalled/summary")         # k = 3..15, 5-50 kb
+NEW  <- file.path(Q, "pc_window_selection_w200kb/fold5_union_auto_noUCcalled/summary")  # k = 3, 5, 5-200 kb
+NOM  <- file.path(Q, "nominal_wide_window/fold5_union_auto_noUCcalled/w2000kb_pc3/summary")
+fmt  <- function(x) format(x, big.mark = ",", trim = TRUE, scientific = FALSE)
+pct  <- function(x) sprintf("%.0f%%", 100 * x)
+th   <- theme_classic(base_size = 12) + theme(strip.background = element_blank(), legend.position = "bottom")
+
+so <- fread(file.path(OLD, "selection_table.tsv")); sn <- fread(file.path(NEW, "selection_table.tsv"))
+co <- fread(file.path(OLD, "selection_no_inheritedC.tsv")); cn <- fread(file.path(NEW, "selection_no_inheritedC.tsv"))
+# k = 3 and 5 from the extended run (all five windows, deduplicated genotypes); k = 7, 10, 15 from the first run
+ST <- rbind(sn[, src := "extended run"], so[!npcs %in% sn$npcs][, src := "first run"], fill = TRUE)
+SC <- rbind(cn, co[!npcs %in% cn$npcs], fill = TRUE)
+chk <- merge(sn[window_kb <= 50, .(window_kb, npcs, a = disc_q10)], so[, .(window_kb, npcs, b = disc_q10)], by = c("window_kb", "npcs"))
+stopifnot(nrow(chk) > 0, all(chk$a == chk$b))   # the extended run reproduces the first one at 5-50 kb (q < 0.10)
+G  <- fread(file.path(Q, "calibration_grid/grid_calibration.tsv"))
+lam3 <- G[npcs == 3, sprintf("%.2f-%.2f", min(perm_lambda_min), max(perm_lambda_max))]
+S  <- fread(file.path(NOM, "strong_pairs_p0.0001.tsv.gz"))[, absd := abs(dist_bp)]
+EN <- fread(file.path(NOM, "enrichment_by_distance.tsv"))
+FL <- fread(file.path(Q, "stage1_open_questions/farlead.tsv"))
+e  <- function(k, w, v = "disc_q10") ST[npcs == k & window_kb == w, get(v)]
+```
+
+Stage 2 identifies **Ψ sites with at least one significant cis-QTL (eSites)**,
+following the approach of the m6A-QTL study (Zhang et al. 2020).
+
+```{r overview}
+knitr::kable(data.table(
+  item = c("test", "fitter", "covariates", "genotypes", "site significance", "FDR", "status"),
+  value = c("beta-binomial likelihood-ratio test per SNP-site pair: logit(mean) = intercept + k PCs (+ genotype)",
+            "maximum likelihood with three starting values of the overdispersion (a single start sometimes stopped at a false optimum)",
+            "k phenotype PCs; k = 3 chosen below",
+            "8.54 M biallelic SNPs with MAF >= 0.05; duplicated variant IDs (hg19 -> hg38 liftover collisions) removed",
+            "per-site permutations of phenotype and covariates together across cell lines; beta approximation; Storey q-values",
+            "10%, as in the paper",
+            "k decided (3); cis window pending; final scan (about 1,000 permutations) not yet run")),
+  col.names = c("", ""))
+```
+
+# 1. Calling eSites
+
+For each site, every cis SNP is tested and the smallest p-value is kept. The
+phenotype and the covariates are then permuted together across the 50 cell lines
+(genotypes fixed) and the scan is repeated; the minima of the permutations are
+fitted with a beta distribution, which turns the site's smallest p-value into a
+permutation p-value that accounts for the number of SNPs tested. Storey q-values
+across sites give the eSites (q < 0.10). The scans below use 100 permutations per
+site; the final scan will use more.
+
+At k = 3 the permutations are well calibrated in bulk (genomic-control lambda of
+permuted data `r lam3`). QQ plots for every configuration:
+[permutation check page](qtl_mapping_betabinomial_pc_window_permutation.html).
+
+# 2. Choosing k
+
+The scan was run for k = 3, 5, 7, 10 and 15 phenotype PCs and cis windows of 5, 20
+and 50 kb, and extended to 100 and 200 kb for k = 3 and 5. As in the paper, k is
+chosen to **maximise discoveries**.
+
+```{r ktable, fig.width=7.5, fig.height=3.8}
+ws <- sort(unique(ST$window_kb)); ks <- sort(unique(ST$npcs))
+hm <- merge(CJ(npcs = ks, window_kb = ws), ST[, .(npcs, window_kb, disc_q10, disc_q05)], by = c("npcs", "window_kb"), all.x = TRUE)
+hm[, `:=`(w = factor(paste0(window_kb, " kb"), paste0(ws, " kb")), k = factor(npcs, rev(ks)),
+          lab = fifelse(is.na(disc_q10), "not run", sprintf("%d\n(%d)", disc_q10, disc_q05)))]
+hm[!is.na(disc_q10), best := disc_q10 == max(disc_q10), by = window_kb]
+hm[, ink := fifelse(!is.na(disc_q10) & disc_q10 > mean(range(disc_q10, na.rm = TRUE)), "white", "grey15")]
+ggplot(hm, aes(w, k)) +
+  geom_tile(aes(fill = disc_q10), colour = "white", linewidth = 1.2) +
+  geom_text(aes(label = lab, colour = ink, fontface = fifelse(best %in% TRUE, "bold", "plain")), size = 3.4, lineheight = 0.9) +
+  scale_fill_gradient(low = "#e8f0fb", high = "#1a4f8f", na.value = "grey92", name = "eSites (q < 0.10)") +
+  scale_colour_identity() +
+  labs(x = "cis window", y = "phenotype PCs (k)") +
+  theme_classic(base_size = 12) + theme(axis.line = element_blank(), axis.ticks = element_blank(), legend.position = "right")
+```
+
+eSites at q < 0.10, with q < 0.05 in brackets; the best k in each window is in bold.
+k = 3 and 5 come from one run over all five windows, and k = 7, 10, 15 from the
+first run (5-50 kb); the two runs agree exactly where they overlap.
+
+```{r kplot, fig.width=8, fig.height=4.2}
+pd <- ST[, .(k = factor(npcs), window_kb, eSites = disc_q10)]
+ggplot(pd, aes(window_kb, eSites, colour = k)) + geom_line(linewidth = 0.8) + geom_point(size = 2.4) +
+  scale_x_log10(breaks = ws) +
+  scale_colour_manual(values = c(`3` = "#2a78d6", `5` = "#eb6834", `7` = "#1baf7a", `10` = "#eda100", `15` = "#e87ba4"),
+                      name = "phenotype PCs (k)") +
+  labs(x = "cis window (kb, log scale)", y = "eSites (q < 0.10)") + th
+best <- ST[, .SD[which.max(disc_q10)], by = window_kb]
+stopifnot(all(best$npcs == 3))
+```
+
+**k = 3 gives the most eSites at every window** and discoveries fall as k grows.
+
+# 3. Choosing the cis window
+
+## Where the strong associations are (the paper's approach)
+
+To choose its window, the paper tested every SNP within 2 Mb of each peak and
+looked at how far the strongly associated SNPs lie (their Fig. 1c). We did the
+same: a nominal scan of every SNP within **+/-2 Mb** of each site at k = 3
+(`r fmt(nrow(S))` SNP-site pairs with p < 1e-4), drawn with the paper's own plotting
+choices.
+
+```{r fig1c, fig.width=7, fig.height=4.6}
+CUTS <- c(1e-4, 1e-5, 1e-6); LAB <- c("p < 1e-4", "p < 1e-5", "p < 1e-6")
+ec <- rbindlist(lapply(seq_along(CUTS), function(j) S[p_nominal < CUTS[j], .(absd, cutoff = LAB[j])]))[, cutoff := factor(cutoff, LAB)]
+ggplot(ec, aes(absd, colour = cutoff)) + stat_ecdf(geom = "step", linewidth = 0.9) +
+  geom_hline(yintercept = 1, linetype = 2) +
+  scale_colour_manual(values = setNames(c("black", "#D55E00", "#CC79A7"), LAB), name = NULL) +
+  scale_x_continuous(breaks = seq(0, 2e6, 2e5), labels = paste(seq(0, 2e6, 2e5) / 1000, "kb"), expand = c(0.01, 0.01)) +
+  labs(x = "distance from the pU site", y = "cumulative proportion of SNP-site pairs") + th +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = c(0.8, 0.3))
+sh <- rbindlist(lapply(seq_along(CUTS), function(j) S[p_nominal < CUTS[j], .(cutoff = LAB[j], n = .N,
+  w5 = mean(absd <= 5e3), w20 = mean(absd <= 2e4), w50 = mean(absd <= 5e4), w100 = mean(absd <= 1e5), w200 = mean(absd <= 2e5))]))
+```
+
+```{r shares}
+knitr::kable(sh[, .(cutoff, pairs = fmt(n), `within 5 kb` = pct(w5), `within 50 kb` = pct(w50),
+                    `within 100 kb` = pct(w100), `within 200 kb` = pct(w200))])
+```
+
+Most strongly associated SNPs lie within 100 kb of the site
+(`r pct(sh[cutoff == "p < 1e-6"]$w100)` at p < 1e-6), which is the paper's criterion for its 100 kb
+window. Few are within 5 kb (`r pct(sh[cutoff == "p < 1e-6"]$w5)`).
+
+<!-- ## How far the excess of strong associations extends -->
+
+<!-- The cumulative curves reach 1 at the window edge by construction. A clearer -->
+<!-- reading is the **rate** of strong pairs in each distance class, relative to the -->
+<!-- rate at 1-2 Mb, where little cis signal is expected (dashed line = 1). -->
+
+<!-- ```{r enrich, fig.width=9, fig.height=4} -->
+<!-- en <- EN[group == "all sites" & set == "SNP-site pairs" & cutoff %in% c(1e-4, 1e-6, 1e-8)] -->
+<!-- en[, floor := enrichment[class_kb == "1000-2000"], by = cutoff][, rel := enrichment / floor] -->
+<!-- EL <- c("p < 1e-4", "p < 1e-6", "p < 1e-8") -->
+<!-- en[, `:=`(class_kb = factor(class_kb, unique(EN$class_kb)), cutoff = factor(EL[match(cutoff, c(1e-4, 1e-6, 1e-8))], EL))] -->
+<!-- ggplot(en[rel > 0], aes(class_kb, rel, colour = cutoff, group = cutoff)) + -->
+<!--   geom_hline(yintercept = 1, linetype = 2, colour = "grey50") + geom_line(linewidth = 0.8) + geom_point(size = 2.2) + -->
+<!--   scale_y_log10() + scale_colour_manual(values = c("#2a78d6", "#eb6834", "#1baf7a"), name = NULL) + -->
+<!--   labs(x = "distance from the pU site (kb)", y = "strong-pair rate / rate at 1-2 Mb") + -->
+<!--   th + theme(axis.text.x = element_text(angle = 45, hjust = 1)) -->
+<!-- r <- en[cutoff == "p < 1e-8"] -->
+<!-- ``` -->
+
+<!-- The excess is largest right at the site (about ` r fmt(signif(r[class_kb == "0-1"]$rel, 2))` times the -->
+<!-- 1-2 Mb rate within 1 kb, at p < 1e-8), still clear at 100-200 kb -->
+<!-- (` r round(r[class_kb == "100-200"]$rel)` times) and gone by 200-500 kb. -->
+
+<!-- **The far tail is not distal regulation.** Of the ` r FL[far == TRUE & local_signal == FALSE, .N]` strongest sites -->
+<!-- (lead p < 1e-8) whose signal lies only beyond 200 kb, ` r FL[far == TRUE & local_signal == FALSE & region != "other", .N]` -->
+<!-- are in the MHC or the immunoglobulin loci (see [Stage 1 open questions](stage1_open_questions.html)). -->
+
+## The trade-off
+
+```{r tradeoff}
+knitr::kable(data.table(window = paste0(ws, " kb"), `eSites, k = 3 (q < 0.10)` = sapply(ws, function(w) e(3, w)),
+  `strong pairs within the window (p < 1e-6)` = c(pct(sh[cutoff == "p < 1e-6"]$w5), pct(sh[cutoff == "p < 1e-6"]$w20), pct(sh[cutoff == "p < 1e-6"]$w50),
+                                                  pct(sh[cutoff == "p < 1e-6"]$w100), pct(sh[cutoff == "p < 1e-6"]$w200))))
+```
+
+- **5 kb** gives the most eSites (`r e(3, 5)`): fewer SNPs per site means a lighter
+  multiple-testing burden, and the strongest enrichment is close to the site.
+- **100 kb** follows the paper's criterion and captures most strong associations,
+  at the cost of fewer eSites (`r e(3, 100)`). 200 kb gives fewer still (`r e(3, 200)`) and adds few
+  strong associations (`r pct(sh[cutoff == "p < 1e-6"]$w200)` within the window, against `r pct(sh[cutoff == "p < 1e-6"]$w100)` at 100 kb).
+
+**Decision pending:** 5 kb or 100 kb.
+
+<!-- # 4. Status -->
+
+<!-- - **Decided:** k = 3; FDR 10%; duplicated genotype IDs removed. -->
+<!-- - **Pending:** the cis window; the inherited-C sites and the MHC / immunoglobulin -->
+<!--   sites (on hold, see [Stage 1 open questions](stage1_open_questions.html)). -->
+<!-- - **Next:** the final scan at the chosen window with about 1,000 permutations per -->
+<!--   site, giving the eSite set for Stage 3 (fine-mapping). -->
+
+<!-- <details><summary>eSites with the inherited-C sites set aside (for reference; the question is on hold)</summary> -->
+
+<!-- ```{r clean} -->
+<!-- tc <- dcast(SC[, .(k = npcs, w = factor(paste0(window_kb, " kb"), paste0(ws, " kb")), -->
+<!--                    v = sprintf("%d (%d)", eSites_clean_q10, eSites_clean))], k ~ w, value.var = "v", fill = "") -->
+<!-- knitr::kable(tc, caption = "Inherited-C sites removed after the scan and q-values recomputed: q < 0.10 (q < 0.05).") -->
+<!-- ``` -->
+
+<!-- </details> -->
+
+# Data and scripts
+
+- k x window scans: `qtl_betabinomial/pc_window_selection/` (k = 3-15, 5-50 kb) and
+  `qtl_betabinomial/pc_window_selection_w200kb/` (k = 3, 5, 5-200 kb); scripts
+  `47.scan_pc_window_selection.R`, `48.pc_window_selection_summary.R`,
+  `50.selection_inheritedC_setaside.R`.
+- +/-2 Mb nominal scan: `qtl_betabinomial/nominal_wide_window/`; scripts
+  `56.scan_nominal_wide_window.R`, `57.window_distance_summary.R`, `59.paper_style_fig1c.R`.
+- Related pages: [Stage 1 summary](stage1_phenotype_preparation.html),
+  [permutation check](qtl_mapping_betabinomial_pc_window_permutation.html),
+  [model](qtl_mapping_betabinomial_model.html).

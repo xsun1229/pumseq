@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-11-16" />
+
+<title>Stage 2: cis-QTL mapping</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Stage 2: cis-QTL mapping</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-11-16</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-11-16
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee23ea81cb4ac812f5059dae1b4892ca01d5323fatargetblanke23ea81a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/e23ea81cb4ac812f5059dae1b4892ca01d5323fa" target="_blank">e23ea81</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee23ea81cb4ac812f5059dae1b4892ca01d5323fatargetblanke23ea81a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/e23ea81cb4ac812f5059dae1b4892ca01d5323fa" target="_blank">e23ea81</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/stage1_open_questions.Rmd
+    Untracked:  analysis/stage1_phenotype_preparation.Rmd
+    Untracked:  analysis/stage2_cis_qtl_mapping.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+Q    &lt;- &quot;/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl/qtl_betabinomial&quot;
+OLD  &lt;- file.path(Q, &quot;pc_window_selection/fold5_union_auto_noUCcalled/summary&quot;)         # k = 3..15, 5-50 kb
+NEW  &lt;- file.path(Q, &quot;pc_window_selection_w200kb/fold5_union_auto_noUCcalled/summary&quot;)  # k = 3, 5, 5-200 kb
+NOM  &lt;- file.path(Q, &quot;nominal_wide_window/fold5_union_auto_noUCcalled/w2000kb_pc3/summary&quot;)
+fmt  &lt;- function(x) format(x, big.mark = &quot;,&quot;, trim = TRUE, scientific = FALSE)
+pct  &lt;- function(x) sprintf(&quot;%.0f%%&quot;, 100 * x)
+th   &lt;- theme_classic(base_size = 12) + theme(strip.background = element_blank(), legend.position = &quot;bottom&quot;)
+
+so &lt;- fread(file.path(OLD, &quot;selection_table.tsv&quot;)); sn &lt;- fread(file.path(NEW, &quot;selection_table.tsv&quot;))
+co &lt;- fread(file.path(OLD, &quot;selection_no_inheritedC.tsv&quot;)); cn &lt;- fread(file.path(NEW, &quot;selection_no_inheritedC.tsv&quot;))
+# k = 3 and 5 from the extended run (all five windows, deduplicated genotypes); k = 7, 10, 15 from the first run
+ST &lt;- rbind(sn[, src := &quot;extended run&quot;], so[!npcs %in% sn$npcs][, src := &quot;first run&quot;], fill = TRUE)
+SC &lt;- rbind(cn, co[!npcs %in% cn$npcs], fill = TRUE)
+chk &lt;- merge(sn[window_kb &lt;= 50, .(window_kb, npcs, a = disc_q10)], so[, .(window_kb, npcs, b = disc_q10)], by = c(&quot;window_kb&quot;, &quot;npcs&quot;))
+stopifnot(nrow(chk) &gt; 0, all(chk$a == chk$b))   # the extended run reproduces the first one at 5-50 kb (q &lt; 0.10)
+G  &lt;- fread(file.path(Q, &quot;calibration_grid/grid_calibration.tsv&quot;))
+lam3 &lt;- G[npcs == 3, sprintf(&quot;%.2f-%.2f&quot;, min(perm_lambda_min), max(perm_lambda_max))]
+S  &lt;- fread(file.path(NOM, &quot;strong_pairs_p0.0001.tsv.gz&quot;))[, absd := abs(dist_bp)]
+EN &lt;- fread(file.path(NOM, &quot;enrichment_by_distance.tsv&quot;))
+FL &lt;- fread(file.path(Q, &quot;stage1_open_questions/farlead.tsv&quot;))
+e  &lt;- function(k, w, v = &quot;disc_q10&quot;) ST[npcs == k &amp; window_kb == w, get(v)]</code></pre>
+<p>Stage 2 identifies <strong>Ψ sites with at least one significant
+cis-QTL (eSites)</strong>, following the approach of the m6A-QTL study
+(Zhang et al. 2020).</p>
+<pre class="r"><code>knitr::kable(data.table(
+  item = c(&quot;test&quot;, &quot;fitter&quot;, &quot;covariates&quot;, &quot;genotypes&quot;, &quot;site significance&quot;, &quot;FDR&quot;, &quot;status&quot;),
+  value = c(&quot;beta-binomial likelihood-ratio test per SNP-site pair: logit(mean) = intercept + k PCs (+ genotype)&quot;,
+            &quot;maximum likelihood with three starting values of the overdispersion (a single start sometimes stopped at a false optimum)&quot;,
+            &quot;k phenotype PCs; k = 3 chosen below&quot;,
+            &quot;8.54 M biallelic SNPs with MAF &gt;= 0.05; duplicated variant IDs (hg19 -&gt; hg38 liftover collisions) removed&quot;,
+            &quot;per-site permutations of phenotype and covariates together across cell lines; beta approximation; Storey q-values&quot;,
+            &quot;10%, as in the paper&quot;,
+            &quot;k decided (3); cis window pending; final scan (about 1,000 permutations) not yet run&quot;)),
+  col.names = c(&quot;&quot;, &quot;&quot;))</code></pre>
+<table>
+<colgroup>
+<col width="12%" />
+<col width="87%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td align="left">test</td>
+<td align="left">beta-binomial likelihood-ratio test per SNP-site pair:
+logit(mean) = intercept + k PCs (+ genotype)</td>
+</tr>
+<tr class="even">
+<td align="left">fitter</td>
+<td align="left">maximum likelihood with three starting values of the
+overdispersion (a single start sometimes stopped at a false
+optimum)</td>
+</tr>
+<tr class="odd">
+<td align="left">covariates</td>
+<td align="left">k phenotype PCs; k = 3 chosen below</td>
+</tr>
+<tr class="even">
+<td align="left">genotypes</td>
+<td align="left">8.54 M biallelic SNPs with MAF &gt;= 0.05; duplicated
+variant IDs (hg19 -&gt; hg38 liftover collisions) removed</td>
+</tr>
+<tr class="odd">
+<td align="left">site significance</td>
+<td align="left">per-site permutations of phenotype and covariates
+together across cell lines; beta approximation; Storey q-values</td>
+</tr>
+<tr class="even">
+<td align="left">FDR</td>
+<td align="left">10%, as in the paper</td>
+</tr>
+<tr class="odd">
+<td align="left">status</td>
+<td align="left">k decided (3); cis window pending; final scan (about
+1,000 permutations) not yet run</td>
+</tr>
+</tbody>
+</table>
+<div id="calling-esites" class="section level1">
+<h1>1. Calling eSites</h1>
+<p>For each site, every cis SNP is tested and the smallest p-value is
+kept. The phenotype and the covariates are then permuted together across
+the 50 cell lines (genotypes fixed) and the scan is repeated; the minima
+of the permutations are fitted with a beta distribution, which turns the
+site’s smallest p-value into a permutation p-value that accounts for the
+number of SNPs tested. Storey q-values across sites give the eSites (q
+&lt; 0.10). The scans below use 100 permutations per site; the final
+scan will use more.</p>
+<p>At k = 3 the permutations are well calibrated in bulk
+(genomic-control lambda of permuted data 1.01-1.07). QQ plots for every
+configuration: <a
+href="qtl_mapping_betabinomial_pc_window_permutation.html">permutation
+check page</a>.</p>
+</div>
+<div id="choosing-k" class="section level1">
+<h1>2. Choosing k</h1>
+<p>The scan was run for k = 3, 5, 7, 10 and 15 phenotype PCs and cis
+windows of 5, 20 and 50 kb, and extended to 100 and 200 kb for k = 3 and
+5. As in the paper, k is chosen to <strong>maximise
+discoveries</strong>.</p>
+<pre class="r"><code>ws &lt;- sort(unique(ST$window_kb)); ks &lt;- sort(unique(ST$npcs))
+hm &lt;- merge(CJ(npcs = ks, window_kb = ws), ST[, .(npcs, window_kb, disc_q10, disc_q05)], by = c(&quot;npcs&quot;, &quot;window_kb&quot;), all.x = TRUE)
+hm[, `:=`(w = factor(paste0(window_kb, &quot; kb&quot;), paste0(ws, &quot; kb&quot;)), k = factor(npcs, rev(ks)),
+          lab = fifelse(is.na(disc_q10), &quot;not run&quot;, sprintf(&quot;%d\n(%d)&quot;, disc_q10, disc_q05)))]
+hm[!is.na(disc_q10), best := disc_q10 == max(disc_q10), by = window_kb]
+hm[, ink := fifelse(!is.na(disc_q10) &amp; disc_q10 &gt; mean(range(disc_q10, na.rm = TRUE)), &quot;white&quot;, &quot;grey15&quot;)]
+ggplot(hm, aes(w, k)) +
+  geom_tile(aes(fill = disc_q10), colour = &quot;white&quot;, linewidth = 1.2) +
+  geom_text(aes(label = lab, colour = ink, fontface = fifelse(best %in% TRUE, &quot;bold&quot;, &quot;plain&quot;)), size = 3.4, lineheight = 0.9) +
+  scale_fill_gradient(low = &quot;#e8f0fb&quot;, high = &quot;#1a4f8f&quot;, na.value = &quot;grey92&quot;, name = &quot;eSites (q &lt; 0.10)&quot;) +
+  scale_colour_identity() +
+  labs(x = &quot;cis window&quot;, y = &quot;phenotype PCs (k)&quot;) +
+  theme_classic(base_size = 12) + theme(axis.line = element_blank(), axis.ticks = element_blank(), legend.position = &quot;right&quot;)</code></pre>
+<p><img src="figure/stage2_cis_qtl_mapping.Rmd/ktable-1.png" width="720" style="display: block; margin: auto;" /></p>
+<p>eSites at q &lt; 0.10, with q &lt; 0.05 in brackets; the best k in
+each window is in bold. k = 3 and 5 come from one run over all five
+windows, and k = 7, 10, 15 from the first run (5-50 kb); the two runs
+agree exactly where they overlap.</p>
+<pre class="r"><code>pd &lt;- ST[, .(k = factor(npcs), window_kb, eSites = disc_q10)]
+ggplot(pd, aes(window_kb, eSites, colour = k)) + geom_line(linewidth = 0.8) + geom_point(size = 2.4) +
+  scale_x_log10(breaks = ws) +
+  scale_colour_manual(values = c(`3` = &quot;#2a78d6&quot;, `5` = &quot;#eb6834&quot;, `7` = &quot;#1baf7a&quot;, `10` = &quot;#eda100&quot;, `15` = &quot;#e87ba4&quot;),
+                      name = &quot;phenotype PCs (k)&quot;) +
+  labs(x = &quot;cis window (kb, log scale)&quot;, y = &quot;eSites (q &lt; 0.10)&quot;) + th</code></pre>
+<p><img src="figure/stage2_cis_qtl_mapping.Rmd/kplot-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>best &lt;- ST[, .SD[which.max(disc_q10)], by = window_kb]
+stopifnot(all(best$npcs == 3))</code></pre>
+<p><strong>k = 3 gives the most eSites at every window</strong> and
+discoveries fall as k grows.</p>
+</div>
+<div id="choosing-the-cis-window" class="section level1">
+<h1>3. Choosing the cis window</h1>
+<div id="where-the-strong-associations-are-the-papers-approach"
+class="section level2">
+<h2>Where the strong associations are (the paper’s approach)</h2>
+<p>To choose its window, the paper tested every SNP within 2 Mb of each
+peak and looked at how far the strongly associated SNPs lie (their Fig.
+1c). We did the same: a nominal scan of every SNP within <strong>+/-2
+Mb</strong> of each site at k = 3 (133,049 SNP-site pairs with p &lt;
+1e-4), drawn with the paper’s own plotting choices.</p>
+<pre class="r"><code>CUTS &lt;- c(1e-4, 1e-5, 1e-6); LAB &lt;- c(&quot;p &lt; 1e-4&quot;, &quot;p &lt; 1e-5&quot;, &quot;p &lt; 1e-6&quot;)
+ec &lt;- rbindlist(lapply(seq_along(CUTS), function(j) S[p_nominal &lt; CUTS[j], .(absd, cutoff = LAB[j])]))[, cutoff := factor(cutoff, LAB)]
+ggplot(ec, aes(absd, colour = cutoff)) + stat_ecdf(geom = &quot;step&quot;, linewidth = 0.9) +
+  geom_hline(yintercept = 1, linetype = 2) +
+  scale_colour_manual(values = setNames(c(&quot;black&quot;, &quot;#D55E00&quot;, &quot;#CC79A7&quot;), LAB), name = NULL) +
+  scale_x_continuous(breaks = seq(0, 2e6, 2e5), labels = paste(seq(0, 2e6, 2e5) / 1000, &quot;kb&quot;), expand = c(0.01, 0.01)) +
+  labs(x = &quot;distance from the pU site&quot;, y = &quot;cumulative proportion of SNP-site pairs&quot;) + th +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = c(0.8, 0.3))</code></pre>
+<p><img src="figure/stage2_cis_qtl_mapping.Rmd/fig1c-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>sh &lt;- rbindlist(lapply(seq_along(CUTS), function(j) S[p_nominal &lt; CUTS[j], .(cutoff = LAB[j], n = .N,
+  w5 = mean(absd &lt;= 5e3), w20 = mean(absd &lt;= 2e4), w50 = mean(absd &lt;= 5e4), w100 = mean(absd &lt;= 1e5), w200 = mean(absd &lt;= 2e5))]))</code></pre>
+<pre class="r"><code>knitr::kable(sh[, .(cutoff, pairs = fmt(n), `within 5 kb` = pct(w5), `within 50 kb` = pct(w50),
+                    `within 100 kb` = pct(w100), `within 200 kb` = pct(w200))])</code></pre>
+<table>
+<colgroup>
+<col width="12%" />
+<col width="11%" />
+<col width="17%" />
+<col width="18%" />
+<col width="20%" />
+<col width="20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">cutoff</th>
+<th align="left">pairs</th>
+<th align="left">within 5 kb</th>
+<th align="left">within 50 kb</th>
+<th align="left">within 100 kb</th>
+<th align="left">within 200 kb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">p &lt; 1e-4</td>
+<td align="left">133,049</td>
+<td align="left">8%</td>
+<td align="left">43%</td>
+<td align="left">59%</td>
+<td align="left">69%</td>
+</tr>
+<tr class="even">
+<td align="left">p &lt; 1e-5</td>
+<td align="left">72,475</td>
+<td align="left">11%</td>
+<td align="left">54%</td>
+<td align="left">72%</td>
+<td align="left">81%</td>
+</tr>
+<tr class="odd">
+<td align="left">p &lt; 1e-6</td>
+<td align="left">45,046</td>
+<td align="left">14%</td>
+<td align="left">64%</td>
+<td align="left">82%</td>
+<td align="left">89%</td>
+</tr>
+</tbody>
+</table>
+<p>Most strongly associated SNPs lie within 100 kb of the site (82% at p
+&lt; 1e-6), which is the paper’s criterion for its 100 kb window. Few
+are within 5 kb (14%).</p>
+<!-- ## How far the excess of strong associations extends -->
+<!-- The cumulative curves reach 1 at the window edge by construction. A clearer -->
+<!-- reading is the **rate** of strong pairs in each distance class, relative to the -->
+<!-- rate at 1-2 Mb, where little cis signal is expected (dashed line = 1). -->
+<!-- ```{r enrich, fig.width=9, fig.height=4} -->
+<!-- en <- EN[group == "all sites" & set == "SNP-site pairs" & cutoff %in% c(1e-4, 1e-6, 1e-8)] -->
+<!-- en[, floor := enrichment[class_kb == "1000-2000"], by = cutoff][, rel := enrichment / floor] -->
+<!-- EL <- c("p < 1e-4", "p < 1e-6", "p < 1e-8") -->
+<!-- en[, `:=`(class_kb = factor(class_kb, unique(EN$class_kb)), cutoff = factor(EL[match(cutoff, c(1e-4, 1e-6, 1e-8))], EL))] -->
+<!-- ggplot(en[rel > 0], aes(class_kb, rel, colour = cutoff, group = cutoff)) + -->
+<!--   geom_hline(yintercept = 1, linetype = 2, colour = "grey50") + geom_line(linewidth = 0.8) + geom_point(size = 2.2) + -->
+<!--   scale_y_log10() + scale_colour_manual(values = c("#2a78d6", "#eb6834", "#1baf7a"), name = NULL) + -->
+<!--   labs(x = "distance from the pU site (kb)", y = "strong-pair rate / rate at 1-2 Mb") + -->
+<!--   th + theme(axis.text.x = element_text(angle = 45, hjust = 1)) -->
+<!-- r <- en[cutoff == "p < 1e-8"] -->
+<!-- ``` -->
+<!-- The excess is largest right at the site (about ` r fmt(signif(r[class_kb == "0-1"]$rel, 2))` times the -->
+<!-- 1-2 Mb rate within 1 kb, at p < 1e-8), still clear at 100-200 kb -->
+<!-- (` r round(r[class_kb == "100-200"]$rel)` times) and gone by 200-500 kb. -->
+<!-- **The far tail is not distal regulation.** Of the ` r FL[far == TRUE & local_signal == FALSE, .N]` strongest sites -->
+<!-- (lead p < 1e-8) whose signal lies only beyond 200 kb, ` r FL[far == TRUE & local_signal == FALSE & region != "other", .N]` -->
+<!-- are in the MHC or the immunoglobulin loci (see [Stage 1 open questions](stage1_open_questions.html)). -->
+</div>
+<div id="the-trade-off" class="section level2">
+<h2>The trade-off</h2>
+<pre class="r"><code>knitr::kable(data.table(window = paste0(ws, &quot; kb&quot;), `eSites, k = 3 (q &lt; 0.10)` = sapply(ws, function(w) e(3, w)),
+  `strong pairs within the window (p &lt; 1e-6)` = c(pct(sh[cutoff == &quot;p &lt; 1e-6&quot;]$w5), pct(sh[cutoff == &quot;p &lt; 1e-6&quot;]$w20), pct(sh[cutoff == &quot;p &lt; 1e-6&quot;]$w50),
+                                                  pct(sh[cutoff == &quot;p &lt; 1e-6&quot;]$w100), pct(sh[cutoff == &quot;p &lt; 1e-6&quot;]$w200))))</code></pre>
+<table>
+<colgroup>
+<col width="9%" />
+<col width="33%" />
+<col width="56%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">window</th>
+<th align="right">eSites, k = 3 (q &lt; 0.10)</th>
+<th align="left">strong pairs within the window (p &lt; 1e-6)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">5 kb</td>
+<td align="right">249</td>
+<td align="left">14%</td>
+</tr>
+<tr class="even">
+<td align="left">20 kb</td>
+<td align="right">242</td>
+<td align="left">38%</td>
+</tr>
+<tr class="odd">
+<td align="left">50 kb</td>
+<td align="right">200</td>
+<td align="left">64%</td>
+</tr>
+<tr class="even">
+<td align="left">100 kb</td>
+<td align="right">190</td>
+<td align="left">82%</td>
+</tr>
+<tr class="odd">
+<td align="left">200 kb</td>
+<td align="right">176</td>
+<td align="left">89%</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>5 kb</strong> gives the most eSites (249): fewer SNPs per
+site means a lighter multiple-testing burden, and the strongest
+enrichment is close to the site.</li>
+<li><strong>100 kb</strong> follows the paper’s criterion and captures
+most strong associations, at the cost of fewer eSites (190). 200 kb
+gives fewer still (176) and adds few strong associations (89% within the
+window, against 82% at 100 kb).</li>
+</ul>
+<p><strong>Decision pending:</strong> 5 kb or 100 kb.</p>
+<!-- # 4. Status -->
+<!-- - **Decided:** k = 3; FDR 10%; duplicated genotype IDs removed. -->
+<!-- - **Pending:** the cis window; the inherited-C sites and the MHC / immunoglobulin -->
+<!--   sites (on hold, see [Stage 1 open questions](stage1_open_questions.html)). -->
+<!-- - **Next:** the final scan at the chosen window with about 1,000 permutations per -->
+<!--   site, giving the eSite set for Stage 3 (fine-mapping). -->
+<!-- <details><summary>eSites with the inherited-C sites set aside (for reference; the question is on hold)</summary> -->
+<!-- ```{r clean} -->
+<!-- tc <- dcast(SC[, .(k = npcs, w = factor(paste0(window_kb, " kb"), paste0(ws, " kb")), -->
+<!--                    v = sprintf("%d (%d)", eSites_clean_q10, eSites_clean))], k ~ w, value.var = "v", fill = "") -->
+<!-- knitr::kable(tc, caption = "Inherited-C sites removed after the scan and q-values recomputed: q < 0.10 (q < 0.05).") -->
+<!-- ``` -->
+<!-- </details> -->
+</div>
+</div>
+<div id="data-and-scripts" class="section level1">
+<h1>Data and scripts</h1>
+<ul>
+<li>k x window scans: <code>qtl_betabinomial/pc_window_selection/</code>
+(k = 3-15, 5-50 kb) and
+<code>qtl_betabinomial/pc_window_selection_w200kb/</code> (k = 3, 5,
+5-200 kb); scripts <code>47.scan_pc_window_selection.R</code>,
+<code>48.pc_window_selection_summary.R</code>,
+<code>50.selection_inheritedC_setaside.R</code>.</li>
+<li>+/-2 Mb nominal scan:
+<code>qtl_betabinomial/nominal_wide_window/</code>; scripts
+<code>56.scan_nominal_wide_window.R</code>,
+<code>57.window_distance_summary.R</code>,
+<code>59.paper_style_fig1c.R</code>.</li>
+<li>Related pages: <a href="stage1_phenotype_preparation.html">Stage 1
+summary</a>, <a
+href="qtl_mapping_betabinomial_pc_window_permutation.html">permutation
+check</a>, <a href="qtl_mapping_betabinomial_model.html">model</a>.</li>
+</ul>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 7 (Core)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el7-x86_64/lib/libopenblas_haswellp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_4.0.3     data.table_1.14.2
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.12        highr_0.9          RColorBrewer_1.1-3 pillar_1.9.0      
+ [5] compiler_4.2.0     bslib_0.3.1        later_1.3.0        jquerylib_0.1.4   
+ [9] git2r_0.30.1       workflowr_1.7.0    R.methodsS3_1.8.1  R.utils_2.11.0    
+[13] tools_4.2.0        digest_0.6.29      gtable_0.3.6       jsonlite_1.8.0    
+[17] evaluate_0.15      lifecycle_1.0.4    tibble_3.2.1       pkgconfig_2.0.3   
+[21] rlang_1.1.2        cli_3.6.1          rstudioapi_0.13    yaml_2.3.5        
+[25] xfun_0.41          fastmap_1.1.0      withr_2.5.0        dplyr_1.1.4       
+[29] stringr_1.5.1      knitr_1.39         generics_0.1.4     fs_1.5.2          
+[33] vctrs_0.6.5        sass_0.4.1         tidyselect_1.2.0   rprojroot_2.0.3   
+[37] grid_4.2.0         glue_1.6.2         R6_2.5.1           fansi_1.0.3       
+[41] rmarkdown_2.25     farver_2.1.0       magrittr_2.0.3     scales_1.4.0      
+[45] promises_1.2.0.1   htmltools_0.5.2    dichromat_2.0-0.1  httpuv_1.6.5      
+[49] labeling_0.4.2     S7_0.2.0           utf8_1.2.2         stringi_1.7.6     
+[53] R.oo_1.24.0       </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

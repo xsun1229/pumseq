@@ -1,0 +1,207 @@
+---
+title: "Stage 1: phenotype preparation"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+PR    <- "/project/xinhe/xsun/pumseq/pumseq_processed"
+PH    <- file.path(PR, "psi_qtl/phenotype")
+FINAL <- file.path(PH, "fold5_union_auto_noUCcalled")
+ANNO  <- file.path(PR, "joint/fold5_union_analysis/fold5_union_sites_annotated.txt.gz")
+SEL   <- file.path(PR, "psi_qtl/qtl_betabinomial/pc_window_selection/fold5_union_auto_noUCcalled/summary")
+CG    <- file.path(PR, "psi_qtl/qtl_betabinomial/calibration_grid")
+fmt <- function(x) format(x, big.mark = ",", trim = TRUE, scientific = FALSE)
+
+sites <- fread(ANNO, colClasses = list(character = c("ref", "strand")))
+C <- fread(file.path(FINAL, "counts/C_matrix.txt.gz")); N <- fread(file.path(FINAL, "counts/N_matrix.txt.gz"))
+cls <- setdiff(names(C), c("ref", "pos", "strand"))
+Cm <- as.matrix(C[, ..cls]); Nm <- as.matrix(N[, ..cls])
+ri <- fread(file.path(FINAL, "runinfo.txt")); rv <- function(k) as.numeric(ri[parameter == k, value])
+man <- fread(file.path(FINAL, "site_exclusion_manifest.txt.gz"))
+pc_old <- fread(file.path(PH, "fold5_union/mvalue_pcs.txt")); pc_new <- fread(file.path(FINAL, "mvalue_pcs.txt"))
+stopifnot(identical(pc_old$sample, pc_new$sample))
+ST <- fread(file.path(SEL, "selection_table.tsv"))
+SC <- fread(file.path(SEL, "selection_no_inheritedC.tsv"))
+G  <- fread(file.path(CG, "grid_calibration.tsv"))[window_kb %in% unique(ST$window_kb) & npcs %in% unique(ST$npcs)]
+th <- theme_classic(base_size = 12)
+
+covered <- mean(Nm > 0, na.rm = TRUE); med_depth <- median(Nm[Nm > 0], na.rm = TRUE)
+bacs <- sites[in_bacs & !is.na(mean_ratio)]; r_bacs <- cor(bacs$mean_ratio, bacs$bacs_psi)
+best <- ST[, .SD[which.max(disc_q10)], by = window_kb]
+stopifnot(all(best$npcs == 3))   # the text below states that k = 3 is best at every window
+stopifnot(all(SC[window_kb > min(window_kb), .SD[which.max(eSites_clean_q10)], by = window_kb]$npcs == 3))   # "k = 3 leads at the larger windows"
+```
+
+Stage 1 of the working plan asks two questions: **how is Ψ (pU) quantified
+at each site**, and **how are technical covariates corrected**. The answers in
+brief:
+
+```{r overview}
+knitr::kable(data.table(
+  question = c("Quantify pU per site", "", "", "Correct technical covariates", ""),
+  answer = c(sprintf("%s sites, called in 5 disjoint folds of 10 cell lines and combined (%s before filtering)",
+                     fmt(nrow(C)), fmt(nrow(sites))),
+             sprintf("per site and cell line: converted reads C out of depth N = C + T (%d cell lines)", length(cls)),
+             "sites with a called U/C variant on the pU base removed (genotype read-out)",
+             "phenotype principal components (M-value PCs), recomputed on the filtered sites",
+             "k = 3 PCs: the most eSites at every cis window tested")),
+  col.names = c("", ""))
+```
+
+# 1. Quantifying Ψ per site
+
+## Calling sites
+
+The 50 genotyped cell lines are split into **5 disjoint folds of 10**. Within
+each fold the reads of its 10 lines are pooled and every candidate site is
+tested (chi-squared test, FDR < 0.01, rate difference > 0.05, depth >= 20).
+The sites called in any fold are combined, giving **`r fmt(nrow(sites))` sites**.
+CL19039 has no genotype in any source, so it is left out here and in QTL
+mapping. Details: [5-fold site-calling page](mRNA_5fold_union_site_calling.html).
+
+Our %pU agrees with the orthogonal BACS Ψ levels: Pearson r =
+**`r sprintf("%.2f", r_bacs)`** at the `r fmt(nrow(bacs))` sites that BACS also
+measures.
+
+```{r folds}
+knitr::kable(rbindlist(lapply(1:5, function(k) {
+  s <- sites[n_folds >= k]; b <- s[in_bacs & !is.na(mean_ratio)]
+  data.table(`called in >= k folds` = k, sites = fmt(nrow(s)), `in BACS` = nrow(b),
+             `r with BACS` = sprintf("%.2f", cor(b$mean_ratio, b$bacs_psi)))
+})), caption = "Sites by the number of folds that called them. The QTL phenotype uses all of them (k = 1).")
+```
+
+## From sites to the QTL phenotype
+
+Two filters (`13.filtered_phenotype.R`): autosomes only, since the genotype panel
+is autosomal, and removal of sites with a **U/C variant called on the pU base**.
+pU is read out as a T-to-C change, so a cell line that carries a C at the pU base
+shows "conversion" without modification. At such a site %pU reads out genotype
+and mimics a strong QTL.
+
+```{r filters}
+knitr::kable(data.table(
+  step = c("called sites", "on chr1-22", "minus sites with a called U/C variant on the pU base"),
+  sites = fmt(c(nrow(sites), rv("n_sites_in"), rv("n_retained")))),
+  caption = sprintf("%s sites removed by the U/C filter.", fmt(rv("n_excluded"))))
+```
+
+The untreated controls (no chemistry, so any C is inherited) give a second
+check on the same problem:
+
+```{r untreated}
+m <- copy(man)[, called := fifelse(annotated_UC, "U/C variant called (removed)", "no U/C variant called (kept)")]
+m[, untreated := fifelse(!judgeable_untreated, "too few untreated reads to judge",
+                         fifelse(measured_alias, "inherited C in untreated RNA", "no inherited C"))]
+knitr::kable(dcast(m[, .N, by = .(untreated, called)], untreated ~ called, value.var = "N", fill = 0),
+  caption = "Autosomal sites. 'Inherited C': a cell line with >= 10 untreated reads shows >= 10% C at the pU base, from >= 2 C reads.")
+n_ic <- man[annotated_UC == FALSE & measured_alias %in% TRUE, .N]
+```
+
+**`r fmt(n_ic)` kept sites show inherited C** without a called variant,
+presumably variants missing from the genotype calls. How to treat them is
+decided in Stage 2 (see the open items at the end).
+
+## The phenotype
+
+For each site and cell line the phenotype is the **raw count pair**: C
+converted reads out of N = C + T reads at the pU base in the treated library,
+with treated replicates summed. It is modelled directly with a beta-binomial
+distribution, with no transformation, normalisation or imputation. The matrix is
+`r fmt(nrow(C))` sites x `r length(cls)` cell lines; `r sprintf("%.1f%%", 100 * covered)`
+of entries have at least one read, with a median depth of `r med_depth` reads.
+
+```{r pheno, fig.width=9, fig.height=3.6}
+d1 <- data.table(depth = Nm[Nm > 0 & !is.na(Nm)])
+d2 <- data.table(pu = rowSums(Cm, na.rm = TRUE) / rowSums(Nm, na.rm = TRUE))
+p1 <- ggplot(d1, aes(depth)) + geom_histogram(bins = 40, fill = "#2a78d6", colour = "white", linewidth = 0.2) +
+  scale_x_log10() + labs(x = "reads at the pU base (N, covered entries, log scale)", y = "site x cell line entries",
+                         title = "Depth") + th
+p2 <- ggplot(d2, aes(pu)) + geom_histogram(bins = 40, fill = "#2a78d6", colour = "white", linewidth = 0.2) +
+  labs(x = "%pU of the site (all cell lines pooled)", y = "sites", title = "Modification level") + th
+gridExtra::grid.arrange(p1, p2, ncol = 2)
+```
+
+# 2. Correcting technical covariates
+
+## Phenotype PCs
+
+The covariates are **M-value PCs**. For each site and cell line,
+$M = \log_2[(C + \pi_s)/(T + 1 - \pi_s)]$, with $\pi_s$ the site's pooled %pU.
+M is standardised per site and its principal components are taken across cell
+lines. The PCs are **recomputed on the filtered sites**, because the original
+PCs, taken from all sites, could partly encode the genotype read-out sites. The
+two sets are close:
+
+```{r pcs}
+r <- abs(diag(cor(as.matrix(pc_old[, paste0("PC", 1:5), with = FALSE]), as.matrix(pc_new[, paste0("PC", 1:5), with = FALSE]))))
+knitr::kable(data.table(PC = paste0("PC", 1:5), `|correlation|, original vs recomputed` = sprintf("%.2f", r)))
+```
+
+## How many PCs (k)
+
+k was chosen to **maximise discoveries**, as in the reference m6A-QTL study:
+a real-data scan of every combination of k = 3, 5, 7, 10, 15 and cis windows of
+5, 20 and 50 kb. It used the beta-binomial likelihood-ratio test with 100 per-site
+permutations, a beta approximation, and Storey q-values. eSites are sites with
+q < 0.10 (q < 0.05 in brackets):
+
+```{r esites}
+ws <- sort(unique(ST$window_kb))
+tab <- function(d, a, b) dcast(d[, .(npcs, w = paste0(window_kb, " kb"), v = sprintf("%d (%d)", get(a), get(b)))],
+                               npcs ~ w, value.var = "v")[, c("npcs", paste0(ws, " kb")), with = FALSE]
+t1 <- tab(ST, "disc_q10", "disc_q05"); t2 <- tab(SC, "eSites_clean_q10", "eSites_clean")
+setnames(t1, "npcs", "k"); setnames(t2, "npcs", "k")
+knitr::kable(t1, caption = "eSites, all sites: q < 0.10 (q < 0.05).")
+knitr::kable(t2, caption = "eSites with the inherited-C sites set aside (q recomputed): q < 0.10 (q < 0.05).")
+```
+
+```{r esiteplot, fig.width=9, fig.height=3.8}
+pd <- rbind(ST[, .(npcs, window_kb, eSites = disc_q10, set = "all sites")],
+            SC[, .(npcs, window_kb, eSites = eSites_clean_q10, set = "inherited-C sites set aside")])
+pd[, window := factor(paste0(window_kb, " kb"), paste0(ws, " kb"))]
+ggplot(pd, aes(npcs, eSites, colour = window)) + geom_line(linewidth = 0.8) + geom_point(size = 2.2) +
+  facet_wrap(~ set, scales = "free_y") + scale_x_continuous(breaks = sort(unique(pd$npcs))) +
+  scale_colour_manual(values = c("#2a78d6", "#eb6834", "#1baf7a"), name = "cis window") +
+  labs(x = "phenotype PCs (k)", y = "eSites (q < 0.10)") + th +
+  theme(strip.background = element_blank(), legend.position = "bottom")
+lam <- G[, .(lo = min(perm_lambda_min), hi = max(perm_lambda_max)), keyby = npcs]
+e5 <- SC[window_kb == min(ws)]
+```
+
+- **k = 3 gives the most eSites at every window**: `r paste(sprintf("%d at %d kb", ST[npcs == 3][order(window_kb)]$disc_q10, ws), collapse = ", ")`, at q < 0.10.
+  Counts fall steadily as k grows.
+- With the inherited-C sites set aside, k = 3 and k = 5 are close at 5 kb
+  (`r e5[npcs == 3]$eSites_clean_q10` and `r e5[npcs == 5]$eSites_clean_q10`), and
+  k = 3 leads at the larger windows.
+- The permutations are also best calibrated at k = 3. The genomic-control lambda
+  of the permuted data is `r sprintf("%.2f-%.2f", lam[npcs == 3]$lo, lam[npcs == 3]$hi)` at k = 3,
+  rising to `r sprintf("%.2f-%.2f", lam[npcs == max(npcs)]$lo, lam[npcs == max(npcs)]$hi)` at k = `r max(lam$npcs)`.
+  Per-configuration QQ plots: [permutation check page](qtl_mapping_betabinomial_pc_window_permutation.html).
+
+**Decision: k = 3.** A run extending the same scan to 100 and 200 kb windows
+(k = 3 and 5, 100 permutations, deduplicated genotypes) is in progress. It will
+make the k x window comparison consistent with the window choice in Stage 2.
+
+# Open items carried into Stage 2
+
+- **Inherited-C sites** (`r fmt(n_ic)`; about 9% of tested sites but more than half
+  of the eSites): filter them, model the untreated C as a covariate, or flag them.
+- Sites where **one cell line supplies most converted reads**, and sites in the
+  **MHC and immunoglobulin loci**, which dominate the extreme tail of the
+  permutations.
+
+# Detailed pages
+
+- [5-fold site calling](mRNA_5fold_union_site_calling.html)
+- [Phenotype, covariates and genotypes for the beta-binomial model](qtl_mapping_betabinomial_data.html)
+- [Calibration after the U/C filter](qtl_mapping_betabinomial_calibration_noUCcalled.html)
+- [Permutation check for each window and k](qtl_mapping_betabinomial_pc_window_permutation.html)

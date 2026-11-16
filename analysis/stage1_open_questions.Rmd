@@ -1,0 +1,249 @@
+---
+title: "Stage 1: two open questions on the phenotype"
+author: "XSun"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+Q   <- "/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl/qtl_betabinomial"
+D   <- file.path(Q, "stage1_open_questions")
+S   <- fread(file.path(D, "sites.tsv"), colClasses = list(character = "ref"))
+EX  <- fread(file.path(D, "examples.tsv"))
+FL  <- fread(file.path(D, "farlead.tsv"), colClasses = list(character = "ref"))
+FLK <- fread(file.path(Q, "untreated_covariate/firstlook_w5kb_pc3_by_site.tsv"))
+FLS <- fread(file.path(Q, "untreated_covariate/firstlook_w5kb_pc3_summary.tsv"))
+SC  <- fread(file.path(Q, "pc_window_selection/fold5_union_auto_noUCcalled/summary/selection_no_inheritedC.tsv"))
+n_clean_q <- SC[window_kb == 5 & npcs == 3, eSites_clean_q10]
+fmt <- function(x) format(x, big.mark = ",", trim = TRUE, scientific = FALSE)
+pct <- function(x) sprintf("%.0f%%", 100 * x)
+th  <- theme_classic(base_size = 12) + theme(strip.background = element_blank(), legend.position = "bottom")
+FLAG <- "#eb6834"; OTHER <- "#2a78d6"; DOSE <- c(`0` = "#bcd7f5", `1` = "#5b9be0", `2` = "#1a4f8f")
+E  <- S[eSite == TRUE]
+nE <- nrow(E); nIC_E <- E[inherited_C == TRUE, .N]; nT <- nrow(S); nIC_T <- S[inherited_C == TRUE, .N]
+```
+
+Both questions concern sites whose %pU may reflect something other than
+genetic regulation of pseudouridylation. Each needs a decision before the final
+QTL scan. Numbers are from the k x window selection scan at **5 kb, k = 3**, where
+**eSites** are sites with q < 0.10 (`r nE` eSites among `r fmt(nT)` tested sites).
+
+# Question 1: the inherited-C sites
+
+**The issue.** pU is read out as a T-to-C change at the pU base. If a cell line
+carries a C allele at that base in its genome, its reads show C whether or not
+the base is modified, and the site's %pU tracks genotype. We already remove sites
+with a **called** U/C variant on the pU base (1,118 sites). The untreated controls
+(no chemistry, so any C is inherited) show that the problem is wider:
+**1,057 of the remaining sites** have a cell line with >= 10% C at the pU base in
+untreated RNA (>= 10 reads, >= 2 C reads), but no called variant. These are
+presumably variants missing from the genotype calls.
+
+## What it looks like
+
+At an inherited-C site, the treated %pU of each cell line follows its untreated C
+fraction, and both follow a nearby SNP. At an unflagged eSite the untreated C
+stays near zero and the treated %pU varies on its own.
+
+```{r ex1, fig.width=12, fig.height=4.2}
+e1 <- EX[kind %in% c("inherited C", "no flag")]
+e1[, `:=`(treated = C / N, untreated = fifelse(uN >= 10, uC / uN, NA_real_), dose = factor(round(dosage)))]
+e1[, panel := sprintf("%s\n%s (%s, q = %.1g)", sid, lead_snp, kind, q)]
+e1[, panel := factor(panel, unique(panel[order(kind != "inherited C")]))]
+ggplot(e1[N > 0 & !is.na(untreated)], aes(untreated, treated, colour = dose)) +
+  geom_abline(slope = 1, intercept = 0, colour = "grey70", linetype = 2) +
+  geom_point(aes(size = N), alpha = 0.85) + facet_wrap(~ panel, nrow = 1) +
+  scale_colour_manual(values = DOSE, name = "lead-SNP dosage (counted allele)", na.value = "grey60") +
+  scale_size_area(max_size = 4, name = "treated reads") +
+  labs(x = "untreated C fraction at the pU base", y = "treated %pU") + th
+```
+
+Each point is a cell line with >= 10 untreated reads. Dashed line: treated = untreated.
+
+## How much of the signal it carries
+
+```{r share, fig.width=7, fig.height=3.6}
+setorder(E, perm_p); E[, rank := .I]
+grp <- function(r) cut(r, c(0, 20, 50, 100, Inf), labels = c("top 20", "21-50", "51-100", sprintf("101-%d", nE)))
+sh <- rbind(data.table(set = "all tested sites", n = nT, share = nIC_T / nT),
+            E[, .(n = .N, share = mean(inherited_C)), by = .(set = paste("eSites", grp(rank)))])
+sh[, set := factor(set, set)]
+ggplot(sh, aes(set, share)) + geom_col(fill = FLAG, width = 0.65) +
+  geom_text(aes(label = sprintf("%s\n(n = %d)", pct(share), n)), vjust = -0.25, size = 3.4) +
+  scale_y_continuous(limits = c(0, 1.12), breaks = seq(0, 1, 0.25), labels = function(x) pct(x)) +
+  labs(x = NULL, y = "share that are inherited-C sites") + th
+```
+
+Inherited-C sites are **`r pct(nIC_T / nT)` of tested sites but `r pct(nIC_E / nE)` of
+eSites** (`r nIC_E` of `r nE`), and the share rises with significance. Setting them
+aside leaves **`r E[inherited_C == FALSE, .N]` eSites** at the same q-values, or
+`r n_clean_q` after recomputing q without them.
+
+## What an untreated-C covariate does
+
+We tested one alternative to removal. The untreated C fraction of each cell line
+(standardised per site) was added to the model at the 204 eSites (q < 0.05), with
+the same 100 permutations. If a site's signal is inherited C, its p-value should
+weaken; otherwise it should not change.
+
+```{r cov, fig.width=6.5, fig.height=5}
+FLK[, group := fifelse(inherited_C, "inherited C", "no inherited C")]
+ggplot(FLK, aes(nlp_before, nlp_after, colour = group)) +
+  geom_abline(slope = 1, intercept = 0, colour = "grey70", linetype = 2) + geom_point(size = 2, alpha = 0.8) +
+  scale_colour_manual(values = c(`inherited C` = FLAG, `no inherited C` = OTHER), name = NULL) + coord_equal() +
+  labs(x = "-log10 p, scan model", y = "-log10 p, with untreated C as a covariate") + th
+s1 <- FLS[group == "inherited C"]; s0 <- FLS[group == "no inherited C"]
+```
+
+At inherited-C eSites the median -log10 p falls from `r s1$median_nlp_before` to
+`r s1$median_nlp_after`, and `r s1$remain_eSite` of `r s1$eSites` stay significant.
+At the other eSites it barely moves (`r s0$median_nlp_before` to `r s0$median_nlp_after`;
+`r s0$remain_eSite` of `r s0$eSites` stay). So part of the inherited-C signal is
+explained by inherited C, and part is not. In a genome-wide permutation check the
+covariate model had a heavier permuted tail than the scan model, almost all of it
+from 3 sites where the fit failed (in the MHC, the IGH locus and chr14:51.3 Mb).
+
+## Options
+
+```{r opts1}
+knitr::kable(data.table(
+  option = c("1. Remove all inherited-C sites", "2. Untreated C as a covariate", "3. Mask lines", "4. Mixture model", "5. Keep and flag"),
+  what = c("drop the 1,057 sites (a filtered phenotype already exists)",
+           "add each line's untreated C fraction to the model",
+           "set the phenotype missing for lines that show inherited C at the site",
+           "expected treated C = a_i + (1 - a_i) mu_i, a_i = line i's inherited fraction",
+           "run as now, report inherited-C sites separately"),
+  pro = c("simple and conservative", "keeps sites; tested: removes much of the artefact",
+          "removes the contaminated observations only", "models the read-out directly", "no information lost"),
+  con = c("loses any real pU-QTL at 9% of sites; depends on the flag thresholds",
+          "fit failures at a few sites; untreated depth < 10 in 14% of entries",
+          "lines with low untreated depth cannot be checked", "new model; not yet tested",
+          "most eSites stay artefact-prone")),
+  col.names = c("option", "what", "for", "against"))
+```
+
+**To decide:** which option is primary for the final scan (and which is a
+sensitivity analysis), and whether the flag thresholds (>= 10 untreated reads,
+>= 10% C, >= 2 C reads) are reasonable.
+
+# Question 2: one-line dominance and the MHC / immunoglobulin loci
+
+**The issue.** At some sites a **single cell line supplies most of the converted
+reads**. The beta-binomial null model then cannot describe the site, and any SNP
+whose genotype separates that line from the rest gives a small p-value, in real
+and in permuted data alike. Problem sites of this and other kinds concentrate in
+the **MHC** and the **immunoglobulin (IGH, IGK, IGL) loci**. Both regions are special in LCLs: the
+cell lines are clonal B cells, so the immunoglobulin loci are rearranged
+differently in each line; the MHC is highly polymorphic and maps poorly to the
+reference.
+
+## What it looks like
+
+```{r ex2, fig.width=11, fig.height=4.2}
+e2 <- EX[kind == "one line dominates"]
+e2[, `:=`(pu = fifelse(N > 0, C / N, NA_real_), dose = factor(round(dosage)))]
+top <- e2[which.max(C)]
+e2[, line := factor(cell_line, cell_line[order(-C)])]
+e2[, who := fifelse(cell_line == top$cell_line, "top cell line", "other cell lines")]
+cols <- c(`top cell line` = FLAG, `other cell lines` = OTHER)
+pa <- ggplot(e2, aes(line, C, fill = who)) + geom_col(width = 0.8) + scale_fill_manual(values = cols, name = NULL) +
+  labs(x = "cell lines, sorted", y = "converted reads (C)",
+       title = sprintf("%s of %s converted reads from %s", fmt(top$C), fmt(sum(e2$C)), top$cell_line)) +
+  th + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), legend.position = "none")
+pb <- ggplot(e2[N > 0], aes(dose, pu, colour = who)) + geom_jitter(aes(size = N), width = 0.15, height = 0, alpha = 0.85) +
+  scale_colour_manual(values = cols, guide = "none") + scale_size_area(max_size = 4, name = "treated reads") +
+  labs(x = sprintf("dosage of %s (counted allele)", e2$lead_snp[1]), y = "treated %pU",
+       title = sprintf("nominal p %.1g; strongest permuted p %.1g", e2$nominal_min_p[1], e2$min_perm_p[1])) + th
+gridExtra::grid.arrange(pa, pb, ncol = 2, widths = c(1, 1.15),
+  top = sprintf("%s (region: %s; top-line share %.2f)", e2$sid[1], e2$region[1], e2$top_line_share[1]))
+```
+
+At this site one cell line (orange) carries almost all the converted reads. In
+the real data that line shares its genotype with many others, so the site is not
+significant (nominal p `r sprintf("%.1g", e2$nominal_min_p[1])`). But a permutation
+that happens to place the line alone in a rare genotype group gives p =
+`r sprintf("%.1g", e2$min_perm_p[1])`. The permutation null of such a site is
+therefore far from what the beta-binomial assumes, and if the real genotype does
+set the line apart, the real p-value is just as extreme without reflecting a
+genetic effect on pseudouridylation.
+
+## Where the permutations go wrong
+
+For each site, the strongest p-value among its 100 permutations. Under the null,
+fewer than one site in the genome is expected beyond 1e-8 (dashed line).
+
+```{r perm, fig.width=8, fig.height=4.6}
+S[, regcol := fifelse(region == "other", "elsewhere", "MHC or immunoglobulin locus")]
+ggplot(S[is.finite(min_perm_p)][order(regcol == "elsewhere", decreasing = TRUE)],
+       aes(top_line_share, -log10(min_perm_p), colour = regcol)) +
+  geom_point(size = 1.1, alpha = 0.6) + geom_hline(yintercept = 8, linetype = 2, colour = "grey50") +
+  scale_colour_manual(values = c(`MHC or immunoglobulin locus` = FLAG, elsewhere = OTHER), name = NULL) +
+  labs(x = "share of the site's converted reads from its top cell line",
+       y = "-log10 (strongest permuted p)") + th
+x8 <- S[min_perm_p < 1e-8]
+```
+
+`r nrow(x8)` sites have a permuted p below 1e-8. Their median top-line share is
+`r sprintf("%.2f", median(x8$top_line_share))` (all sites: `r sprintf("%.2f", median(S$top_line_share, na.rm = TRUE))`),
+and `r x8[region != "other", .N]` of them are in the MHC or immunoglobulin loci.
+
+The same regions dominate the **far tail of the +/-2 Mb nominal scan**: sites
+whose strongest SNP lies more than 200 kb away with nothing strong nearby.
+
+```{r far}
+f <- FL[far == TRUE & local_signal == FALSE]
+knitr::kable(f[, .N, by = region][order(-N)], col.names = c("region", "sites"),
+  caption = sprintf("Sites with lead p < 1e-8 whose lead SNP is > 200 kb away and with no SNP p < 1e-4 within 100 kb (%d sites).", nrow(f)))
+```
+
+## How many eSites are affected
+
+```{r affected}
+knitr::kable(data.table(
+  eSites = c("all", "top-line share > 0.5", "in the MHC", "in an immunoglobulin locus", "either of the two above",
+             "  ... of which also inherited C"),
+  n = c(nE, E[top_line_share > 0.5, .N], E[region == "MHC", .N], E[region %in% c("IGH", "IGK", "IGL"), .N],
+        E[top_line_share > 0.5 | region != "other", .N], E[(top_line_share > 0.5 | region != "other") & inherited_C == TRUE, .N])),
+  col.names = c("eSites (5 kb, k = 3, q < 0.10)", "n"))
+ov <- E[(top_line_share > 0.5 | region != "other")]
+```
+
+Capping the top-line share would remove only `r E[top_line_share > 0.5, .N]` eSites,
+but it targets the sites that distort the permutations. The MHC holds
+`r E[region == "MHC", .N]` eSites, and `r ov[inherited_C == TRUE, .N]` of the `r nrow(ov)`
+flagged eSites are also inherited-C sites, so **the two questions overlap**.
+Inherited C is far more common in these loci: `r pct(S[region == "MHC", mean(inherited_C)])` of
+MHC sites and `r pct(S[region %in% c("IGH", "IGK", "IGL"), mean(inherited_C)])` of
+immunoglobulin-locus sites, against `r pct(S[region == "other", mean(inherited_C)])` elsewhere.
+
+## Options
+
+```{r opts2}
+knitr::kable(data.table(
+  option = c("1. Cap the top-line share", "2. Exclude the MHC and immunoglobulin loci", "3. Keep and flag"),
+  what = c("drop sites where one line supplies more than a set share of converted reads (e.g. 0.5)",
+           "drop sites in MHC chr6:28.5-33.5 Mb, IGH chr14:105.6-106.9 Mb, IGK chr2:88.9-90.2 Mb, IGL chr22:22.0-22.9 Mb (GRCh38)",
+           "run as now, report these sites separately"),
+  pro = c("computable for any site; targets the mechanism", "standard practice in many QTL studies", "no information lost"),
+  con = c("the threshold is arbitrary", "removes any real pU-QTLs there", "these sites distort the permutation tail and the window choice")),
+  col.names = c("option", "what", "for", "against"))
+```
+
+**To decide:** whether to apply option 1, option 2, or both, before the final
+scan; and for option 1, the share cut-off.
+
+# Data
+
+`sites.tsv`, `examples.tsv` and `farlead.tsv` in
+`qtl_betabinomial/stage1_open_questions/` (made by `61.stage1_open_questions_data.R`
+from the saved selection-scan, untreated-control and +/-2 Mb scan results);
+covariate test: `qtl_betabinomial/untreated_covariate/`. Related pages:
+[Stage 1 summary](stage1_phenotype_preparation.html),
+[phenotype data](qtl_mapping_betabinomial_data.html),
+[permutation check for each window and k](qtl_mapping_betabinomial_pc_window_permutation.html).

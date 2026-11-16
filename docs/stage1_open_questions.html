@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="XSun" />
+
+<meta name="date" content="2026-11-12" />
+
+<title>Stage 1: two open questions on the phenotype</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pumseq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/xsun1229/pumseq">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Stage 1: two open questions on the
+phenotype</h1>
+<h4 class="author">XSun</h4>
+<h4 class="date">2026-11-12</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-11-12
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pumseq/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260202code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260202code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260202)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee23ea81cb4ac812f5059dae1b4892ca01d5323fatargetblanke23ea81a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/xsun1229/pumseq/tree/e23ea81cb4ac812f5059dae1b4892ca01d5323fa" target="_blank">e23ea81</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee23ea81cb4ac812f5059dae1b4892ca01d5323fatargetblanke23ea81a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/xsun1229/pumseq/tree/e23ea81cb4ac812f5059dae1b4892ca01d5323fa" target="_blank">e23ea81</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/qtl_mapping_summary_cache/
+
+Untracked files:
+    Untracked:  analysis/stage1_open_questions.Rmd
+    Untracked:  analysis/stage1_phenotype_preparation.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>suppressMessages({ library(data.table); library(ggplot2) })
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+Q   &lt;- &quot;/project/xinhe/xsun/pumseq/pumseq_processed/psi_qtl/qtl_betabinomial&quot;
+D   &lt;- file.path(Q, &quot;stage1_open_questions&quot;)
+S   &lt;- fread(file.path(D, &quot;sites.tsv&quot;), colClasses = list(character = &quot;ref&quot;))
+EX  &lt;- fread(file.path(D, &quot;examples.tsv&quot;))
+FL  &lt;- fread(file.path(D, &quot;farlead.tsv&quot;), colClasses = list(character = &quot;ref&quot;))
+FLK &lt;- fread(file.path(Q, &quot;untreated_covariate/firstlook_w5kb_pc3_by_site.tsv&quot;))
+FLS &lt;- fread(file.path(Q, &quot;untreated_covariate/firstlook_w5kb_pc3_summary.tsv&quot;))
+SC  &lt;- fread(file.path(Q, &quot;pc_window_selection/fold5_union_auto_noUCcalled/summary/selection_no_inheritedC.tsv&quot;))
+n_clean_q &lt;- SC[window_kb == 5 &amp; npcs == 3, eSites_clean_q10]
+fmt &lt;- function(x) format(x, big.mark = &quot;,&quot;, trim = TRUE, scientific = FALSE)
+pct &lt;- function(x) sprintf(&quot;%.0f%%&quot;, 100 * x)
+th  &lt;- theme_classic(base_size = 12) + theme(strip.background = element_blank(), legend.position = &quot;bottom&quot;)
+FLAG &lt;- &quot;#eb6834&quot;; OTHER &lt;- &quot;#2a78d6&quot;; DOSE &lt;- c(`0` = &quot;#bcd7f5&quot;, `1` = &quot;#5b9be0&quot;, `2` = &quot;#1a4f8f&quot;)
+E  &lt;- S[eSite == TRUE]
+nE &lt;- nrow(E); nIC_E &lt;- E[inherited_C == TRUE, .N]; nT &lt;- nrow(S); nIC_T &lt;- S[inherited_C == TRUE, .N]</code></pre>
+<p>Both questions concern sites whose %pU may reflect something other
+than genetic regulation of pseudouridylation. Each needs a decision
+before the final QTL scan. Numbers are from the k x window selection
+scan at <strong>5 kb, k = 3</strong>, where <strong>eSites</strong> are
+sites with q &lt; 0.10 (249 eSites among 9,991 tested sites).</p>
+<div id="question-1-the-inherited-c-sites" class="section level1">
+<h1>Question 1: the inherited-C sites</h1>
+<p><strong>The issue.</strong> pU is read out as a T-to-C change at the
+pU base. If a cell line carries a C allele at that base in its genome,
+its reads show C whether or not the base is modified, and the site’s %pU
+tracks genotype. We already remove sites with a <strong>called</strong>
+U/C variant on the pU base (1,118 sites). The untreated controls (no
+chemistry, so any C is inherited) show that the problem is wider:
+<strong>1,057 of the remaining sites</strong> have a cell line with
+&gt;= 10% C at the pU base in untreated RNA (&gt;= 10 reads, &gt;= 2 C
+reads), but no called variant. These are presumably variants missing
+from the genotype calls.</p>
+<div id="what-it-looks-like" class="section level2">
+<h2>What it looks like</h2>
+<p>At an inherited-C site, the treated %pU of each cell line follows its
+untreated C fraction, and both follow a nearby SNP. At an unflagged
+eSite the untreated C stays near zero and the treated %pU varies on its
+own.</p>
+<pre class="r"><code>e1 &lt;- EX[kind %in% c(&quot;inherited C&quot;, &quot;no flag&quot;)]
+e1[, `:=`(treated = C / N, untreated = fifelse(uN &gt;= 10, uC / uN, NA_real_), dose = factor(round(dosage)))]
+e1[, panel := sprintf(&quot;%s\n%s (%s, q = %.1g)&quot;, sid, lead_snp, kind, q)]
+e1[, panel := factor(panel, unique(panel[order(kind != &quot;inherited C&quot;)]))]
+ggplot(e1[N &gt; 0 &amp; !is.na(untreated)], aes(untreated, treated, colour = dose)) +
+  geom_abline(slope = 1, intercept = 0, colour = &quot;grey70&quot;, linetype = 2) +
+  geom_point(aes(size = N), alpha = 0.85) + facet_wrap(~ panel, nrow = 1) +
+  scale_colour_manual(values = DOSE, name = &quot;lead-SNP dosage (counted allele)&quot;, na.value = &quot;grey60&quot;) +
+  scale_size_area(max_size = 4, name = &quot;treated reads&quot;) +
+  labs(x = &quot;untreated C fraction at the pU base&quot;, y = &quot;treated %pU&quot;) + th</code></pre>
+<p><img src="figure/stage1_open_questions.Rmd/ex1-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>Each point is a cell line with &gt;= 10 untreated reads. Dashed line:
+treated = untreated.</p>
+</div>
+<div id="how-much-of-the-signal-it-carries" class="section level2">
+<h2>How much of the signal it carries</h2>
+<pre class="r"><code>setorder(E, perm_p); E[, rank := .I]
+grp &lt;- function(r) cut(r, c(0, 20, 50, 100, Inf), labels = c(&quot;top 20&quot;, &quot;21-50&quot;, &quot;51-100&quot;, sprintf(&quot;101-%d&quot;, nE)))
+sh &lt;- rbind(data.table(set = &quot;all tested sites&quot;, n = nT, share = nIC_T / nT),
+            E[, .(n = .N, share = mean(inherited_C)), by = .(set = paste(&quot;eSites&quot;, grp(rank)))])
+sh[, set := factor(set, set)]
+ggplot(sh, aes(set, share)) + geom_col(fill = FLAG, width = 0.65) +
+  geom_text(aes(label = sprintf(&quot;%s\n(n = %d)&quot;, pct(share), n)), vjust = -0.25, size = 3.4) +
+  scale_y_continuous(limits = c(0, 1.12), breaks = seq(0, 1, 0.25), labels = function(x) pct(x)) +
+  labs(x = NULL, y = &quot;share that are inherited-C sites&quot;) + th</code></pre>
+<p><img src="figure/stage1_open_questions.Rmd/share-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Inherited-C sites are <strong>9% of tested sites but 57% of
+eSites</strong> (143 of 249), and the share rises with significance.
+Setting them aside leaves <strong>106 eSites</strong> at the same
+q-values, or 79 after recomputing q without them.</p>
+</div>
+<div id="what-an-untreated-c-covariate-does" class="section level2">
+<h2>What an untreated-C covariate does</h2>
+<p>We tested one alternative to removal. The untreated C fraction of
+each cell line (standardised per site) was added to the model at the 204
+eSites (q &lt; 0.05), with the same 100 permutations. If a site’s signal
+is inherited C, its p-value should weaken; otherwise it should not
+change.</p>
+<pre class="r"><code>FLK[, group := fifelse(inherited_C, &quot;inherited C&quot;, &quot;no inherited C&quot;)]
+ggplot(FLK, aes(nlp_before, nlp_after, colour = group)) +
+  geom_abline(slope = 1, intercept = 0, colour = &quot;grey70&quot;, linetype = 2) + geom_point(size = 2, alpha = 0.8) +
+  scale_colour_manual(values = c(`inherited C` = FLAG, `no inherited C` = OTHER), name = NULL) + coord_equal() +
+  labs(x = &quot;-log10 p, scan model&quot;, y = &quot;-log10 p, with untreated C as a covariate&quot;) + th</code></pre>
+<p><img src="figure/stage1_open_questions.Rmd/cov-1.png" width="624" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>s1 &lt;- FLS[group == &quot;inherited C&quot;]; s0 &lt;- FLS[group == &quot;no inherited C&quot;]</code></pre>
+<p>At inherited-C eSites the median -log10 p falls from 9.93 to 5.61,
+and 58 of 121 stay significant. At the other eSites it barely moves
+(6.98 to 6.83; 74 of 83 stay). So part of the inherited-C signal is
+explained by inherited C, and part is not. In a genome-wide permutation
+check the covariate model had a heavier permuted tail than the scan
+model, almost all of it from 3 sites where the fit failed (in the MHC,
+the IGH locus and chr14:51.3 Mb).</p>
+</div>
+<div id="options" class="section level2">
+<h2>Options</h2>
+<pre class="r"><code>knitr::kable(data.table(
+  option = c(&quot;1. Remove all inherited-C sites&quot;, &quot;2. Untreated C as a covariate&quot;, &quot;3. Mask lines&quot;, &quot;4. Mixture model&quot;, &quot;5. Keep and flag&quot;),
+  what = c(&quot;drop the 1,057 sites (a filtered phenotype already exists)&quot;,
+           &quot;add each line&#39;s untreated C fraction to the model&quot;,
+           &quot;set the phenotype missing for lines that show inherited C at the site&quot;,
+           &quot;expected treated C = a_i + (1 - a_i) mu_i, a_i = line i&#39;s inherited fraction&quot;,
+           &quot;run as now, report inherited-C sites separately&quot;),
+  pro = c(&quot;simple and conservative&quot;, &quot;keeps sites; tested: removes much of the artefact&quot;,
+          &quot;removes the contaminated observations only&quot;, &quot;models the read-out directly&quot;, &quot;no information lost&quot;),
+  con = c(&quot;loses any real pU-QTL at 9% of sites; depends on the flag thresholds&quot;,
+          &quot;fit failures at a few sites; untreated depth &lt; 10 in 14% of entries&quot;,
+          &quot;lines with low untreated depth cannot be checked&quot;, &quot;new model; not yet tested&quot;,
+          &quot;most eSites stay artefact-prone&quot;)),
+  col.names = c(&quot;option&quot;, &quot;what&quot;, &quot;for&quot;, &quot;against&quot;))</code></pre>
+<table>
+<colgroup>
+<col width="14%" />
+<col width="33%" />
+<col width="21%" />
+<col width="30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">option</th>
+<th align="left">what</th>
+<th align="left">for</th>
+<th align="left">against</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">1. Remove all inherited-C sites</td>
+<td align="left">drop the 1,057 sites (a filtered phenotype already
+exists)</td>
+<td align="left">simple and conservative</td>
+<td align="left">loses any real pU-QTL at 9% of sites; depends on the
+flag thresholds</td>
+</tr>
+<tr class="even">
+<td align="left">2. Untreated C as a covariate</td>
+<td align="left">add each line’s untreated C fraction to the model</td>
+<td align="left">keeps sites; tested: removes much of the artefact</td>
+<td align="left">fit failures at a few sites; untreated depth &lt; 10 in
+14% of entries</td>
+</tr>
+<tr class="odd">
+<td align="left">3. Mask lines</td>
+<td align="left">set the phenotype missing for lines that show inherited
+C at the site</td>
+<td align="left">removes the contaminated observations only</td>
+<td align="left">lines with low untreated depth cannot be checked</td>
+</tr>
+<tr class="even">
+<td align="left">4. Mixture model</td>
+<td align="left">expected treated C = a_i + (1 - a_i) mu_i, a_i = line
+i’s inherited fraction</td>
+<td align="left">models the read-out directly</td>
+<td align="left">new model; not yet tested</td>
+</tr>
+<tr class="odd">
+<td align="left">5. Keep and flag</td>
+<td align="left">run as now, report inherited-C sites separately</td>
+<td align="left">no information lost</td>
+<td align="left">most eSites stay artefact-prone</td>
+</tr>
+</tbody>
+</table>
+<p><strong>To decide:</strong> which option is primary for the final
+scan (and which is a sensitivity analysis), and whether the flag
+thresholds (&gt;= 10 untreated reads, &gt;= 10% C, &gt;= 2 C reads) are
+reasonable.</p>
+</div>
+</div>
+<div id="question-2-one-line-dominance-and-the-mhc-immunoglobulin-loci"
+class="section level1">
+<h1>Question 2: one-line dominance and the MHC / immunoglobulin
+loci</h1>
+<p><strong>The issue.</strong> At some sites a <strong>single cell line
+supplies most of the converted reads</strong>. The beta-binomial null
+model then cannot describe the site, and any SNP whose genotype
+separates that line from the rest gives a small p-value, in real and in
+permuted data alike. Problem sites of this and other kinds concentrate
+in the <strong>MHC</strong> and the <strong>immunoglobulin (IGH, IGK,
+IGL) loci</strong>. Both regions are special in LCLs: the cell lines are
+clonal B cells, so the immunoglobulin loci are rearranged differently in
+each line; the MHC is highly polymorphic and maps poorly to the
+reference.</p>
+<div id="what-it-looks-like-1" class="section level2">
+<h2>What it looks like</h2>
+<pre class="r"><code>e2 &lt;- EX[kind == &quot;one line dominates&quot;]
+e2[, `:=`(pu = fifelse(N &gt; 0, C / N, NA_real_), dose = factor(round(dosage)))]
+top &lt;- e2[which.max(C)]
+e2[, line := factor(cell_line, cell_line[order(-C)])]
+e2[, who := fifelse(cell_line == top$cell_line, &quot;top cell line&quot;, &quot;other cell lines&quot;)]
+cols &lt;- c(`top cell line` = FLAG, `other cell lines` = OTHER)
+pa &lt;- ggplot(e2, aes(line, C, fill = who)) + geom_col(width = 0.8) + scale_fill_manual(values = cols, name = NULL) +
+  labs(x = &quot;cell lines, sorted&quot;, y = &quot;converted reads (C)&quot;,
+       title = sprintf(&quot;%s of %s converted reads from %s&quot;, fmt(top$C), fmt(sum(e2$C)), top$cell_line)) +
+  th + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), legend.position = &quot;none&quot;)
+pb &lt;- ggplot(e2[N &gt; 0], aes(dose, pu, colour = who)) + geom_jitter(aes(size = N), width = 0.15, height = 0, alpha = 0.85) +
+  scale_colour_manual(values = cols, guide = &quot;none&quot;) + scale_size_area(max_size = 4, name = &quot;treated reads&quot;) +
+  labs(x = sprintf(&quot;dosage of %s (counted allele)&quot;, e2$lead_snp[1]), y = &quot;treated %pU&quot;,
+       title = sprintf(&quot;nominal p %.1g; strongest permuted p %.1g&quot;, e2$nominal_min_p[1], e2$min_perm_p[1])) + th
+gridExtra::grid.arrange(pa, pb, ncol = 2, widths = c(1, 1.15),
+  top = sprintf(&quot;%s (region: %s; top-line share %.2f)&quot;, e2$sid[1], e2$region[1], e2$top_line_share[1]))</code></pre>
+<p><img src="figure/stage1_open_questions.Rmd/ex2-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>At this site one cell line (orange) carries almost all the converted
+reads. In the real data that line shares its genotype with many others,
+so the site is not significant (nominal p 0.5). But a permutation that
+happens to place the line alone in a rare genotype group gives p =
+4e-12. The permutation null of such a site is therefore far from what
+the beta-binomial assumes, and if the real genotype does set the line
+apart, the real p-value is just as extreme without reflecting a genetic
+effect on pseudouridylation.</p>
+</div>
+<div id="where-the-permutations-go-wrong" class="section level2">
+<h2>Where the permutations go wrong</h2>
+<p>For each site, the strongest p-value among its 100 permutations.
+Under the null, fewer than one site in the genome is expected beyond
+1e-8 (dashed line).</p>
+<pre class="r"><code>S[, regcol := fifelse(region == &quot;other&quot;, &quot;elsewhere&quot;, &quot;MHC or immunoglobulin locus&quot;)]
+ggplot(S[is.finite(min_perm_p)][order(regcol == &quot;elsewhere&quot;, decreasing = TRUE)],
+       aes(top_line_share, -log10(min_perm_p), colour = regcol)) +
+  geom_point(size = 1.1, alpha = 0.6) + geom_hline(yintercept = 8, linetype = 2, colour = &quot;grey50&quot;) +
+  scale_colour_manual(values = c(`MHC or immunoglobulin locus` = FLAG, elsewhere = OTHER), name = NULL) +
+  labs(x = &quot;share of the site&#39;s converted reads from its top cell line&quot;,
+       y = &quot;-log10 (strongest permuted p)&quot;) + th</code></pre>
+<p><img src="figure/stage1_open_questions.Rmd/perm-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>x8 &lt;- S[min_perm_p &lt; 1e-8]</code></pre>
+<p>44 sites have a permuted p below 1e-8. Their median top-line share is
+0.88 (all sites: 0.13), and 29 of them are in the MHC or immunoglobulin
+loci.</p>
+<p>The same regions dominate the <strong>far tail of the +/-2 Mb nominal
+scan</strong>: sites whose strongest SNP lies more than 200 kb away with
+nothing strong nearby.</p>
+<pre class="r"><code>f &lt;- FL[far == TRUE &amp; local_signal == FALSE]
+knitr::kable(f[, .N, by = region][order(-N)], col.names = c(&quot;region&quot;, &quot;sites&quot;),
+  caption = sprintf(&quot;Sites with lead p &lt; 1e-8 whose lead SNP is &gt; 200 kb away and with no SNP p &lt; 1e-4 within 100 kb (%d sites).&quot;, nrow(f)))</code></pre>
+<table>
+<caption>Sites with lead p &lt; 1e-8 whose lead SNP is &gt; 200 kb away
+and with no SNP p &lt; 1e-4 within 100 kb (28 sites).</caption>
+<thead>
+<tr class="header">
+<th align="left">region</th>
+<th align="right">sites</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">MHC</td>
+<td align="right">10</td>
+</tr>
+<tr class="even">
+<td align="left">other</td>
+<td align="right">9</td>
+</tr>
+<tr class="odd">
+<td align="left">IGK</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="left">IGH</td>
+<td align="right">3</td>
+</tr>
+<tr class="odd">
+<td align="left">IGL</td>
+<td align="right">2</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="how-many-esites-are-affected" class="section level2">
+<h2>How many eSites are affected</h2>
+<pre class="r"><code>knitr::kable(data.table(
+  eSites = c(&quot;all&quot;, &quot;top-line share &gt; 0.5&quot;, &quot;in the MHC&quot;, &quot;in an immunoglobulin locus&quot;, &quot;either of the two above&quot;,
+             &quot;  ... of which also inherited C&quot;),
+  n = c(nE, E[top_line_share &gt; 0.5, .N], E[region == &quot;MHC&quot;, .N], E[region %in% c(&quot;IGH&quot;, &quot;IGK&quot;, &quot;IGL&quot;), .N],
+        E[top_line_share &gt; 0.5 | region != &quot;other&quot;, .N], E[(top_line_share &gt; 0.5 | region != &quot;other&quot;) &amp; inherited_C == TRUE, .N])),
+  col.names = c(&quot;eSites (5 kb, k = 3, q &lt; 0.10)&quot;, &quot;n&quot;))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">eSites (5 kb, k = 3, q &lt; 0.10)</th>
+<th align="right">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">all</td>
+<td align="right">249</td>
+</tr>
+<tr class="even">
+<td align="left">top-line share &gt; 0.5</td>
+<td align="right">8</td>
+</tr>
+<tr class="odd">
+<td align="left">in the MHC</td>
+<td align="right">61</td>
+</tr>
+<tr class="even">
+<td align="left">in an immunoglobulin locus</td>
+<td align="right">7</td>
+</tr>
+<tr class="odd">
+<td align="left">either of the two above</td>
+<td align="right">72</td>
+</tr>
+<tr class="even">
+<td align="left">… of which also inherited C</td>
+<td align="right">55</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>ov &lt;- E[(top_line_share &gt; 0.5 | region != &quot;other&quot;)]</code></pre>
+<p>Capping the top-line share would remove only 8 eSites, but it targets
+the sites that distort the permutations. The MHC holds 61 eSites, and 55
+of the 72 flagged eSites are also inherited-C sites, so <strong>the two
+questions overlap</strong>. Inherited C is far more common in these
+loci: 36% of MHC sites and 54% of immunoglobulin-locus sites, against 7%
+elsewhere.</p>
+</div>
+<div id="options-1" class="section level2">
+<h2>Options</h2>
+<pre class="r"><code>knitr::kable(data.table(
+  option = c(&quot;1. Cap the top-line share&quot;, &quot;2. Exclude the MHC and immunoglobulin loci&quot;, &quot;3. Keep and flag&quot;),
+  what = c(&quot;drop sites where one line supplies more than a set share of converted reads (e.g. 0.5)&quot;,
+           &quot;drop sites in MHC chr6:28.5-33.5 Mb, IGH chr14:105.6-106.9 Mb, IGK chr2:88.9-90.2 Mb, IGL chr22:22.0-22.9 Mb (GRCh38)&quot;,
+           &quot;run as now, report these sites separately&quot;),
+  pro = c(&quot;computable for any site; targets the mechanism&quot;, &quot;standard practice in many QTL studies&quot;, &quot;no information lost&quot;),
+  con = c(&quot;the threshold is arbitrary&quot;, &quot;removes any real pU-QTLs there&quot;, &quot;these sites distort the permutation tail and the window choice&quot;)),
+  col.names = c(&quot;option&quot;, &quot;what&quot;, &quot;for&quot;, &quot;against&quot;))</code></pre>
+<table style="width:100%;">
+<colgroup>
+<col width="15%" />
+<col width="43%" />
+<col width="17%" />
+<col width="23%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">option</th>
+<th align="left">what</th>
+<th align="left">for</th>
+<th align="left">against</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">1. Cap the top-line share</td>
+<td align="left">drop sites where one line supplies more than a set
+share of converted reads (e.g. 0.5)</td>
+<td align="left">computable for any site; targets the mechanism</td>
+<td align="left">the threshold is arbitrary</td>
+</tr>
+<tr class="even">
+<td align="left">2. Exclude the MHC and immunoglobulin loci</td>
+<td align="left">drop sites in MHC chr6:28.5-33.5 Mb, IGH
+chr14:105.6-106.9 Mb, IGK chr2:88.9-90.2 Mb, IGL chr22:22.0-22.9 Mb
+(GRCh38)</td>
+<td align="left">standard practice in many QTL studies</td>
+<td align="left">removes any real pU-QTLs there</td>
+</tr>
+<tr class="odd">
+<td align="left">3. Keep and flag</td>
+<td align="left">run as now, report these sites separately</td>
+<td align="left">no information lost</td>
+<td align="left">these sites distort the permutation tail and the window
+choice</td>
+</tr>
+</tbody>
+</table>
+<p><strong>To decide:</strong> whether to apply option 1, option 2, or
+both, before the final scan; and for option 1, the share cut-off.</p>
+</div>
+</div>
+<div id="data" class="section level1">
+<h1>Data</h1>
+<p><code>sites.tsv</code>, <code>examples.tsv</code> and
+<code>farlead.tsv</code> in
+<code>qtl_betabinomial/stage1_open_questions/</code> (made by
+<code>61.stage1_open_questions_data.R</code> from the saved
+selection-scan, untreated-control and +/-2 Mb scan results); covariate
+test: <code>qtl_betabinomial/untreated_covariate/</code>. Related pages:
+<a href="stage1_phenotype_preparation.html">Stage 1 summary</a>, <a
+href="qtl_mapping_betabinomial_data.html">phenotype data</a>, <a
+href="qtl_mapping_betabinomial_pc_window_permutation.html">permutation
+check for each window and k</a>.</p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.0 (2022-04-22)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 7 (Core)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.3.13-el7-x86_64/lib/libopenblas_haswellp-r0.3.13.so
+
+locale:
+[1] C
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_4.0.3     data.table_1.14.2
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.12        highr_0.9          RColorBrewer_1.1-3 pillar_1.9.0      
+ [5] compiler_4.2.0     bslib_0.3.1        later_1.3.0        jquerylib_0.1.4   
+ [9] git2r_0.30.1       workflowr_1.7.0    tools_4.2.0        digest_0.6.29     
+[13] gtable_0.3.6       jsonlite_1.8.0     evaluate_0.15      lifecycle_1.0.4   
+[17] tibble_3.2.1       pkgconfig_2.0.3    rlang_1.1.2        cli_3.6.1         
+[21] rstudioapi_0.13    yaml_2.3.5         xfun_0.41          fastmap_1.1.0     
+[25] gridExtra_2.3      withr_2.5.0        dplyr_1.1.4        stringr_1.5.1     
+[29] knitr_1.39         generics_0.1.4     fs_1.5.2           vctrs_0.6.5       
+[33] sass_0.4.1         tidyselect_1.2.0   rprojroot_2.0.3    grid_4.2.0        
+[37] glue_1.6.2         R6_2.5.1           fansi_1.0.3        rmarkdown_2.25    
+[41] farver_2.1.0       magrittr_2.0.3     scales_1.4.0       promises_1.2.0.1  
+[45] htmltools_0.5.2    dichromat_2.0-0.1  httpuv_1.6.5       labeling_0.4.2    
+[49] S7_0.2.0           utf8_1.2.2         stringi_1.7.6     </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
