@@ -102,13 +102,13 @@ stopifnot(all(bk$npcs %in% c(0, 1)))   # the text below says k = 0 or 1 gives th
 `r e(1, 50)` at 50 kb against `r e(3, 50)`. Phenotype PCs therefore do not increase
 power here.
 
-k = 0 is tested on fewer sites than the other settings (`r fmt(ts[["0"]])` against
-`r fmt(ts[["1"]])` at k = 1, at 5 kb). With no PCs the null model is intercept-only,
-and at about a thousand shallow sites its dispersion estimate runs to the boundary
-(no overdispersion); the optimiser then stops at its iteration limit and the fit is
-discarded, although the best fit is simply the binomial one. Before switching, the
-calibration of k = 0 and 1 is being checked (1 real + 5 genome-wide permutations, as
-for k = 3).
+<!-- k = 0 is tested on fewer sites than the other settings (`r fmt(ts[["0"]])` against -->
+<!-- `r fmt(ts[["1"]])` at k = 1, at 5 kb). With no PCs the null model is intercept-only, -->
+<!-- and at about a thousand shallow sites its dispersion estimate runs to the boundary -->
+<!-- (no overdispersion); the optimiser then stops at its iteration limit and the fit is -->
+<!-- discarded, although the best fit is simply the binomial one. Before switching, the -->
+<!-- calibration of k = 0 and 1 is being checked (1 real + 5 genome-wide permutations, as -->
+<!-- for k = 3). -->
 
 ```{r kplot, fig.width=8, fig.height=4.2}
 pd <- ST[, .(k = factor(npcs), window_kb, eSites = disc_q10)]
