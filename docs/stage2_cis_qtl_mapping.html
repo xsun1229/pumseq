@@ -536,15 +536,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree287146daf6d16a7e8db26ba34e887c5f53431a74targetblank287146da">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree50ffa83abe7c625702631339959308199d3dfbf9targetblank50ffa83a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/287146daf6d16a7e8db26ba34e887c5f53431a74" target="_blank">287146d</a>
+<a href="https://github.com/xsun1229/pumseq/tree/50ffa83abe7c625702631339959308199d3dfbf9" target="_blank">50ffa83</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree287146daf6d16a7e8db26ba34e887c5f53431a74targetblank287146da"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree50ffa83abe7c625702631339959308199d3dfbf9targetblank50ffa83a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -554,7 +554,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/287146daf6d16a7e8db26ba34e887c5f53431a74" target="_blank">287146d</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/50ffa83abe7c625702631339959308199d3dfbf9" target="_blank">50ffa83</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -619,6 +619,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/50ffa83abe7c625702631339959308199d3dfbf9/analysis/stage2_cis_qtl_mapping.Rmd" target="_blank">50ffa83</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-11-18
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/50ffa83abe7c625702631339959308199d3dfbf9/docs/stage2_cis_qtl_mapping.html" target="_blank">50ffa83</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-11-18
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -798,6 +832,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/xsun1229/pumseq/blob/50ffa83abe7c625702631339959308199d3dfbf9/docs/figure/stage2_cis_qtl_mapping.Rmd/ktable-1.png" target="_blank">50ffa83</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-11-18
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/xsun1229/pumseq/blob/287146daf6d16a7e8db26ba34e887c5f53431a74/docs/figure/stage2_cis_qtl_mapping.Rmd/ktable-1.png" target="_blank">287146d</a>
 </td>
 <td>
@@ -815,74 +860,21 @@ XSun
 each window is in bold. k = 0, 1, 3 and 5 come from one run over all
 five windows, and k = 7, 10, 15 from the first run (5-50 kb); the two
 runs agree exactly where they overlap.</p>
-<pre class="r"><code>cs &lt;- sn[npcs %in% c(0, 1, 3, 5)]
-ts &lt;- cs[window_kb == min(ws), setNames(tested_sites, npcs)]
-tc2 &lt;- dcast(cs[, .(k = npcs, w = factor(paste0(window_kb, &quot; kb&quot;), paste0(ws, &quot; kb&quot;)),
-                    v = sprintf(&quot;%d (%d)&quot;, disc_q10_common, disc_q05_common))], k ~ w, value.var = &quot;v&quot;)
-bc &lt;- cs[, .SD[which.max(disc_q10_common)], by = window_kb]
-stopifnot(all(bc$npcs %in% c(0, 1)))   # the text below says k = 0 or 1 leads at every window on the common sites
-cc &lt;- function(k, w) cs[npcs == k &amp; window_kb == w, disc_q10_common]
-knitr::kable(tc2, caption = sprintf(&quot;eSites on the %s sites tested at every k and window: q &lt; 0.10 (q &lt; 0.05).&quot;, fmt(unique(cs$common_sites))))</code></pre>
-<table>
-<caption>eSites on the 8,366 sites tested at every k and window: q &lt;
-0.10 (q &lt; 0.05).</caption>
-<thead>
-<tr class="header">
-<th align="right">k</th>
-<th align="left">5 kb</th>
-<th align="left">20 kb</th>
-<th align="left">50 kb</th>
-<th align="left">100 kb</th>
-<th align="left">200 kb</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="right">0</td>
-<td align="left">275 (234)</td>
-<td align="left">268 (223)</td>
-<td align="left">268 (222)</td>
-<td align="left">234 (193)</td>
-<td align="left">215 (190)</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="left">282 (239)</td>
-<td align="left">288 (229)</td>
-<td align="left">267 (212)</td>
-<td align="left">219 (184)</td>
-<td align="left">211 (178)</td>
-</tr>
-<tr class="odd">
-<td align="right">3</td>
-<td align="left">264 (211)</td>
-<td align="left">250 (194)</td>
-<td align="left">204 (177)</td>
-<td align="left">197 (164)</td>
-<td align="left">179 (164)</td>
-</tr>
-<tr class="even">
-<td align="right">5</td>
-<td align="left">234 (201)</td>
-<td align="left">205 (173)</td>
-<td align="left">175 (159)</td>
-<td align="left">170 (147)</td>
-<td align="left">156 (136)</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Fewer PCs give more eSites.</strong> k = 0 is tested on fewer
-sites than the other settings (9,071 against 10,086 at k = 1, at 5 kb).
-With no PCs the null model is intercept-only, and at about a thousand
-shallow sites its dispersion estimate runs to the boundary (no
-overdispersion); the optimiser then stops at its iteration limit and the
-fit is discarded, although the best fit is simply the binomial one. The
-fair comparison therefore uses the sites tested in every setting (table
-above): <strong>k = 0 and k = 1 lead at every window</strong>, with 275
-and 282 eSites at 5 kb against 264 at k = 3, and 268 and 267 at 50 kb
-against 204. Phenotype PCs therefore do not increase power here. Before
-switching, the calibration of k = 0 and 1 is being checked (1 real + 5
-genome-wide permutations, as for k = 3).</p>
+<pre class="r"><code>ts &lt;- sn[window_kb == min(ws), setNames(tested_sites, npcs)]
+bk &lt;- ST[, .SD[which.max(disc_q10)], by = window_kb]
+stopifnot(all(bk$npcs %in% c(0, 1)))   # the text below says k = 0 or 1 gives the most eSites at every window</code></pre>
+<p><strong>Fewer PCs give more eSites.</strong> k = 0 or k = 1 gives the
+most eSites at every window: 280 and 272 at 5 kb against 249 at k = 3,
+and 272 and 250 at 50 kb against 200. Phenotype PCs therefore do not
+increase power here.</p>
+<p>k = 0 is tested on fewer sites than the other settings (9,071 against
+10,086 at k = 1, at 5 kb). With no PCs the null model is intercept-only,
+and at about a thousand shallow sites its dispersion estimate runs to
+the boundary (no overdispersion); the optimiser then stops at its
+iteration limit and the fit is discarded, although the best fit is
+simply the binomial one. Before switching, the calibration of k = 0 and
+1 is being checked (1 real + 5 genome-wide permutations, as for k =
+3).</p>
 <pre class="r"><code>pd &lt;- ST[, .(k = factor(npcs), window_kb, eSites = disc_q10)]
 ggplot(pd, aes(window_kb, eSites, colour = k)) + geom_line(linewidth = 0.8) + geom_point(size = 2.4) +
   scale_x_log10(breaks = ws) +
@@ -912,6 +904,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/50ffa83abe7c625702631339959308199d3dfbf9/docs/figure/stage2_cis_qtl_mapping.Rmd/kplot-1.png" target="_blank">50ffa83</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-11-18
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/287146daf6d16a7e8db26ba34e887c5f53431a74/docs/figure/stage2_cis_qtl_mapping.Rmd/kplot-1.png" target="_blank">287146d</a>
@@ -971,6 +974,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/50ffa83abe7c625702631339959308199d3dfbf9/docs/figure/stage2_cis_qtl_mapping.Rmd/fig1c-1.png" target="_blank">50ffa83</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-11-18
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/xsun1229/pumseq/blob/287146daf6d16a7e8db26ba34e887c5f53431a74/docs/figure/stage2_cis_qtl_mapping.Rmd/fig1c-1.png" target="_blank">287146d</a>
