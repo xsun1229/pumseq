@@ -11,11 +11,11 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-11-16" />
+<meta name="date" content="2026-11-18" />
 
 <title>Stage 2: cis-QTL mapping</title>
 
-<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
@@ -31,15 +31,15 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
-<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
-<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
 
 <link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
 <!-- Add a small amount of space between sections. -->
@@ -373,7 +373,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Stage 2: cis-QTL mapping</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-11-16</h4>
+<h4 class="date">2026-11-18</h4>
 
 </div>
 
@@ -402,7 +402,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-11-16
+<strong>Last updated:</strong> 2026-11-18
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -440,10 +440,10 @@ changes </a>
 <div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown is untracked by Git. To know which version of the R
-Markdown file created these results, you’ll want to first commit it to
-the Git repo. If you’re still working on the analysis, you can ignore
-this warning. When you’re finished, you can run
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
 <code>wflow_publish</code> to commit the R Markdown file and build the
 HTML.</p>
 </div>
@@ -536,15 +536,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee23ea81cb4ac812f5059dae1b4892ca01d5323fatargetblanke23ea81a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree287146daf6d16a7e8db26ba34e887c5f53431a74targetblank287146da">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/e23ea81cb4ac812f5059dae1b4892ca01d5323fa" target="_blank">e23ea81</a>
+<a href="https://github.com/xsun1229/pumseq/tree/287146daf6d16a7e8db26ba34e887c5f53431a74" target="_blank">287146d</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreee23ea81cb4ac812f5059dae1b4892ca01d5323fatargetblanke23ea81a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree287146daf6d16a7e8db26ba34e887c5f53431a74targetblank287146da"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -554,7 +554,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/e23ea81cb4ac812f5059dae1b4892ca01d5323fa" target="_blank">e23ea81</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/287146daf6d16a7e8db26ba34e887c5f53431a74" target="_blank">287146d</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -571,10 +571,8 @@ were generated:
 Ignored files:
     Ignored:    analysis/qtl_mapping_summary_cache/
 
-Untracked files:
-    Untracked:  analysis/stage1_open_questions.Rmd
-    Untracked:  analysis/stage1_phenotype_preparation.Rmd
-    Untracked:  analysis/stage2_cis_qtl_mapping.Rmd
+Unstaged changes:
+    Modified:   analysis/stage2_cis_qtl_mapping.Rmd
 
 </code></pre>
 <p>
@@ -589,10 +587,75 @@ have uncommitted changes.
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
+
 <p>
-There are no past versions. Publish this analysis with
-<code>wflow_publish()</code> to start tracking its development.
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>analysis/stage2_cis_qtl_mapping.Rmd</code>) and HTML
+(<code>docs/stage2_cis_qtl_mapping.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
 </p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/287146daf6d16a7e8db26ba34e887c5f53431a74/analysis/stage2_cis_qtl_mapping.Rmd" target="_blank">287146d</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-11-16
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/287146daf6d16a7e8db26ba34e887c5f53431a74/docs/stage2_cis_qtl_mapping.html" target="_blank">287146d</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-11-16
+</td>
+<td>
+update
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <hr>
 </div>
 </div>
@@ -627,16 +690,16 @@ cis-QTL (eSites)</strong>, following the approach of the m6A-QTL study
   item = c(&quot;test&quot;, &quot;fitter&quot;, &quot;covariates&quot;, &quot;genotypes&quot;, &quot;site significance&quot;, &quot;FDR&quot;, &quot;status&quot;),
   value = c(&quot;beta-binomial likelihood-ratio test per SNP-site pair: logit(mean) = intercept + k PCs (+ genotype)&quot;,
             &quot;maximum likelihood with three starting values of the overdispersion (a single start sometimes stopped at a false optimum)&quot;,
-            &quot;k phenotype PCs; k = 3 chosen below&quot;,
+            &quot;k phenotype PCs; k under review (section 2)&quot;,
             &quot;8.54 M biallelic SNPs with MAF &gt;= 0.05; duplicated variant IDs (hg19 -&gt; hg38 liftover collisions) removed&quot;,
             &quot;per-site permutations of phenotype and covariates together across cell lines; beta approximation; Storey q-values&quot;,
             &quot;10%, as in the paper&quot;,
-            &quot;k decided (3); cis window pending; final scan (about 1,000 permutations) not yet run&quot;)),
+            &quot;k under review (0-1 PCs give more eSites; calibration at k = 0/1 being checked); cis window pending; final scan (about 1,000 permutations) not yet run&quot;)),
   col.names = c(&quot;&quot;, &quot;&quot;))</code></pre>
 <table>
 <colgroup>
-<col width="12%" />
-<col width="87%" />
+<col width="10%" />
+<col width="89%" />
 </colgroup>
 <tbody>
 <tr class="odd">
@@ -652,7 +715,7 @@ optimum)</td>
 </tr>
 <tr class="odd">
 <td align="left">covariates</td>
-<td align="left">k phenotype PCs; k = 3 chosen below</td>
+<td align="left">k phenotype PCs; k under review (section 2)</td>
 </tr>
 <tr class="even">
 <td align="left">genotypes</td>
@@ -670,8 +733,9 @@ together across cell lines; beta approximation; Storey q-values</td>
 </tr>
 <tr class="odd">
 <td align="left">status</td>
-<td align="left">k decided (3); cis window pending; final scan (about
-1,000 permutations) not yet run</td>
+<td align="left">k under review (0-1 PCs give more eSites; calibration
+at k = 0/1 being checked); cis window pending; final scan (about 1,000
+permutations) not yet run</td>
 </tr>
 </tbody>
 </table>
@@ -686,17 +750,16 @@ number of SNPs tested. Storey q-values across sites give the eSites (q
 &lt; 0.10). The scans below use 100 permutations per site; the final
 scan will use more.</p>
 <p>At k = 3 the permutations are well calibrated in bulk
-(genomic-control lambda of permuted data 1.01-1.07). QQ plots for every
-configuration: <a
+(genomic-control lambda of permuted data 1.01-1.07); the same check at k
+= 0 and 1 is running. QQ plots for every configuration: <a
 href="qtl_mapping_betabinomial_pc_window_permutation.html">permutation
 check page</a>.</p>
 </div>
 <div id="choosing-k" class="section level1">
 <h1>2. Choosing k</h1>
-<p>The scan was run for k = 3, 5, 7, 10 and 15 phenotype PCs and cis
-windows of 5, 20 and 50 kb, and extended to 100 and 200 kb for k = 3 and
-5. As in the paper, k is chosen to <strong>maximise
-discoveries</strong>.</p>
+<p>The scan was run for k = 0, 1, 3, 5, 7, 10 and 15 phenotype PCs: all
+at 5, 20 and 50 kb, and k = 0, 1, 3 and 5 also at 100 and 200 kb. As in
+the paper, k is chosen to <strong>maximise discoveries</strong>.</p>
 <pre class="r"><code>ws &lt;- sort(unique(ST$window_kb)); ks &lt;- sort(unique(ST$npcs))
 hm &lt;- merge(CJ(npcs = ks, window_kb = ws), ST[, .(npcs, window_kb, disc_q10, disc_q05)], by = c(&quot;npcs&quot;, &quot;window_kb&quot;), all.x = TRUE)
 hm[, `:=`(w = factor(paste0(window_kb, &quot; kb&quot;), paste0(ws, &quot; kb&quot;)), k = factor(npcs, rev(ks)),
@@ -711,21 +774,161 @@ ggplot(hm, aes(w, k)) +
   labs(x = &quot;cis window&quot;, y = &quot;phenotype PCs (k)&quot;) +
   theme_classic(base_size = 12) + theme(axis.line = element_blank(), axis.ticks = element_blank(), legend.position = &quot;right&quot;)</code></pre>
 <p><img src="figure/stage2_cis_qtl_mapping.Rmd/ktable-1.png" width="720" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-ktable-1">
+Past versions of ktable-1.png
+</button>
+</p>
+<div id="fig-ktable-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/287146daf6d16a7e8db26ba34e887c5f53431a74/docs/figure/stage2_cis_qtl_mapping.Rmd/ktable-1.png" target="_blank">287146d</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-11-16
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>eSites at q &lt; 0.10, with q &lt; 0.05 in brackets; the best k in
-each window is in bold. k = 3 and 5 come from one run over all five
-windows, and k = 7, 10, 15 from the first run (5-50 kb); the two runs
-agree exactly where they overlap.</p>
+each window is in bold. k = 0, 1, 3 and 5 come from one run over all
+five windows, and k = 7, 10, 15 from the first run (5-50 kb); the two
+runs agree exactly where they overlap.</p>
+<pre class="r"><code>cs &lt;- sn[npcs %in% c(0, 1, 3, 5)]
+ts &lt;- cs[window_kb == min(ws), setNames(tested_sites, npcs)]
+tc2 &lt;- dcast(cs[, .(k = npcs, w = factor(paste0(window_kb, &quot; kb&quot;), paste0(ws, &quot; kb&quot;)),
+                    v = sprintf(&quot;%d (%d)&quot;, disc_q10_common, disc_q05_common))], k ~ w, value.var = &quot;v&quot;)
+bc &lt;- cs[, .SD[which.max(disc_q10_common)], by = window_kb]
+stopifnot(all(bc$npcs %in% c(0, 1)))   # the text below says k = 0 or 1 leads at every window on the common sites
+cc &lt;- function(k, w) cs[npcs == k &amp; window_kb == w, disc_q10_common]
+knitr::kable(tc2, caption = sprintf(&quot;eSites on the %s sites tested at every k and window: q &lt; 0.10 (q &lt; 0.05).&quot;, fmt(unique(cs$common_sites))))</code></pre>
+<table>
+<caption>eSites on the 8,366 sites tested at every k and window: q &lt;
+0.10 (q &lt; 0.05).</caption>
+<thead>
+<tr class="header">
+<th align="right">k</th>
+<th align="left">5 kb</th>
+<th align="left">20 kb</th>
+<th align="left">50 kb</th>
+<th align="left">100 kb</th>
+<th align="left">200 kb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="left">275 (234)</td>
+<td align="left">268 (223)</td>
+<td align="left">268 (222)</td>
+<td align="left">234 (193)</td>
+<td align="left">215 (190)</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="left">282 (239)</td>
+<td align="left">288 (229)</td>
+<td align="left">267 (212)</td>
+<td align="left">219 (184)</td>
+<td align="left">211 (178)</td>
+</tr>
+<tr class="odd">
+<td align="right">3</td>
+<td align="left">264 (211)</td>
+<td align="left">250 (194)</td>
+<td align="left">204 (177)</td>
+<td align="left">197 (164)</td>
+<td align="left">179 (164)</td>
+</tr>
+<tr class="even">
+<td align="right">5</td>
+<td align="left">234 (201)</td>
+<td align="left">205 (173)</td>
+<td align="left">175 (159)</td>
+<td align="left">170 (147)</td>
+<td align="left">156 (136)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fewer PCs give more eSites.</strong> k = 0 is tested on fewer
+sites than the other settings (9,071 against 10,086 at k = 1, at 5 kb).
+With no PCs the null model is intercept-only, and at about a thousand
+shallow sites its dispersion estimate runs to the boundary (no
+overdispersion); the optimiser then stops at its iteration limit and the
+fit is discarded, although the best fit is simply the binomial one. The
+fair comparison therefore uses the sites tested in every setting (table
+above): <strong>k = 0 and k = 1 lead at every window</strong>, with 275
+and 282 eSites at 5 kb against 264 at k = 3, and 268 and 267 at 50 kb
+against 204. Phenotype PCs therefore do not increase power here. Before
+switching, the calibration of k = 0 and 1 is being checked (1 real + 5
+genome-wide permutations, as for k = 3).</p>
 <pre class="r"><code>pd &lt;- ST[, .(k = factor(npcs), window_kb, eSites = disc_q10)]
 ggplot(pd, aes(window_kb, eSites, colour = k)) + geom_line(linewidth = 0.8) + geom_point(size = 2.4) +
   scale_x_log10(breaks = ws) +
-  scale_colour_manual(values = c(`3` = &quot;#2a78d6&quot;, `5` = &quot;#eb6834&quot;, `7` = &quot;#1baf7a&quot;, `10` = &quot;#eda100&quot;, `15` = &quot;#e87ba4&quot;),
-                      name = &quot;phenotype PCs (k)&quot;) +
+  scale_colour_manual(values = c(`0` = &quot;#2a78d6&quot;, `1` = &quot;#eb6834&quot;, `3` = &quot;#1baf7a&quot;, `5` = &quot;#eda100&quot;, `7` = &quot;#e87ba4&quot;,
+                                 `10` = &quot;#008300&quot;, `15` = &quot;#6250d6&quot;), name = &quot;phenotype PCs (k)&quot;) +
   labs(x = &quot;cis window (kb, log scale)&quot;, y = &quot;eSites (q &lt; 0.10)&quot;) + th</code></pre>
 <p><img src="figure/stage2_cis_qtl_mapping.Rmd/kplot-1.png" width="768" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>best &lt;- ST[, .SD[which.max(disc_q10)], by = window_kb]
-stopifnot(all(best$npcs == 3))</code></pre>
-<p><strong>k = 3 gives the most eSites at every window</strong> and
-discoveries fall as k grows.</p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-kplot-1">
+Past versions of kplot-1.png
+</button>
+</p>
+<div id="fig-kplot-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/287146daf6d16a7e8db26ba34e887c5f53431a74/docs/figure/stage2_cis_qtl_mapping.Rmd/kplot-1.png" target="_blank">287146d</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-11-16
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Among k = 3 to 15, discoveries fall as k grows; k = 0 and 1 give the
+most at every window.</p>
 </div>
 <div id="choosing-the-cis-window" class="section level1">
 <h1>3. Choosing the cis window</h1>
@@ -746,6 +949,43 @@ ggplot(ec, aes(absd, colour = cutoff)) + stat_ecdf(geom = &quot;step&quot;, line
   labs(x = &quot;distance from the pU site&quot;, y = &quot;cumulative proportion of SNP-site pairs&quot;) + th +
   theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = c(0.8, 0.3))</code></pre>
 <p><img src="figure/stage2_cis_qtl_mapping.Rmd/fig1c-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-fig1c-1">
+Past versions of fig1c-1.png
+</button>
+</p>
+<div id="fig-fig1c-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/287146daf6d16a7e8db26ba34e887c5f53431a74/docs/figure/stage2_cis_qtl_mapping.Rmd/fig1c-1.png" target="_blank">287146d</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-11-16
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>sh &lt;- rbindlist(lapply(seq_along(CUTS), function(j) S[p_nominal &lt; CUTS[j], .(cutoff = LAB[j], n = .N,
   w5 = mean(absd &lt;= 5e3), w20 = mean(absd &lt;= 2e4), w50 = mean(absd &lt;= 5e4), w100 = mean(absd &lt;= 1e5), w200 = mean(absd &lt;= 2e5))]))</code></pre>
 <pre class="r"><code>knitr::kable(sh[, .(cutoff, pairs = fmt(n), `within 5 kb` = pct(w5), `within 50 kb` = pct(w50),
@@ -824,58 +1064,75 @@ are within 5 kb (14%).</p>
 </div>
 <div id="the-trade-off" class="section level2">
 <h2>The trade-off</h2>
-<pre class="r"><code>knitr::kable(data.table(window = paste0(ws, &quot; kb&quot;), `eSites, k = 3 (q &lt; 0.10)` = sapply(ws, function(w) e(3, w)),
+<pre class="r"><code>knitr::kable(data.table(window = paste0(ws, &quot; kb&quot;), `eSites, k = 0` = sapply(ws, function(w) e(0, w)),
+  `k = 1` = sapply(ws, function(w) e(1, w)), `k = 3` = sapply(ws, function(w) e(3, w)),
   `strong pairs within the window (p &lt; 1e-6)` = c(pct(sh[cutoff == &quot;p &lt; 1e-6&quot;]$w5), pct(sh[cutoff == &quot;p &lt; 1e-6&quot;]$w20), pct(sh[cutoff == &quot;p &lt; 1e-6&quot;]$w50),
                                                   pct(sh[cutoff == &quot;p &lt; 1e-6&quot;]$w100), pct(sh[cutoff == &quot;p &lt; 1e-6&quot;]$w200))))</code></pre>
 <table>
 <colgroup>
 <col width="9%" />
-<col width="33%" />
+<col width="18%" />
+<col width="8%" />
+<col width="8%" />
 <col width="56%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th align="left">window</th>
-<th align="right">eSites, k = 3 (q &lt; 0.10)</th>
+<th align="right">eSites, k = 0</th>
+<th align="right">k = 1</th>
+<th align="right">k = 3</th>
 <th align="left">strong pairs within the window (p &lt; 1e-6)</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td align="left">5 kb</td>
+<td align="right">280</td>
+<td align="right">272</td>
 <td align="right">249</td>
 <td align="left">14%</td>
 </tr>
 <tr class="even">
 <td align="left">20 kb</td>
+<td align="right">274</td>
+<td align="right">279</td>
 <td align="right">242</td>
 <td align="left">38%</td>
 </tr>
 <tr class="odd">
 <td align="left">50 kb</td>
+<td align="right">272</td>
+<td align="right">250</td>
 <td align="right">200</td>
 <td align="left">64%</td>
 </tr>
 <tr class="even">
 <td align="left">100 kb</td>
+<td align="right">229</td>
+<td align="right">216</td>
 <td align="right">190</td>
 <td align="left">82%</td>
 </tr>
 <tr class="odd">
 <td align="left">200 kb</td>
+<td align="right">215</td>
+<td align="right">209</td>
 <td align="right">176</td>
 <td align="left">89%</td>
 </tr>
 </tbody>
 </table>
+<p>eSites at q &lt; 0.10 (all tested sites). The distance profile comes
+from the +/-2 Mb scan at k = 3.</p>
 <ul>
-<li><strong>5 kb</strong> gives the most eSites (249): fewer SNPs per
-site means a lighter multiple-testing burden, and the strongest
-enrichment is close to the site.</li>
+<li><strong>5 kb</strong> gives the most eSites at every k (k = 1: 272;
+k = 3: 249): fewer SNPs per site means a lighter multiple-testing
+burden, and the strongest enrichment is close to the site.</li>
 <li><strong>100 kb</strong> follows the paper’s criterion and captures
-most strong associations, at the cost of fewer eSites (190). 200 kb
-gives fewer still (176) and adds few strong associations (89% within the
-window, against 82% at 100 kb).</li>
+most strong associations, at the cost of fewer eSites (k = 1: 216; k =
+3: 190). 200 kb gives fewer still (k = 3: 176) and adds few strong
+associations (89% within the window, against 82% at 100 kb).</li>
 </ul>
 <p><strong>Decision pending:</strong> 5 kb or 100 kb.</p>
 <!-- # 4. Status -->
@@ -923,10 +1180,10 @@ Session information
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.2.0 (2022-04-22)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: CentOS Linux 7 (Core)
+Running under: CentOS Linux 8
 
 Matrix products: default
-BLAS/LAPACK: /software/openblas-0.3.13-el7-x86_64/lib/libopenblas_haswellp-r0.3.13.so
+BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
 
 locale:
 [1] C
@@ -935,23 +1192,24 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] ggplot2_4.0.3     data.table_1.14.2
+[1] ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.0  
 
 loaded via a namespace (and not attached):
- [1] Rcpp_1.0.12        highr_0.9          RColorBrewer_1.1-3 pillar_1.9.0      
- [5] compiler_4.2.0     bslib_0.3.1        later_1.3.0        jquerylib_0.1.4   
- [9] git2r_0.30.1       workflowr_1.7.0    R.methodsS3_1.8.1  R.utils_2.11.0    
-[13] tools_4.2.0        digest_0.6.29      gtable_0.3.6       jsonlite_1.8.0    
-[17] evaluate_0.15      lifecycle_1.0.4    tibble_3.2.1       pkgconfig_2.0.3   
-[21] rlang_1.1.2        cli_3.6.1          rstudioapi_0.13    yaml_2.3.5        
-[25] xfun_0.41          fastmap_1.1.0      withr_2.5.0        dplyr_1.1.4       
-[29] stringr_1.5.1      knitr_1.39         generics_0.1.4     fs_1.5.2          
-[33] vctrs_0.6.5        sass_0.4.1         tidyselect_1.2.0   rprojroot_2.0.3   
-[37] grid_4.2.0         glue_1.6.2         R6_2.5.1           fansi_1.0.3       
-[41] rmarkdown_2.25     farver_2.1.0       magrittr_2.0.3     scales_1.4.0      
-[45] promises_1.2.0.1   htmltools_0.5.2    dichromat_2.0-0.1  httpuv_1.6.5      
-[49] labeling_0.4.2     S7_0.2.0           utf8_1.2.2         stringi_1.7.6     
-[53] R.oo_1.24.0       </code></pre>
+ [1] tidyselect_1.2.0  xfun_0.38         bslib_0.3.1       colorspace_2.0-3 
+ [5] vctrs_0.6.1       generics_0.1.3    htmltools_0.5.7   yaml_2.3.5       
+ [9] utf8_1.2.2        rlang_1.1.2       R.oo_1.24.0       jquerylib_0.1.4  
+[13] later_1.3.0       pillar_1.9.0      glue_1.6.2        withr_2.5.0      
+[17] R.utils_2.11.0    lifecycle_1.0.4   stringr_1.5.0     munsell_0.5.0    
+[21] gtable_0.3.0      R.methodsS3_1.8.1 evaluate_0.15     labeling_0.4.2   
+[25] knitr_1.42        callr_3.7.0       fastmap_1.1.0     httpuv_1.6.5     
+[29] ps_1.7.0          fansi_1.0.3       highr_0.9         Rcpp_1.0.11      
+[33] promises_1.2.0.1  scales_1.2.0      jsonlite_1.8.7    farver_2.1.0     
+[37] fs_1.5.2          digest_0.6.29     stringi_1.7.6     processx_3.5.3   
+[41] dplyr_1.1.2       getPass_0.2-2     rprojroot_2.0.3   grid_4.2.0       
+[45] cli_3.6.2         tools_4.2.0       magrittr_2.0.3    sass_0.4.1       
+[49] tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3   rmarkdown_2.21   
+[53] httr_1.4.5        rstudioapi_0.14   R6_2.5.1          git2r_0.30.1     
+[57] compiler_4.2.0   </code></pre>
 </div>
 </div>
 
