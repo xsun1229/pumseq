@@ -38,12 +38,26 @@ band <- function(n, expected) {
              lo = -log10(qbeta(0.975, i, n - i + 1)), hi = -log10(qbeta(0.025, i, n - i + 1)))
 }
 
+# k = 0 and 1, added later at +/-5 and 20 kb (63.calibration_k01_page_data.R; same test and
+# permutation orders). Kept separate from G/QA so the section 2 summaries stay k = 3-15.
+K01  <- file.path(PSI, "qtl_betabinomial/calibration_k01")
+KLOW <- c(0, 1)
+G01  <- fread(file.path(K01, "page_k01_calibration.tsv"))
+QA01 <- fread(file.path(K01, "page_k01_qq_allpoints_merged.tsv.gz"))
+# eSites for k = 0/1 come from the later scan (pc_window_selection_w200kb)
+ST01 <- fread(file.path(PSI, "qtl_betabinomial/pc_window_selection_w200kb/fold5_union_auto_noUCcalled/summary/selection_table.tsv"))[npcs %in% KLOW]
+stopifnot(nrow(G01) == 4, QA01[, uniqueN(dataset), by = .(window_kb, npcs)]$V1 == 6,
+          nrow(ST01[window_kb %in% c(5, 20)]) == 4)
+
 qq_plot <- function(w, k) {
-  g <- G[window_kb == w & npcs == k]
-  qq_panel(QA[window_kb == w & npcs == k], sprintf("+/-%d kb, k = %d PCs", w, k)) +
+  low <- k %in% KLOW
+  g  <- (if (low) G01 else G)[window_kb == w & npcs == k]
+  qa <- (if (low) QA01 else QA)[window_kb == w & npcs == k]
+  st <- (if (low) ST01 else ST)[window_kb == w & npcs == k]
+  qq_panel(qa, sprintf("+/-%d kb, k = %d PCs", w, k)) +
     labs(subtitle = sprintf("%s cis tests | permutation lambda %.3f-%.3f, real %.3f\nworst permuted -log10 p %.1f | eSites (q < 0.05): %d",
                             fmt(g$tests), g$perm_lambda_min, g$perm_lambda_max, g$real_lambda, g$worst_perm_tail,
-                            ST[window_kb == w & npcs == k]$disc_q05)) +
+                            st$disc_q05)) +
     theme(plot.subtitle = element_text(size = 9, hjust = 0.5))
 }
 ```
@@ -53,6 +67,10 @@ qq_plot <- function(w, k) {
 This page checks how well the likelihood-ratio test is calibrated for each of
 the 15 configurations considered for the real-data analysis: cis windows of
 ±5, 20 and 50 kb, and k = 3, 5, 7, 10 and 15 phenotype PCs.
+
+**k = 0 and 1** were added later, at ±5 and ±20 kb, with the same test and the
+same 5 permutation orders. They are shown in the QQ plots (section 3) and in
+section 4, but not in the summary tables of section 2.
 
 **The test.** Beta-binomial LRT, with each fit started from φ = 0.01, 0.1 and
 0.5 and the best kept. Covariates are the first k M-value PCs, and the
@@ -68,7 +86,10 @@ is a false positive.
 **Same fits as the eSite counts.** The real-data p-values here are identical
 to those of the window and PC selection scan (`47.scan_pc_window_selection.R`).
 That was checked at every chr21–22 site for ±5 kb with k = 3 (466 sites) and
-for ±50 kb with k = 15 (336 sites).
+for ±50 kb with k = 15 (336 sites). For k = 0 and 1, the scan used genotypes
+with the 151 duplicated variant IDs (302 records) removed, while the
+calibration runs kept them, so the real-data p-values can differ at those
+variants only.
 
 **What this checks, and what it does not.** These are the nominal LRT
 p-values. The eSite counts in the table and plot subtitles use a different
@@ -263,23 +284,25 @@ ggplot(L, aes(npcs, mid, colour = window)) +
 
 Each panel shows every cis test on the real data (teal) and on the 5
 permutations (light blue), and has its own y-axis. Every p-value is included.
-There are 1.75 to 17.6 million per configuration, so points that would land on
+There are 1.60 to 17.6 million per configuration, so points that would land on
 the same spot of the figure (within a third of a pixel) are drawn once; the
 picture is the same as plotting each one.
 
 ## ±5 kb
 
 ```{r qq5-all-sites, results="asis", fig.width=7, fig.height=5.6}
-for (k in KS) { cat(sprintf("\n\n### k = %d\n\n", k)); print(qq_plot(5, k)); cat("\n\n") }
+for (k in c(KLOW, KS)) { cat(sprintf("\n\n### k = %d\n\n", k)); print(qq_plot(5, k)); cat("\n\n") }
 ```
 
 ## ±20 kb
 
 ```{r qq20-all-sites, results="asis", fig.width=7, fig.height=5.6}
-for (k in KS) { cat(sprintf("\n\n### k = %d\n\n", k)); print(qq_plot(20, k)); cat("\n\n") }
+for (k in c(KLOW, KS)) { cat(sprintf("\n\n### k = %d\n\n", k)); print(qq_plot(20, k)); cat("\n\n") }
 ```
 
 ## ±50 kb
+
+k = 0 and 1 were not run at ±50 kb.
 
 ```{r qq50-all-sites, results="asis", fig.width=7, fig.height=5.6}
 for (k in KS) { cat(sprintf("\n\n### k = %d\n\n", k)); print(qq_plot(50, k)); cat("\n\n") }
@@ -289,17 +312,37 @@ for (k in KS) { cat(sprintf("\n\n### k = %d\n\n", k)); print(qq_plot(50, k)); ca
 
 ```{r reading}
 r <- G[, .(lam = sprintf("%.2f-%.2f", min(perm_lambda_min), max(perm_lambda_max))), by = npcs][order(npcs)]
+# k = 0 and 1 (+/-5 and 20 kb): lambda, worst permuted tail, and where the permuted tests
+# at p < 1e-6 lie (62.calibration_k01_compare.R; MHC/IG = MHC, IGH, IGK, IGL)
+r01 <- G01[, .(lam = sprintf("%.2f-%.2f", min(perm_lambda_min), max(perm_lambda_max)),
+               tail = sprintf("%.1f-%.1f", min(worst_perm_tail), max(worst_perm_tail)),
+               prob = sum(problematic)), by = npcs]
+TP <- rbind(fread(file.path(K01, "top_perm_sites.tsv"))[, window_kb := 5],
+            fread(file.path(K01, "top_perm_sites_w20kb_k0135_MS2.tsv"))[, window_kb := 20])[k %in% KLOW]
+mi <- TP[, .(tests = sum(n_tests), mhc_ig = sum(n_tests[region != "other"])), by = k]
+stopifnot(nrow(mi) == 2, r01$prob == 0)
 ```
 
+- **k = 0 and 1 are better calibrated than any k from 3 to 15**, at both ±5 and
+  ±20 kb. Permutation lambda is `r r01[npcs == 0]$lam` at k = 0 and
+  `r r01[npcs == 1]$lam` at k = 1, against `r r[npcs == 3]$lam` at k = 3. The
+  worst permuted −log10 p is `r r01[npcs == 0]$tail` at k = 0 and
+  `r r01[npcs == 1]$tail` at k = 1, against 11.3 at k = 3. The permuted tests
+  with p < 1e-6 are almost all in the MHC and immunoglobulin regions:
+  `r mi[k == 0]$mhc_ig` of `r mi[k == 0]$tests` at k = 0 and
+  `r mi[k == 1]$mhc_ig` of `r mi[k == 1]$tests` at k = 1 (both windows, all 5
+  permutations). No site is extreme in both real and permuted data.
 - **The bulk of the test is inflated as k grows, in every window.** Permutation
   lambda is `r r[npcs == 3]$lam` at k = 3, `r r[npcs == 5]$lam` at k = 5,
   `r r[npcs == 7]$lam` at k = 7, `r r[npcs == 10]$lam` at k = 10 and
   `r r[npcs == 15]$lam` at k = 15. The window changes it very little.
 - **Every configuration has a permuted tail beyond chance.** The worst
-  permuted −log10 p is 11.3–25.9, against an expected maximum of about 6–7. At
+  permuted −log10 p is 11.3–25.9 for k = 3–15, and
+  `r sprintf("%.1f-%.1f", min(G01$worst_perm_tail), max(G01$worst_perm_tail))` for
+  k = 0 and 1, against an expected maximum of about 6–7. At
   ±5 kb with k = 3, those permuted outliers are sites where one cell line
   supplies most of the converted reads; many are in the immunoglobulin and MHC
-  regions. The tail is lowest at k = 3, at 11.3 in all three windows. At k = 10
+  regions. Among k = 3–15, the tail is lowest at k = 3, at 11.3 in all three windows. At k = 10
   and 15 it grows with the window, as do the sites extreme in both real and
   permuted data (`r tab[npcs == 15 & window_kb == 50]$problematic` at ±50 kb,
   k = 15).
@@ -310,6 +353,11 @@ Data: `calibration_grid/grid_calibration.tsv`, `grid_by_dataset.tsv` and
 `grid_qq_thinned.tsv.gz` (built by `27.calibration_grid_summary.R` from
 `8.calibration_site_resolved.R` runs). eSites come from
 `pc_window_selection/fold5_union_auto_noUCcalled/summary/` (`48.pc_window_selection_summary.R`).
+k = 0 and 1: `calibration_k01/page_k01_*` (built by `63.calibration_k01_page_data.R`
+from the `calib_siteres_w5kb_pc{0,1}_auto_noUCcalled_MS` and
+`calib_siteres_w20kb_pc{0,1}_auto_noUCcalled_MS2` runs), the MHC/immunoglobulin
+counts from `62.calibration_k01_compare.R`, and eSites from
+`pc_window_selection_w200kb/fold5_union_auto_noUCcalled/summary/`.
 
 Fit diagnostics are reconstructed by `55.pc_window_failure_summary.R` from
 the saved real-data `_sites` and `_snps` logs. Aggregated tables and per-site

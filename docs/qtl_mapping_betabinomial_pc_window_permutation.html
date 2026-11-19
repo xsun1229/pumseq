@@ -11,11 +11,11 @@
 
 <meta name="author" content="XSun" />
 
-<meta name="date" content="2026-10-12" />
+<meta name="date" content="2026-11-19" />
 
 <title>Beta-binomial pU-QTL: permutation check for each window and number of PCs</title>
 
-<script src="site_libs/header-attrs-2.31/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
@@ -31,7 +31,7 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
-<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
@@ -374,7 +374,7 @@ div.tocify {
 <h1 class="title toc-ignore">Beta-binomial pU-QTL: permutation check for
 each window and number of PCs</h1>
 <h4 class="author">XSun</h4>
-<h4 class="date">2026-10-12</h4>
+<h4 class="date">2026-11-19</h4>
 
 </div>
 
@@ -403,7 +403,7 @@ aria-hidden="true"></span> </a>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-10-12
+<strong>Last updated:</strong> 2026-11-19
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -421,7 +421,7 @@ title="This is the local directory in which the code in this file was executed."
 This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
 analysis was created with <a
   href="https://github.com/workflowr/workflowr">workflowr</a> (version
-1.7.1). The <em>Checks</em> tab describes the reproducibility checks
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
 that were applied when the results were created. The <em>Past
 versions</em> tab lists the development history.
 </p>
@@ -537,15 +537,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree35c5a08d5e538264632fcfb0f4bddd52e4729120targetblank35c5a08a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreecbdcad0c2634dd3b1e6bb19b1703736ac9d790e9targetblankcbdcad0a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/xsun1229/pumseq/tree/35c5a08d5e538264632fcfb0f4bddd52e4729120" target="_blank">35c5a08</a>
+<a href="https://github.com/xsun1229/pumseq/tree/cbdcad0c2634dd3b1e6bb19b1703736ac9d790e9" target="_blank">cbdcad0</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtree35c5a08d5e538264632fcfb0f4bddd52e4729120targetblank35c5a08a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomxsun1229pumseqtreecbdcad0c2634dd3b1e6bb19b1703736ac9d790e9targetblankcbdcad0a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -555,7 +555,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/xsun1229/pumseq/tree/35c5a08d5e538264632fcfb0f4bddd52e4729120" target="_blank">35c5a08</a>.
+<a href="https://github.com/xsun1229/pumseq/tree/cbdcad0c2634dd3b1e6bb19b1703736ac9d790e9" target="_blank">cbdcad0</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -621,6 +621,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/e23ea81cb4ac812f5059dae1b4892ca01d5323fa/analysis/qtl_mapping_betabinomial_pc_window_permutation.Rmd" target="_blank">e23ea81</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-10-12
+</td>
+<td>
+update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/xsun1229/pumseq/e23ea81cb4ac812f5059dae1b4892ca01d5323fa/docs/qtl_mapping_betabinomial_pc_window_permutation.html" target="_blank">e23ea81</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-10-12
+</td>
+<td>
+update
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -894,12 +928,26 @@ band &lt;- function(n, expected) {
              lo = -log10(qbeta(0.975, i, n - i + 1)), hi = -log10(qbeta(0.025, i, n - i + 1)))
 }
 
+# k = 0 and 1, added later at +/-5 and 20 kb (63.calibration_k01_page_data.R; same test and
+# permutation orders). Kept separate from G/QA so the section 2 summaries stay k = 3-15.
+K01  &lt;- file.path(PSI, &quot;qtl_betabinomial/calibration_k01&quot;)
+KLOW &lt;- c(0, 1)
+G01  &lt;- fread(file.path(K01, &quot;page_k01_calibration.tsv&quot;))
+QA01 &lt;- fread(file.path(K01, &quot;page_k01_qq_allpoints_merged.tsv.gz&quot;))
+# eSites for k = 0/1 come from the later scan (pc_window_selection_w200kb)
+ST01 &lt;- fread(file.path(PSI, &quot;qtl_betabinomial/pc_window_selection_w200kb/fold5_union_auto_noUCcalled/summary/selection_table.tsv&quot;))[npcs %in% KLOW]
+stopifnot(nrow(G01) == 4, QA01[, uniqueN(dataset), by = .(window_kb, npcs)]$V1 == 6,
+          nrow(ST01[window_kb %in% c(5, 20)]) == 4)
+
 qq_plot &lt;- function(w, k) {
-  g &lt;- G[window_kb == w &amp; npcs == k]
-  qq_panel(QA[window_kb == w &amp; npcs == k], sprintf(&quot;+/-%d kb, k = %d PCs&quot;, w, k)) +
+  low &lt;- k %in% KLOW
+  g  &lt;- (if (low) G01 else G)[window_kb == w &amp; npcs == k]
+  qa &lt;- (if (low) QA01 else QA)[window_kb == w &amp; npcs == k]
+  st &lt;- (if (low) ST01 else ST)[window_kb == w &amp; npcs == k]
+  qq_panel(qa, sprintf(&quot;+/-%d kb, k = %d PCs&quot;, w, k)) +
     labs(subtitle = sprintf(&quot;%s cis tests | permutation lambda %.3f-%.3f, real %.3f\nworst permuted -log10 p %.1f | eSites (q &lt; 0.05): %d&quot;,
                             fmt(g$tests), g$perm_lambda_min, g$perm_lambda_max, g$real_lambda, g$worst_perm_tail,
-                            ST[window_kb == w &amp; npcs == k]$disc_q05)) +
+                            st$disc_q05)) +
     theme(plot.subtitle = element_text(size = 9, hjust = 0.5))
 }</code></pre>
 <div id="what-this-page-shows" class="section level1">
@@ -908,6 +956,10 @@ qq_plot &lt;- function(w, k) {
 each of the 15 configurations considered for the real-data analysis: cis
 windows of ±5, 20 and 50 kb, and k = 3, 5, 7, 10 and 15 phenotype
 PCs.</p>
+<p><strong>k = 0 and 1</strong> were added later, at ±5 and ±20 kb, with
+the same test and the same 5 permutation orders. They are shown in the
+QQ plots (section 3) and in section 4, but not in the summary tables of
+section 2.</p>
 <p><strong>The test.</strong> Beta-binomial LRT, with each fit started
 from φ = 0.01, 0.1 and 0.5 and the best kept. Covariates are the first k
 M-value PCs, and the phenotype is
@@ -922,7 +974,10 @@ should follow the diagonal, and any excess is a false positive.</p>
 p-values here are identical to those of the window and PC selection scan
 (<code>47.scan_pc_window_selection.R</code>). That was checked at every
 chr21–22 site for ±5 kb with k = 3 (466 sites) and for ±50 kb with k =
-15 (336 sites).</p>
+15 (336 sites). For k = 0 and 1, the scan used genotypes with the 151
+duplicated variant IDs (302 records) removed, while the calibration runs
+kept them, so the real-data p-values can differ at those variants
+only.</p>
 <p><strong>What this checks, and what it does not.</strong> These are
 the nominal LRT p-values. The eSite counts in the table and plot
 subtitles use a different p-value: a per-site permutation p-value under
@@ -960,7 +1015,7 @@ E &lt;- rbindlist(list(
  tab[,.(window_kb,npcs,value=disc_q05,cutoff=&quot;q &lt; 0.05&quot;)],
  tab[,.(window_kb,npcs,value=disc_q10,cutoff=&quot;q &lt; 0.10&quot;)]))
 heat(E,&quot;eSites by window, PC count and q-value cutoff&quot;,&quot;eSites&quot;) + facet_wrap(~cutoff,nrow=1)</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/summary-all-sites-1.png" alt="" width="864" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/summary-all-sites-1.png" width="864" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-summary-all-sites-1">
 Past versions of summary-all-sites-1.png
@@ -1009,7 +1064,7 @@ distinct from a failed fit and from an eSite passing a q-value
 cutoff.</p>
 <pre class="r"><code>heat(tab[,.(window_kb,npcs,value=problematic)],
      &quot;Sites extreme in both real and permuted data&quot;)</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/extreme-heatmap-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/extreme-heatmap-1.png" width="768" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-extreme-heatmap-1">
 Past versions of extreme-heatmap-1.png
@@ -1080,7 +1135,7 @@ ggplot(NS,aes(factor(npcs,levels=KS),100*null_failed/eligible)) +
       title=&quot;Null-fit failures increase with PC count&quot;,
       subtitle=&quot;Labels: rejected / sites with suitable cis SNPs within 50 kb&quot;) +
  theme_minimal(base_size=12)</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/null-fit-failures-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/null-fit-failures-1.png" width="768" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-null-fit-failures-1">
 Past versions of null-fit-failures-1.png
@@ -1130,7 +1185,7 @@ F &lt;- rbindlist(list(
 F[,metric:=factor(metric,levels=unique(metric))]
 for (m in levels(F$metric)) print(heat(F[metric==m],m) +
   theme(plot.title=element_text(size=12)))</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failure-heatmaps-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failure-heatmaps-1.png" width="768" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-failure-heatmaps-1">
 Past versions of failure-heatmaps-1.png
@@ -1179,7 +1234,7 @@ XSun
 </table>
 </div>
 </div>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failure-heatmaps-2.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failure-heatmaps-2.png" width="768" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-failure-heatmaps-2">
 Past versions of failure-heatmaps-2.png
@@ -1242,7 +1297,7 @@ rounding. Mean depth is total reads divided by the number of covered
 cell lines.</p>
 <pre class="r"><code>distribution_plot(&quot;depth_bin&quot;,c(&quot;&lt;=5&quot;,&quot;5-10&quot;,&quot;10-20&quot;,&quot;20-50&quot;,&quot;50-100&quot;,&quot;&gt;100&quot;),
  &quot;Read-depth distribution among failed sites&quot;, &quot;Reads per covered cell line&quot;, &quot;distribution&quot;)</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-depth-pc-only-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-depth-pc-only-1.png" width="960" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-failures-depth-pc-only-1">
 Past versions of failures-depth-pc-only-1.png
@@ -1290,7 +1345,44 @@ each bin and do not sum to 100% down a column. Eligible sites have a
 suitable cis SNP within 50 kb.</p>
 <pre class="r"><code>distribution_plot(&quot;cells_bin&quot;,c(&quot;1-9&quot;,&quot;10-19&quot;,&quot;20-29&quot;,&quot;30-39&quot;,&quot;40-49&quot;,&quot;50&quot;),
  &quot;Failure rate by covered cell lines&quot;, &quot;Covered cell lines&quot;, &quot;rate&quot;)</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-cells-counts-1.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-cells-counts-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-failures-cells-counts-1">
+Past versions of failures-cells-counts-1.png
+</button>
+</p>
+<div id="fig-failures-cells-counts-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/xsun1229/pumseq/blob/e23ea81cb4ac812f5059dae1b4892ca01d5323fa/docs/figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/failures-cells-counts-1.png" target="_blank">e23ea81</a>
+</td>
+<td>
+XSun
+</td>
+<td>
+2026-10-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="configuration-counts" class="section level3">
@@ -1513,7 +1605,7 @@ ggplot(L, aes(npcs, mid, colour = window)) +
        title = &quot;Calibration under permutation&quot;,
        subtitle = &quot;Point = median over the 5 permutations, bar = range. Dashed line = 1 (perfect calibration).&quot;) +
   theme_bw(base_size = 11) + theme(panel.grid.minor = element_blank())</code></pre>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/lambdaplot-1.png" alt="" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/lambdaplot-1.png" width="768" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-lambdaplot-1">
 Past versions of lambdaplot-1.png
@@ -1569,15 +1661,15 @@ XSun
 <h1 class="tabset">3. QQ plots, one per configuration</h1>
 <p>Each panel shows every cis test on the real data (teal) and on the 5
 permutations (light blue), and has its own y-axis. Every p-value is
-included. There are 1.75 to 17.6 million per configuration, so points
+included. There are 1.60 to 17.6 million per configuration, so points
 that would land on the same spot of the figure (within a third of a
 pixel) are drawn once; the picture is the same as plotting each one.</p>
 <div id="kb" class="section level2">
 <h2>±5 kb</h2>
-<pre class="r"><code>for (k in KS) { cat(sprintf(&quot;\n\n### k = %d\n\n&quot;, k)); print(qq_plot(5, k)); cat(&quot;\n\n&quot;) }</code></pre>
-<div id="k-3" class="section level3">
-<h3>k = 3</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>for (k in c(KLOW, KS)) { cat(sprintf(&quot;\n\n### k = %d\n\n&quot;, k)); print(qq_plot(5, k)); cat(&quot;\n\n&quot;) }</code></pre>
+<div id="k-0" class="section level3">
+<h3>k = 0</h3>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq5-all-sites-1">
 Past versions of qq5-all-sites-1.png
@@ -1616,9 +1708,9 @@ XSun
 </div>
 </div>
 </div>
-<div id="k-5" class="section level3">
-<h3>k = 5</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-2.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<div id="k-1" class="section level3">
+<h3>k = 1</h3>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-2.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq5-all-sites-2">
 Past versions of qq5-all-sites-2.png
@@ -1657,9 +1749,9 @@ XSun
 </div>
 </div>
 </div>
-<div id="k-7" class="section level3">
-<h3>k = 7</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-3.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<div id="k-3" class="section level3">
+<h3>k = 3</h3>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-3.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq5-all-sites-3">
 Past versions of qq5-all-sites-3.png
@@ -1698,9 +1790,9 @@ XSun
 </div>
 </div>
 </div>
-<div id="k-10" class="section level3">
-<h3>k = 10</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-4.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<div id="k-5" class="section level3">
+<h3>k = 5</h3>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-4.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq5-all-sites-4">
 Past versions of qq5-all-sites-4.png
@@ -1739,9 +1831,9 @@ XSun
 </div>
 </div>
 </div>
-<div id="k-15" class="section level3">
-<h3>k = 15</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-5.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<div id="k-7" class="section level3">
+<h3>k = 7</h3>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-5.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq5-all-sites-5">
 Past versions of qq5-all-sites-5.png
@@ -1780,13 +1872,21 @@ XSun
 </div>
 </div>
 </div>
+<div id="k-10" class="section level3">
+<h3>k = 10</h3>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-6.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-15" class="section level3">
+<h3>k = 15</h3>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq5-all-sites-7.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
 </div>
 <div id="kb-1" class="section level2">
 <h2>±20 kb</h2>
-<pre class="r"><code>for (k in KS) { cat(sprintf(&quot;\n\n### k = %d\n\n&quot;, k)); print(qq_plot(20, k)); cat(&quot;\n\n&quot;) }</code></pre>
-<div id="k-3-1" class="section level3">
-<h3>k = 3</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>for (k in c(KLOW, KS)) { cat(sprintf(&quot;\n\n### k = %d\n\n&quot;, k)); print(qq_plot(20, k)); cat(&quot;\n\n&quot;) }</code></pre>
+<div id="k-0-1" class="section level3">
+<h3>k = 0</h3>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq20-all-sites-1">
 Past versions of qq20-all-sites-1.png
@@ -1825,9 +1925,9 @@ XSun
 </div>
 </div>
 </div>
-<div id="k-5-1" class="section level3">
-<h3>k = 5</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-2.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<div id="k-1-1" class="section level3">
+<h3>k = 1</h3>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-2.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq20-all-sites-2">
 Past versions of qq20-all-sites-2.png
@@ -1866,9 +1966,9 @@ XSun
 </div>
 </div>
 </div>
-<div id="k-7-1" class="section level3">
-<h3>k = 7</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-3.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<div id="k-3-1" class="section level3">
+<h3>k = 3</h3>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-3.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq20-all-sites-3">
 Past versions of qq20-all-sites-3.png
@@ -1907,9 +2007,9 @@ XSun
 </div>
 </div>
 </div>
-<div id="k-10-1" class="section level3">
-<h3>k = 10</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-4.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<div id="k-5-1" class="section level3">
+<h3>k = 5</h3>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-4.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq20-all-sites-4">
 Past versions of qq20-all-sites-4.png
@@ -1948,9 +2048,9 @@ XSun
 </div>
 </div>
 </div>
-<div id="k-15-1" class="section level3">
-<h3>k = 15</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-5.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<div id="k-7-1" class="section level3">
+<h3>k = 7</h3>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-5.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq20-all-sites-5">
 Past versions of qq20-all-sites-5.png
@@ -1989,13 +2089,22 @@ XSun
 </div>
 </div>
 </div>
+<div id="k-10-1" class="section level3">
+<h3>k = 10</h3>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-6.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-15-1" class="section level3">
+<h3>k = 15</h3>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq20-all-sites-7.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
 </div>
 <div id="kb-2" class="section level2">
 <h2>±50 kb</h2>
+<p>k = 0 and 1 were not run at ±50 kb.</p>
 <pre class="r"><code>for (k in KS) { cat(sprintf(&quot;\n\n### k = %d\n\n&quot;, k)); print(qq_plot(50, k)); cat(&quot;\n\n&quot;) }</code></pre>
 <div id="k-3-2" class="section level3">
 <h3>k = 3</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-all-sites-1.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-all-sites-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq50-all-sites-1">
 Past versions of qq50-all-sites-1.png
@@ -2036,7 +2145,7 @@ XSun
 </div>
 <div id="k-5-2" class="section level3">
 <h3>k = 5</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-all-sites-2.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-all-sites-2.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq50-all-sites-2">
 Past versions of qq50-all-sites-2.png
@@ -2077,7 +2186,7 @@ XSun
 </div>
 <div id="k-7-2" class="section level3">
 <h3>k = 7</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-all-sites-3.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-all-sites-3.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq50-all-sites-3">
 Past versions of qq50-all-sites-3.png
@@ -2118,7 +2227,7 @@ XSun
 </div>
 <div id="k-10-2" class="section level3">
 <h3>k = 10</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-all-sites-4.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-all-sites-4.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq50-all-sites-4">
 Past versions of qq50-all-sites-4.png
@@ -2159,7 +2268,7 @@ XSun
 </div>
 <div id="k-15-2" class="section level3">
 <h3>k = 15</h3>
-<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-all-sites-5.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/qtl_mapping_betabinomial_pc_window_permutation.Rmd/qq50-all-sites-5.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-qq50-all-sites-5">
 Past versions of qq50-all-sites-5.png
@@ -2202,20 +2311,38 @@ XSun
 </div>
 <div id="reading-the-plots" class="section level1">
 <h1>4. Reading the plots</h1>
-<pre class="r"><code>r &lt;- G[, .(lam = sprintf(&quot;%.2f-%.2f&quot;, min(perm_lambda_min), max(perm_lambda_max))), by = npcs][order(npcs)]</code></pre>
+<pre class="r"><code>r &lt;- G[, .(lam = sprintf(&quot;%.2f-%.2f&quot;, min(perm_lambda_min), max(perm_lambda_max))), by = npcs][order(npcs)]
+# k = 0 and 1 (+/-5 and 20 kb): lambda, worst permuted tail, and where the permuted tests
+# at p &lt; 1e-6 lie (62.calibration_k01_compare.R; MHC/IG = MHC, IGH, IGK, IGL)
+r01 &lt;- G01[, .(lam = sprintf(&quot;%.2f-%.2f&quot;, min(perm_lambda_min), max(perm_lambda_max)),
+               tail = sprintf(&quot;%.1f-%.1f&quot;, min(worst_perm_tail), max(worst_perm_tail)),
+               prob = sum(problematic)), by = npcs]
+TP &lt;- rbind(fread(file.path(K01, &quot;top_perm_sites.tsv&quot;))[, window_kb := 5],
+            fread(file.path(K01, &quot;top_perm_sites_w20kb_k0135_MS2.tsv&quot;))[, window_kb := 20])[k %in% KLOW]
+mi &lt;- TP[, .(tests = sum(n_tests), mhc_ig = sum(n_tests[region != &quot;other&quot;])), by = k]
+stopifnot(nrow(mi) == 2, r01$prob == 0)</code></pre>
 <ul>
+<li><strong>k = 0 and 1 are better calibrated than any k from 3 to
+15</strong>, at both ±5 and ±20 kb. Permutation lambda is 0.95-1.01 at k
+= 0 and 0.96-1.02 at k = 1, against 1.01-1.07 at k = 3. The worst
+permuted −log10 p is 8.7-9.4 at k = 0 and 9.5-9.7 at k = 1, against 11.3
+at k = 3. The permuted tests with p &lt; 1e-6 are almost all in the MHC
+and immunoglobulin regions: 49 of 50 at k = 0 and 68 of 75 at k = 1
+(both windows, all 5 permutations). No site is extreme in both real and
+permuted data.</li>
 <li><strong>The bulk of the test is inflated as k grows, in every
 window.</strong> Permutation lambda is 1.01-1.07 at k = 3, 1.07-1.14 at
 k = 5, 1.11-1.18 at k = 7, 1.20-1.27 at k = 10 and 1.28-1.38 at k = 15.
 The window changes it very little.</li>
 <li><strong>Every configuration has a permuted tail beyond
-chance.</strong> The worst permuted −log10 p is 11.3–25.9, against an
-expected maximum of about 6–7. At ±5 kb with k = 3, those permuted
-outliers are sites where one cell line supplies most of the converted
-reads; many are in the immunoglobulin and MHC regions. The tail is
-lowest at k = 3, at 11.3 in all three windows. At k = 10 and 15 it grows
-with the window, as do the sites extreme in both real and permuted data
-(13 at ±50 kb, k = 15).</li>
+chance.</strong> The worst permuted −log10 p is 11.3–25.9 for k = 3–15,
+and 8.7-9.7 for k = 0 and 1, against an expected maximum of about 6–7.
+At ±5 kb with k = 3, those permuted outliers are sites where one cell
+line supplies most of the converted reads; many are in the
+immunoglobulin and MHC regions. Among k = 3–15, the tail is lowest at k
+= 3, at 11.3 in all three windows. At k = 10 and 15 it grows with the
+window, as do the sites extreme in both real and permuted data (13 at
+±50 kb, k = 15).</li>
 <li><strong>The real data separate clearly from the
 permutations</strong> in every configuration, with real −log10 p up to
 33.</li>
@@ -2225,7 +2352,14 @@ permutations</strong> in every configuration, with real −log10 p up to
 (built by <code>27.calibration_grid_summary.R</code> from
 <code>8.calibration_site_resolved.R</code> runs). eSites come from
 <code>pc_window_selection/fold5_union_auto_noUCcalled/summary/</code>
-(<code>48.pc_window_selection_summary.R</code>).</p>
+(<code>48.pc_window_selection_summary.R</code>). k = 0 and 1:
+<code>calibration_k01/page_k01_*</code> (built by
+<code>63.calibration_k01_page_data.R</code> from the
+<code>calib_siteres_w5kb_pc{0,1}_auto_noUCcalled_MS</code> and
+<code>calib_siteres_w20kb_pc{0,1}_auto_noUCcalled_MS2</code> runs), the
+MHC/immunoglobulin counts from
+<code>62.calibration_k01_compare.R</code>, and eSites from
+<code>pc_window_selection_w200kb/fold5_union_auto_noUCcalled/summary/</code>.</p>
 <p>Fit diagnostics are reconstructed by
 <code>55.pc_window_failure_summary.R</code> from the saved real-data
 <code>_sites</code> and <code>_snps</code> logs. Aggregated tables and
@@ -2243,38 +2377,35 @@ Session information
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 4.2.0 (2022-04-22)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Red Hat Enterprise Linux 8.4 (Ootpa)
+Running under: CentOS Linux 8
 
 Matrix products: default
 BLAS/LAPACK: /software/openblas-0.3.13-el8-x86_64/lib/libopenblas_skylakexp-r0.3.13.so
 
 locale:
- [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
- [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
- [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
-[10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+[1] C
 
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.1  
+[1] ggplot2_3.4.2     data.table_1.14.4 workflowr_1.7.0  
 
 loaded via a namespace (and not attached):
- [1] tidyselect_1.2.0  xfun_0.59         bslib_0.3.1       colorspace_2.0-3 
+ [1] tidyselect_1.2.0  xfun_0.38         bslib_0.3.1       colorspace_2.0-3 
  [5] vctrs_0.6.1       generics_0.1.3    htmltools_0.5.7   yaml_2.3.5       
- [9] utf8_1.2.2        rlang_1.1.2       R.oo_1.24.0       later_1.3.0      
-[13] pillar_1.9.0      jquerylib_0.1.4   glue_1.6.2        withr_2.5.0      
+ [9] utf8_1.2.2        rlang_1.1.2       R.oo_1.24.0       jquerylib_0.1.4  
+[13] later_1.3.0       pillar_1.9.0      glue_1.6.2        withr_2.5.0      
 [17] R.utils_2.11.0    lifecycle_1.0.4   stringr_1.5.0     munsell_0.5.0    
 [21] gtable_0.3.0      R.methodsS3_1.8.1 evaluate_0.15     labeling_0.4.2   
-[25] knitr_1.51        callr_3.7.0       fastmap_1.1.0     httpuv_1.6.5     
-[29] ps_1.7.0          fansi_1.0.3       Rcpp_1.1.1-1.1    promises_1.2.0.1 
-[33] scales_1.2.0      jsonlite_2.0.0    farver_2.1.0      otel_0.2.0       
+[25] knitr_1.42        callr_3.7.0       fastmap_1.1.0     httpuv_1.6.5     
+[29] ps_1.7.0          fansi_1.0.3       highr_0.9         Rcpp_1.0.11      
+[33] promises_1.2.0.1  scales_1.2.0      jsonlite_1.8.7    farver_2.1.0     
 [37] fs_1.5.2          digest_0.6.29     stringi_1.7.6     processx_3.5.3   
 [41] dplyr_1.1.2       getPass_0.2-2     rprojroot_2.0.3   grid_4.2.0       
 [45] cli_3.6.2         tools_4.2.0       magrittr_2.0.3    sass_0.4.1       
-[49] tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3   rmarkdown_2.31   
-[53] httr_1.4.8        rstudioapi_0.14   R6_2.5.1          git2r_0.30.1     
+[49] tibble_3.2.1      whisker_0.4       pkgconfig_2.0.3   rmarkdown_2.21   
+[53] httr_1.4.5        rstudioapi_0.14   R6_2.5.1          git2r_0.30.1     
 [57] compiler_4.2.0   </code></pre>
 </div>
 </div>
